@@ -466,6 +466,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('shipments', [SellController::class, 'shipments']);
 
     Route::post('upload-module', [Install\ModulesController::class, 'uploadModule']);
+    Route::get('manage-modules/download/{module_name}', [Install\ModulesController::class, 'download']);
     Route::delete('manage-modules/destroy/{module_name}', [Install\ModulesController::class, 'destroy']);
     Route::resource('manage-modules', Install\ModulesController::class)
         ->only(['index', 'update'])
