@@ -1,6 +1,6 @@
-# Panduan Instalasi HassaPOS v7
+# Panduan Instalasi HassaPOS
 
-Selamat datang di panduan instalasi HassaPOS v7! Panduan ini akan memandu Anda melalui proses instalasi dari awal hingga akhir, baik untuk lingkungan lokal (komputer pribadi) maupun server (hosting online). Kami akan menjelaskan setiap langkah dengan detail dan sederhana, sehingga orang awam pun bisa mengikutinya.
+Selamat datang di panduan instalasi HassaPOS! Panduan ini akan memandu Anda melalui proses instalasi dari awal hingga akhir, baik untuk lingkungan lokal (komputer pribadi) maupun server (hosting online). Kami akan menjelaskan setiap langkah dengan detail dan sederhana, sehingga orang awam pun bisa mengikutinya.
 
 ## Persyaratan Sistem
 
@@ -234,5 +234,5 @@ Jika Anda mengalami kesulitan, silakan:
 2. Cari di forum komunitas HassaPOS.
 3. Hubungi tim dukungan jika tersedia.
 
-Selamat menggunakan HassaPOS! 🚀
+Selamat menggunakan HassaPOS!
 # HassaPOS
