@@ -247,6 +247,61 @@ class ModulesController extends Controller
     }
 
     /**
+     * Downloads the module.
+     *
+     * @param  string  $module_name
+     * @return \Illuminate\Http\Response
+     */
+    public function download($module_name)
+    {
+        if (! auth()->user()->can('manage_modules')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $notAllowed = $this->moduleUtil->notAllowedInDemo();
+        if (! empty($notAllowed)) {
+            return $notAllowed;
+        }
+
+        try {
+            $module = Module::find($module_name);
+
+            if (empty($module)) {
+                abort(404);
+            }
+
+            $path = $module->getPath();
+            $zip_file = $module_name . '_' . time() . '.zip';
+            $zip_path = storage_path('app/' . $zip_file);
+
+            $zip = new ZipArchive();
+            if ($zip->open($zip_path, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
+                $files = new \RecursiveIteratorIterator(
+                    new \RecursiveDirectoryIterator($path),
+                    \RecursiveIteratorIterator::LEAVES_ONLY
+                );
+
+                foreach ($files as $name => $file) {
+                    if (! $file->isDir()) {
+                        $filePath = $file->getRealPath();
+                        $relativePath = substr($filePath, strlen($path) + 1);
+                        $zip->addFile($filePath, $relativePath);
+                    }
+                }
+                $zip->close();
+            }
+
+            return response()->download($zip_path)->deleteFileAfterSend(true);
+        } catch (\Exception $e) {
+            $output = ['success' => false,
+                'msg' => $e->getMessage(),
+            ];
+
+            return redirect()->back()->with(['status' => $output]);
+        }
+    }
+
+    /**
      * Upload the module.
      */
     public function uploadModule(Request $request)
