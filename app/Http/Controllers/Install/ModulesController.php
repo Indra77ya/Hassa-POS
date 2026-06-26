@@ -225,14 +225,24 @@ class ModulesController extends Controller
 
         try {
             $module = Module::find($module_name);
-            // $module->delete();
 
-            $path = $module->getPath();
+            if (! empty($module)) {
+                $path = $module->getPath();
+                $public_path = public_path('modules/' . strtolower($module_name));
+
+                //Delete module folder
+                if (is_dir($path)) {
+                    \File::deleteDirectory($path);
+                }
+
+                //Delete module public assets folder
+                if (is_dir($public_path)) {
+                    \File::deleteDirectory($public_path);
+                }
+            }
 
             // Clear module assets cache when module is deleted
             Cache::forget('module_assets');
-
-            die("To delete the module delete this folder <br/>" . $path . '<br/> Go back after deleting');
 
             $output = ['success' => true,
                 'msg' => __('lang_v1.success'),
@@ -271,7 +281,7 @@ class ModulesController extends Controller
             }
 
             $path = $module->getPath();
-            $zip_file = $module_name . '_' . time() . '.zip';
+            $zip_file = $module_name . '.zip';
             $zip_path = storage_path('app/' . $zip_file);
 
             $zip = new ZipArchive();
@@ -285,7 +295,17 @@ class ModulesController extends Controller
                     if (! $file->isDir()) {
                         $filePath = $file->getRealPath();
                         $relativePath = substr($filePath, strlen($path) + 1);
-                        $zip->addFile($filePath, $relativePath);
+
+                        // Exclude unnecessary files/folders
+                        if (strpos($relativePath, '.git/') === 0 ||
+                            strpos($relativePath, 'node_modules/') === 0 ||
+                            strpos($relativePath, '.DS_Store') !== false ||
+                            strpos($relativePath, 'Thumbs.db') !== false
+                        ) {
+                            continue;
+                        }
+
+                        $zip->addFile($filePath, $module_name . '/' . $relativePath);
                     }
                 }
                 $zip->close();
