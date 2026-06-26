@@ -1,0 +1,16 @@
+{
+    "name": "Accounting",
+    "alias": "accounting",
+ "description": "Accounting is the process of recording and tracking financial statements to see the financial health of an entity. This is done by inputting, sorting, measuring, and then communicating transactions in various formats. Accounting consists of bookkeeping and analysis. Once the bookkeeper records and organizes all of the transactions, the next step of accounting is to analyze these transactions into helpful reports which will show the state of one's finances. These reports can include profit/loss statements, cash flow reports,etc. With small business accounting done right, small business owner will be able to have a clear understanding of the state of your finances so you can make better decisions based on what you have available.",
+    "keywords": [],
+    "active": 1,
+    "order": 0,
+    "providers": [
+        "Modules\\Accounting\\Providers\\AccountingServiceProvider"
+    ],
+    "aliases": {},
+    "files": [
+        "Helpers/general_helper.php"
+    ],
+        "requires": []
+}

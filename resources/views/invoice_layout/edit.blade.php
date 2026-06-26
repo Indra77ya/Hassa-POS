@@ -1128,7 +1128,7 @@
 <!-- Call restaurant module if defined -->
 @include('restaurant.partials.invoice_layout', ['module_info' => $invoice_layout->module_info, 'edit_il' => true])
 
-@if(Module::has('Repair'))
+@if(Module::isEnabled('Repair'))
   @include('repair::layouts.partials.invoice_layout_settings', ['module_info' => $invoice_layout->module_info, 'edit_il' => true])
 @endif
 

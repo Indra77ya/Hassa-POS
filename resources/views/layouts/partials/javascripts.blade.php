@@ -126,7 +126,7 @@
 @endif
 @yield('javascript')
 
-@if (Module::has('Essentials'))
+@if (Module::isEnabled('Essentials'))
     @includeIf('essentials::layouts.partials.footer_part')
 @endif
 
@@ -144,15 +144,68 @@
             locale: locale,
             isRTL: isRTL
         });
-
-        // Initialize popovers and close them when clicking outside
-        $('[data-toggle="popover"]').popover();
-        $(document).on('click', function (e) {
-            $('[data-toggle="popover"]').each(function () {
-                if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
-                    $(this).popover('hide');
-                }
+        // side bar toggle  
+        $(".drop_down").click(function(event) {
+            event.preventDefault();
+            var $chiled = $(this).next(".chiled");
+            var svgElement = $(this).find(".svg");
+            $(".chiled").not($chiled).slideUp();
+            $chiled.slideToggle(function() {
+                $(".svg").each(function() {
+                    var $currentSvgElement = $(this);
+                    if ($currentSvgElement.closest(".drop_down").next(".chiled").is(
+                            ":visible")) {
+                        // If the corresponding menu is visible, set the arrow pointing upwards
+                        $currentSvgElement.html(
+                            '<path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M6 9l6 6l6 -6" />'
+                        );
+                    } else {
+                        // Otherwise, set the arrow pointing downwards
+                        $currentSvgElement.html(
+                            '<path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 6l-6 6l6 6" />'
+                        );
+                    }
+                });
             });
+        });
+
+        $('.small-view-button').on('click', function() {
+            $('.side-bar').addClass('small-view-side-active');
+            $('.overlay').fadeIn('slow');
+        });
+
+        $('.overlay').on('click', function() {
+            $('.overlay').fadeOut('slow');
+            $('.side-bar').removeClass('small-view-side-active');
+        });
+
+        $(window).on('resize', function() {
+            if ($(window).width() >= 992) {
+                $('.overlay').fadeOut('slow');
+                $('.side-bar').removeClass('small-view-side-active');
+            }
+
+            if($('.side-bar').hasClass('small-view-side-active')){
+                $('.overlay').fadeIn('slow');
+            }
+        });
+
+        $(document).on('click', function (e) {
+            $('[data-toggle="popover"]').popover();
+
+            $(document).on('click', function (e) {
+                $('[data-toggle="popover"]').each(function () {
+                    // Check if the clicked element is the popover button or inside the popover
+                    if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
+                        $(this).popover('hide');
+                    }
+                });
+            });
+            
+        });
+
+        $('.side-bar-collapse').click(function() {
+            $('.side-bar').toggle('slow');
         });
 
         $('.dt-buttons.btn-group').find('a.btn').removeClass('btn-default');
@@ -164,6 +217,5 @@
    
     });
 </script>
-
 
 

@@ -468,7 +468,8 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::post('upload-module', [Install\ModulesController::class, 'uploadModule']);
     Route::delete('manage-modules/destroy/{module_name}', [Install\ModulesController::class, 'destroy']);
     Route::resource('manage-modules', Install\ModulesController::class)
-        ->only(['index', 'update']);
+        ->only(['index', 'update'])
+        ->parameters(['manage-modules' => 'module_name']);
     Route::get('regenerate', [Install\ModulesController::class, 'regenerate']);
 
     Route::resource('warranties', WarrantyController::class);

@@ -71,31 +71,31 @@
                     </td>
                     <td>
                         <strong>{{$module['name']}}</strong> <br/>
-                        @if(!$module['is_installed'])
-                            <a class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent" 
-                            @if($is_demo)
-                                href="#"
-                                title="@lang('lang_v1.disabled_in_demo')"
-                                disabled
-                            @else
-                                href="{{$module['install_link']}}"
-                            @endif
-                            > @lang('lang_v1.install')</a>
-                        @else
-                            <a class="btn btn-warning btn-xs"
+
+                        @if($module['is_enabled'])
+                            @if(!$module['is_installed'])
+                                <a class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent"
                                 @if($is_demo)
                                     href="#"
-                                    disabled
                                     title="@lang('lang_v1.disabled_in_demo')"
+                                    disabled
                                 @else
-                                    href="{{$module['uninstall_link']}}"
+                                    href="{{$module['install_link']}}"
                                 @endif
-                                onclick="return confirm('Do you really want to uninstall the module? Module will be uninstall but the data will not be deleted')"
-                            >@lang('lang_v1.uninstall')
-                            </a>
+                                > @lang('lang_v1.install')</a>
+                            @else
+                                <a class="btn btn-warning btn-xs"
+                                    @if($is_demo)
+                                        href="#"
+                                        disabled
+                                        title="@lang('lang_v1.disabled_in_demo')"
+                                    @else
+                                        href="{{$module['uninstall_link']}}"
+                                    @endif
+                                    onclick="return confirm('Do you really want to uninstall the module? Module will be uninstall but the data will not be deleted')"
+                                >@lang('lang_v1.uninstall')
+                                </a>
 
-                            {{-- Commented Activate/Deactivate
-                            @if($module['active'] == 1)
                                 <form 
                                     action="{{action([\App\Http\Controllers\Install\ModulesController::class, 'update'], ['module_name' => $module['name']])}}" 
                                     style="display: inline;" 
@@ -105,18 +105,17 @@
                                     <input type="hidden" name="action_type" value="deactivate">
                                     <button class="btn btn-warning btn-xs">Deactivate</button>
                                 </form>
-                            @else
-                                <form action="{{action([\App\Http\Controllers\Install\ModulesController::class, 'update'], ['module_name' => $module['name']])}}" 
-                                    style="display: inline;" 
-                                    method="post"
-                                >
-                                    @method('PUT')
-                                    @csrf
-                                    <input type="hidden" name="action_type" value="activate">
-                                    <button class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent">Activate</button>
-                                </form>
                             @endif
-                            --}}
+                        @else
+                            <form action="{{action([\App\Http\Controllers\Install\ModulesController::class, 'update'], ['module_name' => $module['name']])}}"
+                                style="display: inline;"
+                                method="post"
+                            >
+                                @method('PUT')
+                                @csrf
+                                <input type="hidden" name="action_type" value="activate">
+                                <button class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent">Activate</button>
+                            </form>
                         @endif
 
                         <form 

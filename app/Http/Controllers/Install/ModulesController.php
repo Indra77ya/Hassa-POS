@@ -48,6 +48,7 @@ class ModulesController extends Controller
 
         foreach ($modules as $module => $details) {
             $modules[$module]['is_installed'] = $this->moduleUtil->isModuleInstalled($details['name']) ? true : false;
+            $modules[$module]['is_enabled'] = Module::isEnabled($details['name']);
 
             //Get version information.
             if ($modules[$module]['is_installed']) {
@@ -188,7 +189,7 @@ class ModulesController extends Controller
                 $module->disable();
             }
             // Publish assets for this specific module after status change
-            Artisan::call('module:publish', ['module' => $module_name, '--force' => true]);
+            Artisan::call('module:publish', ['module' => $module_name]);
 
             // Clear module assets cache when module is activated/deactivated
             Cache::forget('module_assets');
@@ -298,7 +299,7 @@ class ModulesController extends Controller
 
                 // Publish assets for the uploaded module using its name
                 try {
-                    Artisan::call('module:publish', ['module' => $module_name, '--force' => true]);
+                    Artisan::call('module:publish', ['module' => $module_name]);
                 } catch (\Throwable $e) {
                     // Fallback to publishing all if targeted signature not supported
                     Artisan::call('module:publish');
