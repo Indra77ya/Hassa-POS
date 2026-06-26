@@ -94,7 +94,7 @@
                                                             <th>@lang('lang_v1.balance')</th>
                                                             <th>@lang('lang_v1.account_details')</th>
                                                             <th>@lang('lang_v1.added_by')</th>
-                                                            <th class="not-export">@lang('messages.action')</th>
+                                                            <th>@lang('messages.action')</th>
                                                         </tr>
                                                     </thead>
                                                     <tfoot>
@@ -118,7 +118,7 @@
                                     <th>@lang('account.account_number')</th>
                                     <th>@lang( 'brand.note' )</th>
                                     <th>@lang('lang_v1.balance')</th>
-                                    <th class="not-export">@lang( 'messages.action' )</th>
+                                    <th>@lang( 'messages.action' )</th>
                                 </tr>
                             </thead>
                         </table>
@@ -131,6 +131,13 @@
                                                 data-href="{{ action([\App\Http\Controllers\AccountTypeController::class, 'create']) }}"
                                                 data-container="#account_type_modal">
                                                 <i class="fa fa-plus"></i> @lang('messages.add')</button>
+
+                                            <form action="{{ action([\App\Http\Controllers\AccountTypeController::class, 'seedDefault']) }}" method="POST" class="pull-right tw-mr-2">
+                                                @csrf
+                                                <button type="submit" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-sm">
+                                                    <i class="fa fa-magic"></i> @lang('account.add_default_account_types')
+                                                </button>
+                                            </form>
                                         </div>
                                     </div>
                                     <br>
@@ -141,7 +148,7 @@
                                                 <thead>
                                                     <tr>
                                                         <th>@lang('lang_v1.name')</th>
-                                                        <th class="not-export">@lang('messages.action')</th>
+                                                        <th>@lang('messages.action')</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
