@@ -55,10 +55,10 @@
         @endif
 
         <!-- Add currency related field-->
-        <input type="hidden" id="__code" value="{{ session('currency')['code'] }}">
-        <input type="hidden" id="__symbol" value="{{ session('currency')['symbol'] }}">
-        <input type="hidden" id="__thousand" value="{{ session('currency')['thousand_separator'] }}">
-        <input type="hidden" id="__decimal" value="{{ session('currency')['decimal_separator'] }}">
+        <input type="hidden" id="__code" value="{{ session('currency.code') }}">
+        <input type="hidden" id="__symbol" value="{{ session('currency.symbol') }}">
+        <input type="hidden" id="__thousand" value="{{ session('currency.thousand_separator') }}">
+        <input type="hidden" id="__decimal" value="{{ session('currency.decimal_separator') }}">
         <input type="hidden" id="__symbol_placement" value="{{ session('business.currency_symbol_placement') }}">
         <input type="hidden" id="__precision" value="{{ session('business.currency_precision', 2) }}">
         <input type="hidden" id="__quantity_precision" value="{{ session('business.quantity_precision', 2) }}">
@@ -159,13 +159,9 @@
 </style>
 <style>
     .small-view-side-active {
-        display: flex !important;
-        flex-direction: column;
+        display: grid !important;
         z-index: 1000;
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100vh;
+        position: absolute;
     }
     .overlay {
         width: 100vw;
