@@ -38,63 +38,29 @@
             <h3 class="box-title">{{session()->get('business.name')}} - @lang( 'account.trial_balance') - <span id="hidden_date">{{@format_date('now')}}</span></h3>
         </div>
         <div class="box-body">
-            <table class="table table-border-center-col no-border table-pl-12" id="trial_balance_table">
+            <table class="table table-bordered table-pl-12" id="trial_balance_table">
                 <thead>
                     <tr class="bg-gray">
-                        <th>@lang('account.trial_balance')</th>
-                        <th>@lang('account.debit')</th>
-                        <th>@lang('account.credit')</th>
+                        <th rowspan="2" class="text-center" style="vertical-align: middle;">@lang('account.account')</th>
+                        <th colspan="2" class="text-center">@lang('account.balance')</th>
+                    </tr>
+                    <tr class="bg-gray">
+                        <th class="text-center">@lang('account.debit')</th>
+                        <th class="text-center">@lang('account.credit')</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <th>@lang('account.supplier_due'):</th>
-                        <td>&nbsp;</td>
-                        <td>
-                            <input type="hidden" id="hidden_supplier_due" class="debit">
-                            <span class="remote-data" id="supplier_due">
-                                <i class="fas fa-sync fa-spin fa-fw"></i>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>@lang('account.customer_due'):</th>
-                        <td>
-                            <input type="hidden" id="hidden_customer_due" class="credit">
-                            <span class="remote-data" id="customer_due">
-                                <i class="fas fa-sync fa-spin fa-fw"></i>
-                            </span>
-                        </td>
-                        <td>&nbsp;</td>
-                    </tr>
-                    <tr>
-                        <th>@lang('account.account_balances'):</th>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
-                    </tr>
+                <tbody id="trial_balance_details">
                 </tbody>
-                <tbody id="account_balances_details">
-                </tbody>
-                {{--
-                <tbody>
-                    <tr>
-                        <th>@lang('account.capital_accounts'):</th>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
-                    </tr>
-                </tbody>
-                <tbody id="capital_account_balances_details"></tbody>
-                --}}
                 <tfoot>
                     <tr class="bg-gray">
-                        <th>@lang('sale.total')</th>
-                        <td>
-                            <span class="remote-data" id="total_credit">
+                        <th class="text-right">@lang('sale.total')</th>
+                        <td class="text-center">
+                            <span class="remote-data" id="total_debit">
                                 <i class="fas fa-sync fa-spin fa-fw"></i>
                             </span>
                         </td>
-                        <td>
-                            <span class="remote-data" id="total_debit">
+                        <td class="text-center">
+                            <span class="remote-data" id="total_credit">
                                 <i class="fas fa-sync fa-spin fa-fw"></i>
                             </span>
                         </td>
@@ -137,8 +103,7 @@
             $(this).html(loader);
         });
 
-        $('table#trial_balance_table tbody#capital_account_balances_details').html('<tr><td colspan="3"><i class="fas fa-sync fa-spin fa-fw"></i></td></tr>');
-        $('table#trial_balance_table tbody#account_balances_details').html('<tr><td colspan="3"><i class="fas fa-sync fa-spin fa-fw"></i></td></tr>');
+        $('#trial_balance_details').html('<tr><td colspan="3" class="text-center"><i class="fas fa-sync fa-spin fa-fw"></i></td></tr>');
 
         var end_date = $('input#end_date').val();
         var location_id = $('#trial_bal_location_id').val()
@@ -146,43 +111,139 @@
             url: "{{action([\App\Http\Controllers\AccountReportsController::class, 'trialBalance'])}}?end_date=" + end_date + '&location_id=' + location_id,
             dataType: "json",
             success: function(result){
-                $('span#supplier_due').text(__currency_trans_from_en(result.supplier_due, true));
-                __write_number($('input#hidden_supplier_due'), result.supplier_due);
-
-                $('span#customer_due').text(__currency_trans_from_en(result.customer_due, true));
-                __write_number($('input#hidden_customer_due'), result.customer_due);
-
-                var account_balances = result.account_balances;
-                $('table#trial_balance_table tbody#account_balances_details').html('');
-                for (var key in account_balances) {
-                    var accnt_bal = __currency_trans_from_en(result.account_balances[key]);
-                    var accnt_bal_with_sym = __currency_trans_from_en(result.account_balances[key], true);
-                    var account_tr = '<tr><td class="pl-20-td">' + key + ':</td><td><input type="hidden" class="credit" value="' + accnt_bal + '">' + accnt_bal_with_sym + '</td><td>&nbsp;</td></tr>';
-                    $('table#trial_balance_table tbody#account_balances_details').append(account_tr);
-                }
-
-                var capital_account_details = result.capital_account_details;
-                $('table#trial_balance_table tbody#capital_account_balances_details').html('');
-                for (var key in capital_account_details) {
-                    var accnt_bal = __currency_trans_from_en(result.capital_account_details[key]);
-                    var accnt_bal_with_sym = __currency_trans_from_en(result.capital_account_details[key], true);
-                    var account_tr = '<tr><td class="pl-20-td">' + key + ':</td><td><input type="hidden" class="credit" value="' + accnt_bal + '">' + accnt_bal_with_sym + '</td><td>&nbsp;</td></tr>';
-                    $('table#trial_balance_table tbody#capital_account_balances_details').append(account_tr);
-                }
-
                 var total_debit = 0;
                 var total_credit = 0;
-                $('input.debit').each( function(){
-                    total_debit += __read_number($(this));
-                });
-                $('input.credit').each( function(){
-                    total_credit += __read_number($(this));
+                var rows = '';
+
+                // 1. Assets (Debit nature)
+                // Opening Stock
+                if (result.opening_stock > 0) {
+                    rows += render_row("{{__('report.opening_stock')}}", result.opening_stock, 0);
+                    total_debit += parseFloat(result.opening_stock);
+                }
+
+                // Customer Due (Piutang)
+                if (result.customer_due > 0) {
+                    rows += render_row("{{__('account.customer_due')}}", result.customer_due, 0);
+                    total_debit += parseFloat(result.customer_due);
+                } else if (result.customer_due < 0) {
+                    rows += render_row("{{__('account.customer_due')}}", 0, Math.abs(result.customer_due));
+                    total_credit += Math.abs(parseFloat(result.customer_due));
+                }
+
+                // Payment Accounts
+                result.account_balances.forEach(function(account) {
+                    var type = (account.type_name || '') + ' ' + (account.parent_type_name || '');
+                    type = type.toLowerCase();
+                    var name = account.name.toLowerCase();
+
+                    var balance = 0;
+                    var is_debit = true;
+
+                    if (type.includes('liability') || type.includes('utang') || type.includes('kewajiban') || type.includes('pasiva') || name.includes('utang') || name.includes('kewajiban')) {
+                        balance = account.total_credit - account.total_debit;
+                        is_debit = false;
+                    } else if (type.includes('equity') || type.includes('modal') || type.includes('ekuitas') || type.includes('capital') || name.includes('modal') || name.includes('ekuitas')) {
+                        balance = account.total_credit - account.total_debit;
+                        is_debit = false;
+                    } else {
+                        balance = account.total_debit - account.total_credit;
+                        is_debit = true;
+                    }
+
+                    if (balance > 0) {
+                        if (is_debit) {
+                            rows += render_row(account.name, balance, 0);
+                            total_debit += balance;
+                        } else {
+                            rows += render_row(account.name, 0, balance);
+                            total_credit += balance;
+                        }
+                    } else if (balance < 0) {
+                        if (is_debit) {
+                            rows += render_row(account.name, 0, Math.abs(balance));
+                            total_credit += Math.abs(balance);
+                        } else {
+                            rows += render_row(account.name, Math.abs(balance), 0);
+                            total_debit += Math.abs(balance);
+                        }
+                    }
                 });
 
+                // 2. Liabilities (Credit nature)
+                // Supplier Due (Utang)
+                if (result.supplier_due > 0) {
+                    rows += render_row("{{__('account.supplier_due')}}", 0, result.supplier_due);
+                    total_credit += parseFloat(result.supplier_due);
+                } else if (result.supplier_due < 0) {
+                    rows += render_row("{{__('account.supplier_due')}}", Math.abs(result.supplier_due), 0);
+                    total_debit += Math.abs(parseFloat(result.supplier_due));
+                }
+
+                // 3. Income (Credit nature)
+                if (result.total_sell > 0) {
+                    rows += render_row("{{__('report.total_sell')}}", 0, result.total_sell);
+                    total_credit += parseFloat(result.total_sell);
+                }
+                if (result.total_purchase_return > 0) {
+                    rows += render_row("{{__('lang_v1.total_purchase_return')}}", 0, result.total_purchase_return);
+                    total_credit += parseFloat(result.total_purchase_return);
+                }
+                if (result.total_recovered > 0) {
+                    rows += render_row("{{__('report.total_recovered')}}", 0, result.total_recovered);
+                    total_credit += parseFloat(result.total_recovered);
+                }
+                if (result.total_purchase_discount > 0) {
+                    rows += render_row("{{__('lang_v1.total_purchase_discount')}}", 0, result.total_purchase_discount);
+                    total_credit += parseFloat(result.total_purchase_discount);
+                }
+
+                // 4. Expenses (Debit nature)
+                if (result.total_purchase > 0) {
+                    rows += render_row("{{__('report.total_purchase')}}", result.total_purchase, 0);
+                    total_debit += parseFloat(result.total_purchase);
+                }
+                if (result.total_expense > 0) {
+                    rows += render_row("{{__('report.total_expense')}}", result.total_expense, 0);
+                    total_debit += parseFloat(result.total_expense);
+                }
+                if (result.total_sell_return > 0) {
+                    rows += render_row("{{__('lang_v1.total_sell_return')}}", result.total_sell_return, 0);
+                    total_debit += parseFloat(result.total_sell_return);
+                }
+                if (result.total_adjustment > 0) {
+                    rows += render_row("{{__('report.total_stock_adjustment')}}", result.total_adjustment, 0);
+                    total_debit += parseFloat(result.total_adjustment);
+                }
+                if (result.total_sell_discount > 0) {
+                    rows += render_row("{{__('lang_v1.total_sell_discount')}}", result.total_sell_discount, 0);
+                    total_debit += parseFloat(result.total_sell_discount);
+                }
+                if (result.total_reward_amount > 0) {
+                    rows += render_row("{{__('lang_v1.total_reward_amount')}}", result.total_reward_amount, 0);
+                    total_debit += parseFloat(result.total_reward_amount);
+                }
+                if (result.total_sell_round_off != 0) {
+                    if (result.total_sell_round_off > 0) {
+                        rows += render_row("{{__('lang_v1.round_off')}}", result.total_sell_round_off, 0);
+                        total_debit += parseFloat(result.total_sell_round_off);
+                    } else {
+                        rows += render_row("{{__('lang_v1.round_off')}}", 0, Math.abs(result.total_sell_round_off));
+                        total_credit += Math.abs(parseFloat(result.total_sell_round_off));
+                    }
+                }
+
+                $('#trial_balance_details').html(rows);
                 $('span#total_debit').text(__currency_trans_from_en(total_debit, true));
                 $('span#total_credit').text(__currency_trans_from_en(total_credit, true));
             }
         });
+    }
+
+    function render_row(name, debit, credit) {
+        var debit_text = debit > 0 ? __currency_trans_from_en(debit, true) : '';
+        var credit_text = credit > 0 ? __currency_trans_from_en(credit, true) : '';
+        return '<tr><td>' + name + '</td><td class="text-right">' + debit_text + '</td><td class="text-right">' + credit_text + '</td></tr>';
     }
 </script>
 

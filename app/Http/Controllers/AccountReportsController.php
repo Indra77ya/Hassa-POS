@@ -192,15 +192,36 @@ class AccountReportsController extends Controller
                 $location_id
             );
 
+            $transaction_types = ['sell_return'];
+            $sell_return_details = $this->transactionUtil->getTransactionTotals(
+                $business_id,
+                $transaction_types,
+                null,
+                $end_date,
+                $location_id
+            );
+
             $account_details = $this->getAccountBalance($business_id, $end_date, 'others', $location_id);
 
-            // $capital_account_details = $this->getAccountBalance($business_id, $end_date, 'capital');
+            $permitted_locations = auth()->user()->permitted_locations();
+            $pl_details = $this->transactionUtil->getProfitLossDetails($business_id, $location_id, '1970-01-01', $end_date, null, $permitted_locations);
 
             $output = [
                 'supplier_due' => $purchase_details['purchase_due'],
-                'customer_due' => $sell_details['invoice_due'],
+                'customer_due' => $sell_details['invoice_due'] - $sell_return_details['total_sell_return_inc_tax'],
                 'account_balances' => $account_details,
-                'capital_account_details' => null,
+                'total_sell' => $pl_details['total_sell'],
+                'total_purchase' => $pl_details['total_purchase'],
+                'total_expense' => $pl_details['total_expense'],
+                'total_adjustment' => $pl_details['total_adjustment'],
+                'total_recovered' => $pl_details['total_recovered'],
+                'total_purchase_return' => $pl_details['total_purchase_return'],
+                'total_sell_return' => $pl_details['total_sell_return'],
+                'opening_stock' => $pl_details['opening_stock'],
+                'total_sell_discount' => $pl_details['total_sell_discount'],
+                'total_purchase_discount' => $pl_details['total_purchase_discount'],
+                'total_reward_amount' => $pl_details['total_reward_amount'],
+                'total_sell_round_off' => $pl_details['total_sell_round_off'],
             ];
 
             return $output;
@@ -224,22 +245,18 @@ class AccountReportsController extends Controller
             '=',
             'accounts.id'
         )
-                                // ->NotClosed()
-                                ->whereNull('AT.deleted_at')
-                                ->where('business_id', $business_id)
-                                ->whereDate('AT.operation_date', '<=', $end_date);
-
-        // if ($account_type == 'others') {
-        //    $query->NotCapital();
-        // } elseif ($account_type == 'capital') {
-        //     $query->where('account_type', 'capital');
-        // }
+        ->leftjoin('account_types as ATY', 'accounts.account_type_id', '=', 'ATY.id')
+        ->leftjoin('account_types as PATY', 'ATY.parent_account_type_id', '=', 'PATY.id')
+        ->whereNull('AT.deleted_at')
+        ->where('accounts.business_id', $business_id)
+        ->whereDate('AT.operation_date', '<=', $end_date);
 
         $permitted_locations = auth()->user()->permitted_locations();
         $account_ids = [];
-        if ($permitted_locations != 'all') {
+        if ($permitted_locations != 'all' || ! empty($location_id)) {
+            $locations_to_check = ($location_id) ? [$location_id] : $permitted_locations;
             $locations = BusinessLocation::where('business_id', $business_id)
-                            ->whereIn('id', $permitted_locations)
+                            ->whereIn('id', $locations_to_check)
                             ->get();
 
             foreach ($locations as $location) {
@@ -252,34 +269,19 @@ class AccountReportsController extends Controller
                     }
                 }
             }
-
             $account_ids = array_unique($account_ids);
-        }
-
-        if ($permitted_locations != 'all') {
             $query->whereIn('accounts.id', $account_ids);
         }
 
-        if (! empty($location_id)) {
-            $location = BusinessLocation::find($location_id);
-            if (! empty($location->default_payment_accounts)) {
-                $default_payment_accounts = json_decode($location->default_payment_accounts, true);
-                $account_ids = [];
-                foreach ($default_payment_accounts as $key => $account) {
-                    if (! empty($account['is_enabled']) && ! empty($account['account'])) {
-                        $account_ids[] = $account['account'];
-                    }
-                }
-
-                $query->whereIn('accounts.id', $account_ids);
-            }
-        }
-
-        $account_details = $query->select(['name',
-            DB::raw("SUM( IF(AT.type='credit', amount, -1*amount) ) as balance"), ])
-                                ->groupBy('accounts.id')
-                                ->get()
-                                ->pluck('balance', 'name');
+        $account_details = $query->select([
+            'accounts.name',
+            'ATY.name as type_name',
+            'PATY.name as parent_type_name',
+            DB::raw("SUM( IF(AT.type='credit', amount, 0) ) as total_credit"),
+            DB::raw("SUM( IF(AT.type='debit', amount, 0) ) as total_debit"),
+        ])
+        ->groupBy('accounts.id', 'accounts.name', 'ATY.name', 'PATY.name')
+        ->get();
 
         return $account_details;
     }

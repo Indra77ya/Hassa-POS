@@ -66,4 +66,5 @@ return [
     'retained_earnings' => 'Laba Ditahan',
     'total_equity' => 'Total Ekuitas',
     'total_liability_equity' => 'Total Pasiva',
+    'balance' => 'Saldo',
 ];
