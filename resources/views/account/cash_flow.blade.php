@@ -58,20 +58,18 @@
                         <th>@lang( 'messages.date' )</th>
                         <th>@lang( 'account.account' )</th>
                         <th>@lang( 'lang_v1.description' )</th>
-                        <th>@lang( 'lang_v1.payment_method' )</th>
-                        <th>@lang( 'lang_v1.payment_details' )</th>
+                        <th>@lang( 'account.activity' )</th>
                         <th>@lang('account.debit')</th>
                         <th>@lang('account.credit')</th>
                         <th>@lang( 'lang_v1.account_balance' ) @show_tooltip(__('lang_v1.account_balance_tooltip'))</th>
-                        <th>@lang( 'lang_v1.total_balance' ) @show_tooltip(__('lang_v1.total_balance_tooltip'))</th>
                     </tr>
                 </thead>
                 <tfoot>
                     <tr class="bg-gray font-17 footer-total text-center">
-                        <td colspan="5"><strong>@lang('sale.total'):</strong></td>
+                        <td colspan="4"><strong>@lang('sale.total'):</strong></td>
                         <td class="footer_total_debit"></td>
                         <td class="footer_total_credit"></td>
-                        <td colspan="2"></td>
+                        <td></td>
                     </tr>
                 </tfoot>
             </table>
@@ -132,12 +130,10 @@
                 {data: 'operation_date', name: 'operation_date'},
                 {data: 'account_name', name: 'A.name'},
                 {data: 'sub_type', name: 'sub_type', searchable: false},
-                {data: 'method', name: 'TP.method'},
-                {data: 'payment_details', name: 'TP.payment_ref_no'},
+                {data: 'activity', name: 'activity', searchable: false},
                 {data: 'debit', name: 'amount', searchable: false},
                 {data: 'credit', name: 'amount', searchable: false},
                 {data: 'balance', name: 'balance', searchable: false},
-                {data: 'total_balance', name: 'total_balance', searchable: false},
             ],
             "fnDrawCallback": function (oSettings) {
                 __currency_convert_recursively($('#cash_flow_table'));

@@ -5741,6 +5741,9 @@ class TransactionUtil extends Util
 
         $data['total_sell_round_off'] = ! empty($total_sell_round_off) ? $total_sell_round_off : 0;
 
+        $data['total_sell_tax'] = ! empty($sell_details['total_tax']) ? $sell_details['total_tax'] : 0;
+        $data['total_purchase_tax'] = ! empty($purchase_details['total_tax']) ? $purchase_details['total_tax'] : 0;
+
         //Expense
         $data['total_expense'] = $transaction_totals['total_expense'];
 

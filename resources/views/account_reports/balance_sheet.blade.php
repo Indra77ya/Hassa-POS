@@ -86,8 +86,8 @@
             <table class="table table-balance-sheet">
                 <thead>
                     <tr>
-                        <th class="header-side" width="50%">@lang( 'account.assets')</th>
-                        <th class="header-side" width="50%">@lang( 'account.liability_equity')</th>
+                        <th class="header-side" width="50%">@lang('account.assets')</th>
+                        <th class="header-side" width="50%">@lang('account.liability')</th>
                     </tr>
                 </thead>
                 <tbody>
