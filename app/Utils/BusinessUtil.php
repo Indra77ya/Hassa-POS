@@ -134,7 +134,47 @@ class BusinessUtil extends Util
             NotificationTemplate::create($notification_template);
         }
 
+        $this->seedDefaultAccountTypes($business_id);
+
         return true;
+    }
+
+    /**
+     * Seeds default account types for a business
+     *
+     * @param  int  $business_id
+     * @return void
+     */
+    public function seedDefaultAccountTypes($business_id)
+    {
+        $default_types = [
+            ['key' => 'kas_dan_bank', 'parent' => null],
+            ['key' => 'piutang_usaha', 'parent' => null],
+            ['key' => 'persediaan', 'parent' => null],
+            ['key' => 'aktiva_lancar_lainnya', 'parent' => null],
+            ['key' => 'aktiva_tetap', 'parent' => null],
+            ['key' => 'akumulasi_penyusutan', 'parent' => null],
+            ['key' => 'aktiva_lainnya', 'parent' => null],
+            ['key' => 'hutang_usaha', 'parent' => null],
+            ['key' => 'hutang_lancar_lainnya', 'parent' => null],
+            ['key' => 'hutang_jangka_panjang', 'parent' => null],
+            ['key' => 'ekuitas', 'parent' => null],
+            ['key' => 'pendapatan_usaha', 'parent' => null],
+            ['key' => 'pendapatan_lainnya', 'parent' => null],
+            ['key' => 'harga_pokok_penjualan', 'parent' => null],
+            ['key' => 'beban_operasional', 'parent' => null],
+            ['key' => 'beban_lain_lain', 'parent' => null],
+            ['key' => 'beban_pajak', 'parent' => null],
+        ];
+
+        foreach ($default_types as $at) {
+            $translated_name = __('account.' . $at['key'], [], 'id');
+
+            \App\AccountType::updateOrCreate(
+                ['business_id' => $business_id, 'fixed_key' => $at['key']],
+                ['name' => $translated_name, 'parent_account_type_id' => null]
+            );
+        }
     }
 
     /**

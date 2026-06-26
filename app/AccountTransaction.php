@@ -34,15 +34,15 @@ class AccountTransaction extends Model
     public static function getAccountTransactionType($tansaction_type)
     {
         $account_transaction_types = [
-            'sell' => 'credit',
-            'purchase' => 'debit',
-            'expense' => 'debit',
-            'purchase_return' => 'credit',
-            'sell_return' => 'debit',
-            'payroll' => 'debit',
-            'expense_refund' => 'credit',
-            'hms_booking' => 'credit',
-            'gym_subscription' => 'credit',
+            'sell' => 'debit',
+            'purchase' => 'credit',
+            'expense' => 'credit',
+            'purchase_return' => 'debit',
+            'sell_return' => 'credit',
+            'payroll' => 'credit',
+            'expense_refund' => 'debit',
+            'hms_booking' => 'debit',
+            'gym_subscription' => 'debit',
         ];
 
         return $account_transaction_types[$tansaction_type];
@@ -107,9 +107,9 @@ class AccountTransaction extends Model
                     'transaction_payment_id' => $transaction_payment->id,
                 ];
 
-                //If change return then set type as debit
+                //If change return then set type as credit
                 if (!empty($transaction_payment->transaction) && $transaction_payment->transaction->type == 'sell' && $transaction_payment->is_return == 1) {
-                    $accnt_trans_data['type'] = 'debit';
+                    $accnt_trans_data['type'] = 'credit';
                 }
 
                 self::createAccountTransaction($accnt_trans_data);

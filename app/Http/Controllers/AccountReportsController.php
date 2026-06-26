@@ -92,13 +92,16 @@ class AccountReportsController extends Controller
             // Removed restrictive filtering to include all accounts in Balance Sheet
 
             $accounts = $accounts->select([
+                'accounts.id',
                 'accounts.name as account_name',
+                'accounts.normal_balance',
                 'ATY.name as type_name',
+                'ATY.fixed_key as fixed_key',
                 'PATY.name as parent_type_name',
                 DB::raw("SUM( IF(AT.type='credit', amount, 0) ) as credit_balance"),
                 DB::raw("SUM( IF(AT.type='debit', amount, 0) ) as debit_balance"),
             ])
-            ->groupBy('accounts.id', 'accounts.name', 'ATY.name', 'PATY.name')
+            ->groupBy('accounts.id', 'accounts.name', 'ATY.name', 'ATY.fixed_key', 'PATY.name')
             ->get();
 
             $assets = [
@@ -113,31 +116,33 @@ class AccountReportsController extends Controller
             $equity = [];
 
             foreach ($accounts as $account) {
-                $type = strtolower($account->type_name . ' ' . $account->parent_type_name);
-                $name = strtolower($account->account_name);
+                $fixed_key = $account->fixed_key;
+                $is_debit_normal = $account->normal_balance == 'debit';
+                if (empty($account->normal_balance)) {
+                    $is_debit_normal = in_array($fixed_key, ['kas_dan_bank', 'piutang_usaha', 'persediaan', 'aktiva_lancar_lainnya', 'aktiva_tetap', 'akumulasi_penyusutan', 'aktiva_lainnya']);
+                }
 
-                if (str_contains($type, 'liability') || str_contains($type, 'utang') || str_contains($type, 'kewajiban') || str_contains($type, 'pasiva') || str_contains($name, 'utang') || str_contains($name, 'kewajiban')) {
-                    $account->balance = $account->credit_balance - $account->debit_balance;
-                    if (str_contains($type, 'long term') || str_contains($type, 'jangka panjang') || str_contains($name, 'jangka panjang')) {
-                        $liabilities['long_term_liabilities'][] = $account;
-                    } else {
-                        $liabilities['current_liabilities'][] = $account;
-                    }
-                } elseif (str_contains($type, 'equity') || str_contains($type, 'modal') || str_contains($type, 'ekuitas') || str_contains($type, 'capital') || str_contains($name, 'modal') || str_contains($name, 'ekuitas')) {
-                    $account->balance = $account->credit_balance - $account->debit_balance;
-                    $equity[] = $account;
-                } elseif (str_contains($type, 'asset') || str_contains($type, 'aktiva') || str_contains($type, 'harta') || str_contains($type, 'saving') || str_contains($type, 'current') || str_contains($name, 'kas') || str_contains($name, 'bank') || str_contains($name, 'piutang')) {
+                if ($is_debit_normal) {
                     $account->balance = $account->debit_balance - $account->credit_balance;
-                    if (str_contains($type, 'fixed') || str_contains($type, 'tetap') || str_contains($name, 'tetap') || str_contains($name, 'tanah') || str_contains($name, 'bangunan') || str_contains($name, 'mesin') || str_contains($name, 'peralatan')) {
-                        $assets['fixed_assets'][] = $account;
-                    } elseif (str_contains($type, 'other') || str_contains($type, 'lainnya') || str_contains($name, 'lainnya')) {
-                        $assets['other_assets'][] = $account;
-                    } else {
-                        $assets['current_assets'][] = $account;
-                    }
                 } else {
-                    $account->balance = $account->debit_balance - $account->credit_balance;
+                    $account->balance = $account->credit_balance - $account->debit_balance;
+                }
+
+                // AKTIVA
+                if (in_array($fixed_key, ['kas_dan_bank', 'piutang_usaha', 'persediaan', 'aktiva_lancar_lainnya'])) {
                     $assets['current_assets'][] = $account;
+                } elseif (in_array($fixed_key, ['aktiva_tetap', 'akumulasi_penyusutan'])) {
+                    $assets['fixed_assets'][] = $account;
+                } elseif ($fixed_key == 'aktiva_lainnya') {
+                    $assets['other_assets'][] = $account;
+                }
+                // PASIVA
+                elseif (in_array($fixed_key, ['hutang_usaha', 'hutang_lancar_lainnya'])) {
+                    $liabilities['current_liabilities'][] = $account;
+                } elseif ($fixed_key == 'hutang_jangka_panjang') {
+                    $liabilities['long_term_liabilities'][] = $account;
+                } elseif ($fixed_key == 'ekuitas') {
+                    $equity[] = $account;
                 }
             }
 
@@ -222,6 +227,10 @@ class AccountReportsController extends Controller
                 'total_purchase_discount' => $pl_details['total_purchase_discount'],
                 'total_reward_amount' => $pl_details['total_reward_amount'],
                 'total_sell_round_off' => $pl_details['total_sell_round_off'],
+                'total_sell_tax' => $pl_details['total_sell_tax'] ?? 0,
+                'total_purchase_tax' => $pl_details['total_purchase_tax'] ?? 0,
+                'total_sell_shipping_charge' => $pl_details['total_sell_shipping_charge'] ?? 0,
+                'total_sell_additional_expense' => $pl_details['total_sell_additional_expense'] ?? 0,
             ];
 
             return $output;
@@ -239,17 +248,11 @@ class AccountReportsController extends Controller
      */
     private function getAccountBalance($business_id, $end_date, $account_type = 'others', $location_id = null)
     {
-        $query = Account::leftjoin(
-            'account_transactions as AT',
-            'AT.account_id',
-            '=',
-            'accounts.id'
-        )
-        ->leftjoin('account_types as ATY', 'accounts.account_type_id', '=', 'ATY.id')
-        ->leftjoin('account_types as PATY', 'ATY.parent_account_type_id', '=', 'PATY.id')
-        ->whereNull('AT.deleted_at')
-        ->where('accounts.business_id', $business_id)
-        ->whereDate('AT.operation_date', '<=', $end_date);
+        $start_date = ! empty(request()->input('start_date')) ? $this->transactionUtil->uf_date(request()->input('start_date')) : \Carbon::now()->startOfMonth()->format('Y-m-d');
+
+        $query = Account::leftjoin('account_types as ATY', 'accounts.account_type_id', '=', 'ATY.id')
+            ->leftjoin('account_types as PATY', 'ATY.parent_account_type_id', '=', 'PATY.id')
+            ->where('accounts.business_id', $business_id);
 
         $permitted_locations = auth()->user()->permitted_locations();
         $account_ids = [];
@@ -274,13 +277,23 @@ class AccountReportsController extends Controller
         }
 
         $account_details = $query->select([
+            'accounts.id',
             'accounts.name',
+            'accounts.normal_balance',
             'ATY.name as type_name',
+            'ATY.fixed_key as fixed_key',
             'PATY.name as parent_type_name',
-            DB::raw("SUM( IF(AT.type='credit', amount, 0) ) as total_credit"),
-            DB::raw("SUM( IF(AT.type='debit', amount, 0) ) as total_debit"),
+            DB::raw("(SELECT SUM(IF(type='debit', amount, 0)) FROM account_transactions WHERE account_id = accounts.id AND deleted_at IS NULL AND DATE(operation_date) < ?) as opening_debit"),
+            DB::raw("(SELECT SUM(IF(type='credit', amount, 0)) FROM account_transactions WHERE account_id = accounts.id AND deleted_at IS NULL AND DATE(operation_date) < ?) as opening_credit"),
+            DB::raw("(SELECT SUM(amount) FROM account_transactions WHERE account_id = accounts.id AND type='debit' AND deleted_at IS NULL AND DATE(operation_date) >= ? AND DATE(operation_date) <= ?) as total_debit"),
+            DB::raw("(SELECT SUM(amount) FROM account_transactions WHERE account_id = accounts.id AND type='credit' AND deleted_at IS NULL AND DATE(operation_date) >= ? AND DATE(operation_date) <= ?) as total_credit"),
         ])
-        ->groupBy('accounts.id', 'accounts.name', 'ATY.name', 'PATY.name')
+        ->addBinding($start_date, 'select')
+        ->addBinding($start_date, 'select')
+        ->addBinding($start_date, 'select')
+        ->addBinding($end_date, 'select')
+        ->addBinding($start_date, 'select')
+        ->addBinding($end_date, 'select')
         ->get();
 
         return $account_details;
