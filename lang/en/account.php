@@ -66,4 +66,5 @@ return [
     'retained_earnings' => 'Retained Earnings',
     'total_equity' => 'Total Equity',
     'total_liability_equity' => 'Total Liabilities & Equity',
+    'balance' => 'Balance',
 ];
