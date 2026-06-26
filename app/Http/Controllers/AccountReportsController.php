@@ -67,9 +67,6 @@ class AccountReportsController extends Controller
                 $location_id
             );
 
-            $account_details = $this->getAccountBalance($business_id, $end_date, 'others', $location_id);
-            // $capital_account_details = $this->getAccountBalance($business_id, $end_date, 'capital');
-
             //Get Closing stock
             $permitted_locations = auth()->user()->permitted_locations();
             
@@ -80,12 +77,81 @@ class AccountReportsController extends Controller
                 $permitted_locations
             );
 
+            $accounts = Account::leftjoin(
+                'account_transactions as AT',
+                'AT.account_id',
+                '=',
+                'accounts.id'
+            )
+            ->leftjoin('account_types as ATY', 'accounts.account_type_id', '=', 'ATY.id')
+            ->leftjoin('account_types as PATY', 'ATY.parent_account_type_id', '=', 'PATY.id')
+            ->whereNull('AT.deleted_at')
+            ->where('accounts.business_id', $business_id)
+            ->whereDate('AT.operation_date', '<=', $end_date);
+
+            // Removed restrictive filtering to include all accounts in Balance Sheet
+
+            $accounts = $accounts->select([
+                'accounts.name as account_name',
+                'ATY.name as type_name',
+                'PATY.name as parent_type_name',
+                DB::raw("SUM( IF(AT.type='credit', amount, 0) ) as credit_balance"),
+                DB::raw("SUM( IF(AT.type='debit', amount, 0) ) as debit_balance"),
+            ])
+            ->groupBy('accounts.id', 'accounts.name', 'ATY.name', 'PATY.name')
+            ->get();
+
+            $assets = [
+                'current_assets' => [],
+                'fixed_assets' => [],
+                'other_assets' => [],
+            ];
+            $liabilities = [
+                'current_liabilities' => [],
+                'long_term_liabilities' => [],
+            ];
+            $equity = [];
+
+            foreach ($accounts as $account) {
+                $type = strtolower($account->type_name . ' ' . $account->parent_type_name);
+                $name = strtolower($account->account_name);
+
+                if (str_contains($type, 'liability') || str_contains($type, 'utang') || str_contains($type, 'kewajiban') || str_contains($type, 'pasiva') || str_contains($name, 'utang') || str_contains($name, 'kewajiban')) {
+                    $account->balance = $account->credit_balance - $account->debit_balance;
+                    if (str_contains($type, 'long term') || str_contains($type, 'jangka panjang') || str_contains($name, 'jangka panjang')) {
+                        $liabilities['long_term_liabilities'][] = $account;
+                    } else {
+                        $liabilities['current_liabilities'][] = $account;
+                    }
+                } elseif (str_contains($type, 'equity') || str_contains($type, 'modal') || str_contains($type, 'ekuitas') || str_contains($type, 'capital') || str_contains($name, 'modal') || str_contains($name, 'ekuitas')) {
+                    $account->balance = $account->credit_balance - $account->debit_balance;
+                    $equity[] = $account;
+                } elseif (str_contains($type, 'asset') || str_contains($type, 'aktiva') || str_contains($type, 'harta') || str_contains($type, 'saving') || str_contains($type, 'current') || str_contains($name, 'kas') || str_contains($name, 'bank') || str_contains($name, 'piutang')) {
+                    $account->balance = $account->debit_balance - $account->credit_balance;
+                    if (str_contains($type, 'fixed') || str_contains($type, 'tetap') || str_contains($name, 'tetap') || str_contains($name, 'tanah') || str_contains($name, 'bangunan') || str_contains($name, 'mesin') || str_contains($name, 'peralatan')) {
+                        $assets['fixed_assets'][] = $account;
+                    } elseif (str_contains($type, 'other') || str_contains($type, 'lainnya') || str_contains($name, 'lainnya')) {
+                        $assets['other_assets'][] = $account;
+                    } else {
+                        $assets['current_assets'][] = $account;
+                    }
+                } else {
+                    $account->balance = $account->debit_balance - $account->credit_balance;
+                    $assets['current_assets'][] = $account;
+                }
+            }
+
+            // Calculate Retained Earnings
+            $retained_earnings = $this->transactionUtil->getProfitLossDetails($business_id, $location_id, '1970-01-01', $end_date, null, $permitted_locations);
+
             $output = [
                 'supplier_due' => $purchase_details['purchase_due'],
                 'customer_due' => $sell_details['invoice_due'] - $sell_return_details['total_sell_return_inc_tax'],
-                'account_balances' => $account_details,
                 'closing_stock' => $closing_stock,
-                'capital_account_details' => null,
+                'assets' => $assets,
+                'liabilities' => $liabilities,
+                'equity' => $equity,
+                'retained_earnings' => $retained_earnings['net_profit'],
             ];
 
             return $output;
