@@ -1,0 +1,181 @@
+/* ==========================================================================
+   Calculator — styles that cannot be expressed as Tailwind utilities:
+     1. Popover shell  (:has() selectors, external elements)
+     2. #calc-display  (!important overrides to beat legacy CSS)
+     3. Button base + variants  (active state, custom box-shadows on hover)
+     4. History popup  (HTML generated in calculator.js, not in blade)
+   Layout/container styles live in calculator.blade.php as tw- classes.
+   ========================================================================== */
+
+/* ── Popover shell (scoped via :has — cannot use Tailwind) ─────────────── */
+.popover:has(#calculator).bottom > .arrow:after { border-bottom-color: #f8fafc; }
+.popover:has(#calculator).bottom {
+    border: none;
+    box-shadow: 0 8px 32px rgba(0,0,0,.15), 0 2px 8px rgba(0,0,0,.10);
+    border-radius: 12px;
+    overflow: hidden;
+}
+.popover:has(#calculator) .popover-content { padding: 0 !important; background: #f8fafc; }
+
+/* Prevent the global navbar/pos-header padding rule from adding unwanted space */
+.navbar-custom-menu .popover-content, .pos-header .popover-content { padding: 4px 0; }
+
+/* ── Display — !important needed to override legacy AdminLTE button rules ── */
+#calc-display {
+    display: block;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    height: auto !important;
+    margin: 0 0 6px !important;
+    padding: 10px 12px !important;
+    background: #f1f5f9 !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    color: #0f172a !important;
+    font-family: 'Consolas', 'Courier New', monospace !important;
+    font-size: 22px !important;
+    font-weight: 600 !important;
+    text-align: right !important;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,.06) !important;
+    outline: none !important;
+    transition: border-color .15s;
+}
+#calc-display:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,.06), 0 0 0 3px rgba(59,130,246,.12) !important;
+}
+
+/* ── Button base ───────────────────────────────────────────────────────── */
+#calculator .calc-btn {
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 9px 4px !important;
+    border: none !important;
+    border-radius: 7px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    font-family: 'Consolas', 'Courier New', monospace !important;
+    cursor: pointer;
+    transition: background .12s, transform .08s, box-shadow .08s;
+    box-shadow: 0 2px 0 rgba(0,0,0,.12);
+    line-height: 1;
+    display: block;
+    text-align: center;
+}
+#calculator .calc-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 rgba(0,0,0,.10);
+}
+
+/* ── Button variants ───────────────────────────────────────────────────── */
+#calculator .calc-btn-num {
+    background: #eff6ff !important;
+    color: #1d4ed8 !important;
+    border: 1px solid #bfdbfe !important;
+    box-shadow: 0 2px 0 #bfdbfe !important;
+}
+#calculator .calc-btn-num:hover { background: #dbeafe !important; }
+
+#calculator .calc-btn-op {
+    background: #e2e8f0 !important;
+    color: #475569 !important;
+    font-size: 15px !important;
+    box-shadow: 0 2px 0 #cbd5e1 !important;
+}
+#calculator .calc-btn-op:hover { background: #cbd5e1 !important; }
+
+#calculator .calc-btn-ac {
+    background: #ef4444 !important;
+    color: #fff !important;
+    box-shadow: 0 2px 0 #b91c1c !important;
+}
+#calculator .calc-btn-ac:hover { background: #dc2626 !important; }
+
+#calculator .calc-btn-ce {
+    background: #f59e0b !important;
+    color: #fff !important;
+    box-shadow: 0 2px 0 #b45309 !important;
+}
+#calculator .calc-btn-ce:hover { background: #d97706 !important; }
+
+#calculator .calc-btn-eq {
+    background: #16a34a !important;
+    color: #fff !important;
+    font-size: 18px !important;
+    box-shadow: 0 2px 0 #15803d !important;
+}
+#calculator .calc-btn-eq:hover { background: #15803d !important; }
+
+/* ── History popup (HTML built in calculator.js — not in blade) ────────── */
+#calc-hist-popup {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.13), 0 2px 6px rgba(0,0,0,.07);
+    padding: 8px;
+}
+.calc-hist-head {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #94a3b8;
+    padding: 0 2px 6px;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 5px;
+}
+#calc-hist-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    max-height: 180px;
+    overflow-y: auto;
+}
+.calc-hist-entry {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 7px;
+    padding: 5px 9px;
+    cursor: pointer;
+    transition: background .12s, border-color .12s;
+}
+.calc-hist-entry:hover { background: #dbeafe; border-color: #bfdbfe; }
+.calc-hist-expr {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 11px;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.calc-hist-result {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: #1d4ed8;
+    text-align: right;
+}
+.calc-hist-empty {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 12px;
+    padding: 20px 0;
+}
+#calc-hist-clear {
+    width: 100%;
+    margin-top: 6px;
+    padding: 5px;
+    background: #fee2e2;
+    border: none;
+    border-radius: 6px;
+    color: #dc2626;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .12s;
+}
+#calc-hist-clear:hover { background: #fecaca; }

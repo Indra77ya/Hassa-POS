@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'pageCheckout'         => 'ماي فاتورة - إتمام الدفع',
+    'pageError'            => 'خطأ في ماي فاتورة',
+    'noPaymentGateways'    => 'لا توجد طرق دفع متاحة على حسابك، يرجى الاتصال بمدير حسابك.',
+    'howWouldYouLikeToPay' => 'كيف تريد الدفع؟',
+    'or'                   => 'أو',
+    'payWith'              => 'ادفع بواسطة',
+    'insertCardDetails'    => 'أدخل تفاصيل البطاقة',
+    'payNow'               => 'سدد الآن',
+    'holderName'           => 'الاسم على البطاقة',
+    'cardNumber'           => 'الرقم',
+    'expiryDate'           => 'MM/YY',
+    'securityCode'         => 'رمز الأمان CVV',
+    'cardHolderNameLabel'  => 'اسم حامل البطاقة',
+    'cardNumberLabel'      => 'رقم البطاقة',
+    'expiryDateLabel'      => 'تاريخ الانتهاء',
+    'securityCodeLabel'    => 'الرقم السري',
+    'saveCard'             => 'حفظ رقم البطاقة للدفع في المستقبل',
+    'addCard'              => 'استخدام بطاقة أخرى',
+    'deleteAlert.title'    => 'حذف البطاقة',
+    'deleteAlert.message'  => 'هل أنت متأكد من رغبتك في حذف هذه البطاقة؟',
+    'deleteAlert.confirm'  => 'نعم',
+    'deleteAlert.cancel'   => 'لا',
+    'Kindly review your MyFatoorah admin configuration due to a wrong entry.'   => 'يرجى مراجعة إعدادات "ماي فاتورة" لوجود بيانات خاطئة.',
+];

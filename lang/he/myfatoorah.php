@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'pageCheckout' => 'MyFatoorah - תשלום',
+    'pageError' => 'שגיאת MyFatoorah',
+    'noPaymentGateways' => 'אין אמצעי תשלום זמינים בחשבונך, פנה למנהל החשבון.',
+    'howWouldYouLikeToPay' => 'איך תרצה לשלם?',
+    'or' => 'או',
+    'payWith' => 'שלם עם',
+    'insertCardDetails' => 'הזן פרטי כרטיס',
+    'payNow' => 'שלם עכשיו',
+    'holderName' => 'שם על הכרטיס',
+    'cardNumber' => 'מספר',
+    'expiryDate' => 'MM/YY',
+    'securityCode' => 'CVV',
+    'cardHolderNameLabel' => 'שם בעל הכרטיס',
+    'cardNumberLabel' => 'מספר כרטיס',
+    'expiryDateLabel' => 'תאריך תפוגה',
+    'securityCodeLabel' => 'קוד אבטחה',
+    'saveCard' => 'שמור מספר כרטיס לתשלומים עתידיים',
+    'addCard' => 'השתמש בכרטיס אחר',
+    'deleteAlert.title' => 'מחק כרטיס',
+    'deleteAlert.message' => 'האם אתה בטוח שברצונך להסיר כרטיס זה?',
+    'deleteAlert.confirm' => 'כן',
+    'deleteAlert.cancel' => 'לא',
+    'Kindly review your MyFatoorah admin configuration due to a wrong entry.' => 'נא לבדוק את הגדרות מנהל MyFatoorah עקב הזנה שגויה.',
+];

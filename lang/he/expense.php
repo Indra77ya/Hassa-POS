@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'expenses' => 'הוצאות',
+    'expense_categories' => 'קטגוריות הוצאות',
+    'manage_your_expense_categories' => 'נהל קטגוריות הוצאות',
+    'all_your_expense_categories' => 'כל קטגוריות ההוצאות',
+    'expense_category' => 'קטגוריית הוצאה',
+    'category_name' => 'שם קטגוריה',
+    'category_code' => 'קוד קטגוריה',
+    'added_success' => 'קטגוריית הוצאה נוספה בהצלחה',
+    'updated_success' => 'קטגוריית הוצאה עודכנה בהצלחה',
+    'deleted_success' => 'קטגוריית הוצאה נמחקה בהצלחה',
+    'add_expense_category' => 'הוסף קטגוריית הוצאה',
+    'edit_expense_category' => 'ערוך קטגוריית הוצאה',
+    'all_expenses' => 'כל ההוצאות',
+    'expense_status' => 'סטטוס הוצאה',
+    'add_expense' => 'הוסף הוצאה',
+    'edit_expense' => 'ערוך הוצאה',
+    'expense_note' => 'הערת הוצאה',
+    'expense_add_success' => 'הוצאה נוספה בהצלחה',
+    'expense_update_success' => 'הוצאה עודכנה בהצלחה',
+    'expense_delete_success' => 'הוצאה נמחקה בהצלחה',
+    'expense_for' => 'הוצאה עבור',
+    'expense_for_help' => 'בחר משתמש (דוא״ל/שם משתמש) שאליו קשורה ההוצאה (אופציונלי)',
+    'import_expense' => 'ייבוא הוצאות',
+    'date_format_instruction' => 'פורמט תאריך ושעה של הוצאה: "Y-m-d H:i:s" (2020-07-15 17:45:32)',
+];
