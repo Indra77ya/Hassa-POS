@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             PermissionsTableSeeder::class,
             CurrenciesTableSeeder::class,
             AccountTypesSeeder::class,
+            RolesTableSeeder::class,
         ]);
     }
 }
