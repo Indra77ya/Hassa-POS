@@ -484,7 +484,7 @@ class AdminSidebarMenu
                         $sub->url(
                             action([\App\Http\Controllers\ExpenseController::class, 'index']),
                             __('lang_v1.list_expenses'),
-                            ['icon' => '', 'active' => request()->segment(1) == 'expenses' || request()->segment(1) == 'import-expense' && request()->segment(2) == null]
+                            ['icon' => '', 'active' => (request()->segment(1) == 'expenses' && request()->segment(2) == null) || (request()->segment(1) == 'import-expense' && request()->segment(2) == null)]
                         );
 
                         if (auth()->user()->can('expense.add')) {
