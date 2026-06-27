@@ -24,7 +24,7 @@ class Account extends Model
 
     public static function forDropdown($business_id, $prepend_none, $closed = false, $show_balance = false)
     {
-        $query = Account::where('business_id', $business_id);
+        $query = Account::where('accounts.business_id', $business_id);
 
         $permitted_locations = auth()->user()->permitted_locations();
         $account_ids = [];
@@ -67,7 +67,7 @@ class Account extends Model
         }
 
         if (! $closed) {
-            $query->where('is_closed', 0);
+            $query->where('accounts.is_closed', 0);
         }
 
         $accounts = $query->get();
