@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             CurrenciesTableSeeder::class,
             AccountTypesSeeder::class,
             RolesTableSeeder::class,
+            UsersTableSeeder::class,
         ]);
     }
 }
