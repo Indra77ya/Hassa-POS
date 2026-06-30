@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             UnitsTableSeeder::class,
             CategoriesTableSeeder::class,
             BrandsTableSeeder::class,
+            WarrantiesTableSeeder::class,
         ]);
     }
 }
