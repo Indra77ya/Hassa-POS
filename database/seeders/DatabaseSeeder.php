@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             CustomersTableSeeder::class,
             UnitsTableSeeder::class,
             CategoriesTableSeeder::class,
+            BrandsTableSeeder::class,
         ]);
     }
 }
