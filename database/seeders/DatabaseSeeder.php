@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             AccountTypesSeeder::class,
             RolesTableSeeder::class,
             UsersTableSeeder::class,
+            SuppliersTableSeeder::class,
         ]);
     }
 }
