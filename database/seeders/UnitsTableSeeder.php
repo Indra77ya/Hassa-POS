@@ -24,22 +24,22 @@ class UnitsTableSeeder extends Seeder
         $user = User::where('business_id', $business->id)->first();
         $created_by = $user ? $user->id : 1;
 
-        // 1. Base Units
+        // 1. Base Units (Satuan Dasar)
         $base_units = [
-            ['Pieces', 'Pcs', 0],
-            ['Grams', 'g', 1],
-            ['Milliliters', 'ml', 1],
-            ['Meters', 'm', 1],
-            ['Each', 'ea', 0],
-            ['Session', 'session', 0],
-            ['Hour', 'hr', 1],
-            ['Day', 'day', 0],
-            ['Box', 'box', 0],
-            ['Pack', 'pack', 0],
-            ['Bottle', 'btl', 0],
-            ['Can', 'can', 0],
-            ['Roll', 'roll', 0],
-            ['Pair', 'pair', 0],
+            ['Buah', 'bh', 0],
+            ['Gram', 'g', 1],
+            ['Mililiter', 'ml', 1],
+            ['Meter', 'm', 1],
+            ['Pcs', 'pcs', 0],
+            ['Sesi', 'sesi', 0],
+            ['Jam', 'jam', 1],
+            ['Hari', 'hari', 0],
+            ['Kotak', 'kotak', 0],
+            ['Pak', 'pak', 0],
+            ['Botol', 'btl', 0],
+            ['Kaleng', 'klng', 0],
+            ['Gulung', 'roll', 0],
+            ['Pasang', 'psg', 0],
             ['Set', 'set', 0],
         ];
 
@@ -60,23 +60,23 @@ class UnitsTableSeeder extends Seeder
             $created_base_units[$bu[0]] = $unit->id;
         }
 
-        // 2. Conversion Units
+        // 2. Conversion Units (Satuan Konversi)
         $conversion_units = [
-            ['Kilograms', 'Kg', 1, 'Grams', 1000],
-            ['Liters', 'L', 1, 'Milliliters', 1000],
-            ['Centimeters', 'cm', 1, 'Meters', 0.01],
-            ['Kilometers', 'Km', 1, 'Meters', 1000],
-            ['Dozen', 'dz', 0, 'Pieces', 12],
-            ['Gross', 'gs', 0, 'Pieces', 144],
-            ['Carton (Large)', 'ctn-l', 0, 'Pieces', 48],
-            ['Carton (Small)', 'ctn-s', 0, 'Pieces', 24],
-            ['Box of 10', 'box-10', 0, 'Pieces', 10],
-            ['Pack of 6', 'pack-6', 0, 'Pieces', 6],
-            ['Ream', 'ream', 0, 'Pieces', 500],
-            ['Pallet', 'pallet', 0, 'Box', 50],
-            ['Bundle', 'bundle', 0, 'Pieces', 20],
-            ['Metric Ton', 'MT', 1, 'Kilograms', 1000],
-            ['Square Meter', 'sqm', 1, 'Meters', 1], // Just as a placeholder for 1:1 if needed, though usually different dimension
+            ['Kilogram', 'Kg', 1, 'Gram', 1000],
+            ['Liter', 'L', 1, 'Mililiter', 1000],
+            ['Sentimeter', 'cm', 1, 'Meter', 0.01],
+            ['Kilometer', 'Km', 1, 'Meter', 1000],
+            ['Lusin', 'lsn', 0, 'Buah', 12],
+            ['Kodi', 'kodi', 0, 'Buah', 20],
+            ['Gross', 'grs', 0, 'Buah', 144],
+            ['Rim', 'ream', 0, 'Buah', 500],
+            ['Karton (Besar)', 'ktn-b', 0, 'Buah', 48],
+            ['Karton (Kecil)', 'ktn-k', 0, 'Buah', 24],
+            ['Box isi 10', 'box-10', 0, 'Buah', 10],
+            ['Pak isi 6', 'pak-6', 0, 'Buah', 6],
+            ['Palet', 'pallet', 0, 'Kotak', 50],
+            ['Ikat', 'ikat', 0, 'Buah', 20],
+            ['Ton Metrik', 'Ton', 1, 'Kilogram', 1000],
         ];
 
         foreach ($conversion_units as $cu) {
@@ -86,7 +86,6 @@ class UnitsTableSeeder extends Seeder
             if (isset($created_base_units[$base_unit_name])) {
                 $base_unit_id = $created_base_units[$base_unit_name];
             } else {
-                // Check if it's already in conversion units created just before (like Metric Ton -> Kilograms)
                 $existing = Unit::where('business_id', $business->id)
                                 ->where('actual_name', $base_unit_name)
                                 ->first();
