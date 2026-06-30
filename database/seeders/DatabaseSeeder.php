@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             SuppliersTableSeeder::class,
             CustomersTableSeeder::class,
             UnitsTableSeeder::class,
+            CategoriesTableSeeder::class,
         ]);
     }
 }
