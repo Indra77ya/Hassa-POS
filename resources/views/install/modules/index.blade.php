@@ -72,18 +72,31 @@
                     <td>
                         <strong>{{$module['name']}}</strong> <br/>
 
-                        @if($module['is_enabled'])
-                            @if(!$module['is_installed'])
-                                <a class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent"
-                                @if($is_demo)
-                                    href="#"
-                                    title="@lang('lang_v1.disabled_in_demo')"
-                                    disabled
-                                @else
-                                    href="{{$module['install_link']}}"
-                                @endif
-                                > @lang('lang_v1.install')</a>
+                        {{-- Case 1: Module is Installed --}}
+                        @if($module['is_installed'])
+                            {{-- If Enabled: Show Deactivate --}}
+                            @if($module['is_enabled'])
+                                <form
+                                    action="{{action([\App\Http\Controllers\Install\ModulesController::class, 'update'], ['module_name' => $module['name']])}}"
+                                    style="display: inline;"
+                                    method="post">
+                                    @method('PUT')
+                                    @csrf
+                                    <input type="hidden" name="action_type" value="deactivate">
+                                    <button class="btn btn-warning btn-xs">Deactivate</button>
+                                </form>
+                            {{-- If Disabled: Show Activate and Uninstall --}}
                             @else
+                                <form action="{{action([\App\Http\Controllers\Install\ModulesController::class, 'update'], ['module_name' => $module['name']])}}"
+                                    style="display: inline;"
+                                    method="post"
+                                >
+                                    @method('PUT')
+                                    @csrf
+                                    <input type="hidden" name="action_type" value="activate">
+                                    <button class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent">Activate</button>
+                                </form>
+
                                 <a class="btn btn-warning btn-xs"
                                     @if($is_demo)
                                         href="#"
@@ -95,30 +108,54 @@
                                     onclick="return confirm('Do you really want to uninstall the module? Module will be uninstall but the data will not be deleted')"
                                 >@lang('lang_v1.uninstall')
                                 </a>
+                            @endif
 
-                                <form 
-                                    action="{{action([\App\Http\Controllers\Install\ModulesController::class, 'update'], ['module_name' => $module['name']])}}" 
-                                    style="display: inline;" 
-                                    method="post">
+                        {{-- Case 2: Module is NOT Installed --}}
+                        @else
+                            {{-- If Enabled (but not installed): Show Install --}}
+                            @if($module['is_enabled'])
+                                <a class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent"
+                                @if($is_demo)
+                                    href="#"
+                                    title="@lang('lang_v1.disabled_in_demo')"
+                                    disabled
+                                @else
+                                    href="{{$module['install_link']}}"
+                                @endif
+                                > @lang('lang_v1.install')</a>
+                            {{-- If Disabled (and not installed): This case should technically not happen based on current logic but adding for safety --}}
+                            @else
+                                <form action="{{action([\App\Http\Controllers\Install\ModulesController::class, 'update'], ['module_name' => $module['name']])}}"
+                                    style="display: inline;"
+                                    method="post"
+                                >
                                     @method('PUT')
                                     @csrf
-                                    <input type="hidden" name="action_type" value="deactivate">
-                                    <button class="btn btn-warning btn-xs">Deactivate</button>
+                                    <input type="hidden" name="action_type" value="activate">
+                                    <button class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent">Activate</button>
                                 </form>
                             @endif
 
-                        @else
-                            <form action="{{action([\App\Http\Controllers\Install\ModulesController::class, 'update'], ['module_name' => $module['name']])}}"
-                                style="display: inline;"
-                                method="post"
-                            >
-                                @method('PUT')
-                                @csrf
-                                <input type="hidden" name="action_type" value="activate">
-                                <button class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent">Activate</button>
-                            </form>
+                            {{-- Delete button: only if NOT installed --}}
+                            <form
+                                action="{{action([\App\Http\Controllers\Install\ModulesController::class, 'destroy'], ['module_name' => $module['name']])}}"
+                                    style="display: inline;"
+                                    method="post"
+                                    onsubmit="return confirm('Do you really want to delete the module? Module code will be deleted but the data will not be deleted')"
+                                >
+                                    @method('DELETE')
+                                    @csrf
+                                    <button class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-error"
+                                        @if($is_demo)
+                                        disabled="disabled"
+                                        title="@lang('lang_v1.disabled_in_demo')"
+                                        @endif
+                                    >
+                                    @lang('messages.delete')</button>
+                                </form>
                         @endif
 
+                        {{-- Download button: always available? (keeping original logic) --}}
                         <a class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info"
                             @if($is_demo)
                                 href="#"
@@ -128,23 +165,6 @@
                                 href="{{action([\App\Http\Controllers\Install\ModulesController::class, 'download'], ['module_name' => $module['name']])}}"
                             @endif
                             > <i class="fa fa-download"></i> @lang('lang_v1.download')</a>
-
-                        <form 
-                            action="{{action([\App\Http\Controllers\Install\ModulesController::class, 'destroy'], ['module_name' => $module['name']])}}"
-                                style="display: inline;" 
-                                method="post"
-                                onsubmit="return confirm('Do you really want to delete the module? Module code will be deleted but the data will not be deleted')"
-                            >
-                                @method('DELETE')
-                                @csrf
-                                <button class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-error"
-                                    @if($is_demo)
-                                    disabled="disabled" 
-                                    title="@lang('lang_v1.disabled_in_demo')"
-                                    @endif
-                                >
-                                @lang('messages.delete')</button>
-                            </form>
                     </td>
 
                     <td>
