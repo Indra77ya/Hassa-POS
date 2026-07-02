@@ -86,7 +86,7 @@ class ModuleUtil extends Util
         $installed_modules = [];
         foreach ($module_name_map as $version_key => $details) {
             $module_version = isset($module_versions[$version_key]) ? $module_versions[$version_key] : null;
-            if (!empty($module_version) && Module::isEnabled($details['name'])) {
+            if (!empty($module_version) && isModuleEnabled($details['name'])) {
                 $installed_modules[] = $details;
             }
         }

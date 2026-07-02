@@ -58,7 +58,7 @@
                     </div>
                 </div>
             </div>
-            @if(Module::isEnabled('Manufacturing'))
+            @if(isModuleEnabled('Manufacturing'))
                 <div class="col-md-3">
                     <div class="form-group">
                         <br>
