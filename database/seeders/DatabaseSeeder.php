@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             ProductsTableSeeder::class,
             DiscountsTableSeeder::class,
             ExpenseCategoriesTableSeeder::class,
+            TaxRatesTableSeeder::class,
         ]);
     }
 }
