@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             WarrantiesTableSeeder::class,
             ProductsTableSeeder::class,
             DiscountsTableSeeder::class,
+            ExpenseCategoriesTableSeeder::class,
         ]);
     }
 }
