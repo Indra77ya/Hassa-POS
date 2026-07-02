@@ -234,6 +234,10 @@ class AppServiceProvider extends ServiceProvider
             echo $formated_number; ?>';
         });
 
+        Blade::if('ifmodule', function ($module) {
+            return isModuleEnabled($module);
+        });
+
         $this->registerCommands();
     }
 

@@ -208,7 +208,7 @@
             @endif
 
 
-            @if (Module::isEnabled('Repair') && $transaction_sub_type != 'repair')
+            @if (isModuleEnabled('Repair') && $transaction_sub_type != 'repair')
                 @include('repair::layouts.partials.pos_header')
             @endif
 

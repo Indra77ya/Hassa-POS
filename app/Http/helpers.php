@@ -145,3 +145,22 @@ if (! function_exists('str_ordinal')) {
         return number_format($number).$suffix;
     }
 }
+
+/**
+ * Checks if a module is enabled safely.
+ *
+ * @param  string  $module_name
+ * @return bool
+ */
+if (! function_exists('isModuleEnabled')) {
+    function isModuleEnabled($module_name)
+    {
+        if (class_exists('Module')) {
+            if (\Module::has($module_name)) {
+                return \Module::isEnabled($module_name);
+            }
+        }
+
+        return false;
+    }
+}

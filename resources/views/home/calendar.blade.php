@@ -40,7 +40,7 @@
                             </div>
                         </div>
                         @endforeach
-                        @if(Module::isEnabled('Essentials'))
+                        @if(isModuleEnabled('Essentials'))
                         <div class="col-md-12">
                             <button class="tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-sm tw-w-full btn-modal" 
                                 data-href="{{action([\Modules\Essentials\Http\Controllers\ToDoController::class, 'create'])}}?from_calendar=true" 

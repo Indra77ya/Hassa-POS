@@ -48,7 +48,7 @@ class ModulesController extends Controller
 
         foreach ($modules as $module => $details) {
             $modules[$module]['is_installed'] = $this->moduleUtil->isModuleInstalled($details['name']) ? true : false;
-            $modules[$module]['is_enabled'] = Module::isEnabled($details['name']);
+            $modules[$module]['is_enabled'] = isModuleEnabled($details['name']);
 
             //Get version information.
             if ($modules[$module]['is_installed']) {
