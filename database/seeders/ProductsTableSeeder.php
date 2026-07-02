@@ -11,7 +11,6 @@ use App\ProductVariation;
 use App\Unit;
 use App\User;
 use App\Variation;
-use App\VariationLocationDetails;
 use App\VariationTemplate;
 use App\VariationValueTemplate;
 use Illuminate\Database\Seeder;
@@ -136,7 +135,7 @@ class ProductsTableSeeder extends Seeder
                 $purchase_price = $pd[5] * 0.8;
                 $sell_price = $pd[5];
 
-                $variation = Variation::firstOrCreate(
+                Variation::firstOrCreate(
                     [
                         'product_id' => $product->id,
                         'product_variation_id' => $product_variation->id,
@@ -151,17 +150,6 @@ class ProductsTableSeeder extends Seeder
                         'sell_price_inc_tax' => $sell_price
                     ]
                 );
-
-                if ($location) {
-                    VariationLocationDetails::firstOrCreate(
-                        [
-                            'product_id' => $product->id,
-                            'variation_id' => $variation->id,
-                            'location_id' => $location->id
-                        ],
-                        ['qty_available' => rand(50, 100)]
-                    );
-                }
             } else {
                 $product_variation = ProductVariation::firstOrCreate(
                     ['name' => 'Ukuran', 'product_id' => $product->id, 'is_dummy' => 0]
@@ -171,7 +159,7 @@ class ProductsTableSeeder extends Seeder
                     $purchase_price = $pd[5] * 0.8;
                     $sell_price = $pd[5];
 
-                    $variation = Variation::firstOrCreate(
+                    Variation::firstOrCreate(
                         [
                             'product_id' => $product->id,
                             'product_variation_id' => $product_variation->id,
@@ -186,17 +174,6 @@ class ProductsTableSeeder extends Seeder
                             'sell_price_inc_tax' => $sell_price
                         ]
                     );
-
-                    if ($location) {
-                        VariationLocationDetails::firstOrCreate(
-                            [
-                                'product_id' => $product->id,
-                                'variation_id' => $variation->id,
-                                'location_id' => $location->id
-                            ],
-                            ['qty_available' => rand(20, 50)]
-                        );
-                    }
                 }
             }
         }
