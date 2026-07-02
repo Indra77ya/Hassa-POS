@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             BrandsTableSeeder::class,
             WarrantiesTableSeeder::class,
             ProductsTableSeeder::class,
+            DiscountsTableSeeder::class,
         ]);
     }
 }
