@@ -1,0 +1,23 @@
+{
+    "name": "pnn/accounting",
+    "description": "",
+    "authors": [
+        {
+            "name": "PNN Solutions",
+            "email": "mail.pnnsolutions@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\Accounting\\Providers\\AccountingServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Accounting\\": ""
+        }
+    }
+}
