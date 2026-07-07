@@ -18,6 +18,5 @@ npm-debug.log
 /public/uploads/invoice_logos
 /public/uploads/UltimatePOS
 /public/uploads/temp
-/public/modules/
 .scribe
 modules_statuses.json
