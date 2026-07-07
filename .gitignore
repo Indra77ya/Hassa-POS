@@ -5,6 +5,7 @@
 /storage/pail
 /storage/logs
 /vendor
+/Modules/*
 /.idea
 /.vagrant
 Homestead.json
