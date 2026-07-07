@@ -181,6 +181,26 @@ Ganti `www-data` dengan user web server Anda (misalnya `apache` atau `nginx`).
 ### Langkah 9: Jalankan Aplikasi
 Aplikasi sekarang seharusnya dapat diakses melalui domain Anda. Jika ada masalah, periksa log error di `storage/logs/laravel.log`.
 
+### Tips: Mengatasi Masalah Versi PHP di Hosting
+
+Seringkali di lingkungan hosting, perintah `php` atau `composer` secara default mengarah ke versi PHP yang lebih tua (misalnya PHP 8.0), meskipun Anda sudah mengatur versi PHP di cPanel ke 8.2. Jika Anda menemui error saat `composer install` atau `php artisan`, gunakan langkah berikut:
+
+1. **Gunakan Path Lengkap PHP**:
+   Cari tahu lokasi binary PHP 8.2 Anda (biasanya `/usr/local/bin/php`). Gunakan path tersebut untuk menjalankan semua perintah terminal.
+
+2. **Install dengan Flag Tambahan**:
+   Jika `composer install` gagal karena deteksi versi PHP yang salah, jalankan:
+   ```bash
+   /usr/local/bin/php $(which composer) install --ignore-platform-reqs --no-scripts
+   ```
+
+3. **Jalankan Artisan secara Manual**:
+   Karena menggunakan flag `--no-scripts`, Anda harus menjalankan perintah Artisan secara manual menggunakan path PHP yang benar:
+   ```bash
+   /usr/local/bin/php artisan key:generate
+   /usr/local/bin/php artisan package:discover
+   ```
+
 ## Login dan Setup Awal
 
 Setelah instalasi selesai (baik lokal maupun server), Anda dapat login ke aplikasi:
