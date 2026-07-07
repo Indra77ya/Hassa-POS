@@ -79,7 +79,7 @@
                             </div>
 
                                 <!-- pricing url -->
-                                @if (Route::has('pricing') && config('app.env') != 'demo' && $request->segment(1) != 'pricing')
+                                @if (Route::has('pricing') && config('app.env') != 'demo' && $request->segment(1) != 'pricing' && class_exists('\Modules\Superadmin\Http\Controllers\PricingController'))
                                     &nbsp; <a class="tw-text-white tw-font-medium tw-text-sm md:tw-text-base hover:tw-text-white"
                                         href="{{ action([\Modules\Superadmin\Http\Controllers\PricingController::class, 'index']) }}">@lang('superadmin::lang.pricing')</a>
                                 @endif

@@ -24,6 +24,12 @@ class ModuleUtil extends Util
         $is_available = Module::has($module_name);
 
         if ($is_available) {
+            // Check if module directory exists
+            $module_path = Module::getModulePath($module_name);
+            if (!file_exists($module_path)) {
+                return false;
+            }
+
             //Check if installed by checking the system table {module_name}_version
             try {
                 $module_version = System::getProperty(strtolower($module_name).'_version');
@@ -149,7 +155,7 @@ class ModuleUtil extends Util
      */
     public function isSubscribed($business_id)
     {
-        if ($this->isSuperadminInstalled()) {
+        if ($this->isSuperadminInstalled() && class_exists('\Modules\Superadmin\Entities\Subscription')) {
             $package = \Modules\Superadmin\Entities\Subscription::active_subscription($business_id);
 
             if (empty($package)) {
@@ -170,7 +176,7 @@ class ModuleUtil extends Util
      */
     public function hasThePermissionInSubscription($business_id, $permission, $callback_function = null)
     {
-        if ($this->isSuperadminInstalled()) {
+        if ($this->isSuperadminInstalled() && class_exists('\Modules\Superadmin\Entities\Subscription')) {
             if (auth()->user()->can('superadmin')) {
                 return true;
             }
@@ -214,11 +220,16 @@ class ModuleUtil extends Util
      */
     public static function expiredResponse($redirect_url = null)
     {
+        $subscribe_url = '#';
+        if (class_exists('\Modules\Superadmin\Http\Controllers\SubscriptionController')) {
+            $subscribe_url = action([\Modules\Superadmin\Http\Controllers\SubscriptionController::class, 'index']);
+        }
+
         $response_array = ['success' => 0,
             'msg' => __(
                 'superadmin::lang.subscription_expired_toastr',
                 ['app_name' => config('app.name'),
-                    'subscribe_url' => action([\Modules\Superadmin\Http\Controllers\SubscriptionController::class, 'index']),
+                    'subscribe_url' => $subscribe_url,
                 ]
             ),
         ];
@@ -368,7 +379,7 @@ class ModuleUtil extends Util
     {
         $is_available = $this->isSuperadminInstalled();
 
-        if ($is_available) {
+        if ($is_available && class_exists('\Modules\Superadmin\Entities\Subscription')) {
             $package = \Modules\Superadmin\Entities\Subscription::active_subscription($business_id);
 
             if (empty($package)) {
@@ -516,8 +527,11 @@ class ModuleUtil extends Util
 
     public function getApiSettings($api_token)
     {
-        $settings = \Modules\Ecommerce\Entities\EcomApiSetting::where('api_token', $api_token)
-                                ->first();
+        $settings = null;
+        if (class_exists('\Modules\Ecommerce\Entities\EcomApiSetting')) {
+            $settings = \Modules\Ecommerce\Entities\EcomApiSetting::where('api_token', $api_token)
+                                    ->first();
+        }
 
         return $settings;
     }

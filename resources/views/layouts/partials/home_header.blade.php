@@ -16,12 +16,12 @@
             <li><a href="{{ action([\App\Http\Controllers\HomeController::class, 'index']) }}">@lang('home.home')</a></li>
         @endif
         @if(Route::has('frontend-pages') && config('app.env') != 'demo' 
-        && !empty($frontend_pages))
+        && !empty($frontend_pages) && class_exists('\Modules\Superadmin\Http\Controllers\PageController'))
             @foreach($frontend_pages as $page)
                 <li><a href="{{ action([\Modules\Superadmin\Http\Controllers\PageController::class, 'showPage'], $page->slug) }}">{{$page->title}}</a></li>
             @endforeach
         @endif
-        @if(Route::has('pricing') && config('app.env') != 'demo')
+        @if(Route::has('pricing') && config('app.env') != 'demo' && class_exists('\Modules\Superadmin\Http\Controllers\PricingController'))
         <li><a href="{{ action([\Modules\Superadmin\Http\Controllers\PricingController::class, 'index']) }}">@lang('superadmin::lang.pricing')</a></li>
         @endif
         @if(Route::has('repair-status'))

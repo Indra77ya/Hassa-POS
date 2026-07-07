@@ -91,7 +91,11 @@ class Business extends Model
      */
     public function subscriptions()
     {
-        return $this->hasMany('\Modules\Superadmin\Entities\Subscription');
+        if (class_exists('\Modules\Superadmin\Entities\Subscription')) {
+            return $this->hasMany('\Modules\Superadmin\Entities\Subscription');
+        }
+
+        return $this->hasMany(\App\User::class, 'id', 'owner_id')->whereRaw('1 = 0'); // Return empty relation
     }
 
     /**

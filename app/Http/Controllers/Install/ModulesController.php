@@ -341,7 +341,7 @@ class ModulesController extends Controller
             $module_name = Str::slug(str_replace('.zip', '', $module->getClientOriginalName()));
 
             //check if 'Modules' folder exist or not, if not exist create
-            $path = '../Modules';
+            $path = base_path('Modules');
             if (! is_dir($path)) {
                 mkdir($path, 0755, true);
             }
@@ -353,7 +353,20 @@ class ModulesController extends Controller
                 $zip->close();
 
                 // Check for required files after extraction
+                // Handle possible nested folder or different folder name in zip
                 $module_dir = $path . '/' . $module_name;
+                if (!is_dir($module_dir)) {
+                    // Try to find the directory if slugified name doesn't match
+                    $dirs = array_filter(glob($path . '/*'), 'is_dir');
+                    foreach ($dirs as $dir) {
+                        if (file_exists($dir . '/module.json')) {
+                            $module_dir = $dir;
+                            $module_name = basename($dir);
+                            break;
+                        }
+                    }
+                }
+
                 $data_controller_path = $module_dir . '/Http/Controllers/DataController.php';
                 if (!(file_exists($module_dir . '/composer.json')
                     && file_exists($module_dir . '/module.json')

@@ -231,7 +231,7 @@ class BusinessController extends Controller
             //Process payment information if superadmin is installed & package information is present
             $is_installed_superadmin = $this->moduleUtil->isSuperadminInstalled();
             $package_id = $request->get('package_id', null);
-            if ($is_installed_superadmin && ! empty($package_id) && (config('app.env') != 'demo')) {
+            if ($is_installed_superadmin && ! empty($package_id) && (config('app.env') != 'demo') && class_exists('\Modules\Superadmin\Entities\Package')) {
                 $package = \Modules\Superadmin\Entities\Package::find($package_id);
                 if (! empty($package)) {
                     Auth::login($user);
