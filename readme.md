@@ -55,10 +55,11 @@ Sebelum memulai, pastikan komputer atau server Anda memenuhi persyaratan berikut
    ```
    Ganti `your_username` and `your_password` dengan kredensial database Anda.
 
-### Langkah 4: Generate Application Key
-Jalankan perintah berikut untuk membuat kunci aplikasi:
-```
+### Langkah 4: Generate Application Key & Storage Link
+Jalankan perintah berikut untuk membuat kunci aplikasi dan membuat tautan simbolis ke folder storage agar file yang diunggah dapat diakses secara publik:
+```bash
 php artisan key:generate
+php artisan storage:link
 ```
 
 ### Langkah 5: Migrasi Database
@@ -111,9 +112,11 @@ Aplikasi akan berjalan di `http://localhost:8000`. Buka browser dan akses alamat
    - APP_ENV: Set ke `production`
    - APP_DEBUG: Set ke `false`
 
-### Langkah 4: Generate Application Key
-```
+### Langkah 4: Generate Application Key & Storage Link
+Jalankan perintah berikut untuk membuat kunci aplikasi dan membuat tautan simbolis ke folder storage:
+```bash
 php artisan key:generate
+php artisan storage:link
 ```
 
 ### Langkah 5: Migrasi Database
@@ -195,9 +198,11 @@ Seringkali di lingkungan hosting, perintah `php` atau `composer` secara default 
    ```
 
 3. **Jalankan Artisan secara Manual**:
-   Karena menggunakan flag `--no-scripts`, Anda harus menjalankan perintah Artisan secara manual menggunakan path PHP yang benar:
+   Karena menggunakan flag `--no-scripts`, Anda harus membuat folder yang diperlukan dan menjalankan perintah Artisan secara manual menggunakan path PHP yang benar:
    ```bash
+   mkdir -p storage/framework/{sessions,views,cache}
    /usr/local/bin/php artisan key:generate
+   /usr/local/bin/php artisan storage:link
    /usr/local/bin/php artisan package:discover
    ```
 
