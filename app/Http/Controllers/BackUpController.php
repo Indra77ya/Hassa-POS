@@ -83,10 +83,20 @@ class BackUpController extends Controller
             // log the results
             Log::info("Backpack\BackupManager -- new backup started from admin interface \r\n".$output);
 
-            $output = ['success' => 1,
-                'msg' => __('lang_v1.success'),
-            ];
-        } catch (Exception $e) {
+            if (strpos($output, 'Backup failed because') !== false) {
+                preg_match('/Backup failed because (.*)/', $output, $match);
+                $message = !empty($match[1]) ? $match[1] : 'Backup failed';
+                $output = [
+                    'success' => 0,
+                    'msg' => $message,
+                ];
+            } else {
+                $output = [
+                    'success' => 1,
+                    'msg' => __('lang_v1.success'),
+                ];
+            }
+        } catch (\Exception $e) {
             $output = ['success' => 0,
                 'msg' => $e->getMessage(),
             ];
