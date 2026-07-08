@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\AccountType;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AccountTypeController extends Controller
 {
@@ -24,18 +25,7 @@ class AccountTypeController extends Controller
      */
     public function create()
     {
-        if (! auth()->user()->can('account.access')) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        $business_id = session()->get('user.business_id');
-
-        $account_types = AccountType::where('business_id', $business_id)
-                                     ->whereNull('parent_account_type_id')
-                                     ->get();
-
-        return view('account_types.create')
-                ->with(compact('account_types'));
+        abort(403, 'Unauthorized action.');
     }
 
     /**
@@ -46,27 +36,7 @@ class AccountTypeController extends Controller
      */
     public function store(Request $request)
     {
-        if (! auth()->user()->can('account.access')) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        try {
-            $input = $request->only(['name', 'parent_account_type_id']);
-            $input['business_id'] = $request->session()->get('user.business_id');
-
-            AccountType::create($input);
-            $output = ['success' => true,
-                'msg' => __('lang_v1.added_success'),
-            ];
-        } catch (\Exception $e) {
-            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
-
-            $output = ['success' => false,
-                'msg' => __('messages.something_went_wrong'),
-            ];
-        }
-
-        return redirect()->back()->with('status', $output);
+        abort(403, 'Unauthorized action.');
     }
 
     /**
@@ -88,21 +58,7 @@ class AccountTypeController extends Controller
      */
     public function edit($id)
     {
-        if (! auth()->user()->can('account.access')) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        $business_id = session()->get('user.business_id');
-
-        $account_type = AccountType::where('business_id', $business_id)
-                                     ->findOrFail($id);
-
-        $account_types = AccountType::where('business_id', $business_id)
-                                     ->whereNull('parent_account_type_id')
-                                     ->get();
-
-        return view('account_types.edit')
-                ->with(compact('account_types', 'account_type'));
+        abort(403, 'Unauthorized action.');
     }
 
     /**
@@ -114,38 +70,7 @@ class AccountTypeController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if (! auth()->user()->can('account.access')) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        try {
-            $input = $request->only(['name', 'parent_account_type_id']);
-            $business_id = $request->session()->get('user.business_id');
-
-            $account_type = AccountType::where('business_id', $business_id)
-                                     ->findOrFail($id);
-
-            //Account type is changed to subtype update all its sub type's parent type
-            if (empty($account_type->parent_account_type_id) && ! empty($input['parent_account_type_id'])) {
-                AccountType::where('business_id', $business_id)
-                        ->where('parent_account_type_id', $account_type->id)
-                        ->update(['parent_account_type_id' => $input['parent_account_type_id']]);
-            }
-
-            $account_type->update($input);
-
-            $output = ['success' => true,
-                'msg' => __('lang_v1.updated_success'),
-            ];
-        } catch (\Exception $e) {
-            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
-
-            $output = ['success' => false,
-                'msg' => __('messages.something_went_wrong'),
-            ];
-        }
-
-        return redirect()->back()->with('status', $output);
+        abort(403, 'Unauthorized action.');
     }
 
     /**
@@ -156,24 +81,110 @@ class AccountTypeController extends Controller
      */
     public function destroy($id)
     {
+        abort(403, 'Unauthorized action.');
+    }
+
+    /**
+     * Add default account types for the business.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function seedDefault(Request $request)
+    {
         if (! auth()->user()->can('account.access')) {
             abort(403, 'Unauthorized action.');
         }
 
-        $business_id = session()->get('user.business_id');
+        try {
+            $business_id = session()->get('user.business_id');
 
-        AccountType::where('business_id', $business_id)
-                                     ->where('id', $id)
-                                     ->delete();
+            $default_types = [
+                ['key' => 'kas_dan_bank', 'parent' => null],
+                ['key' => 'piutang_usaha', 'parent' => null],
+                ['key' => 'persediaan', 'parent' => null],
+                ['key' => 'aktiva_lancar_lainnya', 'parent' => null],
+                ['key' => 'aktiva_tetap', 'parent' => null],
+                ['key' => 'akumulasi_penyusutan', 'parent' => null],
+                ['key' => 'aktiva_lainnya', 'parent' => null],
+                ['key' => 'hutang_usaha', 'parent' => null],
+                ['key' => 'hutang_lancar_lainnya', 'parent' => null],
+                ['key' => 'hutang_jangka_panjang', 'parent' => null],
+                ['key' => 'ekuitas', 'parent' => null],
+                ['key' => 'pendapatan_usaha', 'parent' => null],
+                ['key' => 'pendapatan_lainnya', 'parent' => null],
+                ['key' => 'harga_pokok_penjualan', 'parent' => null],
+                ['key' => 'beban_operasional', 'parent' => null],
+                ['key' => 'beban_lain_lain', 'parent' => null],
+                ['key' => 'beban_pajak', 'parent' => null],
+            ];
 
-        //Upadete parent account if set
-        AccountType::where('business_id', $business_id)
-                 ->where('parent_account_type_id', $id)
-                 ->update(['parent_account_type_id' => null]);
+            $created_types = [];
+            foreach ($default_types as $at) {
+                $translated_name = __('account.' . $at['key']);
 
-        $output = ['success' => true,
-            'msg' => __('lang_v1.deleted_success'),
-        ];
+                // Check if already exists
+                $type = AccountType::where('business_id', $business_id)
+                                     ->where('fixed_key', $at['key'])
+                                     ->first();
+                if (! $type) {
+                    $type = AccountType::create([
+                        'name' => $translated_name,
+                        'business_id' => $business_id,
+                        'parent_account_type_id' => null,
+                        'fixed_key' => $at['key']
+                    ]);
+                } else {
+                    $type->update(['name' => $translated_name]);
+                }
+                $created_types[$at['key']] = $type->id;
+            }
+
+            // Seed basic accounts (COA)
+            $default_accounts = [
+                ['name' => 'Kas', 'type' => 'kas_dan_bank', 'number' => '1101', 'balance' => 'debit'],
+                ['name' => 'Bank', 'type' => 'kas_dan_bank', 'number' => '1102', 'balance' => 'debit'],
+                ['name' => 'Piutang Usaha', 'type' => 'piutang_usaha', 'number' => '1201', 'balance' => 'debit'],
+                ['name' => 'Persediaan Barang', 'type' => 'persediaan', 'number' => '1301', 'balance' => 'debit'],
+                ['name' => 'Hutang Usaha', 'type' => 'hutang_usaha', 'number' => '2101', 'balance' => 'credit'],
+                ['name' => 'Modal Pemilik', 'type' => 'ekuitas', 'number' => '3101', 'balance' => 'credit'],
+                ['name' => 'Laba Ditahan', 'type' => 'ekuitas', 'number' => '3201', 'balance' => 'credit'],
+                ['name' => 'Pendapatan Penjualan', 'type' => 'pendapatan_usaha', 'number' => '4101', 'balance' => 'credit'],
+                ['name' => 'Harga Pokok Penjualan', 'type' => 'harga_pokok_penjualan', 'number' => '5101', 'balance' => 'debit'],
+                ['name' => 'Beban Gaji', 'type' => 'beban_operasional', 'number' => '6101', 'balance' => 'debit'],
+                ['name' => 'Beban Sewa', 'type' => 'beban_operasional', 'number' => '6102', 'balance' => 'debit'],
+                ['name' => 'Beban Listrik & Air', 'type' => 'beban_operasional', 'number' => '6103', 'balance' => 'debit'],
+            ];
+
+            $user_id = $request->session()->get('user.id');
+            foreach ($default_accounts as $da) {
+                $exists = \App\Account::where('business_id', $business_id)
+                                      ->where('name', $da['name'])
+                                      ->first();
+                if (!$exists) {
+                    \App\Account::create([
+                        'name' => $da['name'],
+                        'business_id' => $business_id,
+                        'account_number' => $da['number'],
+                        'account_type_id' => $created_types[$da['type']],
+                        'normal_balance' => $da['balance'],
+                        'created_by' => $user_id
+                    ]);
+                }
+            }
+
+            $output = ['success' => true,
+                'msg' => __('lang_v1.added_success'),
+            ];
+        } catch (\Exception $e) {
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+            $output = ['success' => false,
+                'msg' => __('messages.something_went_wrong'),
+            ];
+        }
+
+        if ($request->ajax()) {
+            return $output;
+        }
 
         return redirect()->back()->with('status', $output);
     }

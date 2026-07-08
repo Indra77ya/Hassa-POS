@@ -48,6 +48,7 @@ class ModulesController extends Controller
 
         foreach ($modules as $module => $details) {
             $modules[$module]['is_installed'] = $this->moduleUtil->isModuleInstalled($details['name']) ? true : false;
+            $modules[$module]['is_enabled'] = isModuleEnabled($details['name']);
 
             //Get version information.
             if ($modules[$module]['is_installed']) {
@@ -188,7 +189,7 @@ class ModulesController extends Controller
                 $module->disable();
             }
             // Publish assets for this specific module after status change
-            Artisan::call('module:publish', ['module' => $module_name, '--force' => true]);
+            Artisan::call('module:publish', ['module' => $module_name]);
 
             // Clear module assets cache when module is activated/deactivated
             Cache::forget('module_assets');
@@ -224,14 +225,24 @@ class ModulesController extends Controller
 
         try {
             $module = Module::find($module_name);
-            // $module->delete();
 
-            $path = $module->getPath();
+            if (! empty($module)) {
+                $path = $module->getPath();
+                $public_path = public_path('modules/' . strtolower($module_name));
+
+                //Delete module folder
+                if (is_dir($path)) {
+                    \File::deleteDirectory($path);
+                }
+
+                //Delete module public assets folder
+                if (is_dir($public_path)) {
+                    \File::deleteDirectory($public_path);
+                }
+            }
 
             // Clear module assets cache when module is deleted
             Cache::forget('module_assets');
-
-            die("To delete the module delete this folder <br/>" . $path . '<br/> Go back after deleting');
 
             $output = ['success' => true,
                 'msg' => __('lang_v1.success'),
@@ -243,6 +254,71 @@ class ModulesController extends Controller
         }
 
         return redirect()->back()->with(['status' => $output]);
+    }
+
+    /**
+     * Downloads the module.
+     *
+     * @param  string  $module_name
+     * @return \Illuminate\Http\Response
+     */
+    public function download($module_name)
+    {
+        if (! auth()->user()->can('manage_modules')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $notAllowed = $this->moduleUtil->notAllowedInDemo();
+        if (! empty($notAllowed)) {
+            return $notAllowed;
+        }
+
+        try {
+            $module = Module::find($module_name);
+
+            if (empty($module)) {
+                abort(404);
+            }
+
+            $path = $module->getPath();
+            $zip_file = $module_name . '.zip';
+            $zip_path = storage_path('app/' . $zip_file);
+
+            $zip = new ZipArchive();
+            if ($zip->open($zip_path, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
+                $files = new \RecursiveIteratorIterator(
+                    new \RecursiveDirectoryIterator($path),
+                    \RecursiveIteratorIterator::LEAVES_ONLY
+                );
+
+                foreach ($files as $name => $file) {
+                    if (! $file->isDir()) {
+                        $filePath = $file->getRealPath();
+                        $relativePath = substr($filePath, strlen($path) + 1);
+
+                        // Exclude unnecessary files/folders
+                        if (strpos($relativePath, '.git/') === 0 ||
+                            strpos($relativePath, 'node_modules/') === 0 ||
+                            strpos($relativePath, '.DS_Store') !== false ||
+                            strpos($relativePath, 'Thumbs.db') !== false
+                        ) {
+                            continue;
+                        }
+
+                        $zip->addFile($filePath, $module_name . '/' . $relativePath);
+                    }
+                }
+                $zip->close();
+            }
+
+            return response()->download($zip_path)->deleteFileAfterSend(true);
+        } catch (\Exception $e) {
+            $output = ['success' => false,
+                'msg' => $e->getMessage(),
+            ];
+
+            return redirect()->back()->with(['status' => $output]);
+        }
     }
 
     /**
@@ -298,7 +374,7 @@ class ModulesController extends Controller
 
                 // Publish assets for the uploaded module using its name
                 try {
-                    Artisan::call('module:publish', ['module' => $module_name, '--force' => true]);
+                    Artisan::call('module:publish', ['module' => $module_name]);
                 } catch (\Throwable $e) {
                     // Fallback to publishing all if targeted signature not supported
                     Artisan::call('module:publish');

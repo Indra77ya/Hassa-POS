@@ -430,6 +430,7 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
         Route::get('/cash-flow', [AccountController::class, 'cashFlow']);
     });
 
+    Route::post('account-types/seed-default', [AccountTypeController::class, 'seedDefault']);
     Route::resource('account-types', AccountTypeController::class);
 
     //Restaurant module
@@ -466,9 +467,11 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('shipments', [SellController::class, 'shipments']);
 
     Route::post('upload-module', [Install\ModulesController::class, 'uploadModule']);
+    Route::get('manage-modules/download/{module_name}', [Install\ModulesController::class, 'download']);
     Route::delete('manage-modules/destroy/{module_name}', [Install\ModulesController::class, 'destroy']);
     Route::resource('manage-modules', Install\ModulesController::class)
-        ->only(['index', 'update']);
+        ->only(['index', 'update'])
+        ->parameters(['manage-modules' => 'module_name']);
     Route::get('regenerate', [Install\ModulesController::class, 'regenerate']);
 
     Route::resource('warranties', WarrantyController::class);

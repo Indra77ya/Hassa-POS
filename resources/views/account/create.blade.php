@@ -22,15 +22,19 @@
             <div class="form-group">
                 {!! Form::label('account_type_id', __( 'account.account_type' ) .":") !!}
                 <select name="account_type_id" class="form-control select2">\
-                    <option>@lang('messages.please_select')</option>
+                    <option value="">@lang('messages.please_select')</option>
                     @foreach($account_types as $account_type)
-                        <optgroup label="{{$account_type->name}}">
-                            <option value="{{$account_type->id}}">{{$account_type->name}}</option>
-                            @foreach($account_type->sub_types as $sub_type)
-                                <option value="{{$sub_type->id}}">{{$sub_type->name}}</option>
-                            @endforeach
-                        </optgroup>
+                        <option value="{{$account_type->id}}">{{$account_type->name}}</option>
                     @endforeach
+                </select>
+            </div>
+
+            <div class="form-group">
+                {!! Form::label('normal_balance', __( 'account.balance' ) .":") !!}
+                <select name="normal_balance" class="form-control select2" required>
+                    <option value="">@lang('messages.please_select')</option>
+                    <option value="debit">@lang('account.debit')</option>
+                    <option value="credit">@lang('account.credit')</option>
                 </select>
             </div>
 

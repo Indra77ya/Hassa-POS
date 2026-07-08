@@ -67,9 +67,6 @@ class AccountReportsController extends Controller
                 $location_id
             );
 
-            $account_details = $this->getAccountBalance($business_id, $end_date, 'others', $location_id);
-            // $capital_account_details = $this->getAccountBalance($business_id, $end_date, 'capital');
-
             //Get Closing stock
             $permitted_locations = auth()->user()->permitted_locations();
             
@@ -80,12 +77,86 @@ class AccountReportsController extends Controller
                 $permitted_locations
             );
 
+            $accounts = Account::leftjoin(
+                'account_transactions as AT',
+                'AT.account_id',
+                '=',
+                'accounts.id'
+            )
+            ->leftjoin('account_types as ATY', 'accounts.account_type_id', '=', 'ATY.id')
+            ->leftjoin('account_types as PATY', 'ATY.parent_account_type_id', '=', 'PATY.id')
+            ->whereNull('AT.deleted_at')
+            ->where('accounts.business_id', $business_id)
+            ->whereDate('AT.operation_date', '<=', $end_date);
+
+            // Removed restrictive filtering to include all accounts in Balance Sheet
+
+            $accounts = $accounts->select([
+                'accounts.id',
+                'accounts.name as account_name',
+                'accounts.normal_balance',
+                'ATY.name as type_name',
+                'ATY.fixed_key as fixed_key',
+                'PATY.name as parent_type_name',
+                DB::raw("SUM( IF(AT.type='credit', amount, 0) ) as credit_balance"),
+                DB::raw("SUM( IF(AT.type='debit', amount, 0) ) as debit_balance"),
+            ])
+            ->groupBy('accounts.id', 'accounts.name', 'ATY.name', 'ATY.fixed_key', 'PATY.name')
+            ->get();
+
+            $assets = [
+                'current_assets' => [],
+                'fixed_assets' => [],
+                'other_assets' => [],
+            ];
+            $liabilities = [
+                'current_liabilities' => [],
+                'long_term_liabilities' => [],
+            ];
+            $equity = [];
+
+            foreach ($accounts as $account) {
+                $fixed_key = $account->fixed_key;
+                $is_debit_normal = $account->normal_balance == 'debit';
+                if (empty($account->normal_balance)) {
+                    $is_debit_normal = in_array($fixed_key, ['kas_dan_bank', 'piutang_usaha', 'persediaan', 'aktiva_lancar_lainnya', 'aktiva_tetap', 'akumulasi_penyusutan', 'aktiva_lainnya']);
+                }
+
+                if ($is_debit_normal) {
+                    $account->balance = $account->debit_balance - $account->credit_balance;
+                } else {
+                    $account->balance = $account->credit_balance - $account->debit_balance;
+                }
+
+                // AKTIVA
+                if (in_array($fixed_key, ['kas_dan_bank', 'piutang_usaha', 'persediaan', 'aktiva_lancar_lainnya'])) {
+                    $assets['current_assets'][] = $account;
+                } elseif (in_array($fixed_key, ['aktiva_tetap', 'akumulasi_penyusutan'])) {
+                    $assets['fixed_assets'][] = $account;
+                } elseif ($fixed_key == 'aktiva_lainnya') {
+                    $assets['other_assets'][] = $account;
+                }
+                // PASIVA
+                elseif (in_array($fixed_key, ['hutang_usaha', 'hutang_lancar_lainnya'])) {
+                    $liabilities['current_liabilities'][] = $account;
+                } elseif ($fixed_key == 'hutang_jangka_panjang') {
+                    $liabilities['long_term_liabilities'][] = $account;
+                } elseif ($fixed_key == 'ekuitas') {
+                    $equity[] = $account;
+                }
+            }
+
+            // Calculate Retained Earnings
+            $retained_earnings = $this->transactionUtil->getProfitLossDetails($business_id, $location_id, '1970-01-01', $end_date, null, $permitted_locations);
+
             $output = [
                 'supplier_due' => $purchase_details['purchase_due'],
                 'customer_due' => $sell_details['invoice_due'] - $sell_return_details['total_sell_return_inc_tax'],
-                'account_balances' => $account_details,
                 'closing_stock' => $closing_stock,
-                'capital_account_details' => null,
+                'assets' => $assets,
+                'liabilities' => $liabilities,
+                'equity' => $equity,
+                'retained_earnings' => $retained_earnings['net_profit'],
             ];
 
             return $output;
@@ -126,15 +197,40 @@ class AccountReportsController extends Controller
                 $location_id
             );
 
+            $transaction_types = ['sell_return'];
+            $sell_return_details = $this->transactionUtil->getTransactionTotals(
+                $business_id,
+                $transaction_types,
+                null,
+                $end_date,
+                $location_id
+            );
+
             $account_details = $this->getAccountBalance($business_id, $end_date, 'others', $location_id);
 
-            // $capital_account_details = $this->getAccountBalance($business_id, $end_date, 'capital');
+            $permitted_locations = auth()->user()->permitted_locations();
+            $pl_details = $this->transactionUtil->getProfitLossDetails($business_id, $location_id, '1970-01-01', $end_date, null, $permitted_locations);
 
             $output = [
                 'supplier_due' => $purchase_details['purchase_due'],
-                'customer_due' => $sell_details['invoice_due'],
+                'customer_due' => $sell_details['invoice_due'] - $sell_return_details['total_sell_return_inc_tax'],
                 'account_balances' => $account_details,
-                'capital_account_details' => null,
+                'total_sell' => $pl_details['total_sell'],
+                'total_purchase' => $pl_details['total_purchase'],
+                'total_expense' => $pl_details['total_expense'],
+                'total_adjustment' => $pl_details['total_adjustment'],
+                'total_recovered' => $pl_details['total_recovered'],
+                'total_purchase_return' => $pl_details['total_purchase_return'],
+                'total_sell_return' => $pl_details['total_sell_return'],
+                'opening_stock' => $pl_details['opening_stock'],
+                'total_sell_discount' => $pl_details['total_sell_discount'],
+                'total_purchase_discount' => $pl_details['total_purchase_discount'],
+                'total_reward_amount' => $pl_details['total_reward_amount'],
+                'total_sell_round_off' => $pl_details['total_sell_round_off'],
+                'total_sell_tax' => $pl_details['total_sell_tax'] ?? 0,
+                'total_purchase_tax' => $pl_details['total_purchase_tax'] ?? 0,
+                'total_sell_shipping_charge' => $pl_details['total_sell_shipping_charge'] ?? 0,
+                'total_sell_additional_expense' => $pl_details['total_sell_additional_expense'] ?? 0,
             ];
 
             return $output;
@@ -152,28 +248,18 @@ class AccountReportsController extends Controller
      */
     private function getAccountBalance($business_id, $end_date, $account_type = 'others', $location_id = null)
     {
-        $query = Account::leftjoin(
-            'account_transactions as AT',
-            'AT.account_id',
-            '=',
-            'accounts.id'
-        )
-                                // ->NotClosed()
-                                ->whereNull('AT.deleted_at')
-                                ->where('business_id', $business_id)
-                                ->whereDate('AT.operation_date', '<=', $end_date);
+        $start_date = ! empty(request()->input('start_date')) ? $this->transactionUtil->uf_date(request()->input('start_date')) : \Carbon::now()->startOfMonth()->format('Y-m-d');
 
-        // if ($account_type == 'others') {
-        //    $query->NotCapital();
-        // } elseif ($account_type == 'capital') {
-        //     $query->where('account_type', 'capital');
-        // }
+        $query = Account::leftjoin('account_types as ATY', 'accounts.account_type_id', '=', 'ATY.id')
+            ->leftjoin('account_types as PATY', 'ATY.parent_account_type_id', '=', 'PATY.id')
+            ->where('accounts.business_id', $business_id);
 
         $permitted_locations = auth()->user()->permitted_locations();
         $account_ids = [];
-        if ($permitted_locations != 'all') {
+        if ($permitted_locations != 'all' || ! empty($location_id)) {
+            $locations_to_check = ($location_id) ? [$location_id] : $permitted_locations;
             $locations = BusinessLocation::where('business_id', $business_id)
-                            ->whereIn('id', $permitted_locations)
+                            ->whereIn('id', $locations_to_check)
                             ->get();
 
             foreach ($locations as $location) {
@@ -186,34 +272,29 @@ class AccountReportsController extends Controller
                     }
                 }
             }
-
             $account_ids = array_unique($account_ids);
-        }
-
-        if ($permitted_locations != 'all') {
             $query->whereIn('accounts.id', $account_ids);
         }
 
-        if (! empty($location_id)) {
-            $location = BusinessLocation::find($location_id);
-            if (! empty($location->default_payment_accounts)) {
-                $default_payment_accounts = json_decode($location->default_payment_accounts, true);
-                $account_ids = [];
-                foreach ($default_payment_accounts as $key => $account) {
-                    if (! empty($account['is_enabled']) && ! empty($account['account'])) {
-                        $account_ids[] = $account['account'];
-                    }
-                }
-
-                $query->whereIn('accounts.id', $account_ids);
-            }
-        }
-
-        $account_details = $query->select(['name',
-            DB::raw("SUM( IF(AT.type='credit', amount, -1*amount) ) as balance"), ])
-                                ->groupBy('accounts.id')
-                                ->get()
-                                ->pluck('balance', 'name');
+        $account_details = $query->select([
+            'accounts.id',
+            'accounts.name',
+            'accounts.normal_balance',
+            'ATY.name as type_name',
+            'ATY.fixed_key as fixed_key',
+            'PATY.name as parent_type_name',
+            DB::raw("(SELECT SUM(IF(type='debit', amount, 0)) FROM account_transactions WHERE account_id = accounts.id AND deleted_at IS NULL AND DATE(operation_date) < ?) as opening_debit"),
+            DB::raw("(SELECT SUM(IF(type='credit', amount, 0)) FROM account_transactions WHERE account_id = accounts.id AND deleted_at IS NULL AND DATE(operation_date) < ?) as opening_credit"),
+            DB::raw("(SELECT SUM(amount) FROM account_transactions WHERE account_id = accounts.id AND type='debit' AND deleted_at IS NULL AND DATE(operation_date) >= ? AND DATE(operation_date) <= ?) as total_debit"),
+            DB::raw("(SELECT SUM(amount) FROM account_transactions WHERE account_id = accounts.id AND type='credit' AND deleted_at IS NULL AND DATE(operation_date) >= ? AND DATE(operation_date) <= ?) as total_credit"),
+        ])
+        ->addBinding($start_date, 'select')
+        ->addBinding($start_date, 'select')
+        ->addBinding($start_date, 'select')
+        ->addBinding($end_date, 'select')
+        ->addBinding($start_date, 'select')
+        ->addBinding($end_date, 'select')
+        ->get();
 
         return $account_details;
     }

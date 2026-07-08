@@ -2,7 +2,11 @@
 /public/hot
 /public/storage
 /storage/*.key
-/storage/
+/storage/pail
+/storage/logs
+/storage/framework/cache/data
+/storage/framework/sessions
+/storage/framework/views
 /vendor
 /.idea
 /.vagrant
@@ -17,12 +21,5 @@ npm-debug.log
 /public/uploads/invoice_logos
 /public/uploads/UltimatePOS
 /public/uploads/temp
-/public/css/
-/public/fonts/
-/public/images/
-/public/modules/
-/public/mix-manifest.json
 .scribe
-/public/docs
-/public/js/skins/
-/public/js/icons/
+modules_statuses.json

@@ -126,7 +126,7 @@
 @endif
 @yield('javascript')
 
-@if (Module::has('Essentials'))
+@if(isModuleEnabled('Essentials'))
     @includeIf('essentials::layouts.partials.footer_part')
 @endif
 
@@ -145,10 +145,11 @@
             isRTL: isRTL
         });
 
-        // Initialize popovers and close them when clicking outside
         $('[data-toggle="popover"]').popover();
+
         $(document).on('click', function (e) {
             $('[data-toggle="popover"]').each(function () {
+                // Check if the clicked element is the popover button or inside the popover
                 if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
                     $(this).popover('hide');
                 }
@@ -164,6 +165,5 @@
    
     });
 </script>
-
 
 

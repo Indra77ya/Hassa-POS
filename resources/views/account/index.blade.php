@@ -45,12 +45,6 @@
                         </a>
                     </li>
                     --}}
-                                <li>
-                                    <a href="#account_types" data-toggle="tab">
-                                        <i class="fa fa-list"></i> <strong>
-                                            @lang('lang_v1.account_types') </strong>
-                                    </a>
-                                </li>
                             </ul>
                             <div class="tab-content">
                                 <div class="tab-pane active" id="other_accounts">
@@ -77,6 +71,12 @@
                                                             <path d="M5 12l14 0" />
                                                         </svg> @lang('messages.add')
                                                     </button>
+
+                                                    {!! Form::open(['url' => action([\App\Http\Controllers\AccountTypeController::class, 'seedDefault']), 'method' => 'post', 'class' => 'pull-right', 'id' => 'add_default_accounts_form', 'style' => 'margin-right: 10px;']) !!}
+                                                        <button type="submit" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-font-bold tw-rounded-full">
+                                                            <i class="fas fa-magic"></i> @lang('account.add_default_account_types')
+                                                        </button>
+                                                    {!! Form::close() !!}
                                             </div>
                                             {{-- @endcomponent --}}
                                         </div>
@@ -88,13 +88,13 @@
                                                         <tr>
                                                             <th>@lang('lang_v1.name')</th>
                                                             <th>@lang('lang_v1.account_type')</th>
-                                                            <th>@lang('lang_v1.account_sub_type')</th>
+                                                            <th>@lang('account.account_category')</th>
                                                             <th>@lang('account.account_number')</th>
                                                             <th>@lang('brand.note')</th>
                                                             <th>@lang('lang_v1.balance')</th>
                                                             <th>@lang('lang_v1.account_details')</th>
                                                             <th>@lang('lang_v1.added_by')</th>
-                                                            <th class="not-export">@lang('messages.action')</th>
+                                                            <th>@lang('messages.action')</th>
                                                         </tr>
                                                     </thead>
                                                     <tfoot>
@@ -118,80 +118,12 @@
                                     <th>@lang('account.account_number')</th>
                                     <th>@lang( 'brand.note' )</th>
                                     <th>@lang('lang_v1.balance')</th>
-                                    <th class="not-export">@lang( 'messages.action' )</th>
+                                    <th>@lang( 'messages.action' )</th>
                                 </tr>
                             </thead>
                         </table>
                     </div>
                     --}}
-                                <div class="tab-pane" id="account_types">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm btn-modal pull-right"
-                                                data-href="{{ action([\App\Http\Controllers\AccountTypeController::class, 'create']) }}"
-                                                data-container="#account_type_modal">
-                                                <i class="fa fa-plus"></i> @lang('messages.add')</button>
-                                        </div>
-                                    </div>
-                                    <br>
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <table class="table table-striped table-bordered" id="account_types_table"
-                                                style="width: 100%;">
-                                                <thead>
-                                                    <tr>
-                                                        <th>@lang('lang_v1.name')</th>
-                                                        <th class="not-export">@lang('messages.action')</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach ($account_types as $account_type)
-                                                        <tr class="account_type_{{ $account_type->id }}">
-                                                            <th>{{ $account_type->name }}</th>
-                                                            <td>
-
-                                                                {!! Form::open([
-                                                                    'url' => action([\App\Http\Controllers\AccountTypeController::class, 'destroy'], $account_type->id),
-                                                                    'method' => 'delete',
-                                                                ]) !!}
-                                                                <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-dw-btn-outline tw-dw-btn-xs btn-modal"
-                                                                    data-href="{{ action([\App\Http\Controllers\AccountTypeController::class, 'edit'], $account_type->id) }}"
-                                                                    data-container="#account_type_modal">
-                                                                    <i class="fa fa-edit"></i> @lang('messages.edit')</button>
-
-                                                                <button type="button"
-                                                                    class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-error delete_account_type">
-                                                                    <i class="fa fa-trash"></i> @lang('messages.delete')</button>
-                                                                {!! Form::close() !!}
-                                                            </td>
-                                                        </tr>
-                                                        @foreach ($account_type->sub_types as $sub_type)
-                                                            <tr>
-                                                                <td>&nbsp;&nbsp;-- {{ $sub_type->name }}</td>
-                                                                <td>
-
-
-                                                                    {!! Form::open([
-                                                                        'url' => action([\App\Http\Controllers\AccountTypeController::class, 'destroy'], $sub_type->id),
-                                                                        'method' => 'delete',
-                                                                    ]) !!}
-                                                                    <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary btn-modal"
-                                                                        data-href="{{ action([\App\Http\Controllers\AccountTypeController::class, 'edit'], $sub_type->id) }}"
-                                                                        data-container="#account_type_modal">
-                                                                        <i class="fa fa-edit"></i> @lang('messages.edit')</button>
-                                                                    <button type="button"
-                                                                        class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-error delete_account_type">
-                                                                        <i class="fa fa-trash"></i> @lang('messages.delete')</button>
-                                                                    {!! Form::close() !!}
-                                                                </td>
-                                                            </tr>
-                                                        @endforeach
-                                                    @endforeach
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -343,12 +275,13 @@
                         name: 'accounts.name'
                     },
                     {
-                        data: 'parent_account_type_name',
-                        name: 'pat.name'
-                    },
-                    {
                         data: 'account_type_name',
                         name: 'ats.name'
+                    },
+                    {
+                        data: 'category',
+                        name: 'category',
+                        searchable: false
                     },
                     {
                         data: 'account_number',
@@ -394,6 +327,29 @@
 
         $('#account_status').change(function() {
             other_account_table.ajax.reload();
+        });
+
+        $(document).on('submit', 'form#add_default_accounts_form', function(e) {
+            e.preventDefault();
+            var data = $(this).serialize();
+            var ladda = Ladda.create(document.querySelector('#add_default_accounts_form button[type="submit"]'));
+            ladda.start();
+
+            $.ajax({
+                method: "post",
+                url: $(this).attr("action"),
+                dataType: "json",
+                data: data,
+                success: function(result) {
+                    ladda.stop();
+                    if (result.success == true) {
+                        toastr.success(result.msg);
+                        other_account_table.ajax.reload();
+                    } else {
+                        toastr.error(result.msg);
+                    }
+                }
+            });
         });
 
         $(document).on('submit', 'form#deposit_form', function(e) {
