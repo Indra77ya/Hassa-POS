@@ -84,8 +84,14 @@ class BackUpController extends Controller
             Log::info("Backpack\BackupManager -- new backup started from admin interface \r\n".$output);
 
             if (strpos($output, 'Backup failed because') !== false) {
-                preg_match('/Backup failed because (.*)/', $output, $match);
-                $message = !empty($match[1]) ? $match[1] : 'Backup failed';
+                preg_match('/Backup failed because (.*)/s', $output, $match);
+                $message = !empty($match[1]) ? trim($match[1]) : 'Backup failed';
+
+                // If it's the exitcode error, add a hint about the path
+                if (strpos($message, 'exitcode') !== false) {
+                    $message .= ' (Cek kembali path DB_DUMP_BINARY_PATH di .env)';
+                }
+
                 $output = [
                     'success' => 0,
                     'msg' => $message,
