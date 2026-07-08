@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@inject('commonUtil', 'App\Utils\Util')
+
 @section('title', __('repair::lang.view_job_sheet'))
 
 @section('content')
@@ -30,6 +32,30 @@ $jobsheet_settings['contact_custom_fields'] : [];
                             @lang("messages.edit")
                         </a>
                         @endif
+
+                        @if(!empty($job_sheet->customer->mobile))
+                            @php
+                                $whatsapp_text = __('repair::lang.whatsapp_message', [
+                                    'customer_name' => $job_sheet->customer->name,
+                                    'job_sheet_no' => $job_sheet->job_sheet_no,
+                                    'device' => $job_sheet->device?->name,
+                                    'brand' => $job_sheet->brand?->name,
+                                    'model' => $job_sheet->deviceModel?->name,
+                                    'estimated_cost' => @num_format($job_sheet->estimated_cost),
+                                    'status_link' => route('repair-status')
+                                ]);
+
+                                $whatsapp_link = $commonUtil->getWhatsappNotificationLink([
+                                    'mobile_number' => $job_sheet->customer->mobile,
+                                    'whatsapp_text' => $whatsapp_text
+                                ]);
+                            @endphp
+                            <a href="{{$whatsapp_link}}" target="_blank" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-sm">
+                                <i class="fab fa-whatsapp"></i>
+                                @lang("repair::lang.send_whatsapp")
+                            </a>
+                        @endif
+
                         <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm" aria-label="Print" id="print_jobsheet">
                             <i class="fa fa-print"></i>
                             @lang( 'repair::lang.print_format_1' )

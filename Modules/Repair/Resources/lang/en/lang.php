@@ -155,6 +155,8 @@ return [
     'comment_by_ss' => 'Comment by technician',
     'send_notification' => 'Send notification',
     'sms' => 'Sms',
+    'send_whatsapp' => 'Send WhatsApp',
+    'whatsapp_message' => 'Hello :customer_name, your Job Sheet with No :job_sheet_no for :device :brand :model has been created. Estimated cost: :estimated_cost. Check your repair status at: :status_link',
     'product_configuration_tooltip' => 'Add comma (,) separated multiple product configurations, to be used in job sheet <br> <b>Ex: </b>Item 1, Item 2, Item 3',
     'problem_reported_by_customer_tooltip' => 'Add comma (,) separated common problems reported by customer, to be used in job sheet <br> <b>Ex: </b>Item 1, Item 2, Item 3',
     'product_condition_tooltip' => 'Add comma (,) separated common product conditions, to be used in job sheet <br> <b>Ex: </b>Item 1, Item 2, Item 3',
