@@ -41,7 +41,7 @@ $jobsheet_settings['contact_custom_fields'] : [];
                                     'device' => $job_sheet->device?->name,
                                     'brand' => $job_sheet->brand?->name,
                                     'model' => $job_sheet->deviceModel?->name,
-                                    'estimated_cost' => @num_format($job_sheet->estimated_cost),
+                                    'estimated_cost' => $commonUtil->num_f($job_sheet->estimated_cost),
                                     'status_link' => route('repair-status')
                                 ]);
 
