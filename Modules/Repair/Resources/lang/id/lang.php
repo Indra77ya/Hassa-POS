@@ -158,7 +158,7 @@ return [
     'send_notification' => 'Kirim pemberitahuan',
     'sms' => 'Sms',
     'send_whatsapp' => 'Kirim WhatsApp',
-    'whatsapp_message' => 'Halo :customer_name, Job Sheet Anda dengan No :job_sheet_no untuk :device :brand :model telah dibuat. Estimasi biaya: :estimated_cost. Cek status perbaikan Anda di: :status_link',
+    'whatsapp_message' => "Halo *:customer_name*,\n\nJob Sheet Anda telah berhasil dibuat.\n\n*No. Job Sheet:* :job_sheet_no\n*Perangkat:* :device :brand :model\n*No. Seri:* :serial_no\n*Estimasi Biaya:* :estimated_cost\n*Tgl. Selesai:* :delivery_date\n\nCek status perbaikan Anda di:\n:status_link\n\nTerima kasih!",
     'product_configuration_tooltip' => 'Tambahkan koma (,) memisahkan beberapa konfigurasi produk, untuk digunakan dalam lembar kerja <br> <b> Contoh: </b> Item 1, Item 2, Item 3',
     'problem_reported_by_customer_tooltip' => 'Tambahkan koma (,) pisahkan masalah umum yang dilaporkan oleh pelanggan, untuk digunakan dalam lembar kerja <br> <b> Contoh: </b> Item 1, Item 2, Item 3',
     'product_condition_tooltip' => 'Tambahkan produk umum dipisahkan koma (,) kondisi, untuk digunakan dalam job sheet <br> <b> Contoh: </b> Item 1, Item 2, Item 3',
