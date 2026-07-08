@@ -5,7 +5,6 @@
 /storage/pail
 /storage/logs
 /storage/framework/cache/data
-/storage/framework/cache/sessions
 /storage/framework/sessions
 /storage/framework/views
 /vendor
