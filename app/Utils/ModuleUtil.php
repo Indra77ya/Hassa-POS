@@ -47,7 +47,7 @@ class ModuleUtil extends Util
      */
     public function isSuperadminInstalled()
     {
-        return $this->isModuleInstalled('Superadmin');
+        return $this->isModuleInstalled('Superadmin') && isModuleEnabled('Superadmin');
     }
 
     /**
