@@ -42,7 +42,7 @@ $jobsheet_settings['contact_custom_fields'] : [];
                                     'brand' => $job_sheet->brand?->name,
                                     'model' => $job_sheet->deviceModel?->name,
                                     'serial_no' => $job_sheet->serial_no,
-                                    'estimated_cost' => $commonUtil->num_f($job_sheet->estimated_cost),
+                                    'estimated_cost' => $commonUtil->num_f($job_sheet->estimated_cost, true),
                                     'delivery_date' => $job_sheet->delivery_date ? $commonUtil->format_date($job_sheet->delivery_date, true) : '',
                                     'status_link' => route('repair-status')
                                 ]);
