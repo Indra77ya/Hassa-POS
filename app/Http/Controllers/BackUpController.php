@@ -77,15 +77,25 @@ class BackUpController extends Controller
             }
 
             // start the backup process
-            Artisan::call('backup:run');
+            $exitCode = Artisan::call('backup:run');
             $output = Artisan::output();
 
             // log the results
             Log::info("Backpack\BackupManager -- new backup started from admin interface \r\n".$output);
 
-            $output = ['success' => 1,
-                'msg' => __('lang_v1.success'),
-            ];
+            if ($exitCode !== 0 || strpos($output, 'Backup failed because') !== false) {
+                $msg = 'Backup failed.';
+                if (strpos($output, 'mysqldump: [ERROR]') !== false || strpos($output, 'mysqldump: command not found') !== false || strpos($output, 'exitcode') !== false) {
+                    $msg = 'Backup failed. Please check if mysqldump is installed and DB_DUMP_BINARY_PATH is set correctly in .env file.';
+                }
+                $output = ['success' => 0,
+                    'msg' => $msg,
+                ];
+            } else {
+                $output = ['success' => 1,
+                    'msg' => __('lang_v1.success'),
+                ];
+            }
         } catch (Exception $e) {
             $output = ['success' => 0,
                 'msg' => $e->getMessage(),

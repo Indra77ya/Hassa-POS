@@ -18,7 +18,7 @@ class Kernel extends ConsoleKernel
         $env = config('app.env');
         $email = config('mail.username');
 
-        if ($env === 'live') {
+        if ($env === 'live' || $env === 'local') {
             //Scheduling backup, specify the time when the backup will get cleaned & time when it will run.
             
             $schedule->command('backup:clean')->daily()->at('01:00');

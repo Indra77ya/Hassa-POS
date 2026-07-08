@@ -1069,7 +1069,9 @@ class Util
 
     public function getCronJobCommand()
     {
-        if (function_exists('exec')) {
+        $is_windows = strpos(PHP_OS, 'WIN') !== false;
+
+        if (function_exists('exec') && ! $is_windows) {
             $php_binary_path = exec('which php');
         } else {
             $php_binary_path = PHP_BINARY;
@@ -1080,7 +1082,11 @@ class Util
             $php_binary_path = 'php';
         }
 
-        $command = '* * * * * '.$php_binary_path.' '.base_path('artisan').' schedule:run >> /dev/null 2>&1';
+        if ($is_windows) {
+            $command = 'php artisan schedule:run';
+        } else {
+            $command = '* * * * * '.$php_binary_path.' '.base_path('artisan').' schedule:run >> /dev/null 2>&1';
+        }
 
         if (config('app.env') == 'demo') {
             $command = '';
