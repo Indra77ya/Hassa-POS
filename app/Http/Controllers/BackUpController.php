@@ -96,7 +96,7 @@ class BackUpController extends Controller
                     'msg' => __('lang_v1.success'),
                 ];
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $output = ['success' => 0,
                 'msg' => $e->getMessage(),
             ];
