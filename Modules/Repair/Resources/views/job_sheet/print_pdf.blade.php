@@ -69,8 +69,8 @@
 @endphp
 <div class="width-100 box mb-10">
 	<div class="width-50 f-left" align="center">
-		@if(!empty(Session::get('business.logo')))
-          <img src="{{ public_path( 'uploads/business_logos/' . Session::get('business.logo') ) }}" alt="Logo" style="width: auto; max-height: 90px; margin: auto;">
+		@if(!empty($job_sheet->customer->business->logo))
+          <img src="{{ public_path( 'uploads/business_logos/' . $job_sheet->customer->business->logo ) }}" alt="Logo" style="width: auto; max-height: 90px; margin: auto;">
         @endif
 	</div>
 	<div class="width-50 f-left" align="center">

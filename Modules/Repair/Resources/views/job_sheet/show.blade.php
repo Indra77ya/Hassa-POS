@@ -78,12 +78,12 @@ $jobsheet_settings['contact_custom_fields'] : [];
                     {{-- business address --}}
                     <div class="width-100">
                         <div class="width-50 f-left" style="padding-top: 40px;">
-                            @if(!empty(Session::get('business.logo')))
-                            <img src="{{ asset( 'uploads/business_logos/' . Session::get('business.logo') ) }}" alt="Logo" style="width: auto; max-height: 90px; margin: auto;">
+                            @if(!empty($job_sheet->customer->business->logo))
+                            <img src="{{ asset( 'uploads/business_logos/' . $job_sheet->customer->business->logo ) }}" alt="Logo" style="width: auto; max-height: 90px; margin: auto;">
                             @endif
                         </div>
                         <div class="width-50 f-left">
-                            <p style="text-align: center;padding-top: 40px;padding-left: 110px;">
+                            <p style="text-align: center;padding-top: 40px;">
                                 <strong class="font-23">
                                     {{$job_sheet->customer->business->name}}
                                 </strong>
@@ -518,6 +518,18 @@ $jobsheet_settings['contact_custom_fields'] : [];
 @stop
 @section('css')
 <style type="text/css">
+    .width-100 {
+        width: 100%;
+    }
+    .width-50 {
+        width: 50%;
+    }
+    .f-left {
+        float: left;
+    }
+    .font-23 {
+        font-size: 23px;
+    }
     .table-bordered>thead>tr>th,
     .table-bordered>tbody>tr>th,
     .table-bordered>tfoot>tr>th,

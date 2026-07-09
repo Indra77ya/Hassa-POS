@@ -73,6 +73,9 @@ $jobsheet_settings['contact_custom_fields'] : [];
 <div class="width-100 box mb-10">
 
     <div class="width-100" align="center">
+        @if(!empty($job_sheet->customer->business->logo))
+            <img src="{{ public_path( 'uploads/business_logos/' . $job_sheet->customer->business->logo ) }}" alt="Logo" style="width: auto; max-height: 50px; margin: auto;">
+        @endif
         <p style="text-align: center;">
             <strong class="font-14">
                 {{$job_sheet->customer->business->name}}<br>
