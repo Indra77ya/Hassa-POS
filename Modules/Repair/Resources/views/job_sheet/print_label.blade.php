@@ -1,7 +1,12 @@
-<link rel="stylesheet" href="{{ asset('css/app.css?v='.$asset_v) }}">
 <style type="text/css">
     .box {
         /* border: 1px solid; */
+    }
+    .width-100 {
+        width: 100%;
+    }
+    .mb-10 {
+        margin-bottom: 10px;
     }
 
     .table-pdf {

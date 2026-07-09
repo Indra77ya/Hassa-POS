@@ -941,10 +941,6 @@ class JobSheetController extends Controller
             ->with(compact('job_sheet', 'repair_settings', 'parts', 'jobsheet_settings'))->render();
         $mpdf = new \Mpdf\Mpdf(['tempDir' => public_path('uploads/temp'),
             'mode' => 'utf-8',
-            'autoScriptToLang' => true,
-            'autoLangToFont' => true,
-            'autoVietnamese' => true,
-            'autoArabic' => true,
             'margin_top' => 8,
             'margin_bottom' => 8,
         ]);
@@ -1010,10 +1006,6 @@ class JobSheetController extends Controller
             'format' => [$label_width, $label_height],
             'tempDir' => public_path('uploads/temp'),
             'mode' => 'utf-8',
-            'autoScriptToLang' => true,
-            'autoLangToFont' => true,
-            'autoVietnamese' => true,
-            'autoArabic' => true,
             'margin_top' => 4,
             'margin_left' => 4,
             'margin_right' => 4,
