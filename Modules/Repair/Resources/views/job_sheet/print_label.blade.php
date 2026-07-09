@@ -73,13 +73,39 @@ $jobsheet_settings['contact_custom_fields'] : [];
 <div class="width-100 box mb-10">
 
     <div class="width-100" align="center">
+        @php
+            $business_logo = !empty($job_sheet->business) ? $job_sheet->business->logo : null;
+            if (empty($business_logo)) {
+                $session_business = session('business');
+                if (is_object($session_business)) {
+                    $business_logo = $session_business->logo;
+                } elseif (is_array($session_business)) {
+                    $business_logo = $session_business['logo'] ?? null;
+                }
+            }
+
+            $logo_path = null;
+            if (!empty($business_logo)) {
+                $logo_path = public_path('uploads/business_logos/' . $business_logo);
+            }
+
+            $logo_data = null;
+            if (!empty($logo_path) && file_exists($logo_path)) {
+                $logo_data = 'data:image/' . pathinfo($logo_path, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($logo_path));
+            }
+        @endphp
+        @if(!empty($logo_data))
+            <img src="{{ $logo_data }}" alt="Logo" style="width: auto; max-height: 50px; margin: auto;">
+        @elseif(!empty($business_logo))
+            <img src="{{ public_path( 'uploads/business_logos/' . $business_logo ) }}" alt="Logo" style="width: auto; max-height: 50px; margin: auto;">
+        @endif
         <p style="text-align: center;">
             <strong class="font-14">
-                {{$job_sheet->customer->business->name}}<br>
+                {{$job_sheet->business->name}}<br>
             </strong>
 
             @if(!empty($jobsheet_settings['show_location_in_label']) && 
-            ($job_sheet->customer->business->name != $job_sheet->businessLocation->name))
+            ($job_sheet->business->name != $job_sheet->businessLocation->name))
             <span class="font-12">
                 {!!$job_sheet->businessLocation->name!!} <br>
             </span>

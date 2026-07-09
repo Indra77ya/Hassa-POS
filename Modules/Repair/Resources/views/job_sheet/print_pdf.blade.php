@@ -69,14 +69,37 @@
 @endphp
 <div class="width-100 box mb-10">
 	<div class="width-50 f-left" align="center">
-		@if(!empty(Session::get('business.logo')))
-          <img src="{{ public_path( 'uploads/business_logos/' . Session::get('business.logo') ) }}" alt="Logo" style="width: auto; max-height: 90px; margin: auto;">
+		@php
+			$business_logo = !empty($job_sheet->business) ? $job_sheet->business->logo : null;
+			if (empty($business_logo)) {
+				$session_business = session('business');
+				if (is_object($session_business)) {
+					$business_logo = $session_business->logo;
+				} elseif (is_array($session_business)) {
+					$business_logo = $session_business['logo'] ?? null;
+				}
+			}
+
+			$logo_path = null;
+			if (!empty($business_logo)) {
+				$logo_path = public_path('uploads/business_logos/' . $business_logo);
+			}
+
+			$logo_data = null;
+			if (!empty($logo_path) && file_exists($logo_path)) {
+				$logo_data = 'data:image/' . pathinfo($logo_path, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($logo_path));
+			}
+		@endphp
+		@if(!empty($logo_data))
+          <img src="{{ $logo_data }}" alt="Logo" style="width: auto; max-height: 90px; margin: auto;">
+		@elseif(!empty($business_logo))
+          <img src="{{ public_path( 'uploads/business_logos/' . $business_logo ) }}" alt="Logo" style="width: auto; max-height: 90px; margin: auto;">
         @endif
 	</div>
 	<div class="width-50 f-left" align="center">
 		<p style="text-align: center;">
 			<strong class="font-14">
-				{{$job_sheet->customer->business->name}}
+				{{$job_sheet->business->name}}
 			</strong>
 			<br>
 			<span class="font-12">

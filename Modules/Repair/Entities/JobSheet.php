@@ -95,6 +95,11 @@ class JobSheet extends Model
         return $this->belongsTo(\App\BusinessLocation::class, 'location_id');
     }
 
+    public function business()
+    {
+        return $this->belongsTo(\App\Business::class, 'business_id');
+    }
+
     /**
      * Get the repair for the job sheet
      */

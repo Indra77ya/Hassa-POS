@@ -77,40 +77,67 @@ $jobsheet_settings['contact_custom_fields'] : [];
                 <div class="box-body" id="job_sheet">
                     {{-- business address --}}
                     <div class="width-100">
-                        <div class="width-50 f-left" style="padding-top: 40px;">
-                            @if(!empty(Session::get('business.logo')))
-                            <img src="{{ asset( 'uploads/business_logos/' . Session::get('business.logo') ) }}" alt="Logo" style="width: auto; max-height: 90px; margin: auto;">
-                            @endif
-                        </div>
-                        <div class="width-50 f-left">
-                            <p style="text-align: center;padding-top: 40px;padding-left: 110px;">
-                                <strong class="font-23">
-                                    {{$job_sheet->customer->business->name}}
-                                </strong>
-                                <br>
-                                @if(!empty($job_sheet->businessLocation))
-                                {{$job_sheet->businessLocation->name}}<br>
-                                @endif
-                                <span>
-                                    {!!$job_sheet->businessLocation->location_address!!}
-                                </span>
-                                @if(!empty($job_sheet->businessLocation->mobile))
-                                <br>
-                                @lang('business.mobile'): {{$job_sheet->businessLocation->mobile}},
-                                @endif
-                                @if(!empty($job_sheet->businessLocation->alternate_number))
-                                @lang('invoice.show_alternate_number'): {{$job_sheet->businessLocation->alternate_number}},
-                                @endif
-                                @if(!empty($job_sheet->businessLocation->email))
-                                <br>
-                                @lang('business.email'): {{$job_sheet->businessLocation->email}},
-                                @endif
+                        <table width="100%">
+                            <tr>
+                                <td width="50%" align="center">
+                                    @php
+                                        $business_logo = !empty($job_sheet->business) ? $job_sheet->business->logo : null;
+                                        if (empty($business_logo)) {
+                                            $session_business = session('business');
+                                            if (is_object($session_business)) {
+                                                $business_logo = $session_business->logo;
+                                            } elseif (is_array($session_business)) {
+                                                $business_logo = $session_business['logo'] ?? null;
+                                            }
+                                        }
 
-                                @if(!empty($job_sheet->businessLocation->website))
-                                @lang('lang_v1.website'): {{$job_sheet->businessLocation->website}}
-                                @endif
-                            </p>
-                        </div>
+                                        $logo_path = null;
+                                        if (!empty($business_logo)) {
+                                            $logo_path = public_path('uploads/business_logos/' . $business_logo);
+                                        }
+
+                                        $logo_data = null;
+                                        if (!empty($logo_path) && file_exists($logo_path)) {
+                                            $logo_data = 'data:image/' . pathinfo($logo_path, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($logo_path));
+                                        }
+                                    @endphp
+                                    @if(!empty($logo_data))
+                                        <img src="{{ $logo_data }}" alt="Logo" style="width: auto; max-height: 90px; margin: auto;">
+                                    @elseif(!empty($business_logo))
+                                        <img src="{{ asset( 'uploads/business_logos/' . $business_logo ) }}" alt="Logo" style="width: auto; max-height: 90px; margin: auto;">
+                                    @endif
+                                </td>
+                                <td width="50%" align="center">
+                                    <p style="text-align: center;">
+                                        <strong class="font-23">
+                                            {{$job_sheet->business->name}}
+                                        </strong>
+                                        <br>
+                                        @if(!empty($job_sheet->businessLocation))
+                                            {{$job_sheet->businessLocation->name}}<br>
+                                        @endif
+                                        <span>
+                                            {!!$job_sheet->businessLocation->location_address!!}
+                                        </span>
+                                        @if(!empty($job_sheet->businessLocation->mobile))
+                                        <br>
+                                        @lang('business.mobile'): {{$job_sheet->businessLocation->mobile}},
+                                        @endif
+                                        @if(!empty($job_sheet->businessLocation->alternate_number))
+                                        @lang('invoice.show_alternate_number'): {{$job_sheet->businessLocation->alternate_number}},
+                                        @endif
+                                        @if(!empty($job_sheet->businessLocation->email))
+                                        <br>
+                                        @lang('business.email'): {{$job_sheet->businessLocation->email}},
+                                        @endif
+
+                                        @if(!empty($job_sheet->businessLocation->website))
+                                        @lang('lang_v1.website'): {{$job_sheet->businessLocation->website}}
+                                        @endif
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
                     {{-- Job sheet details --}}
                     <table class="table table-bordered" style="margin-top: 15px;">
@@ -518,6 +545,18 @@ $jobsheet_settings['contact_custom_fields'] : [];
 @stop
 @section('css')
 <style type="text/css">
+    .width-100 {
+        width: 100%;
+    }
+    .width-50 {
+        width: 50%;
+    }
+    .f-left {
+        float: left;
+    }
+    .font-23 {
+        font-size: 23px;
+    }
     .table-bordered>thead>tr>th,
     .table-bordered>tbody>tr>th,
     .table-bordered>tfoot>tr>th,
