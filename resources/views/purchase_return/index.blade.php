@@ -39,7 +39,7 @@
                     <div class="box-tools">
                         {{-- <a class="btn btn-block btn-primary" href="{{action([\App\Http\Controllers\CombinedPurchaseReturnController::class, 'create'])}}">
                     <i class="fa fa-plus"></i> @lang('messages.add')</a> --}}
-                        <a class="tw-dw-btn tw-bg-gradient-to-r tw-from-indigo-600 tw-to-blue-500 tw-font-bold tw-text-white tw-border-none tw-rounded-full pull-right"
+                        <a class="tw-dw-btn tw-bg-blue-600 tw-font-bold tw-text-white tw-border-none tw-rounded-full pull-right"
                             href="{{action([\App\Http\Controllers\CombinedPurchaseReturnController::class, 'create'])}}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"

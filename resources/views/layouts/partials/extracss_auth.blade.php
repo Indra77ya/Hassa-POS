@@ -12,7 +12,7 @@
         
         html {
             height: 100%;
-            background: linear-gradient(to right, #6366f1, #3b82f6);
+            background: #3b82f6;
         }
        
         

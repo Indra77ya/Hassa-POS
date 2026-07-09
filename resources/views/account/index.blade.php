@@ -60,7 +60,7 @@
                                                 ) !!}
                                             </div>
                                             <div class="col-md-8">
-                                                    <button type="button" class="tw-dw-btn tw-bg-gradient-to-r tw-from-indigo-600 tw-to-blue-500 tw-font-bold tw-text-white tw-border-none tw-rounded-full btn-modal pull-right"
+                                                    <button type="button" class="tw-dw-btn tw-bg-blue-600 tw-font-bold tw-text-white tw-border-none tw-rounded-full btn-modal pull-right"
                                                         data-container=".account_model"
                                                         data-href="{{ action([\App\Http\Controllers\AccountController::class, 'create']) }}">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"

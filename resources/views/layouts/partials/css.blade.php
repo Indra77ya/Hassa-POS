@@ -27,7 +27,7 @@
         --theme-900: {{ $tc['900'] }};
     }
     .theme-header-bg {
-        background-image: linear-gradient(to right, var(--theme-800), var(--theme-900));
+        background-color: var(--theme-800);
     }
     .theme-btn-bg {
         background-color: var(--theme-800);
