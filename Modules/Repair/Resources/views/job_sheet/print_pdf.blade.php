@@ -1,7 +1,21 @@
-<link rel="stylesheet" href="{{ asset('css/app.css?v='.$asset_v) }}">
 <style type="text/css">
 	.box {
 		border: 1px solid;
+	}
+	.width-100 {
+		width: 100%;
+	}
+	.width-50 {
+		width: 50%;
+	}
+	.f-left {
+		float: left;
+	}
+	.mb-10 {
+		margin-bottom: 10px;
+	}
+	.mb-5 {
+		margin-bottom: 5px;
 	}
 	.table-pdf {
 		width: 100%;
@@ -56,7 +70,7 @@
 <div class="width-100 box mb-10">
 	<div class="width-50 f-left" align="center">
 		@if(!empty(Session::get('business.logo')))
-          <img src="{{ asset( 'uploads/business_logos/' . Session::get('business.logo') ) }}" alt="Logo" style="width: auto; max-height: 90px; margin: auto;">
+          <img src="{{ public_path( 'uploads/business_logos/' . Session::get('business.logo') ) }}" alt="Logo" style="width: auto; max-height: 90px; margin: auto;">
         @endif
 	</div>
 	<div class="width-50 f-left" align="center">
