@@ -69,14 +69,25 @@
 @endphp
 <div class="width-100 box mb-10">
 	<div class="width-50 f-left" align="center">
-		@if(!empty($job_sheet->customer->business->logo))
-          <img src="{{ public_path( 'uploads/business_logos/' . $job_sheet->customer->business->logo ) }}" alt="Logo" style="width: auto; max-height: 90px; margin: auto;">
+		@php
+			$business_logo = !empty($job_sheet->business) ? $job_sheet->business->logo : null;
+			if (empty($business_logo)) {
+				$session_business = session('business');
+				if (is_object($session_business)) {
+					$business_logo = $session_business->logo;
+				} elseif (is_array($session_business)) {
+					$business_logo = $session_business['logo'] ?? null;
+				}
+			}
+		@endphp
+		@if(!empty($business_logo))
+          <img src="{{ public_path( 'uploads/business_logos/' . $business_logo ) }}" alt="Logo" style="width: auto; max-height: 90px; margin: auto;">
         @endif
 	</div>
 	<div class="width-50 f-left" align="center">
 		<p style="text-align: center;">
 			<strong class="font-14">
-				{{$job_sheet->customer->business->name}}
+				{{$job_sheet->business->name}}
 			</strong>
 			<br>
 			<span class="font-12">
