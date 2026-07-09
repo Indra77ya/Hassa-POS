@@ -564,9 +564,16 @@ class Util
      */
     public function getWhatsappNotificationLink($data)
     {
-        //Supports only integers without leading zeros
-        $whatsapp_number = abs((int) filter_var($data['mobile_number'], FILTER_SANITIZE_NUMBER_INT));
+        $whatsapp_number = $data['mobile_number'];
         $text = $data['whatsapp_text'];
+
+        //Remove all non-numeric characters
+        $whatsapp_number = preg_replace('/[^0-9]/', '', $whatsapp_number);
+
+        //Check if number starts with 0, then replace it with 62
+        if (strpos($whatsapp_number, '0') === 0) {
+            $whatsapp_number = '62'.substr($whatsapp_number, 1);
+        }
 
         $base_url = config('constants.whatsapp_base_url').'/'.$whatsapp_number;
 
