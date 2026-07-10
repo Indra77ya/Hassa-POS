@@ -191,6 +191,8 @@ return [
     'manage_products' => 'Kelola produk Anda',
     'all_products' => 'Semua produk',
     'login' => 'Masuk',
+    "login_to_your" => "Masuk ke",
+    "welcome_back" => "Selamat Datang Kembali",
     'register' => 'Daftar',
     'username' => 'Username',
     'password' => 'Kata sandi',
