@@ -1438,4 +1438,7 @@ return [
     'view_all_purchase' => 'Lihat Semua Pembelian',
     'hms_booking' => 'Pemesanan HMS',
     'gym_subscription' => 'Langganan Gym',
+    'costs_and_deductions' => 'Biaya dan Potongan',
+    'revenue_and_income' => 'Pendapatan dan Penghasilan',
+
 ];

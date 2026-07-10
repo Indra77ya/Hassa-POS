@@ -1602,4 +1602,6 @@ return [
     'hms_booking' => 'HMS Booking',
     'gym_subscription' => 'Gym Subscription',
 
+    "costs_and_deductions" => "Costs and Deductions",
+    "revenue_and_income" => "Revenue and Income",
 ];
