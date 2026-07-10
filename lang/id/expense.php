@@ -13,7 +13,7 @@ return [
 
     'expenses' => 'Biaya',
     'expense_categories' => 'Kategori Biaya',
-    'manage_your_expense_categories' => 'Mengelola kategori biaya Anda',
+    'manage_your_expense_categories' => 'Kelola kategori biaya Anda',
     'all_your_expense_categories' => 'Semua kategori biaya Anda',
     'expense_category' => 'Kategori Biaya',
     'category_name' => 'Nama kategori',
@@ -32,6 +32,6 @@ return [
     'expense_update_success' => 'Biaya berhasil diperbarui',
     'expense_delete_success' => 'Biaya berhasil dihapus',
     'expense_for' => 'Biaya untuk',
-    'expense_for_help' => 'Pilih pengguna (email/nama pengguna) yang terkait dengan pengeluaran (Opsional)',
+    'expense_for_help' => 'Pilih pengguna (email/username) yang terkait dengan pengeluaran (Opsional)',
     'import_expense' => 'Impor pengeluaran'
 ];

@@ -11,8 +11,8 @@ return [
     |
     */
 
-    'add_role' => 'Tambah Wewenang',
-    'edit_role' => 'Edit Wewenang',
+    'add_role' => 'Tambah Peran',
+    'edit_role' => 'Edit Peran',
     'user' => 'Pengguna',
     'supplier' => 'Pemasok',
     'customer' => 'Pelanggan',

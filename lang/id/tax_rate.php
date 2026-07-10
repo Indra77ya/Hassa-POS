@@ -12,7 +12,7 @@ return [
     */
 
     'tax_rates' => 'Tarif Pajak',
-    'manage_your_tax_rates' => 'Mengelola tarif pajak Anda',
+    'manage_your_tax_rates' => 'Kelola tarif pajak Anda',
     'all_your_tax_rates' => 'Semua tarif pajak Anda',
     'name' => 'Nama',
     'rate' => 'Tarif Pajak %',

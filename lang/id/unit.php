@@ -12,7 +12,7 @@ return [
     */
 
     'units' => 'Satuan',
-    'manage_your_units' => 'Mengelola satuan Anda',
+    'manage_your_units' => 'Kelola satuan Anda',
     'all_your_units' => 'Semua satuan Anda',
     'name' => 'Nama',
     'short_name' => 'Nama singkat',

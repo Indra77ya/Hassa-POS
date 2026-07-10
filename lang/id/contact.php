@@ -14,7 +14,7 @@ return [
     'contacts' => 'Kontak',
     'name' => 'Nama',
     'contact' => 'Kontak',
-    'manage_your_contact' => 'Mengelola :contacts Anda',
+    'manage_your_contact' => 'Kelola :contacts Anda',
     'all_your_contact' => 'Semua :contacts Anda',
     'add_contact' => 'Tambah kontak baru',
     'contact_type' => 'Jenis kontak',

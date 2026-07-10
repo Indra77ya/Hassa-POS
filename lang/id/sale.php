@@ -30,7 +30,7 @@ return [
     'product' => 'Produk',
     'products' => 'Produk',
     'unit_price' => 'Harga Satuan',
-    'qty' => 'Kwantitas',
+    'qty' => 'Kuantitas',
     'subtotal' => 'Subtotal',
     'recent_transactions' => 'Transaksi Terakhir Anda',
     'pos_sale_added' => 'Penjualan berhasil ditambahkan',

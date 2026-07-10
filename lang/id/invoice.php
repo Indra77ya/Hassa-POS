@@ -10,7 +10,7 @@ return [
     | The following language lines are for invoice screen
     |
     */
-    'invoice_settings' => 'Mengelola Faktur',
+    'invoice_settings' => 'Kelola Faktur',
     'manage_your_invoices' => 'Kelola pengaturan faktur Anda',
     'all_your_invoice_schemes' => 'Semua skema faktur Anda',
     'added_success' => 'Pengaturan faktur berhasil ditambahkan',
