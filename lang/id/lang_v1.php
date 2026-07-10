@@ -1441,4 +1441,10 @@ return [
     'costs_and_deductions' => 'Biaya dan Potongan',
     'revenue_and_income' => 'Pendapatan dan Penghasilan',
 
+    "tax_summary" => "Ringkasan Pajak",
+    "tax_collected_on_sales" => "Pajak Penjualan (Pajak Keluaran)",
+    "tax_paid_on_purchases" => "Pajak Pembelian (Pajak Masukan)",
+    "net_tax_liability" => "Kewajiban Pajak Bersih",
+    "tax_summary_help" => "Informasi pajak ini untuk tujuan pelaporan saja dan tidak termasuk dalam perhitungan Laba Bersih.",
+    "total_sell_return_discount" => "Total Diskon Retur Penjualan",
 ];

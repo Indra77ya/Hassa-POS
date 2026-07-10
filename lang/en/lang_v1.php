@@ -1604,4 +1604,10 @@ return [
 
     "costs_and_deductions" => "Costs and Deductions",
     "revenue_and_income" => "Revenue and Income",
+    "tax_summary" => "Tax Summary",
+    "tax_collected_on_sales" => "Tax collected on sales",
+    "tax_paid_on_purchases" => "Tax paid on purchases",
+    "net_tax_liability" => "Net tax liability",
+    "tax_summary_help" => "Tax information is for informational purposes only and is not included in Net Profit calculation.",
+    "total_sell_return_discount" => "Total Sell Return Discount",
 ];
