@@ -7,7 +7,7 @@
 <section class="content-header">
     <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">
         @lang('lang_v1.manage_modules')
-        <small class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold">Only superadmin can access manage modules</small>
+        <small class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold">@lang('lang_v1.only_superadmin_can_access_manage_modules')</small>
     </h1>
     <!-- <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
@@ -20,7 +20,7 @@
 
     <a class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm pull-right tw-mt-4" href="{{action([\App\Http\Controllers\Install\ModulesController::class, 'regenerate'])}}">
         <i class="fas fa-tools"></i>
-        Regenerate @show_tooltip("<br/>1. Regenerate/publish modules css/js to fix not found issue. <br/> 2. Publish api module oauth files")
+        @lang('lang_v1.regenerate') @show_tooltip(__('lang_v1.regenerate_help'))
     </a>
 </section>
 
@@ -92,7 +92,7 @@
                                     @else
                                         href="{{$module['uninstall_link']}}"
                                     @endif
-                                    onclick="return confirm('Do you really want to uninstall the module? Module will be uninstall but the data will not be deleted')"
+                                    onclick="return confirm(__('lang_v1.uninstall_module_confirm'))"
                                 >@lang('lang_v1.uninstall')
                                 </a>
 
@@ -103,7 +103,7 @@
                                     @method('PUT')
                                     @csrf
                                     <input type="hidden" name="action_type" value="deactivate">
-                                    <button class="btn btn-warning btn-xs">Deactivate</button>
+                                    <button class="btn btn-warning btn-xs">@lang('lang_v1.deactivate')</button>
                                 </form>
                             @endif
 
@@ -115,7 +115,7 @@
                                 @method('PUT')
                                 @csrf
                                 <input type="hidden" name="action_type" value="activate">
-                                <button class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent">Activate</button>
+                                <button class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent">@lang('lang_v1.activate')</button>
                             </form>
                         @endif
 
@@ -133,7 +133,7 @@
                             action="{{action([\App\Http\Controllers\Install\ModulesController::class, 'destroy'], ['module_name' => $module['name']])}}"
                                 style="display: inline;" 
                                 method="post"
-                                onsubmit="return confirm('Do you really want to delete the module? Module code will be deleted but the data will not be deleted')"
+                                onsubmit="return confirm(__('lang_v1.delete_module_confirm'))"
                             >
                                 @method('DELETE')
                                 @csrf
@@ -177,7 +177,7 @@
                         <td>
                             <strong>{{$mod->dn}}</strong> <br/>
                             <button onclick="window.open('{{$mod->u}}', '_blank')" 
-                            class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-accent"><i class="fas fa-money-bill"></i> Buy</button>
+                            class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-accent"><i class="fas fa-money-bill"></i> @lang('lang_v1.buy')</button>
                         </td>
                         <td>
                             {{$mod->d}}

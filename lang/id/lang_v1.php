@@ -1449,4 +1449,11 @@ return [
     "net_tax_liability" => "Kewajiban Pajak Bersih",
     "tax_summary_help" => "Informasi pajak ini untuk tujuan pelaporan saja dan tidak termasuk dalam perhitungan Laba Bersih.",
     "total_sell_return_discount" => "Total Diskon Retur Penjualan",
+    "regenerate" => "Regenerasi",
+    "regenerate_help" => "<br/>1. Regenerasi/publikasikan modul css/js untuk memperbaiki masalah tidak ditemukan. <br/> 2. Publikasikan file oauth modul api",
+    "manage_modules" => "Kelola Modul",
+    "only_superadmin_can_access_manage_modules" => "Hanya superadmin yang dapat mengakses kelola modul",
+    "buy" => "Beli",
+    "uninstall_module_confirm" => "Apakah Anda yakin ingin menghapus (uninstall) modul? Modul akan dihapus tetapi data tidak akan dihapus",
+    "delete_module_confirm" => "Apakah Anda yakin ingin menghapus file modul? Kode modul akan dihapus tetapi data tidak akan dihapus",
 ];
