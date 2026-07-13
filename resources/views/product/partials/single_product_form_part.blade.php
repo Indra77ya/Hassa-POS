@@ -18,8 +18,8 @@
             @lang('product.profit_percent') @show_tooltip(__('tooltip.profit_percent'))
             <br/>
             <select class="form-control input-sm" id="profit_margin_type" name="profit_margin_type" style="width: 100%;">
-                <option value="percentage">%</option>
-                <option value="fixed">Fixed (Rp)</option>
+                <option value="percentage" @if(!empty($profit_margin_type) && $profit_margin_type == 'percentage') selected @endif>%</option>
+                <option value="fixed" @if(!empty($profit_margin_type) && $profit_margin_type == 'fixed') selected @endif>Fixed (Rp)</option>
             </select>
           </th>
           <th>@lang('product.default_selling_price')</th>

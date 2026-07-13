@@ -42,7 +42,7 @@ return [
     'update_settings' => 'Perbarui Pengaturan',
     'business_settings' => 'Pengaturan Bisnis',
     'settings_updated_success' => 'Pengaturan berhasil diperbarui',
-    'default_profit_percent' => 'Persentase keuntungan default',
+    'default_profit_percent' => 'Margin keuntungan default',
     'default_sales_tax' => 'Pajak Penjualan Default',
     'default_sales_discount' => 'Diskon Penjualan Default',
     'business_details' => 'Detail bisnis',

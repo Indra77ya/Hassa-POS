@@ -1081,21 +1081,22 @@ class ProductController extends Controller
         $business_id = $request->session()->get('user.business_id');
         $business = Business::findorfail($business_id);
         $profit_percent = $business->default_profit_percent;
+        $profit_margin_type = $business->default_profit_margin_type;
 
         $action = $request->input('action');
         if ($request->input('action') == 'add') {
             if ($request->input('type') == 'single') {
                 return view('product.partials.single_product_form_part')
-                        ->with(['profit_percent' => $profit_percent]);
+                        ->with(['profit_percent' => $profit_percent, 'profit_margin_type' => $profit_margin_type]);
             } elseif ($request->input('type') == 'variable') {
                 $variation_templates = VariationTemplate::where('business_id', $business_id)->pluck('name', 'id')->toArray();
                 $variation_templates = ['' => __('messages.please_select')] + $variation_templates;
 
                 return view('product.partials.variable_product_form_part')
-                        ->with(compact('variation_templates', 'profit_percent', 'action'));
+                        ->with(compact('variation_templates', 'profit_percent', 'profit_margin_type', 'action'));
             } elseif ($request->input('type') == 'combo') {
                 return view('product.partials.combo_product_form_part')
-                ->with(compact('profit_percent', 'action'));
+                ->with(compact('profit_percent', 'profit_margin_type', 'action'));
             }
         } elseif ($request->input('action') == 'edit' || $request->input('action') == 'duplicate') {
             $product_id = $request->input('product_id');
@@ -1140,6 +1141,7 @@ class ProductController extends Controller
         $business_id = $request->session()->get('user.business_id');
         $business = Business::findorfail($business_id);
         $profit_percent = $business->default_profit_percent;
+        $profit_margin_type = $business->default_profit_margin_type;
 
         $variation_index = $request->input('variation_row_index');
         $value_index = $request->input('value_index') + 1;
@@ -1147,7 +1149,7 @@ class ProductController extends Controller
         $row_type = $request->input('row_type', 'add');
 
         return view('product.partials.variation_value_row')
-                ->with(compact('profit_percent', 'variation_index', 'value_index', 'row_type'));
+                ->with(compact('profit_percent', 'profit_margin_type', 'variation_index', 'value_index', 'row_type'));
     }
 
     /**
@@ -1161,6 +1163,7 @@ class ProductController extends Controller
         $business_id = $request->session()->get('user.business_id');
         $business = Business::findorfail($business_id);
         $profit_percent = $business->default_profit_percent;
+        $profit_margin_type = $business->default_profit_margin_type;
 
         $variation_templates = VariationTemplate::where('business_id', $business_id)
                                                 ->pluck('name', 'id')->toArray();
@@ -1170,7 +1173,7 @@ class ProductController extends Controller
         $action = $request->input('action');
 
         return view('product.partials.product_variation_row')
-                    ->with(compact('variation_templates', 'row_index', 'action', 'profit_percent'));
+                    ->with(compact('variation_templates', 'row_index', 'action', 'profit_percent', 'profit_margin_type'));
     }
 
     /**
@@ -1184,6 +1187,7 @@ class ProductController extends Controller
         $business_id = $request->session()->get('user.business_id');
         $business = Business::findorfail($business_id);
         $profit_percent = $business->default_profit_percent;
+        $profit_margin_type = $business->default_profit_margin_type;
 
         $template = VariationTemplate::where('id', $request->input('template_id'))
                                                 ->with(['values'])
@@ -1200,7 +1204,7 @@ class ProductController extends Controller
 
         return [
             'html' => view('product.partials.product_variation_template')
-                    ->with(compact('template', 'row_index', 'profit_percent'))->render(),
+                    ->with(compact('template', 'row_index', 'profit_percent', 'profit_margin_type'))->render(),
             'values' => $values,
         ];
     }
@@ -1518,7 +1522,9 @@ class ProductController extends Controller
 
         $barcode_types = $this->barcode_types;
 
-        $default_profit_percent = Business::where('id', $business_id)->value('default_profit_percent');
+        $business = Business::where('id', $business_id)->first();
+        $default_profit_percent = $business->default_profit_percent;
+        $default_profit_margin_type = $business->default_profit_margin_type;
 
         $locations = BusinessLocation::forDropdown($business_id);
 
@@ -1534,7 +1540,7 @@ class ProductController extends Controller
         $warranties = Warranty::forDropdown($business_id);
 
         return view('product.partials.quick_add_product')
-                ->with(compact('categories', 'brands', 'units', 'taxes', 'barcode_types', 'default_profit_percent', 'tax_attributes', 'product_name', 'locations', 'product_for', 'enable_expiry', 'enable_lot', 'module_form_parts', 'business_locations', 'common_settings', 'warranties'));
+                ->with(compact('categories', 'brands', 'units', 'taxes', 'barcode_types', 'default_profit_percent', 'default_profit_margin_type', 'tax_attributes', 'product_name', 'locations', 'product_for', 'enable_expiry', 'enable_lot', 'module_form_parts', 'business_locations', 'common_settings', 'warranties'));
     }
 
     /**

@@ -350,11 +350,12 @@
         </div>
 
         <div class="form-group col-sm-12" id="product_form_part">
-            @include('product.partials.single_product_form_part', ['profit_percent' => $default_profit_percent])
+            @include('product.partials.single_product_form_part', ['profit_percent' => $default_profit_percent, 'profit_margin_type' => session('business.default_profit_margin_type')])
         </div>
 
         <input type="hidden" id="variation_counter" value="1">
         <input type="hidden" id="default_profit_percent" value="{{ $default_profit_percent }}">
+        <input type="hidden" id="default_profit_margin_type" value="{{ session('business.default_profit_margin_type') }}">
 
     </div>
     @endcomponent

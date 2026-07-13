@@ -2,6 +2,14 @@
 
 Fitur ini memungkinkan pengguna untuk menentukan keuntungan produk menggunakan nominal Rupiah tetap (Fixed) selain menggunakan persentase (%).
 
+## Cara Pengaturan Default (Tingkat Bisnis)
+
+Jika Anda ingin semua produk baru secara otomatis menggunakan tipe margin tertentu (misal: selalu Rp 5.000), Anda bisa mengaturnya di:
+1.  Buka menu **Pengaturan > Pengaturan Bisnis**.
+2.  Pilih tab **Bisnis**.
+3.  Pada kolom **Margin keuntungan default**, Anda sekarang bisa memilih antara **%** atau **Rp** melalui dropdown di samping kotak input.
+4.  Klik **Perbarui Pengaturan**.
+
 ## Cara Penggunaan di Halaman Produk
 
 1.  Buka menu **Produk > Tambah Produk** atau **Edit Produk**.

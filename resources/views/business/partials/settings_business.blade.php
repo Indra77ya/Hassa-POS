@@ -24,7 +24,10 @@
                 {!! Form::label('default_profit_percent', __('business.default_profit_percent') . ':*') !!} @show_tooltip(__('tooltip.default_profit_percent'))
                 <div class="input-group">
                     <span class="input-group-addon">
-                        <i class="fa fa-plus-circle"></i>
+                        <select class="form-control input-sm" id="default_profit_margin_type" name="default_profit_margin_type" style="padding: 2px 5px; height: 28px; width: 70px;">
+                            <option value="percentage" @if($business->default_profit_margin_type == 'percentage') selected @endif>%</option>
+                            <option value="fixed" @if($business->default_profit_margin_type == 'fixed') selected @endif>Rp</option>
+                        </select>
                     </span>
                     {!! Form::text('default_profit_percent', @num_format($business->default_profit_percent), ['class' => 'form-control input_number']); !!}
                 </div>
