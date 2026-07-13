@@ -14,6 +14,10 @@
 	{!! Form::text('products[' . $product->id . '][variations][' . $variation->id . '][dpp_inc_tax]', @num_format($variation->dpp_inc_tax), ['placeholder' => __('product.inc_of_tax'), 'class' => 'form-control input-sm input_number pp_inc_tax']); !!}</td>
 </div>
 <td>
+	<select class="form-control input-sm profit_margin_type" name="products[{{$product->id}}][variations][{{$variation->id}}][profit_margin_type]" style="width: 100%;">
+		<option value="percentage" @if($variation->profit_margin_type == 'percentage') selected @endif>%</option>
+		<option value="fixed" @if($variation->profit_margin_type == 'fixed') selected @endif>Fixed (Rp)</option>
+	</select>
 	{!! Form::text('products[' . $product->id . '][variations][' . $variation->id . '][profit_percent]', @num_format($variation->profit_percent), ['class' => 'form-control input-sm input_number profit_percent']); !!}
 </td>
 <td>

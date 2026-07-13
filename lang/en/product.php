@@ -13,7 +13,8 @@ return [
 
     'exc_of_tax' => 'Exc. tax',
     'inc_of_tax' => 'Inc. tax',
-    'profit_percent' => 'x Margin(%)',
+    'profit_percent' => 'Margin',
+    'profit_margin_type' => 'Margin Type',
     'add_new_product' => 'Add new product',
     'add_product_for_labels' => 'Add products to generate Labels',
     'product_type' => 'Product Type',

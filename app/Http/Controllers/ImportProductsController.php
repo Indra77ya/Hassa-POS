@@ -367,6 +367,10 @@ class ImportProductsController extends Controller
                         }
                         $product_array['variation']['profit_percent'] = $profit_margin;
 
+                        $profit_margin_type = isset($value[37]) ? strtolower(trim($value[37])) : 'percentage';
+                        $profit_margin_type = in_array($profit_margin_type, ['percentage', 'fixed']) ? $profit_margin_type : 'percentage';
+                        $product_array['variation']['profit_margin_type'] = $profit_margin_type;
+
                         //Calculate purchase price
                         $dpp_inc_tax = trim($value[17]);
                         $dpp_exc_tax = trim($value[18]);
@@ -383,7 +387,7 @@ class ImportProductsController extends Controller
                         $selling_price = ! empty(trim($value[20])) ? trim($value[20]) : 0;
 
                         //Calculate product prices
-                        $product_prices = $this->calculateVariationPrices($dpp_exc_tax, $dpp_inc_tax, $selling_price, $tax_amount, $tax_type, $profit_margin);
+                        $product_prices = $this->calculateVariationPrices($dpp_exc_tax, $dpp_inc_tax, $selling_price, $tax_amount, $tax_type, $profit_margin, $profit_margin_type);
 
                         //Assign Values
                         $product_array['variation']['dpp_inc_tax'] = $product_prices['dpp_inc_tax'];
@@ -441,6 +445,7 @@ class ImportProductsController extends Controller
                         $dpp_exc_tax_string = trim($value[18]);
                         $selling_price_string = trim($value[20]);
                         $profit_margin_string = trim($value[19]);
+                        $profit_margin_type_string = isset($value[37]) ? trim($value[37]) : 'percentage';
 
                         if (empty($dpp_inc_tax_string) && empty($dpp_exc_tax_string)) {
                             $is_valid = false;
@@ -513,8 +518,21 @@ class ImportProductsController extends Controller
                             }
                         }
 
+                        //Map profit margin type with variation values
+                        $profit_margin_type = [];
+                        if (! empty($profit_margin_type_string)) {
+                            $profit_margin_type = array_map('trim', explode(
+                                '|',
+                                $profit_margin_type_string
+                                ));
+                        } else {
+                            foreach ($variation_values as $k => $v) {
+                                $profit_margin_type[$k] = 'percentage';
+                            }
+                        }
+
                         //Check if length of prices array is equal to variation values array length
-                        $array_lengths_count = [count($variation_values), count($dpp_inc_tax), count($dpp_exc_tax), count($selling_price), count($profit_margin)];
+                        $array_lengths_count = [count($variation_values), count($dpp_inc_tax), count($dpp_exc_tax), count($selling_price), count($profit_margin), count($profit_margin_type)];
 
                         if (! empty($variation_skus)) {
                             $array_lengths_count[] = count($variation_skus);
@@ -533,7 +551,9 @@ class ImportProductsController extends Controller
                         $product_array['variation']['variation_template_id'] = $variation->id;
 
                         foreach ($variation_values as $k => $v) {
-                            $variation_prices = $this->calculateVariationPrices($dpp_exc_tax[$k], $dpp_inc_tax[$k], $selling_price[$k], $tax_amount, $tax_type, $profit_margin[$k]);
+                            $pm_type = !empty($profit_margin_type[$k]) ? strtolower($profit_margin_type[$k]) : 'percentage';
+                            $pm_type = in_array($pm_type, ['percentage', 'fixed']) ? $pm_type : 'percentage';
+                            $variation_prices = $this->calculateVariationPrices($dpp_exc_tax[$k], $dpp_inc_tax[$k], $selling_price[$k], $tax_amount, $tax_type, $profit_margin[$k], $pm_type);
 
                             //get variation value
                             $variation_value = $variation->values->filter(function ($item) use ($v) {
@@ -554,6 +574,7 @@ class ImportProductsController extends Controller
                                 'default_purchase_price' => $variation_prices['dpp_exc_tax'],
                                 'dpp_inc_tax' => $variation_prices['dpp_inc_tax'],
                                 'profit_percent' => $this->productUtil->num_f($profit_margin[$k]),
+                                'profit_margin_type' => $pm_type,
                                 'default_sell_price' => $variation_prices['dsp_exc_tax'],
                                 'sell_price_inc_tax' => $variation_prices['dsp_inc_tax'],
                                 'sub_sku' => ! empty($variation_skus[$k]) ? $variation_skus[$k] : '',
@@ -665,7 +686,9 @@ class ImportProductsController extends Controller
                                 $variation_data['dpp_inc_tax'],
                                 $variation_data['profit_percent'],
                                 $variation_data['dsp_exc_tax'],
-                                $variation_data['dsp_inc_tax']
+                                $variation_data['dsp_inc_tax'],
+                                [],
+                                $variation_data['profit_margin_type']
                             );
                             if (! empty($opening_stock)) {
                                 $this->addOpeningStock($opening_stock, $product, $business_id);
@@ -707,7 +730,7 @@ class ImportProductsController extends Controller
         return redirect('import-products')->with('status', $output);
     }
 
-    private function calculateVariationPrices($dpp_exc_tax, $dpp_inc_tax, $selling_price, $tax_amount, $tax_type, $margin)
+    private function calculateVariationPrices($dpp_exc_tax, $dpp_inc_tax, $selling_price, $tax_amount, $tax_type, $margin, $margin_type = 'percentage')
     {
 
         //Calculate purchase prices
@@ -739,11 +762,15 @@ class ImportProductsController extends Controller
                 );
             }
         } else {
-            $dsp_exc_tax = $this->productUtil->calc_percentage(
-                $dpp_exc_tax,
-                $margin,
-                $dpp_exc_tax
-            );
+            if ($margin_type == 'fixed') {
+                $dsp_exc_tax = $dpp_exc_tax + $margin;
+            } else {
+                $dsp_exc_tax = $this->productUtil->calc_percentage(
+                    $dpp_exc_tax,
+                    $margin,
+                    $dpp_exc_tax
+                );
+            }
             $dsp_inc_tax = $this->productUtil->calc_percentage(
                 $dsp_exc_tax,
                 $tax_amount,

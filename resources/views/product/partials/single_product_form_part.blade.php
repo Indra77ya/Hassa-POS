@@ -14,7 +14,14 @@
     <table class="table table-bordered add-product-price-table table-condensed {{$class}}">
         <tr>
           <th>@lang('product.default_purchase_price')</th>
-          <th>@lang('product.profit_percent') @show_tooltip(__('tooltip.profit_percent'))</th>
+          <th>
+            @lang('product.profit_percent') @show_tooltip(__('tooltip.profit_percent'))
+            <br/>
+            <select class="form-control input-sm" id="profit_margin_type" name="profit_margin_type" style="width: 100%;">
+                <option value="percentage">%</option>
+                <option value="fixed">Fixed (Rp)</option>
+            </select>
+          </th>
           <th>@lang('product.default_selling_price')</th>
           @if(empty($quick_add))
             <th>@lang('lang_v1.product_image')</th>

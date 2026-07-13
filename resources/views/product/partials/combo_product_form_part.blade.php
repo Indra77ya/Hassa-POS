@@ -71,6 +71,10 @@
 		<div class="col-sm-12 col-sm-offset-4">
 			<div class="col-sm-4">
 				{!! Form::label('margin', __('product.profit_percent')) .":" !!}
+				<select class="form-control input-sm" id="profit_margin_type" name="profit_margin_type" style="width: 100%;">
+					<option value="percentage" @if(!empty($profit_margin_type) && $profit_margin_type == 'percentage') selected @endif>%</option>
+					<option value="fixed" @if(!empty($profit_margin_type) && $profit_margin_type == 'fixed') selected @endif>Fixed (Rp)</option>
+				</select>
 				{!! Form::text('profit_percent', @num_format($profit_percent), ['class' => 'form-control input-sm input_number mousetrap', 'id' => 'margin']) !!}
 			</div>
 			<div class="col-sm-4">
@@ -181,7 +185,13 @@
 
 	    	//Set selling price.
 	    	var margin = __read_number($('input#margin'), false);
-	    	var selling_price = __add_percent(item_level_purchase_price_total, margin);
+		var profit_margin_type = $('#profit_margin_type').val();
+		var selling_price = 0;
+		if (profit_margin_type == 'fixed') {
+			selling_price = item_level_purchase_price_total + margin;
+		} else {
+			selling_price = __add_percent(item_level_purchase_price_total, margin);
+		}
 	    	var selling_price_inc_tax = __add_percent(selling_price, tax_rate);
 
 	    	__write_number($('input#selling_price'), selling_price);
@@ -215,6 +225,10 @@
 	    	update_net_total_amount();
 	    });
 
+	    $(document).on('change', '#profit_margin_type', function() {
+		update_net_total_amount();
+	    });
+
 	    $(document).on('change', 'select#tax', function(){
 	    	update_net_total_amount();
 	    });
@@ -222,8 +236,14 @@
 	    $(document).on('change', 'input#selling_price', function(){
 	    	var amount = __read_number($('input#selling_price'), false);
 			var principal = parseFloat($('input#item_level_purchase_price_total').val());
+			var profit_margin_type = $('#profit_margin_type').val();
 
-	    	var margin = __get_rate(principal, amount);
+		var margin = 0;
+		if (profit_margin_type == 'fixed') {
+			margin = amount - principal;
+		} else {
+			margin = __get_rate(principal, amount);
+		}
 	    	__write_number($('input#margin'), margin);
 
 	    	var tax_rate = $('select#tax').find(':selected').data('rate');

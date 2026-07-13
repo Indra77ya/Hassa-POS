@@ -511,7 +511,7 @@ class ProductController extends Controller
             }
 
             if ($product->type == 'single') {
-                $this->productUtil->createSingleProductVariation($product->id, $product->sku, $request->input('single_dpp'), $request->input('single_dpp_inc_tax'), $request->input('profit_percent'), $request->input('single_dsp'), $request->input('single_dsp_inc_tax'));
+                $this->productUtil->createSingleProductVariation($product->id, $product->sku, $request->input('single_dpp'), $request->input('single_dpp_inc_tax'), $request->input('profit_percent'), $request->input('single_dsp'), $request->input('single_dsp_inc_tax'), [], $request->input('profit_margin_type'));
             } elseif ($product->type == 'variable') {
                 if (! empty($request->input('product_variation'))) {
                     $input_variations = $request->input('product_variation');
@@ -536,7 +536,7 @@ class ProductController extends Controller
                     }
                 }
 
-                $this->productUtil->createSingleProductVariation($product->id, $product->sku, $request->input('item_level_purchase_price_total'), $request->input('purchase_price_inc_tax'), $request->input('profit_percent'), $request->input('selling_price'), $request->input('selling_price_inc_tax'), $combo_variations);
+                $this->productUtil->createSingleProductVariation($product->id, $product->sku, $request->input('item_level_purchase_price_total'), $request->input('purchase_price_inc_tax'), $request->input('profit_percent'), $request->input('selling_price'), $request->input('selling_price_inc_tax'), $combo_variations, $request->input('profit_margin_type'));
             }
 
             //Add product racks details.
@@ -802,13 +802,14 @@ class ProductController extends Controller
             $product->product_locations()->sync($product_locations);
 
             if ($product->type == 'single') {
-                $single_data = $request->only(['single_variation_id', 'single_dpp', 'single_dpp_inc_tax', 'single_dsp_inc_tax', 'profit_percent', 'single_dsp']);
+                $single_data = $request->only(['single_variation_id', 'single_dpp', 'single_dpp_inc_tax', 'single_dsp_inc_tax', 'profit_percent', 'single_dsp', 'profit_margin_type']);
                 $variation = Variation::find($single_data['single_variation_id']);
 
                 $variation->sub_sku = $product->sku;
                 $variation->default_purchase_price = $this->productUtil->num_uf($single_data['single_dpp']);
                 $variation->dpp_inc_tax = $this->productUtil->num_uf($single_data['single_dpp_inc_tax']);
                 $variation->profit_percent = $this->productUtil->num_uf($single_data['profit_percent']);
+                $variation->profit_margin_type = !empty($single_data['profit_margin_type']) ? $single_data['profit_margin_type'] : 'percentage';
                 $variation->default_sell_price = $this->productUtil->num_uf($single_data['single_dsp']);
                 $variation->sell_price_inc_tax = $this->productUtil->num_uf($single_data['single_dsp_inc_tax']);
                 $variation->save();
@@ -827,6 +828,7 @@ class ProductController extends Controller
                     $this->productUtil->createVariableProductVariations($product->id, $input_variations, $request->input('sku_type'));
                 }
             } elseif ($product->type == 'combo') {
+                $combo_data = $request->only(['combo_variation_id', 'profit_margin_type']);
 
                 //Create combo_variations array by combining variation_id and quantity.
                 $combo_variations = [];
@@ -844,11 +846,12 @@ class ProductController extends Controller
                     }
                 }
 
-                $variation = Variation::find($request->input('combo_variation_id'));
+                $variation = Variation::find($combo_data['combo_variation_id']);
                 $variation->sub_sku = $product->sku;
                 $variation->default_purchase_price = $this->productUtil->num_uf($request->input('item_level_purchase_price_total'));
                 $variation->dpp_inc_tax = $this->productUtil->num_uf($request->input('purchase_price_inc_tax'));
                 $variation->profit_percent = $this->productUtil->num_uf($request->input('profit_percent'));
+                $variation->profit_margin_type = !empty($combo_data['profit_margin_type']) ? $combo_data['profit_margin_type'] : 'percentage';
                 $variation->default_sell_price = $this->productUtil->num_uf($request->input('selling_price'));
                 $variation->sell_price_inc_tax = $this->productUtil->num_uf($request->input('selling_price_inc_tax'));
                 $variation->combo_variations = $combo_variations;
@@ -1618,7 +1621,9 @@ class ProductController extends Controller
                 $request->input('single_dpp_inc_tax'),
                 $request->input('profit_percent'),
                 $request->input('single_dsp'),
-                $request->input('single_dsp_inc_tax')
+                $request->input('single_dsp_inc_tax'),
+                [],
+                $request->input('profit_margin_type')
             );
 
             if ($product->enable_stock == 1 && ! empty($request->input('opening_stock'))) {
@@ -2231,6 +2236,7 @@ class ProductController extends Controller
                     $variation->default_purchase_price = $this->productUtil->num_uf($value['default_purchase_price']);
                     $variation->dpp_inc_tax = $this->productUtil->num_uf($value['dpp_inc_tax']);
                     $variation->profit_percent = $this->productUtil->num_uf($value['profit_percent']);
+                    $variation->profit_margin_type = !empty($value['profit_margin_type']) ? $value['profit_margin_type'] : 'percentage';
                     $variation->default_sell_price = $this->productUtil->num_uf($value['default_sell_price']);
                     $variation->sell_price_inc_tax = $this->productUtil->num_uf($value['sell_price_inc_tax']);
                     $variations_data[] = $variation;

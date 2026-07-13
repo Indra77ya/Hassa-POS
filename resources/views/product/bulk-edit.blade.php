@@ -91,14 +91,20 @@
         __write_number(tr.find('input.pp_inc_tax'), purchase_inc_tax);
 
         var profit_percent = __read_number(tr.find('input.profit_percent'));
-        var selling_price = __add_percent(purchase_exc_tax, profit_percent);
+        var profit_margin_type = tr.find('.profit_margin_type').val();
+        var selling_price = 0;
+        if (profit_margin_type == 'fixed') {
+		selling_price = purchase_exc_tax + profit_percent;
+        } else {
+		selling_price = __add_percent(purchase_exc_tax, profit_percent);
+        }
         __write_number(tr.find('input.sp_exc_tax'), selling_price);
 
         var selling_price_inc_tax = __add_percent(selling_price, tax_rate);
         __write_number(tr.find('input.sp_inc_tax'), selling_price_inc_tax);
 
 	}
-	$(document).on('change', 'input.pp_exc_tax, input.profit_percent', function(){
+	$(document).on('change', 'input.pp_exc_tax, input.profit_percent, select.profit_margin_type', function(){
 		var tr = $(this).closest('tr');
 		calculateProductPrices(tr);
 	});
@@ -134,7 +140,14 @@
 
 		var sp_exc_tax = __read_number($(this));
 		var purchase_exc_tax = __read_number(tr.find('input.pp_exc_tax'));
-		var profit_percent = __get_rate(purchase_exc_tax, sp_exc_tax);
+		var profit_margin_type = tr.find('.profit_margin_type').val();
+
+		var profit_percent = 0;
+		if (profit_margin_type == 'fixed') {
+			profit_percent = sp_exc_tax - purchase_exc_tax;
+		} else {
+			profit_percent = __get_rate(purchase_exc_tax, sp_exc_tax);
+		}
 		__write_number(tr.find('input.profit_percent'), profit_percent);
 		var selling_price_inc_tax = __add_percent(sp_exc_tax, tax_rate);
         __write_number(tr.find('input.sp_inc_tax'), selling_price_inc_tax);

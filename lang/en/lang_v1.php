@@ -1617,4 +1617,5 @@ return [
     "buy" => "Buy",
     "uninstall_module_confirm" => "Do you really want to uninstall the module? Module will be uninstall but the data will not be deleted",
     "delete_module_confirm" => "Do you really want to delete the module? Module code will be deleted but the data will not be deleted",
+    'profit_margin_type_ins' => 'Type of profit margin (percentage or fixed)',
 ];

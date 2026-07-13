@@ -276,6 +276,13 @@
                         <td>@lang('lang_v1.product_locations_ins')
                         </td>
                     </tr>
+                    <tr>
+                        <td>38</td>
+                        <td>@lang('product.profit_margin_type') <small class="text-muted">(@lang('lang_v1.optional'))</small></td>
+                        <td>@lang('lang_v1.profit_margin_type_ins')<br>
+                            <strong>@lang('lang_v1.available_options'): percentage, fixed</strong>
+                        </td>
+                    </tr>
 
                 </table>
             @endcomponent
