@@ -7,7 +7,7 @@
         <tr>
             <th class="not-export"><input type="checkbox" id="select-all-row" data-table-id="product_table"></th>
             {{-- Remove data-pdf-include to hide product images from the PDF export --}}
-            <th class="tw-w-full not-export" data-pdf-include="image">{{__('lang_v1.product_image')}} </th>
+            <th style="width: 50px !important;" class="not-export" data-pdf-include="image">{{__('lang_v1.product_image')}} </th>
             <th class="not-export">@lang('messages.action')</th>
             <th>@lang('sale.product')</th>
             <th>@lang('purchase.business_location') @show_tooltip(__('lang_v1.product_business_location_tooltip'))</th>
