@@ -511,7 +511,7 @@ class ProductController extends Controller
             }
 
             if ($product->type == 'single') {
-                $this->productUtil->createSingleProductVariation($product->id, $product->sku, $request->input('single_dpp'), $request->input('single_dpp_inc_tax'), $request->input('profit_percent'), $request->input('single_dsp'), $request->input('single_dsp_inc_tax'));
+                $this->productUtil->createSingleProductVariation($product->id, $product->sku, $request->input('single_dpp'), $request->input('single_dpp_inc_tax'), $request->input('profit_percent'), $request->input('single_dsp'), $request->input('single_dsp_inc_tax'), [], $request->input('profit_margin_type'));
             } elseif ($product->type == 'variable') {
                 if (! empty($request->input('product_variation'))) {
                     $input_variations = $request->input('product_variation');
@@ -536,7 +536,7 @@ class ProductController extends Controller
                     }
                 }
 
-                $this->productUtil->createSingleProductVariation($product->id, $product->sku, $request->input('item_level_purchase_price_total'), $request->input('purchase_price_inc_tax'), $request->input('profit_percent'), $request->input('selling_price'), $request->input('selling_price_inc_tax'), $combo_variations);
+                $this->productUtil->createSingleProductVariation($product->id, $product->sku, $request->input('item_level_purchase_price_total'), $request->input('purchase_price_inc_tax'), $request->input('profit_percent'), $request->input('selling_price'), $request->input('selling_price_inc_tax'), $combo_variations, $request->input('profit_margin_type'));
             }
 
             //Add product racks details.
@@ -802,13 +802,14 @@ class ProductController extends Controller
             $product->product_locations()->sync($product_locations);
 
             if ($product->type == 'single') {
-                $single_data = $request->only(['single_variation_id', 'single_dpp', 'single_dpp_inc_tax', 'single_dsp_inc_tax', 'profit_percent', 'single_dsp']);
+                $single_data = $request->only(['single_variation_id', 'single_dpp', 'single_dpp_inc_tax', 'single_dsp_inc_tax', 'profit_percent', 'single_dsp', 'profit_margin_type']);
                 $variation = Variation::find($single_data['single_variation_id']);
 
                 $variation->sub_sku = $product->sku;
                 $variation->default_purchase_price = $this->productUtil->num_uf($single_data['single_dpp']);
                 $variation->dpp_inc_tax = $this->productUtil->num_uf($single_data['single_dpp_inc_tax']);
                 $variation->profit_percent = $this->productUtil->num_uf($single_data['profit_percent']);
+                $variation->profit_margin_type = !empty($single_data['profit_margin_type']) ? $single_data['profit_margin_type'] : 'percentage';
                 $variation->default_sell_price = $this->productUtil->num_uf($single_data['single_dsp']);
                 $variation->sell_price_inc_tax = $this->productUtil->num_uf($single_data['single_dsp_inc_tax']);
                 $variation->save();
@@ -827,6 +828,7 @@ class ProductController extends Controller
                     $this->productUtil->createVariableProductVariations($product->id, $input_variations, $request->input('sku_type'));
                 }
             } elseif ($product->type == 'combo') {
+                $combo_data = $request->only(['combo_variation_id', 'profit_margin_type']);
 
                 //Create combo_variations array by combining variation_id and quantity.
                 $combo_variations = [];
@@ -844,11 +846,12 @@ class ProductController extends Controller
                     }
                 }
 
-                $variation = Variation::find($request->input('combo_variation_id'));
+                $variation = Variation::find($combo_data['combo_variation_id']);
                 $variation->sub_sku = $product->sku;
                 $variation->default_purchase_price = $this->productUtil->num_uf($request->input('item_level_purchase_price_total'));
                 $variation->dpp_inc_tax = $this->productUtil->num_uf($request->input('purchase_price_inc_tax'));
                 $variation->profit_percent = $this->productUtil->num_uf($request->input('profit_percent'));
+                $variation->profit_margin_type = !empty($combo_data['profit_margin_type']) ? $combo_data['profit_margin_type'] : 'percentage';
                 $variation->default_sell_price = $this->productUtil->num_uf($request->input('selling_price'));
                 $variation->sell_price_inc_tax = $this->productUtil->num_uf($request->input('selling_price_inc_tax'));
                 $variation->combo_variations = $combo_variations;
@@ -1078,21 +1081,22 @@ class ProductController extends Controller
         $business_id = $request->session()->get('user.business_id');
         $business = Business::findorfail($business_id);
         $profit_percent = $business->default_profit_percent;
+        $profit_margin_type = $business->default_profit_margin_type;
 
         $action = $request->input('action');
         if ($request->input('action') == 'add') {
             if ($request->input('type') == 'single') {
                 return view('product.partials.single_product_form_part')
-                        ->with(['profit_percent' => $profit_percent]);
+                        ->with(['profit_percent' => $profit_percent, 'profit_margin_type' => $profit_margin_type]);
             } elseif ($request->input('type') == 'variable') {
                 $variation_templates = VariationTemplate::where('business_id', $business_id)->pluck('name', 'id')->toArray();
                 $variation_templates = ['' => __('messages.please_select')] + $variation_templates;
 
                 return view('product.partials.variable_product_form_part')
-                        ->with(compact('variation_templates', 'profit_percent', 'action'));
+                        ->with(compact('variation_templates', 'profit_percent', 'profit_margin_type', 'action'));
             } elseif ($request->input('type') == 'combo') {
                 return view('product.partials.combo_product_form_part')
-                ->with(compact('profit_percent', 'action'));
+                ->with(compact('profit_percent', 'profit_margin_type', 'action'));
             }
         } elseif ($request->input('action') == 'edit' || $request->input('action') == 'duplicate') {
             $product_id = $request->input('product_id');
@@ -1137,6 +1141,7 @@ class ProductController extends Controller
         $business_id = $request->session()->get('user.business_id');
         $business = Business::findorfail($business_id);
         $profit_percent = $business->default_profit_percent;
+        $profit_margin_type = $business->default_profit_margin_type;
 
         $variation_index = $request->input('variation_row_index');
         $value_index = $request->input('value_index') + 1;
@@ -1144,7 +1149,7 @@ class ProductController extends Controller
         $row_type = $request->input('row_type', 'add');
 
         return view('product.partials.variation_value_row')
-                ->with(compact('profit_percent', 'variation_index', 'value_index', 'row_type'));
+                ->with(compact('profit_percent', 'profit_margin_type', 'variation_index', 'value_index', 'row_type'));
     }
 
     /**
@@ -1158,6 +1163,7 @@ class ProductController extends Controller
         $business_id = $request->session()->get('user.business_id');
         $business = Business::findorfail($business_id);
         $profit_percent = $business->default_profit_percent;
+        $profit_margin_type = $business->default_profit_margin_type;
 
         $variation_templates = VariationTemplate::where('business_id', $business_id)
                                                 ->pluck('name', 'id')->toArray();
@@ -1167,7 +1173,7 @@ class ProductController extends Controller
         $action = $request->input('action');
 
         return view('product.partials.product_variation_row')
-                    ->with(compact('variation_templates', 'row_index', 'action', 'profit_percent'));
+                    ->with(compact('variation_templates', 'row_index', 'action', 'profit_percent', 'profit_margin_type'));
     }
 
     /**
@@ -1181,6 +1187,7 @@ class ProductController extends Controller
         $business_id = $request->session()->get('user.business_id');
         $business = Business::findorfail($business_id);
         $profit_percent = $business->default_profit_percent;
+        $profit_margin_type = $business->default_profit_margin_type;
 
         $template = VariationTemplate::where('id', $request->input('template_id'))
                                                 ->with(['values'])
@@ -1197,7 +1204,7 @@ class ProductController extends Controller
 
         return [
             'html' => view('product.partials.product_variation_template')
-                    ->with(compact('template', 'row_index', 'profit_percent'))->render(),
+                    ->with(compact('template', 'row_index', 'profit_percent', 'profit_margin_type'))->render(),
             'values' => $values,
         ];
     }
@@ -1515,7 +1522,9 @@ class ProductController extends Controller
 
         $barcode_types = $this->barcode_types;
 
-        $default_profit_percent = Business::where('id', $business_id)->value('default_profit_percent');
+        $business = Business::where('id', $business_id)->first();
+        $default_profit_percent = $business->default_profit_percent;
+        $default_profit_margin_type = $business->default_profit_margin_type;
 
         $locations = BusinessLocation::forDropdown($business_id);
 
@@ -1531,7 +1540,7 @@ class ProductController extends Controller
         $warranties = Warranty::forDropdown($business_id);
 
         return view('product.partials.quick_add_product')
-                ->with(compact('categories', 'brands', 'units', 'taxes', 'barcode_types', 'default_profit_percent', 'tax_attributes', 'product_name', 'locations', 'product_for', 'enable_expiry', 'enable_lot', 'module_form_parts', 'business_locations', 'common_settings', 'warranties'));
+                ->with(compact('categories', 'brands', 'units', 'taxes', 'barcode_types', 'default_profit_percent', 'default_profit_margin_type', 'tax_attributes', 'product_name', 'locations', 'product_for', 'enable_expiry', 'enable_lot', 'module_form_parts', 'business_locations', 'common_settings', 'warranties'));
     }
 
     /**
@@ -1618,7 +1627,9 @@ class ProductController extends Controller
                 $request->input('single_dpp_inc_tax'),
                 $request->input('profit_percent'),
                 $request->input('single_dsp'),
-                $request->input('single_dsp_inc_tax')
+                $request->input('single_dsp_inc_tax'),
+                [],
+                $request->input('profit_margin_type')
             );
 
             if ($product->enable_stock == 1 && ! empty($request->input('opening_stock'))) {
@@ -2231,6 +2242,7 @@ class ProductController extends Controller
                     $variation->default_purchase_price = $this->productUtil->num_uf($value['default_purchase_price']);
                     $variation->dpp_inc_tax = $this->productUtil->num_uf($value['dpp_inc_tax']);
                     $variation->profit_percent = $this->productUtil->num_uf($value['profit_percent']);
+                    $variation->profit_margin_type = !empty($value['profit_margin_type']) ? $value['profit_margin_type'] : 'percentage';
                     $variation->default_sell_price = $this->productUtil->num_uf($value['default_sell_price']);
                     $variation->sell_price_inc_tax = $this->productUtil->num_uf($value['sell_price_inc_tax']);
                     $variations_data[] = $variation;

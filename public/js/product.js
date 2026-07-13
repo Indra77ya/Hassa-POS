@@ -47,7 +47,13 @@ $(document).ready(function() {
         __write_number($('input#single_dpp_inc_tax'), purchase_inc_tax);
 
         var profit_percent = __read_number($('#profit_percent'));
-        var selling_price = __add_percent(purchase_exc_tax, profit_percent);
+        var profit_margin_type = $('#profit_margin_type').val();
+        var selling_price = 0;
+        if (profit_margin_type == 'fixed') {
+            selling_price = purchase_exc_tax + profit_percent;
+        } else {
+            selling_price = __add_percent(purchase_exc_tax, profit_percent);
+        }
         __write_number($('input#single_dsp'), selling_price);
 
         var selling_price_inc_tax = __add_percent(selling_price, tax_rate);
@@ -90,7 +96,13 @@ $(document).ready(function() {
 
         var profit_percent = __read_number($('#profit_percent'));
         profit_percent = profit_percent == undefined ? 0 : profit_percent;
-        var selling_price = __add_percent(purchase_exc_tax, profit_percent);
+        var profit_margin_type = $('#profit_margin_type').val();
+        var selling_price = 0;
+        if (profit_margin_type == 'fixed') {
+            selling_price = purchase_exc_tax + profit_percent;
+        } else {
+            selling_price = __add_percent(purchase_exc_tax, profit_percent);
+        }
         __write_number($('input#single_dsp'), selling_price);
 
         var selling_price_inc_tax = __add_percent(selling_price, tax_rate);
@@ -110,7 +122,13 @@ $(document).ready(function() {
         purchase_exc_tax = purchase_exc_tax == undefined ? 0 : purchase_exc_tax;
 
         var profit_percent = __read_number($('input#profit_percent'));
-        var selling_price = __add_percent(purchase_exc_tax, profit_percent);
+        var profit_margin_type = $('#profit_margin_type').val();
+        var selling_price = 0;
+        if (profit_margin_type == 'fixed') {
+            selling_price = purchase_exc_tax + profit_percent;
+        } else {
+            selling_price = __add_percent(purchase_exc_tax, profit_percent);
+        }
         __write_number($('input#single_dsp'), selling_price);
 
         var selling_price_inc_tax = __add_percent(selling_price, tax_rate);
@@ -126,12 +144,17 @@ $(document).ready(function() {
         var selling_price = __read_number($('input#single_dsp'));
         var purchase_exc_tax = __read_number($('input#single_dpp'));
         var profit_percent = __read_number($('input#profit_percent'));
+        var profit_margin_type = $('#profit_margin_type').val();
 
         //if purchase price not set
         if (purchase_exc_tax == 0) {
             profit_percent = 0;
         } else {
-            profit_percent = __get_rate(purchase_exc_tax, selling_price);
+            if (profit_margin_type == 'fixed') {
+                profit_percent = selling_price - purchase_exc_tax;
+            } else {
+                profit_percent = __get_rate(purchase_exc_tax, selling_price);
+            }
         }
 
         __write_number($('input#profit_percent'), profit_percent);
@@ -151,12 +174,17 @@ $(document).ready(function() {
         __write_number($('input#single_dsp'), selling_price);
         var purchase_exc_tax = __read_number($('input#single_dpp'));
         var profit_percent = __read_number($('input#profit_percent'));
+        var profit_margin_type = $('#profit_margin_type').val();
 
         //if purchase price not set
         if (purchase_exc_tax == 0) {
             profit_percent = 0;
         } else {
-            profit_percent = __get_rate(purchase_exc_tax, selling_price);
+            if (profit_margin_type == 'fixed') {
+                profit_percent = selling_price - purchase_exc_tax;
+            } else {
+                profit_percent = __get_rate(purchase_exc_tax, selling_price);
+            }
         }
 
         __write_number($('input#profit_percent'), profit_percent);
@@ -224,6 +252,10 @@ $(document).ready(function() {
         });
     }
 
+    $(document).on('change', '#profit_margin_type', function() {
+        $('input#single_dpp').change();
+    });
+
     $(document).on('click', '.submit_product_form', function(e) {
         e.preventDefault();
 
@@ -288,7 +320,13 @@ $(document).ready(function() {
         __write_number(tr_obj.find('input.variable_dpp_inc_tax'), purchase_inc_tax);
 
         var profit_percent = __read_number(tr_obj.find('input.variable_profit_percent'));
-        var selling_price = __add_percent(purchase_exc_tax, profit_percent);
+        var profit_margin_type = tr_obj.find('.variable_profit_margin_type').val();
+        var selling_price = 0;
+        if (profit_margin_type == 'fixed') {
+            selling_price = purchase_exc_tax + profit_percent;
+        } else {
+            selling_price = __add_percent(purchase_exc_tax, profit_percent);
+        }
         __write_number(tr_obj.find('input.variable_dsp'), selling_price);
 
         var selling_price_inc_tax = __add_percent(selling_price, tax_rate);
@@ -326,11 +364,17 @@ $(document).ready(function() {
 
         var tr_obj = $(this).closest('tr');
         var profit_percent = __read_number($(this));
+        var profit_margin_type = tr_obj.find('.variable_profit_margin_type').val();
 
         var purchase_exc_tax = __read_number(tr_obj.find('input.variable_dpp'));
         purchase_exc_tax = purchase_exc_tax == undefined ? 0 : purchase_exc_tax;
 
-        var selling_price = __add_percent(purchase_exc_tax, profit_percent);
+        var selling_price = 0;
+        if (profit_margin_type == 'fixed') {
+            selling_price = purchase_exc_tax + profit_percent;
+        } else {
+            selling_price = __add_percent(purchase_exc_tax, profit_percent);
+        }
         __write_number(tr_obj.find('input.variable_dsp'), selling_price);
 
         var selling_price_inc_tax = __add_percent(selling_price, tax_rate);
@@ -348,12 +392,17 @@ $(document).ready(function() {
         var purchase_exc_tax = __read_number(tr_obj.find('input.variable_dpp'));
 
         var profit_percent = __read_number(tr_obj.find('input.variable_profit_percent'));
+        var profit_margin_type = tr_obj.find('.variable_profit_margin_type').val();
 
         //if purchase price not set
         if (purchase_exc_tax == 0) {
             profit_percent = 0;
         } else {
-            profit_percent = __get_rate(purchase_exc_tax, selling_price);
+            if (profit_margin_type == 'fixed') {
+                profit_percent = selling_price - purchase_exc_tax;
+            } else {
+                profit_percent = __get_rate(purchase_exc_tax, selling_price);
+            }
         }
 
         __write_number(tr_obj.find('input.variable_profit_percent'), profit_percent);
@@ -375,14 +424,23 @@ $(document).ready(function() {
 
         var purchase_exc_tax = __read_number(tr_obj.find('input.variable_dpp'));
         var profit_percent = __read_number(tr_obj.find('input.variable_profit_percent'));
+        var profit_margin_type = tr_obj.find('.variable_profit_margin_type').val();
         //if purchase price not set
         if (purchase_exc_tax == 0) {
             profit_percent = 0;
         } else {
-            profit_percent = __get_rate(purchase_exc_tax, selling_price);
+            if (profit_margin_type == 'fixed') {
+                profit_percent = selling_price - purchase_exc_tax;
+            } else {
+                profit_percent = __get_rate(purchase_exc_tax, selling_price);
+            }
         }
 
         __write_number(tr_obj.find('input.variable_profit_percent'), profit_percent);
+    });
+
+    $(document).on('change', '.variable_profit_margin_type', function() {
+        $(this).closest('tr').find('input.variable_dpp').change();
     });
 
     $(document).on('click', '.add_variation_value_row', function() {

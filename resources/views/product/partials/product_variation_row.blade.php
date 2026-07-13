@@ -36,7 +36,14 @@
 
                     <span class="pull-right"><small><i>@lang('product.inc_of_tax')</i></small></span>
                 </th>
-                <th class="{{$class}}">@lang('product.profit_percent')</th>
+                <th class="{{$class}}">
+                    @lang('product.profit_percent')
+                    <br/>
+                    <select class="form-control input-sm variable_profit_margin_type" name="product_variation[{{$row_index}}][variations][0][profit_margin_type]" style="width: 100%;">
+                        <option value="percentage">%</option>
+                        <option value="fixed">Fixed (Rp)</option>
+                    </select>
+                </th>
                 <th class="{{$class}}">@lang('product.default_selling_price')
                 <br/>
                 <small><i><span class="dsp_label"></span></i></small>

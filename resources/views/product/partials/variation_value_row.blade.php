@@ -54,6 +54,10 @@
         </div>
     </td>
     <td class="{{$class}}">
+        <select class="form-control input-sm variable_profit_margin_type" name="{{$name}}[{{$variation_index}}][variations][{{$value_index}}][profit_margin_type]" style="width: 100%;">
+            <option value="percentage">%</option>
+            <option value="fixed">Fixed (Rp)</option>
+        </select>
         <div class="input-group">
             {!! Form::text($name . '[' . $variation_index . '][variations][' . $value_index . '][profit_percent]', $profit_percent, ['class' => 'form-control input-sm variable_profit_percent input_number', 'required']); !!}
             @if($value_index == 0)

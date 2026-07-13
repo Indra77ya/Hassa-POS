@@ -13,7 +13,8 @@ return [
 
     'exc_of_tax' => 'Exc. pajak',
     'inc_of_tax' => 'Inc. pajak',
-    'profit_percent' => 'x Margin(%)',
+    'profit_percent' => 'Margin',
+    'profit_margin_type' => 'Tipe Margin',
     'add_new_product' => 'Tambahkan produk baru',
     'add_product_for_labels' => 'Tambahkan produk untuk membuat Label',
     'product_type' => 'Jenis Produk',

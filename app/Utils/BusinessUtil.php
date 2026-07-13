@@ -232,6 +232,7 @@ class BusinessUtil extends Util
         $business_details['sell_price_tax'] = 'includes';
 
         $business_details['default_profit_percent'] = 25;
+        $business_details['default_profit_margin_type'] = 'percentage';
 
         //Add POS shortcuts
         $business_details['keyboard_shortcuts'] = '{"pos":{"express_checkout":"shift+e","pay_n_ckeckout":"shift+p","draft":"shift+d","cancel":"shift+c","edit_discount":"shift+i","edit_order_tax":"shift+t","add_payment_row":"shift+r","finalize_payment":"shift+f","recent_product_quantity":"f2","add_new_product":"f4"}}';

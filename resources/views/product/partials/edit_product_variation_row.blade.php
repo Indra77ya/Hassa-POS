@@ -46,7 +46,9 @@
 
                     <span class="pull-right"><small><i>@lang('product.inc_of_tax')</i></small></span>
                 </th>
-                <th class="{{$class}}">@lang('product.profit_percent')</th>
+                <th class="{{$class}}">
+                    @lang('product.profit_percent')
+                </th>
                 <th class="{{$class}}">@lang('product.default_selling_price') 
                 <br/>
                 <small><i><span class="dsp_label"></span></i></small>
@@ -89,6 +91,10 @@
                         </div>
                     </td>
                     <td class="{{$class}}">
+                        <select class="form-control input-sm variable_profit_margin_type" name="{{$array_name}}[{{$row_index}}][{{$variation_array_name}}][{{$variation_row_index}}][profit_margin_type]" style="width: 100%;">
+                            <option value="percentage" @if($variation->profit_margin_type == 'percentage') selected @endif>%</option>
+                            <option value="fixed" @if($variation->profit_margin_type == 'fixed') selected @endif>Fixed (Rp)</option>
+                        </select>
                         {!! Form::text($array_name . '[' . $row_index .'][' . $variation_array_name . '][' . $variation_row_index . '][profit_percent]', @num_format($variation->profit_percent), ['class' => 'form-control input-sm variable_profit_percent input_number', 'required']); !!}
                     </td>
                     <td class="{{$class}}">

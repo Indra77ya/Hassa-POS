@@ -43,7 +43,7 @@
 					@can('access_default_selling_price')
 						@can('view_purchase_price')
 						<td>
-							{{ @num_format($variation->profit_percent) }}
+							{{ @num_format($variation->profit_percent) }} {{$variation->profit_margin_type == 'fixed' ? '(Fixed)' : '%'}}
 						</td>
 						@endcan
 						<td>

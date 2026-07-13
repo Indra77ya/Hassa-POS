@@ -221,7 +221,7 @@
       </div>
       <div class="row">
         <div class="form-group col-sm-11 col-sm-offset-1">
-          @include('product.partials.single_product_form_part', ['profit_percent' => $default_profit_percent, 'quick_add' => true ])
+          @include('product.partials.single_product_form_part', ['profit_percent' => $default_profit_percent, 'profit_margin_type' => $default_profit_margin_type, 'quick_add' => true ])
         </div>
       </div>
       @if(!empty($product_for) && $product_for == 'pos')

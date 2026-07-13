@@ -81,7 +81,7 @@ return [
     'show_report_607' => false,
     'whatsapp_base_url' => 'https://wa.me',
     'enable_crm_call_log' => false,
-    'enable_product_bulk_edit' => false,  //Will be depreciated in future
+    'enable_product_bulk_edit' => true,  //Will be depreciated in future
     'enable_convert_draft_to_invoice' => false, //Experimental beta feature.
     'enable_download_pdf' => false,         //Experimental feature
     'invoice_scheme_separator' => '-',

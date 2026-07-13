@@ -1456,4 +1456,5 @@ return [
     "buy" => "Beli",
     "uninstall_module_confirm" => "Apakah Anda yakin ingin menghapus (uninstall) modul? Modul akan dihapus tetapi data tidak akan dihapus",
     "delete_module_confirm" => "Apakah Anda yakin ingin menghapus file modul? Kode modul akan dihapus tetapi data tidak akan dihapus",
+    'profit_margin_type_ins' => 'Jenis margin keuntungan (percentage atau fixed)',
 ];
