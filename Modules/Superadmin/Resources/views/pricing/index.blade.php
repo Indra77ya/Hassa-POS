@@ -11,16 +11,16 @@
                     <div class="tw-flex tw-flex-col tw-gap-2 tw-text-center">
                         <h2 class="tw-font-bold tw-text-3xl tw-text-white">@lang('superadmin::lang.pricing')</h2>
                         <h3 class="tw-text-sm tw-font-medium tw-text-white">
-                            Choose your prefered {{ config('app.name', 'ultimatePOS') }} pricing plan
+                            @lang('superadmin::lang.choose_your_pricing_plan', ['app_name' => config('app.name', 'ultimatePOS')])
                         </h3>
                     </div>
-                    <!-- Montly/annual-->
+                    <!-- @lang('superadmin::lang.monthly')/annual-->
                     <div class="tw-flex tw-gap-2 mt-5 md:tw-mt-5">
-                        <span class="tw-text-white">Montly</span>
+                        <span class="tw-text-white">@lang('superadmin::lang.monthly')</span>
                         <input type="checkbox" id="durationCheck" class="tw-dw-toggle tw-dw-toggle-secondary duration_check"
                             style="margin: 0px" />
 
-                        <span class="tw-flex tw-flex-col tw-text-white"> Annual </span>
+                        <span class="tw-flex tw-flex-col tw-text-white"> @lang('superadmin::lang.annual') </span>
                     </div>
                 </div>
 

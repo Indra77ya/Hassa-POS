@@ -272,4 +272,7 @@ return [
     'google_recaptcha_version_2' => 'Google reCAPTCHA Version 2',
     'do_not_allow_disposable_email' => 'Do not allow disposable email',
 
+    "choose_your_pricing_plan" => "Choose your preferred :app_name pricing plan",
+    "monthly" => "Monthly",
+    "annual" => "Annual",
 ];

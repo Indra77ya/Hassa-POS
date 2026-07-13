@@ -12,7 +12,7 @@ return [
     */
 
     'categories' => 'Kategori',
-    'manage_your_categories' => 'Mengelola kategori Anda',
+    'manage_your_categories' => 'Kelola kategori Anda',
     'all_your_categories' => 'Semua kategori Anda',
     'category' => 'Kategori',
     'category_name' => 'Nama Kategori',

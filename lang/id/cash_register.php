@@ -12,7 +12,7 @@ return [
     */
 
     'cash_register' => 'Kasir',
-    'manage_your_cash_register' => 'Mengelola Kasir',
+    'manage_your_cash_register' => 'Kelola Kasir',
     'all_your_cash_register' => 'Semua Kasir',
     'cash_in_hand' => 'Persiapan uang tunai',
     'open_cash_register' => 'Buka Kasir',

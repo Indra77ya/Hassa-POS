@@ -20,7 +20,7 @@ return [
     'port' => 'Port',
     'path' => 'Path',
     'added_success' => 'Printer berhasil ditambahkan',
-    'manage_your_printers' => 'Mengelola Printer Anda',
+    'manage_your_printers' => 'Kelola Printer Anda',
     'all_your_printer' => 'Semua Printer yang dikonfigurasi',
     'deleted_success' => 'Printer berhasil dihapus',
     'edit_printer_setting' => 'Edit Konfigurasi Printer',

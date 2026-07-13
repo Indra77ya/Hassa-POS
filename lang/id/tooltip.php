@@ -86,7 +86,7 @@ return [
 
     'dashboard_permission' => 'Jika tidak dicentang, hanya pesan Selamat Datang yang akan ditampilkan di Beranda.',
 
-    'access_locations_permission' => 'Pilih semua lokasi yang dapat diakses oleh wewenang ini. Semua data untuk lokasi yang dipilih hanya akan ditampilkan menurut pengguna.<br/><br/><small>Sebagai Contoh: Anda dapat menggunakan ini untuk mendefinisikan <i> Mengelola Toko/Kasir/Stok/Cabang, </i> dari Lokasi tertentu.</small>',
+    'access_locations_permission' => 'Pilih semua lokasi yang dapat diakses oleh peran ini. Semua data untuk lokasi yang dipilih hanya akan ditampilkan menurut pengguna.<br/><br/><small>Sebagai Contoh: Anda dapat menggunakan ini untuk mendefinisikan <i> Kelola Toko/Kasir/Stok/Cabang, </i> dari Lokasi tertentu.</small>',
 
     'print_receipt_on_invoice' => 'Aktifkan atau Nonaktifkan pencetakan otomatis faktur pada penyelesaian',
 

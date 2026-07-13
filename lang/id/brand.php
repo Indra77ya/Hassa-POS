@@ -12,7 +12,7 @@ return [
     */
 
     'brands' => 'Merek',
-    'manage_your_brands' => 'Mengelola merek Anda',
+    'manage_your_brands' => 'Kelola merek Anda',
     'all_your_brands' => 'Semua merek Anda',
     'note' => 'Catat',
     'brand_name' => 'Nama merek',

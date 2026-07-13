@@ -35,8 +35,8 @@ return [
     'total_unit_sold' => 'Total unit terjual',
     'tax_report' => 'Laporan Pajak',
     'tax_report_msg' => 'Rincian pajak untuk rentang tanggal yang dipilih',
-    'input_tax' => 'Pajak Masukan',
-    'output_tax' => 'Pajak Keluaran',
+    'input_tax' => 'Pajak Pembelian',
+    'output_tax' => 'Pajak Penjualan',
     'tax_overall' => 'Keseluruhan (Input - Output)',
     'trending_products' => 'Produk Terlaris',
     'apply_filters' => 'Terapkan Filter',
@@ -77,5 +77,5 @@ return [
     'total_expense' => 'Total Biaya',
     'net_profit' => 'Laba Bersih',
     'total_stock_adjustment' => 'Total Penyesuaian Stok',
-    'total_stock_recovered' => 'Total Stok diKembalikan',
+    'total_stock_recovered' => 'Total Stok Dikembalikan',
 ];
