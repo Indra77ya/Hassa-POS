@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -13,9 +14,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('business', function (Blueprint $table) {
-            $table->decimal('default_profit_percent', 22, 4)->default(0)->change();
-        });
+        DB::statement("ALTER TABLE business MODIFY COLUMN default_profit_percent DECIMAL(22,4) DEFAULT 0");
     }
 
     /**
@@ -25,8 +24,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('business', function (Blueprint $table) {
-            $table->float('default_profit_percent', 5, 2)->default(0)->change();
-        });
+        DB::statement("ALTER TABLE business MODIFY COLUMN default_profit_percent FLOAT(5,2) DEFAULT 0");
     }
 };
