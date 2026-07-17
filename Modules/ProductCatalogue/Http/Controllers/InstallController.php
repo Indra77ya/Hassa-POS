@@ -39,10 +39,7 @@ class InstallController extends Controller
             abort(404);
         }
 
-        $action_url = action('\Modules\ProductCatalogue\Http\Controllers\InstallController@install');
-
-        return view('install.install-module')
-            ->with(compact('action_url'));
+        return $this->install();
     }
 
     /**
@@ -62,27 +59,9 @@ class InstallController extends Controller
     public function install()
     {
         try {
-            request()->validate(
-                ['license_code' => 'required',
-                    'login_username' => 'required'],
-                ['license_code.required' => 'License code is required',
-            'login_username.required' => 'Username is required']
-            );
-
             DB::beginTransaction();
 
-            $license_code = request()->license_code;
-            $email = request()->email;
-            $login_username = request()->login_username;
-            $pid = config('productcatalogue.pid');
-
-            //Validate
-            //$response = pos_boot(url('/'), __DIR__, $license_code, $email, $login_username, $type = 1, $pid);
-
-            if (!empty($response)) {
-                return $response;
-            }
-
+            //Check if ProductCatalogue installed or not.
             $is_installed = System::getProperty($this->module_name . '_version');
             if (!empty($is_installed)) {
                 abort(404);
