@@ -2,6 +2,31 @@
 
 /*
 |--------------------------------------------------------------------------
+| Auto Create Storage Directories
+|--------------------------------------------------------------------------
+|
+| Ensure that required storage directories exist with the correct permissions.
+| This prevents errors (like "Please provide a valid cache path") on shared
+| hosting setups during composer install, package:discover, or runtime.
+|
+*/
+$storagePaths = [
+    __DIR__ . '/../storage/framework/views',
+    __DIR__ . '/../storage/framework/sessions',
+    __DIR__ . '/../storage/framework/cache',
+    __DIR__ . '/../storage/framework/testing',
+    __DIR__ . '/../storage/logs',
+    __DIR__ . '/../storage/app/public',
+];
+
+foreach ($storagePaths as $path) {
+    if (!is_dir($path)) {
+        mkdir($path, 0775, true);
+    }
+}
+
+/*
+|--------------------------------------------------------------------------
 | Create The Application
 |--------------------------------------------------------------------------
 |
