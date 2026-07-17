@@ -49,7 +49,8 @@
                                 <script>
                                     (function() {
                                         var cachedLogo = localStorage.getItem('client_logo');
-                                        if (cachedLogo) {
+                                        var isLoginPage = window.location.pathname === '/login' || window.location.pathname.endsWith('/login');
+                                        if (cachedLogo && isLoginPage) {
                                             var logoEl = document.getElementById('client-login-logo');
                                             if (logoEl) {
                                                 logoEl.src = cachedLogo;
@@ -59,12 +60,12 @@
                                 </script>
                             </div>
                         </a>
-                        @if(config('constants.SHOW_REPAIR_STATUS_LOGIN_SCREEN') && Route::has('repair-status'))
+                        {{-- @if(config('constants.SHOW_REPAIR_STATUS_LOGIN_SCREEN') && Route::has('repair-status'))
                             <a class="tw-text-white tw-font-medium tw-text-sm md:tw-text-base hover:tw-text-white"
                                 href="{{ action([\Modules\Repair\Http\Controllers\CustomerRepairStatusController::class, 'index']) }}">
                                 @lang('repair::lang.repair_status')
                             </a>
-                        @endif
+                        @endif --}}
                         
                         @if(Route::has('member_scanner'))
                             <a class="tw-text-white tw-font-medium tw-text-sm md:tw-text-base hover:tw-text-white"
