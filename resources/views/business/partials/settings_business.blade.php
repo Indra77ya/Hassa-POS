@@ -68,6 +68,11 @@
                 {!! Form::label('business_logo', __('business.upload_logo') . ':') !!}
                     {!! Form::file('business_logo', ['accept' => 'image/*']); !!}
                     <p class="help-block"><i> @lang('business.logo_help')</i></p>
+                    @if(!empty($business->logo))
+                        <div style="margin-top: 10px;">
+                            <img src="{{ asset('uploads/business_logos/' . $business->logo) }}" alt="Logo" style="max-height: 80px; width: auto; border: 1px solid #ddd; padding: 5px; border-radius: 4px;">
+                        </div>
+                    @endif
             </div>
         </div>
         <div class="col-md-4">
