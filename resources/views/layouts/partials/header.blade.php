@@ -38,12 +38,6 @@
             </div>
 
 
-            {{-- Showing active package for SaaS Superadmin --}}
-            @if(isModuleEnabled('Superadmin'))
-                @includeIf('superadmin::layouts.partials.active_subscription')
-            @endif
-
-
             <div class="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-3">
                 {{-- When using superadmin, this button is used to switch users --}}
                 @if(!empty(session('previous_user_id')) && !empty(session('previous_username')))
@@ -51,6 +45,11 @@
                         <i class="fas fa-undo"></i>
                         @lang('lang_v1.back_to_username', ['username' => session('previous_username')] )
                     </a>
+                @endif
+
+                {{-- Showing active package for SaaS Superadmin --}}
+                @if(isModuleEnabled('Superadmin'))
+                    @includeIf('superadmin::layouts.partials.active_subscription')
                 @endif
 
                 @if(isModuleEnabled('Essentials'))
