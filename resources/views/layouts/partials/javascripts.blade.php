@@ -63,9 +63,9 @@
             }
         });
 
-        @if (config('app.debug') == false)
-            $.fn.dataTable.ext.errMode = 'throw';
-        @endif
+        $.fn.dataTable.ext.errMode = function (settings, techNote, message) {
+            console.warn('DataTables warning: ', message);
+        };
     });
 
     var financial_year = {
