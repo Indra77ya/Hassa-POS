@@ -602,7 +602,21 @@ class BusinessController extends BaseController
             DB::beginTransaction();
 
             // 1. TRANSACTION DATA
-            if ($request->has('reset_sales_pos')) {
+            $reset_sales_pos = $request->has('reset_sales_pos') || $request->has('select_all_transactions');
+            $reset_purchases = $request->has('reset_purchases') || $request->has('select_all_transactions');
+            $reset_expenses = $request->has('reset_expenses') || $request->has('select_all_transactions');
+            $reset_cash_registers = $request->has('reset_cash_registers') || $request->has('select_all_transactions');
+            $reset_stock_adjustments = $request->has('reset_stock_adjustments') || $request->has('select_all_transactions');
+            $reset_stock_transfers = $request->has('reset_stock_transfers') || $request->has('select_all_transactions');
+
+            // 2. MASTER DATA
+            $reset_products = $request->has('reset_products') || $request->has('select_all_master');
+            $reset_contacts = $request->has('reset_contacts') || $request->has('select_all_master');
+            $reset_categories_brands = $request->has('reset_categories_brands') || $request->has('select_all_master');
+            $reset_tax_rates = $request->has('reset_tax_rates') || $request->has('select_all_master');
+
+            // 1. TRANSACTION DATA IMPLEMENTATION
+            if ($reset_sales_pos) {
                 $sell_transaction_ids = Transaction::where('business_id', $id)
                     ->whereIn('type', ['sell', 'sell_return'])
                     ->pluck('id')
@@ -638,7 +652,7 @@ class BusinessController extends BaseController
                 Transaction::where('business_id', $id)->whereIn('type', ['sell', 'sell_return'])->delete();
             }
 
-            if ($request->has('reset_purchases')) {
+            if ($reset_purchases) {
                 $purchase_transaction_ids = Transaction::where('business_id', $id)
                     ->whereIn('type', ['purchase', 'purchase_return'])
                     ->pluck('id')
@@ -672,7 +686,7 @@ class BusinessController extends BaseController
                 Transaction::where('business_id', $id)->whereIn('type', ['purchase', 'purchase_return'])->delete();
             }
 
-            if ($request->has('reset_expenses')) {
+            if ($reset_expenses) {
                 $expense_transaction_ids = Transaction::where('business_id', $id)
                     ->where('type', 'expense')
                     ->pluck('id')
@@ -691,7 +705,7 @@ class BusinessController extends BaseController
                 Transaction::where('business_id', $id)->where('type', 'expense')->delete();
             }
 
-            if ($request->has('reset_cash_registers')) {
+            if ($reset_cash_registers) {
                 $register_ids = DB::table('cash_registers')
                     ->where('business_id', $id)
                     ->pluck('id')
@@ -706,7 +720,7 @@ class BusinessController extends BaseController
                 DB::table('cash_registers')->where('business_id', $id)->delete();
             }
 
-            if ($request->has('reset_stock_adjustments')) {
+            if ($reset_stock_adjustments) {
                 $adjustment_ids = Transaction::where('business_id', $id)
                     ->where('type', 'stock_adjustment')
                     ->pluck('id')
@@ -725,7 +739,7 @@ class BusinessController extends BaseController
                 Transaction::where('business_id', $id)->where('type', 'stock_adjustment')->delete();
             }
 
-            if ($request->has('reset_stock_transfers')) {
+            if ($reset_stock_transfers) {
                 $transfer_ids = Transaction::where('business_id', $id)
                     ->whereIn('type', ['sell_transfer', 'purchase_transfer'])
                     ->pluck('id')
@@ -748,8 +762,8 @@ class BusinessController extends BaseController
                 Transaction::where('business_id', $id)->whereIn('type', ['sell_transfer', 'purchase_transfer'])->delete();
             }
 
-            // 2. MASTER DATA
-            if ($request->has('reset_products')) {
+            // 2. MASTER DATA IMPLEMENTATION
+            if ($reset_products) {
                 $product_ids = Product::where('business_id', $id)->pluck('id')->toArray();
                 if (! empty($product_ids)) {
                     DB::table('variation_location_details')->whereIn('product_id', $product_ids)->delete();
@@ -770,7 +784,7 @@ class BusinessController extends BaseController
                 Product::where('business_id', $id)->delete();
             }
 
-            if ($request->has('reset_contacts')) {
+            if ($reset_contacts) {
                 $contact_ids = DB::table('contacts')->where('business_id', $id)->pluck('id')->toArray();
                 if (! empty($contact_ids)) {
                     DB::table('user_contact_access')->whereIn('contact_id', $contact_ids)->delete();
@@ -779,12 +793,12 @@ class BusinessController extends BaseController
                 DB::table('contacts')->where('business_id', $id)->delete();
             }
 
-            if ($request->has('reset_categories_brands')) {
+            if ($reset_categories_brands) {
                 DB::table('categories')->where('business_id', $id)->delete();
                 DB::table('brands')->where('business_id', $id)->delete();
             }
 
-            if ($request->has('reset_tax_rates')) {
+            if ($reset_tax_rates) {
                 $tax_rate_ids = DB::table('tax_rates')->where('business_id', $id)->pluck('id')->toArray();
                 if (! empty($tax_rate_ids)) {
                     DB::table('group_sub_taxes')
