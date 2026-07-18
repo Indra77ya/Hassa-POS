@@ -286,4 +286,5 @@ return [
     'type_reset_to_confirm' => 'Silakan ketik ":word" untuk konfirmasi',
     'confirm_reset' => 'Konfirmasi Reset',
     'data_reset_successfully' => 'Data terpilih berhasil di-reset',
+    'select_all' => 'Pilih Semua',
 ];

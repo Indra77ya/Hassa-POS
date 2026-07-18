@@ -293,4 +293,5 @@ return [
     'type_reset_to_confirm' => 'Please type ":word" to confirm',
     'confirm_reset' => 'Confirm Reset',
     'data_reset_successfully' => 'Selected data reset successfully',
+    'select_all' => 'Select All',
 ];
