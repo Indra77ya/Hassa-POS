@@ -19,7 +19,7 @@
         </svg>
         <span class="label label-warning notifications_count">@if (!empty($total_unread)){{$total_unread}}@endif</span>
     </a>
-    <ul class="dropdown-menu !tw-p-2 !tw-w-80 tw-absolute !tw-right-0 !tw-z-10 !tw-mt-2 !tw-origin-top-right !tw-bg-white !tw-rounded-lg !tw-shadow-lg !tw-ring-1 !tw-ring-gray-200 !focus:tw-outline-none" style="left: auto !important ; height:90vh; overflow-y: scroll;">
+    <ul class="dropdown-menu !tw-p-2 !tw-w-80 tw-absolute !tw-right-0 !tw-z-10 !tw-mt-2 !tw-origin-top-right !tw-bg-white !tw-rounded-lg !tw-shadow-lg !tw-ring-1 !tw-ring-gray-200 !focus:tw-outline-none" style="left: auto !important; max-height: 350px; overflow-y: auto;">
         <!-- <li class="header">You have 10 unread notifications</li> -->
         <li>
             <!-- inner menu: contains the actual data -->
