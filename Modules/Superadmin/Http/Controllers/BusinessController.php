@@ -617,7 +617,7 @@ class BusinessController extends BaseController
 
             // 1. TRANSACTION DATA IMPLEMENTATION
             if ($reset_sales_pos) {
-                $sell_transaction_ids = Transaction::where('business_id', $id)
+                $sell_transaction_ids = \App\Transaction::where('business_id', $id)
                     ->whereIn('type', ['sell', 'sell_return'])
                     ->pluck('id')
                     ->toArray();
@@ -649,11 +649,11 @@ class BusinessController extends BaseController
 
                 // Delete bookings & sell transactions
                 DB::table('bookings')->where('business_id', $id)->delete();
-                Transaction::where('business_id', $id)->whereIn('type', ['sell', 'sell_return'])->delete();
+                \App\Transaction::where('business_id', $id)->whereIn('type', ['sell', 'sell_return'])->delete();
             }
 
             if ($reset_purchases) {
-                $purchase_transaction_ids = Transaction::where('business_id', $id)
+                $purchase_transaction_ids = \App\Transaction::where('business_id', $id)
                     ->whereIn('type', ['purchase', 'purchase_return'])
                     ->pluck('id')
                     ->toArray();
@@ -683,11 +683,11 @@ class BusinessController extends BaseController
                         ->delete();
                 }
 
-                Transaction::where('business_id', $id)->whereIn('type', ['purchase', 'purchase_return'])->delete();
+                \App\Transaction::where('business_id', $id)->whereIn('type', ['purchase', 'purchase_return'])->delete();
             }
 
             if ($reset_expenses) {
-                $expense_transaction_ids = Transaction::where('business_id', $id)
+                $expense_transaction_ids = \App\Transaction::where('business_id', $id)
                     ->where('type', 'expense')
                     ->pluck('id')
                     ->toArray();
@@ -702,7 +702,7 @@ class BusinessController extends BaseController
                         ->delete();
                 }
 
-                Transaction::where('business_id', $id)->where('type', 'expense')->delete();
+                \App\Transaction::where('business_id', $id)->where('type', 'expense')->delete();
             }
 
             if ($reset_cash_registers) {
@@ -721,7 +721,7 @@ class BusinessController extends BaseController
             }
 
             if ($reset_stock_adjustments) {
-                $adjustment_ids = Transaction::where('business_id', $id)
+                $adjustment_ids = \App\Transaction::where('business_id', $id)
                     ->where('type', 'stock_adjustment')
                     ->pluck('id')
                     ->toArray();
@@ -736,11 +736,11 @@ class BusinessController extends BaseController
                         ->delete();
                 }
 
-                Transaction::where('business_id', $id)->where('type', 'stock_adjustment')->delete();
+                \App\Transaction::where('business_id', $id)->where('type', 'stock_adjustment')->delete();
             }
 
             if ($reset_stock_transfers) {
-                $transfer_ids = Transaction::where('business_id', $id)
+                $transfer_ids = \App\Transaction::where('business_id', $id)
                     ->whereIn('type', ['sell_transfer', 'purchase_transfer'])
                     ->pluck('id')
                     ->toArray();
@@ -759,12 +759,12 @@ class BusinessController extends BaseController
                         ->delete();
                 }
 
-                Transaction::where('business_id', $id)->whereIn('type', ['sell_transfer', 'purchase_transfer'])->delete();
+                \App\Transaction::where('business_id', $id)->whereIn('type', ['sell_transfer', 'purchase_transfer'])->delete();
             }
 
             // 2. MASTER DATA IMPLEMENTATION
             if ($reset_products) {
-                $product_ids = Product::where('business_id', $id)->pluck('id')->toArray();
+                $product_ids = \App\Product::where('business_id', $id)->pluck('id')->toArray();
                 if (! empty($product_ids)) {
                     DB::table('variation_location_details')->whereIn('product_id', $product_ids)->delete();
                     DB::table('product_locations')->whereIn('product_id', $product_ids)->delete();
@@ -781,7 +781,7 @@ class BusinessController extends BaseController
                 }
 
                 DB::table('discounts')->where('business_id', $id)->delete();
-                Product::where('business_id', $id)->delete();
+                \App\Product::where('business_id', $id)->delete();
             }
 
             if ($reset_contacts) {

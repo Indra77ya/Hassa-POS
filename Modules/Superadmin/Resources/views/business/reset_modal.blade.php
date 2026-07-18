@@ -151,85 +151,71 @@
             }
         }
 
+        var is_programmatic = false;
+
+        // Helper function to update Select All state based on individual checkbox changes
+        function updateSelectAllState(allSelector, checkedSelector, selectAllInput) {
+            if (is_programmatic) return;
+
+            var total = $(allSelector).length;
+            var checked = $(checkedSelector).length;
+
+            is_programmatic = true;
+            if (checked === total) {
+                $(selectAllInput).prop('checked', true).iCheck('update');
+            } else {
+                $(selectAllInput).prop('checked', false).iCheck('update');
+            }
+            is_programmatic = false;
+
+            checkResetConfirmation();
+        }
+
         // Select All Transactions logic
         $('#select_all_transactions').on('ifChecked', function() {
-            $('.transaction_checkbox').iCheck('check');
-            $('.transaction_checkbox').iCheck('disable');
-            checkResetConfirmation();
+            if (!is_programmatic) {
+                is_programmatic = true;
+                $('.transaction_checkbox').prop('checked', true).iCheck('update');
+                is_programmatic = false;
+                checkResetConfirmation();
+            }
         });
         $('#select_all_transactions').on('ifUnchecked', function() {
-            $('.transaction_checkbox').iCheck('enable');
-            $('.transaction_checkbox').iCheck('uncheck');
-            checkResetConfirmation();
+            if (!is_programmatic) {
+                is_programmatic = true;
+                $('.transaction_checkbox').prop('checked', false).iCheck('update');
+                is_programmatic = false;
+                checkResetConfirmation();
+            }
         });
 
         // Select All Master logic
         $('#select_all_master').on('ifChecked', function() {
-            $('.master_checkbox').iCheck('check');
-            $('.master_checkbox').iCheck('disable');
-            checkResetConfirmation();
+            if (!is_programmatic) {
+                is_programmatic = true;
+                $('.master_checkbox').prop('checked', true).iCheck('update');
+                is_programmatic = false;
+                checkResetConfirmation();
+            }
         });
         $('#select_all_master').on('ifUnchecked', function() {
-            $('.master_checkbox').iCheck('enable');
-            $('.master_checkbox').iCheck('uncheck');
-            checkResetConfirmation();
+            if (!is_programmatic) {
+                is_programmatic = true;
+                $('.master_checkbox').prop('checked', false).iCheck('update');
+                is_programmatic = false;
+                checkResetConfirmation();
+            }
         });
 
         // Individual Transaction checkboxes logic
         $('.transaction_checkbox').on('ifChanged', function() {
-            if (!$('#select_all_transactions').is(':checked')) {
-                var allCount = $('.transaction_checkbox').length;
-                var checkedCount = $('.transaction_checkbox:checked').length;
-
-                if (checkedCount === allCount) {
-                    $('#select_all_transactions').off('ifChecked ifUnchecked');
-                    $('#select_all_transactions').iCheck('check');
-                    $('.transaction_checkbox').iCheck('disable');
-                    // Rebind Select All logic
-                    rebindSelectAll();
-                }
-            }
-            checkResetConfirmation();
+            updateSelectAllState('.transaction_checkbox', '.transaction_checkbox:checked', '#select_all_transactions');
         });
 
         // Individual Master checkboxes logic
         $('.master_checkbox').on('ifChanged', function() {
-            if (!$('#select_all_master').is(':checked')) {
-                var allCount = $('.master_checkbox').length;
-                var checkedCount = $('.master_checkbox:checked').length;
-
-                if (checkedCount === allCount) {
-                    $('#select_all_master').off('ifChecked ifUnchecked');
-                    $('#select_all_master').iCheck('check');
-                    $('.master_checkbox').iCheck('disable');
-                    // Rebind Select All logic
-                    rebindSelectAll();
-                }
-            }
-            checkResetConfirmation();
+            updateSelectAllState('.master_checkbox', '.master_checkbox:checked', '#select_all_master');
         });
-
-        function rebindSelectAll() {
-            $('#select_all_transactions').off('ifChecked ifUnchecked').on('ifChecked', function() {
-                $('.transaction_checkbox').iCheck('check');
-                $('.transaction_checkbox').iCheck('disable');
-                checkResetConfirmation();
-            }).on('ifUnchecked', function() {
-                $('.transaction_checkbox').iCheck('enable');
-                $('.transaction_checkbox').iCheck('uncheck');
-                checkResetConfirmation();
-            });
-
-            $('#select_all_master').off('ifChecked ifUnchecked').on('ifChecked', function() {
-                $('.master_checkbox').iCheck('check');
-                $('.master_checkbox').iCheck('disable');
-                checkResetConfirmation();
-            }).on('ifUnchecked', function() {
-                $('.master_checkbox').iCheck('enable');
-                $('.master_checkbox').iCheck('uncheck');
-                checkResetConfirmation();
-            });
-        }
 
         $(document).on('keyup change', '#confirm_word_input', function() {
             checkResetConfirmation();
