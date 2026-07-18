@@ -111,94 +111,105 @@
 </div>
 
 <script type="text/javascript">
-    $(document).ready(function() {
-        // Toggle Select All Transactions
-        $(document).on('change', '#select_all_transactions', function() {
-            var checked = $(this).is(':checked');
-            $('.transaction_reset_option').each(function() {
-                $(this).prop('checked', checked);
-                $(this).prop('disabled', checked);
-            });
-        });
-
-        // Toggle Select All Master Data
-        $(document).on('change', '#select_all_master', function() {
-            var checked = $(this).is(':checked');
-            $('.master_reset_option').each(function() {
-                $(this).prop('checked', checked);
-                $(this).prop('disabled', checked);
-            });
-        });
-
-        // Click Reset Button in Table or view
-        $(document).on('click', '.reset_business_data_btn', function(e) {
-            e.preventDefault();
-            var business_id = $(this).data('business_id');
-            var business_name = $(this).data('business_name');
-
-            // Reset form
-            $('#reset_business_data_form')[0].reset();
-            $('.transaction_reset_option, .master_reset_option').prop('disabled', false).prop('checked', false);
-
-            var is_superadmin = window.location.pathname.includes('/superadmin');
-            var url = is_superadmin ? '/superadmin/business/' + business_id + '/reset-data' : '/business/reset-data';
-            $('#reset_business_data_form').attr('action', url);
-
-            $('#reset_business_data_modal').modal('show');
-        });
-
-        // Confirm Reset
-        $(document).on('click', '#confirm_reset_business_btn', function(e) {
-            e.preventDefault();
-
-            var selected_options = [];
-            $('#reset_business_data_form input[name="reset_options[]"]:checked').each(function() {
-                selected_options.push($(this).val());
+    window.addEventListener('load', function() {
+        $(document).ready(function() {
+            // Toggle Select All Transactions
+            $(document).on('change', '#select_all_transactions', function() {
+                var checked = $(this).is(':checked');
+                $('.transaction_reset_option').each(function() {
+                    $(this).prop('checked', checked);
+                    $(this).prop('disabled', checked);
+                });
             });
 
-            if (selected_options.length === 0) {
-                toastr.error("@lang('superadmin::lang.please_select_at_least_one')");
-                return false;
-            }
+            // Toggle Select All Master Data
+            $(document).on('change', '#select_all_master', function() {
+                var checked = $(this).is(':checked');
+                $('.master_reset_option').each(function() {
+                    $(this).prop('checked', checked);
+                    $(this).prop('disabled', checked);
+                });
+            });
 
-            swal({
-                title: LANG.sure,
-                text: "@lang('superadmin::lang.reset_data_confirmation')",
-                icon: "warning",
-                buttons: true,
-                dangerMode: true,
-            }).then((confirmed) => {
-                if (confirmed) {
-                    var url = $('#reset_business_data_form').attr('action');
-                    var data = {
-                        _token: $('meta[name="csrf-token"]').attr('content'),
-                        reset_options: selected_options
-                    };
+            // Click Reset Button in Table or view
+            $(document).on('click', '.reset_business_data_btn', function(e) {
+                e.preventDefault();
+                var business_id = $(this).data('business_id');
+                var business_name = $(this).data('business_name');
 
-                    $.ajax({
-                        method: 'POST',
-                        url: url,
-                        data: data,
-                        dataType: 'json',
-                        success: function(result) {
-                            if (result.success) {
-                                $('#reset_business_data_modal').modal('hide');
-                                swal({
-                                    title: "Success",
-                                    text: result.msg,
-                                    icon: "success"
-                                }).then(function() {
-                                    window.location.reload();
-                                });
-                            } else {
-                                swal("Error", result.msg, "error");
-                            }
-                        },
-                        error: function(xhr) {
-                            swal("Error", "@lang('messages.something_went_wrong')", "error");
-                        }
-                    });
+                // Reset form
+                $('#reset_business_data_form')[0].reset();
+                $('.transaction_reset_option, .master_reset_option').prop('disabled', false).prop('checked', false);
+
+                var is_superadmin = window.location.pathname.includes('/superadmin');
+                var url = is_superadmin ? '/superadmin/business/' + business_id + '/reset-data' : '/business/reset-data';
+                $('#reset_business_data_form').attr('action', url);
+
+                $('#reset_business_data_modal').modal('show');
+            });
+
+            // Confirm Reset
+            $(document).on('click', '#confirm_reset_business_btn', function(e) {
+                e.preventDefault();
+
+                var selected_options = [];
+                // Check normal checked checkboxes
+                $('#reset_business_data_form input[name="reset_options[]"]:checked').each(function() {
+                    selected_options.push($(this).val());
+                });
+
+                // Also collect checked checkboxes that are disabled due to Select All
+                if ($('#select_all_transactions').is(':checked')) {
+                    selected_options.push('select_all_transactions');
                 }
+                if ($('#select_all_master').is(':checked')) {
+                    selected_options.push('select_all_master');
+                }
+
+                if (selected_options.length === 0) {
+                    toastr.error("@lang('superadmin::lang.please_select_at_least_one')");
+                    return false;
+                }
+
+                swal({
+                    title: LANG.sure,
+                    text: "@lang('superadmin::lang.reset_data_confirmation')",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                }).then((confirmed) => {
+                    if (confirmed) {
+                        var url = $('#reset_business_data_form').attr('action');
+                        var data = {
+                            _token: $('meta[name="csrf-token"]').attr('content'),
+                            reset_options: selected_options
+                        };
+
+                        $.ajax({
+                            method: 'POST',
+                            url: url,
+                            data: data,
+                            dataType: 'json',
+                            success: function(result) {
+                                if (result.success) {
+                                    $('#reset_business_data_modal').modal('hide');
+                                    swal({
+                                        title: "Success",
+                                        text: result.msg,
+                                        icon: "success"
+                                    }).then(function() {
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    swal("Error", result.msg, "error");
+                                }
+                            },
+                            error: function(xhr) {
+                                swal("Error", "@lang('messages.something_went_wrong')", "error");
+                            }
+                        });
+                    }
+                });
             });
         });
     });
