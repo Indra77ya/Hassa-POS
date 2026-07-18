@@ -4,7 +4,7 @@
             {!! Form::open(['url' => '#', 'method' => 'post', 'id' => 'reset_business_data_form']) !!}
             <div class="modal-header" style="background-color: #f5f5f5; border-bottom: 1px solid #e5e5e5;">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true" style="font-size: 24px;">&times;</span></button>
-                <h4 class="modal-title" style="font-weight: bold; color: #333333;"><i class="fa fa-refresh text-danger"></i> @lang('superadmin::lang.reset_business_data')</h4>
+                <h4 class="modal-title" style="font-weight: bold; color: #333333;">@lang('superadmin::lang.reset_business_data')</h4>
             </div>
 
             <div class="modal-body" style="padding: 25px;">
@@ -12,7 +12,7 @@
                 <div class="row">
                     <div class="col-xs-12" style="margin-bottom: 20px;">
                         <div class="callout callout-danger" style="margin: 0; border-left: 5px solid #d9534f; background-color: #fdf7f7 !important; color: #a94442 !important; padding: 15px; border-radius: 4px;">
-                            <h4 style="font-weight: bold; margin-top: 0; color: #d9534f !important;"><i class="fa fa-exclamation-triangle"></i> PENTING / WARNING!</h4>
+                            <h4 style="font-weight: bold; margin-top: 0; color: #d9534f !important;">PENTING / WARNING!</h4>
                             <p style="font-size: 14px; margin-bottom: 0;">@lang('superadmin::lang.reset_data_confirmation')</p>
                         </div>
                     </div>
@@ -23,7 +23,7 @@
                     <div class="col-md-6">
                         <div class="box box-solid box-primary" style="border: 1px solid #3c8dbc; border-radius: 4px; overflow: hidden;">
                             <div class="box-header with-border" style="background-color: #3c8dbc !important; padding: 12px 15px;">
-                                <h3 class="box-title" style="color: #ffffff !important; font-weight: bold; font-size: 16px;"><i class="fa fa-exchange"></i> @lang('superadmin::lang.transactions_data')</h3>
+                                <h3 class="box-title" style="color: #ffffff !important; font-weight: bold; font-size: 16px;">@lang('superadmin::lang.transactions_data')</h3>
                             </div>
                             <div class="box-body" style="padding: 20px;">
                                 <div class="checkbox" style="margin-top: 0; margin-bottom: 15px;">
@@ -74,7 +74,7 @@
                     <div class="col-md-6">
                         <div class="box box-solid box-success" style="border: 1px solid #00a65a; border-radius: 4px; overflow: hidden;">
                             <div class="box-header with-border" style="background-color: #00a65a !important; padding: 12px 15px;">
-                                <h3 class="box-title" style="color: #ffffff !important; font-weight: bold; font-size: 16px;"><i class="fa fa-database"></i> @lang('superadmin::lang.master_data')</h3>
+                                <h3 class="box-title" style="color: #ffffff !important; font-weight: bold; font-size: 16px;">@lang('superadmin::lang.master_data')</h3>
                             </div>
                             <div class="box-body" style="padding: 20px;">
                                 <div class="checkbox" style="margin-top: 0; margin-bottom: 15px;">
@@ -117,9 +117,9 @@
                 </div>
             </div>
 
-            <div class="modal-footer" style="background-color: #f5f5f5; border-top: 1px solid #e5e5e5; padding: 15px 25px;">
-                <button type="button" class="tw-dw-btn tw-dw-btn-error tw-text-white" id="confirm_reset_business_btn" style="font-weight: bold;"><i class="fa fa-refresh"></i> @lang('superadmin::lang.reset_data')</button>
-                <button type="button" class="tw-dw-btn tw-dw-btn-neutral tw-text-white" data-dismiss="modal" style="font-weight: bold;">@lang('messages.close')</button>
+            <div class="modal-footer" style="background-color: #f5f5f5; border-top: 1px solid #e5e5e5; padding: 15px 25px; display: flex; justify-content: flex-end; align-items: center; gap: 10px;">
+                <button type="button" class="tw-m-0.5 tw-dw-btn tw-dw-btn-error tw-text-white" id="confirm_reset_business_btn" style="font-weight: bold; height: 36px; min-height: 36px; margin: 0; padding: 0 16px; display: inline-flex; align-items: center; justify-content: center; line-height: 1;">@lang('superadmin::lang.reset_data')</button>
+                <button type="button" class="tw-m-0.5 tw-dw-btn tw-dw-btn-neutral tw-text-white" data-dismiss="modal" style="font-weight: bold; height: 36px; min-height: 36px; margin: 0; padding: 0 16px; display: inline-flex; align-items: center; justify-content: center; line-height: 1;">@lang('messages.close')</button>
             </div>
             {!! Form::close() !!}
         </div>
