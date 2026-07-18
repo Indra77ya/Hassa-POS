@@ -24,6 +24,8 @@ Route::middleware('web', 'auth', 'SetSessionData', 'language', 'AdminSidebarMenu
 
     Route::resource('/business', Modules\Superadmin\Http\Controllers\BusinessController::class);
     Route::get('/business/{id}/destroy', [Modules\Superadmin\Http\Controllers\BusinessController::class, 'destroy']);
+    Route::get('/business/{id}/reset-data', [Modules\Superadmin\Http\Controllers\BusinessController::class, 'getResetModal']);
+    Route::post('/business/{id}/reset-data', [Modules\Superadmin\Http\Controllers\BusinessController::class, 'postResetData']);
 
     Route::resource('/packages', 'Modules\Superadmin\Http\Controllers\PackagesController');
     Route::get('/packages/{id}/destroy', [Modules\Superadmin\Http\Controllers\PackagesController::class, 'destroy']);

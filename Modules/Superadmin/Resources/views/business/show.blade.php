@@ -19,9 +19,13 @@
         <div
             class=" tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md  tw-ring-gray-200">
             <div class="tw-p-4 sm:tw-p-5">
-                <div class="tw-flex tw-gap-2.5">
+                <div class="tw-flex tw-justify-between tw-items-center tw-gap-2.5">
                     <strong><i class="fa fa-briefcase margin-r-5"></i>
                         {{ $business->name }}</strong>
+
+                    <button type="button" class="tw-dw-btn tw-dw-btn-error tw-text-white tw-font-bold tw-rounded-full btn-modal" data-href="{{ action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'getResetModal'], [$business->id]) }}" data-container=".view_modal">
+                        <i class="fa fa-undo"></i> @lang('superadmin::lang.reset_business_data')
+                    </button>
                 </div>
                 <div class="tw-flow-root tw-mt-5 tw-border-b tw-border-gray-200">
                     <div class="tw-mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
