@@ -9,9 +9,17 @@
         .notifications_count:empty {
             display: none !important;
         }
+        .notifications_count i {
+            font-size: 10px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: auto !important;
+            height: auto !important;
+        }
     </style>
     <a type="button"
-        class="dropdown-toggle load_notifications tw-relative tw-inline-flex tw-items-center tw-ring-1 tw-ring-white/10 tw-justify-center tw-text-sm tw-font-medium tw-text-white hover:tw-text-white tw-transition-all tw-duration-200 theme-btn-bg tw-p-1.5 tw-rounded-lg"
+        class="dropdown-toggle load_notifications tw-inline-flex tw-items-center tw-ring-1 tw-ring-white/10 tw-justify-center tw-text-sm tw-font-medium tw-text-white hover:tw-text-white tw-transition-all tw-duration-200 theme-btn-bg tw-p-1.5 tw-rounded-lg"
+        style="position: relative;"
         data-toggle="dropdown" id="show_unread_notifications" data-loaded="false">
         <span class="tw-sr-only">
             Notifications
@@ -22,7 +30,7 @@
             <path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6" />
             <path d="M9 17v1a3 3 0 0 0 6 0v-1" />
         </svg>
-        <span class="notifications_count tw-absolute -tw-top-1.5 -tw-right-1 tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center tw-rounded-full tw-bg-rose-500 tw-text-[10px] tw-font-bold tw-text-white tw-shadow-md">@if (!empty($total_unread)){{$total_unread}}@endif</span>
+        <span class="notifications_count" style="position: absolute; top: -4px; right: -4px; background-color: #e11d48; color: white; border-radius: 9999px; height: 18px; width: 18px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; line-height: 1; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10;">@if (!empty($total_unread)){{$total_unread}}@endif</span>
     </a>
     <ul class="dropdown-menu !tw-p-2 !tw-w-80 tw-absolute !tw-right-0 !tw-z-10 !tw-mt-2 !tw-origin-top-right !tw-bg-white !tw-rounded-lg !tw-shadow-lg !tw-ring-1 !tw-ring-gray-200 !focus:tw-outline-none" style="left: auto !important; max-height: 350px; overflow-y: auto;">
         <!-- <li class="header">You have 10 unread notifications</li> -->
