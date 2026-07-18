@@ -22,7 +22,7 @@
                     </button>
                     <a class="navbar-brand menu" href="#top">
                         @if(!empty($business->logo))
-                            <img src="{{asset( 'uploads/business_logos/' . $business->logo)}}" alt="Logo" width="30">
+                            <img src="{{url( '/uploads/business_logos/' . $business->logo)}}" alt="Logo" width="30">
                         @else
                             <i class="fas fa-boxes"></i>
                         @endif

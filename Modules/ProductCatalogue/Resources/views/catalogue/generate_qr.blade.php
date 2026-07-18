@@ -116,7 +116,7 @@
             }
 
             if ($('#show_logo').is(':checked')) {
-                opts.logo = "{{asset( 'uploads/business_logos/' . $business->logo)}}";
+                opts.logo = "{{url( '/uploads/business_logos/' . $business->logo)}}";
             }
 
             new QRCode(document.getElementById("qrcode"), opts);
