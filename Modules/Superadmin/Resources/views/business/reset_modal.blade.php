@@ -118,8 +118,8 @@
             </div>
 
             <div class="modal-footer" style="background-color: #f5f5f5; border-top: 1px solid #e5e5e5; padding: 15px 25px;">
-                <button type="button" class="tw-m-0.5 tw-dw-btn tw-dw-btn-outline tw-dw-btn-error" id="confirm_reset_business_btn" style="font-weight: bold;"><i class="fa fa-refresh"></i> @lang('superadmin::lang.reset_data')</button>
-                <button type="button" class="tw-m-0.5 tw-dw-btn tw-dw-btn-outline tw-dw-btn-neutral" data-dismiss="modal" style="font-weight: bold;">@lang('messages.close')</button>
+                <button type="button" class="tw-dw-btn tw-dw-btn-error tw-text-white" id="confirm_reset_business_btn" style="font-weight: bold;"><i class="fa fa-refresh"></i> @lang('superadmin::lang.reset_data')</button>
+                <button type="button" class="tw-dw-btn tw-dw-btn-neutral tw-text-white" data-dismiss="modal" style="font-weight: bold;">@lang('messages.close')</button>
             </div>
             {!! Form::close() !!}
         </div>
