@@ -221,6 +221,38 @@
                 }
             });
         });
+
+        $(document).on('submit', 'form#reset_business_form', function(e) {
+            e.preventDefault();
+            var form = $(this);
+            var data = form.serialize();
+
+            swal({
+                title: LANG.sure,
+                text: "Are you sure you want to reset the selected data? This action cannot be undone!",
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+            }).then((confirmed) => {
+                if (confirmed) {
+                    $.ajax({
+                        method: 'POST',
+                        url: form.attr('action'),
+                        dataType: 'json',
+                        data: data,
+                        success: function(result) {
+                            if (result.success === 1) {
+                                swal("Success", result.msg, "success");
+                                $('.view_modal').modal('hide');
+                                superadmin_business_table.ajax.reload();
+                            } else {
+                                swal("Error", result.msg, "error");
+                            }
+                        }
+                    });
+                }
+            });
+        });
     </script>
 
 @endsection
