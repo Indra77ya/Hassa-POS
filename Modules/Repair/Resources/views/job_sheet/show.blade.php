@@ -104,7 +104,7 @@ $jobsheet_settings['contact_custom_fields'] : [];
                                     @if(!empty($logo_data))
                                         <img src="{{ $logo_data }}" alt="Logo" style="width: auto; max-height: 90px; margin: auto;">
                                     @elseif(!empty($business_logo))
-                                        <img src="{{ asset( 'uploads/business_logos/' . $business_logo ) }}" alt="Logo" style="width: auto; max-height: 90px; margin: auto;">
+                                        <img src="{{ url( 'uploads/business_logos/' . $business_logo ) }}" alt="Logo" style="width: auto; max-height: 90px; margin: auto;">
                                     @endif
                                 </td>
                                 <td width="50%" align="center">

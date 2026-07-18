@@ -14,7 +14,7 @@
 		      		<tr>
 		      			<td colspan="3">
 			      			@if(!empty(Session::get('business.logo')))
-			                  <img src="{{ asset( 'uploads/business_logos/' . Session::get('business.logo') ) }}" alt="Logo" style="width: auto; max-height: 50px; margin: auto;">
+			                  <img src="{{ url( 'uploads/business_logos/' . Session::get('business.logo') ) }}" alt="Logo" style="width: auto; max-height: 50px; margin: auto;">
 			                @endif
 			                <div class="pull-right text-center">
 			                	<strong class="font-23">
