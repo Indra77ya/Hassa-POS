@@ -136,6 +136,8 @@ class BusinessController extends BaseController
                                 </a>';
                     }
 
+                    $html .= ' <button type="button" class="tw-m-0.5 tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-error btn-modal" data-href="'.action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'getResetModal'], [$row->id]).'" data-container=".view_modal">'.__('superadmin::lang.reset_business_data').'</button>';
+
                     if (request()->session()->get('user.business_id') != $row->id) {
                         $html .= ' <a href="'.action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'destroy'], [$row->id]).'"
                                     class="tw-m-0.5 tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-error delete_business_confirmation">'.__('messages.delete').'</a>';
@@ -552,5 +554,209 @@ class BusinessController extends BaseController
         }
 
         return $output;
+    }
+
+    /**
+     * Display the reset business data modal.
+     *
+     * @param  int  $id
+     * @return Response
+     */
+    public function getResetModal($id)
+    {
+        if (! auth()->user()->can('superadmin')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $business = Business::findOrFail($id);
+
+        return view('superadmin::business.reset_data_modal')
+            ->with(compact('business'));
+    }
+
+    /**
+     * Resets granular data for a specific business.
+     *
+     * @param  Request  $request
+     * @param  int  $id
+     * @return Response
+     */
+    public function postResetData(Request $request, $id)
+    {
+        if (! auth()->user()->can('superadmin')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+            $notAllowed = $this->businessUtil->notAllowedInDemo();
+            if (! empty($notAllowed)) {
+                return response()->json($notAllowed);
+            }
+
+            $business_id = $id;
+
+            DB::beginTransaction();
+
+            // 1. DATA TRANSAKSI
+            $select_all_transactions = $request->input('select_all_transactions');
+            $reset_transactions = $request->input('reset_transactions', []);
+
+            $reset_all_tx = !empty($select_all_transactions);
+
+            // Sub-category: sales
+            if ($reset_all_tx || in_array('sales', $reset_transactions)) {
+                $sales_ids = DB::table('transactions')
+                    ->where('business_id', $business_id)
+                    ->whereIn('type', ['sell', 'sell_return', 'sales_order'])
+                    ->pluck('id')
+                    ->toArray();
+
+                if (!empty($sales_ids)) {
+                    DB::table('transaction_payments')->whereIn('transaction_id', $sales_ids)->delete();
+
+                    $sell_line_ids = DB::table('transaction_sell_lines')->whereIn('transaction_id', $sales_ids)->pluck('id')->toArray();
+                    if (!empty($sell_line_ids)) {
+                        DB::table('transaction_sell_lines_purchase_lines')->whereIn('sell_line_id', $sell_line_ids)->delete();
+                        DB::table('transaction_sell_lines')->whereIn('id', $sell_line_ids)->delete();
+                    }
+
+                    DB::table('account_transactions')->whereIn('transaction_id', $sales_ids)->delete();
+                    DB::table('transactions')->whereIn('id', $sales_ids)->delete();
+                }
+
+                // Also delete bookings if sales reset is requested
+                DB::table('bookings')->where('business_id', $business_id)->delete();
+            }
+
+            // Sub-category: purchases
+            if ($reset_all_tx || in_array('purchases', $reset_transactions)) {
+                $purchase_ids = DB::table('transactions')
+                    ->where('business_id', $business_id)
+                    ->whereIn('type', ['purchase', 'purchase_return', 'purchase_order'])
+                    ->pluck('id')
+                    ->toArray();
+
+                if (!empty($purchase_ids)) {
+                    DB::table('transaction_payments')->whereIn('transaction_id', $purchase_ids)->delete();
+
+                    $purchase_line_ids = DB::table('purchase_lines')->whereIn('transaction_id', $purchase_ids)->pluck('id')->toArray();
+                    if (!empty($purchase_line_ids)) {
+                        DB::table('transaction_sell_lines_purchase_lines')->whereIn('purchase_line_id', $purchase_line_ids)->delete();
+                        DB::table('purchase_lines')->whereIn('id', $purchase_line_ids)->delete();
+                    }
+
+                    DB::table('account_transactions')->whereIn('transaction_id', $purchase_ids)->delete();
+                    DB::table('transactions')->whereIn('id', $purchase_ids)->delete();
+                }
+            }
+
+            // Sub-category: expenses
+            if ($reset_all_tx || in_array('expenses', $reset_transactions)) {
+                $expense_ids = DB::table('transactions')
+                    ->where('business_id', $business_id)
+                    ->where('type', 'expense')
+                    ->pluck('id')
+                    ->toArray();
+
+                if (!empty($expense_ids)) {
+                    DB::table('transaction_payments')->whereIn('transaction_id', $expense_ids)->delete();
+                    DB::table('account_transactions')->whereIn('transaction_id', $expense_ids)->delete();
+                    DB::table('transactions')->whereIn('id', $expense_ids)->delete();
+                }
+            }
+
+            // Sub-category: registers (cash register)
+            if ($reset_all_tx || in_array('registers', $reset_transactions)) {
+                $register_ids = DB::table('cash_registers')
+                    ->where('business_id', $business_id)
+                    ->pluck('id')
+                    ->toArray();
+
+                if (!empty($register_ids)) {
+                    DB::table('cash_register_transactions')->whereIn('cash_register_id', $register_ids)->delete();
+                    DB::table('cash_registers')->whereIn('id', $register_ids)->delete();
+                }
+            }
+
+            // Sub-category: stock_adjustments (stock adjustments and transfers)
+            if ($reset_all_tx || in_array('stock_adjustments', $reset_transactions)) {
+                $stock_ids = DB::table('transactions')
+                    ->where('business_id', $business_id)
+                    ->whereIn('type', ['stock_adjustment', 'sell_transfer', 'purchase_transfer'])
+                    ->pluck('id')
+                    ->toArray();
+
+                if (!empty($stock_ids)) {
+                    DB::table('transaction_payments')->whereIn('transaction_id', $stock_ids)->delete();
+                    DB::table('stock_adjustment_lines')->whereIn('transaction_id', $stock_ids)->delete();
+                    DB::table('purchase_lines')->whereIn('transaction_id', $stock_ids)->delete();
+                    DB::table('transaction_sell_lines')->whereIn('transaction_id', $stock_ids)->delete();
+                    DB::table('account_transactions')->whereIn('transaction_id', $stock_ids)->delete();
+                    DB::table('transactions')->whereIn('id', $stock_ids)->delete();
+                }
+            }
+
+
+            // 2. DATA MASTER
+            $select_all_master = $request->input('select_all_master');
+            $reset_master = $request->input('reset_master', []);
+
+            $reset_all_mst = !empty($select_all_master);
+
+            // Sub-category: products
+            if ($reset_all_mst || in_array('products', $reset_master)) {
+                $product_ids = DB::table('products')->where('business_id', $business_id)->pluck('id')->toArray();
+                if (!empty($product_ids)) {
+                    DB::table('variation_location_details')->whereIn('product_id', $product_ids)->delete();
+                    DB::table('product_locations')->whereIn('product_id', $product_ids)->delete();
+                    DB::table('product_racks')->whereIn('product_id', $product_ids)->delete();
+                    DB::table('variations')->whereIn('product_id', $product_ids)->delete();
+                    DB::table('product_variations')->whereIn('product_id', $product_ids)->delete();
+                    DB::table('products')->whereIn('id', $product_ids)->delete();
+                }
+            }
+
+            // Sub-category: contacts
+            if ($reset_all_mst || in_array('contacts', $reset_master)) {
+                DB::table('contacts')->where('business_id', $business_id)->delete();
+            }
+
+            // Sub-category: categories
+            if ($reset_all_mst || in_array('categories', $reset_master)) {
+                DB::table('categories')->where('business_id', $business_id)->delete();
+            }
+
+            // Sub-category: brands
+            if ($reset_all_mst || in_array('brands', $reset_master)) {
+                DB::table('brands')->where('business_id', $business_id)->delete();
+            }
+
+            // Sub-category: taxes (custom taxes)
+            if ($reset_all_mst || in_array('taxes', $reset_master)) {
+                $tax_rate_ids = DB::table('tax_rates')->where('business_id', $business_id)->pluck('id')->toArray();
+                if (!empty($tax_rate_ids)) {
+                    DB::table('group_sub_taxes')->whereIn('group_tax_id', $tax_rate_ids)->orWhereIn('tax_id', $tax_rate_ids)->delete();
+                    DB::table('tax_rates')->whereIn('id', $tax_rate_ids)->delete();
+                }
+            }
+
+            DB::commit();
+
+            $output = [
+                'success' => true,
+                'msg' => __('superadmin::lang.reset_success')
+            ];
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+
+            $output = [
+                'success' => false,
+                'msg' => __('messages.something_went_wrong') . ' ' . $e->getMessage()
+            ];
+        }
+
+        return response()->json($output);
     }
 }
