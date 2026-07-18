@@ -338,10 +338,8 @@
             var form = $(this);
             var actionUrl = form.attr('action');
 
-            // Find all checked boxes, including disabled ones (since they are grouped by select-all)
-            var data = form.find('input, select, textarea').filter(function() {
-                return !this.disabled || $(this).hasClass('transaction-checkbox') || $(this).hasClass('master-checkbox');
-            }).serialize();
+            // Find all checked boxes
+            var data = form.serialize();
 
             swal({
                 title: "Apakah Anda sangat yakin?",

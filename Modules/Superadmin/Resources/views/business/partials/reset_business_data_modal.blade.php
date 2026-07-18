@@ -126,33 +126,44 @@
         // Toggle all transactions check box
         $('#select_all_transactions').change(function() {
             var checked = $(this).is(':checked');
-            $('.transaction-checkbox').prop('checked', checked).prop('disabled', checked);
+            $('.transaction-checkbox').prop('checked', checked);
             validateResetForm();
         });
 
         // Toggle all master data check box
         $('#select_all_master').change(function() {
             var checked = $(this).is(':checked');
-            $('.master-checkbox').prop('checked', checked).prop('disabled', checked);
+            $('.master-checkbox').prop('checked', checked);
             validateResetForm();
         });
 
-        $('.transaction-checkbox, .master-checkbox, #confirm_reset_text').on('change keyup input', function() {
+        // If any transaction sub-checkbox is clicked, update the parent state
+        $('.transaction-checkbox').change(function() {
+            var total = $('.transaction-checkbox').length;
+            var checked = $('.transaction-checkbox:checked').length;
+            $('#select_all_transactions').prop('checked', total === checked);
+            validateResetForm();
+        });
+
+        // If any master sub-checkbox is clicked, update the parent state
+        $('.master-checkbox').change(function() {
+            var total = $('.master-checkbox').length;
+            var checked = $('.master-checkbox:checked').length;
+            $('#select_all_master').prop('checked', total === checked);
+            validateResetForm();
+        });
+
+        $('#confirm_reset_text').on('change keyup input', function() {
             validateResetForm();
         });
 
         function validateResetForm() {
             var hasCheckboxSelected = false;
-            if ($('#select_all_transactions').is(':checked') || $('#select_all_master').is(':checked')) {
-                hasCheckboxSelected = true;
-            }
-            if (!hasCheckboxSelected) {
-                $('.transaction-checkbox, .master-checkbox').each(function() {
-                    if ($(this).is(':checked')) {
-                        hasCheckboxSelected = true;
-                    }
-                });
-            }
+            $('.transaction-checkbox, .master-checkbox').each(function() {
+                if ($(this).is(':checked')) {
+                    hasCheckboxSelected = true;
+                }
+            });
 
             var confirmText = $('#confirm_reset_text').val().trim();
             if (hasCheckboxSelected && confirmText === 'RESET') {
