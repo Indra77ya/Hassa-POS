@@ -656,4 +656,65 @@ class BusinessController extends Controller
 
         return $output;
     }
+
+    /**
+     * Resets current business data via Business Settings.
+     */
+    public function resetBusinessData(Request $request)
+    {
+        if (! auth()->user()->can('business_settings.access')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+            $notAllowed = $this->businessUtil->notAllowedInDemo();
+            if (! empty($notAllowed)) {
+                return $notAllowed;
+            }
+
+            $business_id = $request->session()->get('user.business_id');
+
+            $options = $request->input('reset_options', []);
+            if (empty($options)) {
+                return [
+                    'success' => false,
+                    'msg' => __('superadmin::lang.please_select_at_least_one')
+                ];
+            }
+
+            // If "select_all_transactions" is checked, we can make sure all transactional options are added
+            if (in_array('select_all_transactions', $options)) {
+                $options = array_merge($options, [
+                    'reset_sales', 'reset_purchases', 'reset_expenses', 'reset_registers', 'reset_stock_adjustments'
+                ]);
+            }
+
+            // If "select_all_master" is checked, we can make sure all master data options are added
+            if (in_array('select_all_master', $options)) {
+                $options = array_merge($options, [
+                    'reset_products', 'reset_contacts', 'reset_categories', 'reset_taxes'
+                ]);
+            }
+
+            DB::beginTransaction();
+
+            $this->businessUtil->resetBusinessData($business_id, $options);
+
+            DB::commit();
+
+            return [
+                'success' => true,
+                'msg' => __('superadmin::lang.reset_success')
+            ];
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+
+            return [
+                'success' => false,
+                'msg' => __('messages.something_went_wrong'),
+            ];
+        }
+    }
 }

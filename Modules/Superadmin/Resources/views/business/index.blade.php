@@ -126,6 +126,7 @@
 
     </section>
     <!-- /.content -->
+    @include('superadmin::business.reset_modal')
 
 @endsection
 

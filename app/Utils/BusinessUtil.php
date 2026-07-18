@@ -480,4 +480,135 @@ class BusinessUtil extends Util
         return ['url' => '', 'send_to_param_name' => 'to', 'msg_param_name' => 'text', 'request_method' => 'post', 'param_1' => '', 'param_val_1' => '', 'param_2' => '', 'param_val_2' => '', 'param_3' => '', 'param_val_3' => '', 'param_4' => '', 'param_val_4' => '', 'param_5' => '', 'param_val_5' => '', 'data_parameter_type' => 'form-data'];
     }
 
+    /**
+     * Purges granular business data safely.
+     *
+     * @param int $business_id
+     * @param array $options
+     * @return void
+     */
+    public function resetBusinessData($business_id, array $options)
+    {
+        \Log::info("Resetting business data for business: $business_id with options: " . json_encode($options));
+
+        // 1. Reset Sales
+        if (in_array('reset_sales', $options)) {
+            $sales_ids = \App\Transaction::where('business_id', $business_id)
+                ->whereIn('type', ['sell', 'sell_return'])
+                ->pluck('id')
+                ->toArray();
+
+            if (!empty($sales_ids)) {
+                \App\TransactionSellLine::whereIn('transaction_id', $sales_ids)->delete();
+                \App\TransactionPayment::whereIn('transaction_id', $sales_ids)->delete();
+                \App\CashRegisterTransaction::whereIn('transaction_id', $sales_ids)->delete();
+                \App\Transaction::whereIn('id', $sales_ids)->delete();
+            }
+        }
+
+        // 2. Reset Purchases
+        if (in_array('reset_purchases', $options)) {
+            $purchase_ids = \App\Transaction::where('business_id', $business_id)
+                ->whereIn('type', ['purchase', 'purchase_return'])
+                ->pluck('id')
+                ->toArray();
+
+            if (!empty($purchase_ids)) {
+                \App\PurchaseLine::whereIn('transaction_id', $purchase_ids)->delete();
+                \App\TransactionPayment::whereIn('transaction_id', $purchase_ids)->delete();
+                \App\Transaction::whereIn('id', $purchase_ids)->delete();
+            }
+        }
+
+        // 3. Reset Expenses
+        if (in_array('reset_expenses', $options)) {
+            $expense_ids = \App\Transaction::where('business_id', $business_id)
+                ->where('type', 'expense')
+                ->pluck('id')
+                ->toArray();
+
+            if (!empty($expense_ids)) {
+                \App\TransactionPayment::whereIn('transaction_id', $expense_ids)->delete();
+                \App\Transaction::whereIn('id', $expense_ids)->delete();
+            }
+        }
+
+        // 4. Reset Cash Registers
+        if (in_array('reset_registers', $options)) {
+            $register_ids = \App\CashRegister::where('business_id', $business_id)
+                ->pluck('id')
+                ->toArray();
+
+            if (!empty($register_ids)) {
+                \App\CashRegisterTransaction::whereIn('cash_register_id', $register_ids)->delete();
+                \App\CashRegister::where('business_id', $business_id)->delete();
+            }
+        }
+
+        // 5. Reset Stock Adjustments & Transfers
+        if (in_array('reset_stock_adjustments', $options)) {
+            $stock_ids = \App\Transaction::where('business_id', $business_id)
+                ->whereIn('type', ['stock_adjustment', 'stock_transfer'])
+                ->pluck('id')
+                ->toArray();
+
+            if (!empty($stock_ids)) {
+                \App\StockAdjustmentLine::whereIn('transaction_id', $stock_ids)->delete();
+                \App\Transaction::whereIn('id', $stock_ids)->delete();
+            }
+        }
+
+        // 6. Reset Products (and opening stocks)
+        if (in_array('reset_products', $options)) {
+            // Delete opening stocks first to avoid FK constraints on purchase_lines -> products
+            $opening_stock_ids = \App\Transaction::where('business_id', $business_id)
+                ->where('type', 'opening_stock')
+                ->pluck('id')
+                ->toArray();
+
+            if (!empty($opening_stock_ids)) {
+                \App\PurchaseLine::whereIn('transaction_id', $opening_stock_ids)->delete();
+                \App\Transaction::whereIn('id', $opening_stock_ids)->delete();
+            }
+
+            $product_ids = \App\Product::where('business_id', $business_id)
+                ->pluck('id')
+                ->toArray();
+
+            if (!empty($product_ids)) {
+                \App\VariationLocationDetails::whereIn('product_id', $product_ids)->delete();
+                \App\ProductRack::whereIn('product_id', $product_ids)->delete();
+                \DB::table('product_locations')->whereIn('product_id', $product_ids)->delete();
+                \App\Variation::whereIn('product_id', $product_ids)->delete();
+                \App\ProductVariation::whereIn('product_id', $product_ids)->delete();
+                \App\Product::whereIn('id', $product_ids)->delete();
+            }
+        }
+
+        // 7. Reset Contacts
+        if (in_array('reset_contacts', $options)) {
+            \App\Contact::where('business_id', $business_id)->delete();
+        }
+
+        // 8. Reset Categories & Brands
+        if (in_array('reset_categories', $options)) {
+            \App\Category::where('business_id', $business_id)->delete();
+            \App\Brand::where('business_id', $business_id)->delete();
+        }
+
+        // 9. Reset Taxes
+        if (in_array('reset_taxes', $options)) {
+            $tax_rate_ids = \App\TaxRate::where('business_id', $business_id)
+                ->pluck('id')
+                ->toArray();
+
+            if (!empty($tax_rate_ids)) {
+                \DB::table('group_sub_taxes')->whereIn('tax_id', $tax_rate_ids)
+                    ->orWhereIn('sub_tax_id', $tax_rate_ids)
+                    ->delete();
+                \App\TaxRate::whereIn('id', $tax_rate_ids)->delete();
+            }
+        }
+    }
+
 }

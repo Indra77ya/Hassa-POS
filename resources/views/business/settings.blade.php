@@ -94,11 +94,13 @@
     <div class="row">
         <div class="col-sm-12 text-center">
             <button class="tw-dw-btn tw-dw-btn-error tw-dw-btn-lg tw-text-white" type="submit">@lang('business.update_settings')</button>
+            <button class="tw-dw-btn tw-dw-btn-error tw-dw-btn-lg tw-text-white reset_business_data_btn" type="button" data-business_id="{{ $business->id }}" data-business_name="{{ $business->name }}">@lang('superadmin::lang.reset_business_data')</button>
         </div>
     </div>
 {!! Form::close() !!}
 </section>
 <!-- /.content -->
+@include('superadmin::business.reset_modal')
 @stop
 @section('javascript')
 <script type="text/javascript">

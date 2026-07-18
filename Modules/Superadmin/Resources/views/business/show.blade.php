@@ -19,9 +19,12 @@
         <div
             class=" tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md  tw-ring-gray-200">
             <div class="tw-p-4 sm:tw-p-5">
-                <div class="tw-flex tw-gap-2.5">
+                <div class="tw-flex tw-gap-2.5 tw-justify-between tw-items-center">
                     <strong><i class="fa fa-briefcase margin-r-5"></i>
                         {{ $business->name }}</strong>
+                    <button type="button" class="tw-m-0.5 tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-error reset_business_data_btn" data-business_id="{{ $business->id }}" data-business_name="{{ $business->name }}">
+                        @lang('superadmin::lang.reset_business_data')
+                    </button>
                 </div>
                 <div class="tw-flow-root tw-mt-5 tw-border-b tw-border-gray-200">
                     <div class="tw-mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
@@ -345,4 +348,5 @@
             });
         });
     </script>
+    @include('superadmin::business.reset_modal')
 @endsection
