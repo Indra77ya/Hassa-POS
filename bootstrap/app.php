@@ -17,6 +17,9 @@ $storagePaths = [
     __DIR__ . '/../storage/framework/testing',
     __DIR__ . '/../storage/logs',
     __DIR__ . '/../storage/app/public',
+    __DIR__ . '/../public/uploads',
+    __DIR__ . '/../public/uploads/business_logos',
+    __DIR__ . '/../public/uploads/invoice_logos',
 ];
 
 foreach ($storagePaths as $path) {

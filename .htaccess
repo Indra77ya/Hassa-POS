@@ -1,5 +1,12 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
+    # If the file or directory exists in the root, serve it directly
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Otherwise, rewrite to public directory
+    RewriteCond %{REQUEST_URI} !^/public/
     RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
