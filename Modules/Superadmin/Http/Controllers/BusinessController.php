@@ -6,6 +6,7 @@ use App\Business;
 use App\Product;
 use App\Transaction;
 use App\User;
+use App\Contact;
 use App\Utils\BusinessUtil;
 use App\Utils\ModuleUtil;
 use App\VariationLocationDetails;
@@ -140,6 +141,8 @@ class BusinessController extends BaseController
                         $html .= ' <a href="'.action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'destroy'], [$row->id]).'"
                                     class="tw-m-0.5 tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-error delete_business_confirmation">'.__('messages.delete').'</a>';
                     }
+
+                    $html .= ' <button type="button" class="tw-m-0.5 tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-error reset_business_data_btn" data-id="' . $row->id . '" data-name="' . htmlspecialchars($row->name, ENT_QUOTES, 'UTF-8') . '">Reset Data</button>';
 
                     return $html;
                 })
@@ -511,6 +514,161 @@ class BusinessController extends BaseController
                 ->removeColumn('id')
                 ->rawColumns(['action'])
                 ->make(true);
+        }
+    }
+
+    /**
+     * Resets business data based on chosen categories
+     *
+     * @return Response
+     */
+    public function resetBusinessData(Request $request, $id)
+    {
+        if (! auth()->user()->can('superadmin')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+            $notAllowed = $this->businessUtil->notAllowedInDemo();
+            if (! empty($notAllowed)) {
+                return $notAllowed;
+            }
+
+            // Secure confirmation text check
+            $confirm_text = $request->input('confirm_reset_text');
+            if (trim($confirm_text) !== 'RESET') {
+                return [
+                    'success' => 0,
+                    'msg' => 'Konfirmasi gagal. Anda harus mengetik kata "RESET" dengan tepat.'
+                ];
+            }
+
+            $business = Business::findOrFail($id);
+
+            DB::beginTransaction();
+
+            $reset_transactions = $request->input('reset_transactions', []);
+            $reset_master = $request->input('reset_master', []);
+            $select_all_transactions = $request->input('select_all_transactions');
+            $select_all_master = $request->input('select_all_master');
+
+            // 1. Handle Transaction Purges
+            if ($select_all_transactions || !empty($reset_transactions)) {
+                $transaction_types_to_delete = [];
+
+                if ($select_all_transactions) {
+                    $transaction_types_to_delete = ['sell', 'purchase', 'expense', 'stock_adjustment', 'sell_transfer', 'purchase_transfer', 'opening_stock', 'sell_return', 'opening_balance', 'purchase_return', 'payroll', 'expense_refund', 'sales_order', 'purchase_order'];
+                } else {
+                    if (in_array('sales', $reset_transactions)) {
+                        $transaction_types_to_delete[] = 'sell';
+                        $transaction_types_to_delete[] = 'sell_return';
+                        $transaction_types_to_delete[] = 'sales_order';
+                    }
+                    if (in_array('purchases', $reset_transactions)) {
+                        $transaction_types_to_delete[] = 'purchase';
+                        $transaction_types_to_delete[] = 'purchase_return';
+                        $transaction_types_to_delete[] = 'purchase_order';
+                    }
+                    if (in_array('expenses', $reset_transactions)) {
+                        $transaction_types_to_delete[] = 'expense';
+                        $transaction_types_to_delete[] = 'payroll';
+                        $transaction_types_to_delete[] = 'expense_refund';
+                    }
+                    if (in_array('stock_adjustments', $reset_transactions)) {
+                        $transaction_types_to_delete[] = 'stock_adjustment';
+                        $transaction_types_to_delete[] = 'sell_transfer';
+                        $transaction_types_to_delete[] = 'purchase_transfer';
+                        $transaction_types_to_delete[] = 'opening_stock';
+                    }
+                }
+
+                if (!empty($transaction_types_to_delete)) {
+                    $transactions_to_delete = Transaction::where('business_id', $id)
+                        ->whereIn('type', $transaction_types_to_delete)
+                        ->get();
+
+                    foreach ($transactions_to_delete as $transaction) {
+                        // Delete related lines & details to prevent dangling rows
+                        // 1. Delete intermediate pivot first
+                        DB::table('transaction_sell_lines_purchase_lines')->whereIn('sell_line_id', function ($query) use ($transaction) {
+                            $query->select('id')->from('transaction_sell_lines')->where('transaction_id', $transaction->id);
+                        })->orWhereIn('purchase_line_id', function ($query) use ($transaction) {
+                            $query->select('id')->from('purchase_lines')->where('transaction_id', $transaction->id);
+                        })->delete();
+
+                        // 2. Delete main transaction lines
+                        DB::table('transaction_sell_lines')->where('transaction_id', $transaction->id)->delete();
+                        DB::table('purchase_lines')->where('transaction_id', $transaction->id)->delete();
+                        DB::table('transaction_payments')->where('transaction_id', $transaction->id)->delete();
+                        DB::table('stock_adjustment_lines')->where('transaction_id', $transaction->id)->delete();
+
+                        $transaction->delete();
+                    }
+                }
+
+                // Registers purge
+                if ($select_all_transactions || in_array('registers', $reset_transactions)) {
+                    DB::table('cash_register_transactions')->whereIn('cash_register_id', function ($query) use ($id) {
+                        $query->select('id')->from('cash_registers')->where('business_id', $id);
+                    })->delete();
+                    DB::table('cash_registers')->where('business_id', $id)->delete();
+                }
+            }
+
+            // 2. Handle Master Data Purges
+            if ($select_all_master || !empty($reset_master)) {
+
+                // Products
+                if ($select_all_master || in_array('products', $reset_master)) {
+                    $product_ids = Product::where('business_id', $id)->pluck('id')->toArray();
+                    if (!empty($product_ids)) {
+                        DB::table('variation_group_prices')->whereIn('variation_id', function ($query) use ($product_ids) {
+                            $query->select('id')->from('variations')->whereIn('product_id', $product_ids);
+                        })->delete();
+
+                        VariationLocationDetails::whereIn('product_id', $product_ids)->delete();
+                        DB::table('product_variations')->whereIn('product_id', $product_ids)->delete();
+                        DB::table('variations')->whereIn('product_id', $product_ids)->delete();
+                        Product::whereIn('id', $product_ids)->delete();
+                    }
+                }
+
+                // Contacts
+                if ($select_all_master || in_array('contacts', $reset_master)) {
+                    Contact::where('business_id', $id)->delete();
+                }
+
+                // Categories
+                if ($select_all_master || in_array('categories', $reset_master)) {
+                    DB::table('categories')->where('business_id', $id)->delete();
+                }
+
+                // Brands
+                if ($select_all_master || in_array('brands', $reset_master)) {
+                    DB::table('brands')->where('business_id', $id)->delete();
+                }
+
+                // Custom Taxes
+                if ($select_all_master || in_array('custom_taxes', $reset_master)) {
+                    DB::table('tax_rates')->where('business_id', $id)->delete();
+                }
+            }
+
+            DB::commit();
+
+            return [
+                'success' => 1,
+                'msg' => 'Data bisnis berhasil di-reset sesuai dengan kategori terpilih.'
+            ];
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+
+            return [
+                'success' => 0,
+                'msg' => 'Gagal mereset data bisnis: ' . $e->getMessage()
+            ];
         }
     }
 

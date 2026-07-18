@@ -19,9 +19,16 @@
         <div
             class=" tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md  tw-ring-gray-200">
             <div class="tw-p-4 sm:tw-p-5">
-                <div class="tw-flex tw-gap-2.5">
-                    <strong><i class="fa fa-briefcase margin-r-5"></i>
-                        {{ $business->name }}</strong>
+                <div class="tw-flex tw-justify-between tw-items-center">
+                    <div>
+                        <strong><i class="fa fa-briefcase margin-r-5"></i>
+                            {{ $business->name }}</strong>
+                    </div>
+                    <div>
+                        <button type="button" class="tw-dw-btn tw-dw-btn-sm tw-dw-btn-error tw-text-white reset_business_data_btn" data-id="{{ $business->id }}" data-name="{{ htmlspecialchars($business->name, ENT_QUOTES, 'UTF-8') }}">
+                            <i class="fa fa-warning"></i> Reset Data Bisnis
+                        </button>
+                    </div>
                 </div>
                 <div class="tw-flow-root tw-mt-5 tw-border-b tw-border-gray-200">
                     <div class="tw-mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
@@ -269,6 +276,7 @@
             </div>
         </div>
         @include('superadmin::business.update_password_modal')
+        @include('superadmin::business.partials.reset_business_data_modal')
     </section>
     <!-- /.content -->
 @stop
@@ -304,6 +312,79 @@
                 ]
             });
 
+        });
+
+        // Show Reset Business Data Modal
+        $(document).on('click', '.reset_business_data_btn', function() {
+            var business_id = $(this).data('id');
+            var business_name = $(this).data('name');
+
+            $('#reset_business_name').text(business_name);
+            $('#reset_business_data_form').attr('action', '/superadmin/business/' + business_id + '/reset-data');
+
+            // Reset modal states
+            $('#confirm_reset_text').val('');
+            $('#submit_reset_btn').prop('disabled', true);
+            $('#select_all_transactions').prop('checked', false).trigger('change');
+            $('#select_all_master').prop('checked', false).trigger('change');
+            $('.transaction-checkbox, .master-checkbox').prop('checked', false).prop('disabled', false);
+
+            $('#reset_business_data_modal').modal('show');
+        });
+
+        // Submit Reset Business Data Form
+        $(document).on('submit', '#reset_business_data_form', function(e) {
+            e.preventDefault();
+            var form = $(this);
+            var actionUrl = form.attr('action');
+
+            // Find all checked boxes, including disabled ones (since they are grouped by select-all)
+            var data = form.find('input, select, textarea').filter(function() {
+                return !this.disabled || $(this).hasClass('transaction-checkbox') || $(this).hasClass('master-checkbox');
+            }).serialize();
+
+            swal({
+                title: "Apakah Anda sangat yakin?",
+                text: "Proses ini akan menghapus data terpilih secara permanen!",
+                icon: "warning",
+                buttons: {
+                    cancel: "Batal",
+                    confirm: {
+                        text: "Ya, Hapus Sekarang!",
+                        value: true,
+                        visible: true,
+                        className: "btn-danger",
+                        closeModal: true
+                    }
+                },
+                dangerMode: true,
+            }).then((confirmed) => {
+                if (confirmed) {
+                    $('#submit_reset_btn').prop('disabled', true);
+                    $.ajax({
+                        method: 'POST',
+                        url: actionUrl,
+                        data: data,
+                        dataType: 'json',
+                        success: function(result) {
+                            if (result.success) {
+                                $('#reset_business_data_modal').modal('hide');
+                                toastr.success(result.msg);
+                                setTimeout(function() {
+                                    window.location.reload();
+                                }, 1500);
+                            } else {
+                                toastr.error(result.msg);
+                                $('#submit_reset_btn').prop('disabled', false);
+                            }
+                        },
+                        error: function() {
+                            toastr.error('Terjadi kesalahan pada server.');
+                            $('#submit_reset_btn').prop('disabled', false);
+                        }
+                    });
+                }
+            });
         });
 
         $(document).on('click', '.update_user_password', function(e) {

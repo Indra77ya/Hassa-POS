@@ -122,7 +122,7 @@
             </div>
         </div>
 
-
+        @include('superadmin::business.partials.reset_business_data_modal')
 
     </section>
     <!-- /.content -->
@@ -207,6 +207,80 @@
                     superadmin_business_table.ajax.reload();
                 });
         });
+
+        // Show Reset Business Data Modal
+        $(document).on('click', '.reset_business_data_btn', function() {
+            var business_id = $(this).data('id');
+            var business_name = $(this).data('name');
+
+            $('#reset_business_name').text(business_name);
+            $('#reset_business_data_form').attr('action', '/superadmin/business/' + business_id + '/reset-data');
+
+            // Reset modal states
+            $('#confirm_reset_text').val('');
+            $('#submit_reset_btn').prop('disabled', true);
+            $('#select_all_transactions').prop('checked', false).trigger('change');
+            $('#select_all_master').prop('checked', false).trigger('change');
+            $('.transaction-checkbox, .master-checkbox').prop('checked', false).prop('disabled', false);
+
+            $('#reset_business_data_modal').modal('show');
+        });
+
+        // Submit Reset Business Data Form
+        $(document).on('submit', '#reset_business_data_form', function(e) {
+            e.preventDefault();
+            var form = $(this);
+            var actionUrl = form.attr('action');
+
+            // Find all checked boxes, including disabled ones (since they are grouped by select-all)
+            var data = form.find('input, select, textarea').filter(function() {
+                return !this.disabled || $(this).hasClass('transaction-checkbox') || $(this).hasClass('master-checkbox');
+            }).serialize();
+
+            swal({
+                title: "Apakah Anda sangat yakin?",
+                text: "Proses ini akan menghapus data terpilih secara permanen!",
+                icon: "warning",
+                buttons: {
+                    cancel: "Batal",
+                    confirm: {
+                        text: "Ya, Hapus Sekarang!",
+                        value: true,
+                        visible: true,
+                        className: "btn-danger",
+                        closeModal: true
+                    }
+                },
+                dangerMode: true,
+            }).then((confirmed) => {
+                if (confirmed) {
+                    $('#submit_reset_btn').prop('disabled', true);
+                    $.ajax({
+                        method: 'POST',
+                        url: actionUrl,
+                        data: data,
+                        dataType: 'json',
+                        success: function(result) {
+                            if (result.success) {
+                                $('#reset_business_data_modal').modal('hide');
+                                toastr.success(result.msg);
+                                if (typeof superadmin_business_table !== 'undefined') {
+                                    superadmin_business_table.ajax.reload();
+                                }
+                            } else {
+                                toastr.error(result.msg);
+                                $('#submit_reset_btn').prop('disabled', false);
+                            }
+                        },
+                        error: function() {
+                            toastr.error('Terjadi kesalahan pada server.');
+                            $('#submit_reset_btn').prop('disabled', false);
+                        }
+                    });
+                }
+            });
+        });
+
         $(document).on('click', 'a.delete_business_confirmation', function(e) {
             e.preventDefault();
             swal({
