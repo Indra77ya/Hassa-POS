@@ -41,7 +41,7 @@
             },
             customizations: {
                 title: "{{Session::get('business.name')}}",
-                logo: "{{url('uploads/business_logos/'.Session::get('business.logo'))}}",
+                logo: "{{url('/uploads/business_logos/'.Session::get('business.logo'))}}",
             },
         });
     }

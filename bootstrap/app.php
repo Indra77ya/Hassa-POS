@@ -26,6 +26,9 @@ foreach ($storagePaths as $path) {
     if (!is_dir($path)) {
         mkdir($path, 0775, true);
     }
+    if (is_dir($path)) {
+        @chmod($path, 0775);
+    }
 }
 
 /*

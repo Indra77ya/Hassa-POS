@@ -32,8 +32,8 @@ if ($business) {
     echo "ID: " . $business->id . "\n";
     echo "Name: " . $business->name . "\n";
     echo "Logo in DB: " . $business->logo . "\n";
-    echo "Logo URL (url()): " . url('uploads/business_logos/' . $business->logo) . "\n";
-    echo "Logo URL (asset()): " . asset('uploads/business_logos/' . $business->logo) . "\n";
+    echo "Logo URL (url()): " . url('/uploads/business_logos/' . $business->logo) . "\n";
+    echo "Logo URL (asset()): " . asset('/uploads/business_logos/' . $business->logo) . "\n";
 } else {
     echo "Could not load business from database.\n";
 }

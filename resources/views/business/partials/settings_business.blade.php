@@ -70,7 +70,7 @@
                     <p class="help-block"><i> @lang('business.logo_help')</i></p>
                     @if(!empty($business->logo))
                         <div style="margin-top: 10px;">
-                            <img src="{{ url('uploads/business_logos/' . $business->logo) }}" alt="Logo" style="max-height: 80px; width: auto; border: 1px solid #ddd; padding: 5px; border-radius: 4px;">
+                            <img src="{{ url('/uploads/business_logos/' . $business->logo) }}" alt="Logo" style="max-height: 80px; width: auto; border: 1px solid #ddd; padding: 5px; border-radius: 4px;">
                         </div>
                     @endif
             </div>
