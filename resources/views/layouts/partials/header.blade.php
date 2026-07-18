@@ -38,18 +38,20 @@
             </div>
 
 
-            {{-- Showing active package for SaaS Superadmin --}}
-            @if(isModuleEnabled('Superadmin'))
-                @includeIf('superadmin::layouts.partials.active_subscription')
-            @endif
-
-            {{-- When using superadmin, this button is used to switch users --}}
-            @if(!empty(session('previous_user_id')) && !empty(session('previous_username')))
-                <a href="{{route('sign-in-as-user', session('previous_user_id'))}}" class="btn btn-flat btn-danger m-8 btn-sm mt-10"><i class="fas fa-undo"></i> @lang('lang_v1.back_to_username', ['username' => session('previous_username')] )</a>
-            @endif
-
-
             <div class="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-3">
+                {{-- When using superadmin, this button is used to switch users --}}
+                @if(!empty(session('previous_user_id')) && !empty(session('previous_username')))
+                    <a href="{{route('sign-in-as-user', session('previous_user_id'))}}" class="tw-inline-flex tw-items-center tw-justify-center tw-text-xs md:tw-text-sm tw-font-semibold tw-text-white tw-bg-red-600 hover:tw-bg-red-700 tw-px-3 tw-py-1.5 tw-rounded-lg tw-transition-all tw-duration-200 tw-gap-1.5">
+                        <i class="fas fa-undo"></i>
+                        @lang('lang_v1.back_to_username', ['username' => session('previous_username')] )
+                    </a>
+                @endif
+
+                {{-- Showing active package for SaaS Superadmin --}}
+                @if(isModuleEnabled('Superadmin'))
+                    @includeIf('superadmin::layouts.partials.active_subscription')
+                @endif
+
                 @if(isModuleEnabled('Essentials'))
                     @includeIf('essentials::layouts.partials.header_part')
                 @endif

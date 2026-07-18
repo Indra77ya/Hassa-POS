@@ -63,9 +63,9 @@
             }
         });
 
-        @if (config('app.debug') == false)
-            $.fn.dataTable.ext.errMode = 'throw';
-        @endif
+        $.fn.dataTable.ext.errMode = function (settings, techNote, message) {
+            console.warn('DataTables warning: ', message);
+        };
     });
 
     var financial_year = {
@@ -166,4 +166,13 @@
     });
 </script>
 
+<script type="text/javascript">
+    @if (session()->has('business'))
+        @if (!empty(session()->get('business.logo')))
+            localStorage.setItem('client_logo', "{{ asset('uploads/business_logos/' . session()->get('business.logo')) }}");
+        @else
+            localStorage.removeItem('client_logo');
+        @endif
+    @endif
+</script>
 
