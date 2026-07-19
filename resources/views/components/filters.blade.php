@@ -75,7 +75,7 @@ function pfToggle(id) {
         </span>
 
         {{-- Chevron --}}
-        <svg class="pf-chevron tw-w-4.5 tw-h-4.5 tw-shrink-0 tw-transition-all tw-duration-300 {{ $isOpen ? 'tw-rotate-180' : '' }}"
+        <svg class="pf-chevron tw-w-5 tw-h-5 tw-shrink-0 tw-transition-all tw-duration-300 {{ $isOpen ? 'tw-rotate-180' : '' }}"
              style="color: var(--theme-700, #004EEB);"
              xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
              fill="none" stroke="currentColor" stroke-width="2.5"
