@@ -116,32 +116,59 @@ class BusinessController extends BaseController
             $query = $this->filterTransactionDate($businesses, $no_transaction_since, '=');
 
             return Datatables::of($query)
-                ->addColumn('address', '{{$city}}, {{$state}}, {{$country}} {{$landmark}}, {{$zip_code}}')
+                ->addColumn('address', function ($row) {
+                    $address_parts = [];
+                    if (!empty($row->landmark)) {
+                        $address_parts[] = $row->landmark;
+                    }
+                    if (!empty($row->city)) {
+                        $address_parts[] = $row->city;
+                    }
+                    if (!empty($row->state)) {
+                        $address_parts[] = $row->state;
+                    }
+                    if (!empty($row->country)) {
+                        $address_parts[] = $row->country;
+                    }
+                    if (!empty($row->zip_code)) {
+                        $address_parts[] = $row->zip_code;
+                    }
+                    $address_str = implode(', ', $address_parts);
+                    return '<div class="tw-text-xs tw-text-gray-600 tw-min-w-[250px] tw-break-words">' . e($address_str) . '</div>';
+                })
                 ->addColumn('business_contact_number', '{{$mobile}} @if(!empty($alternate_number)), {{$alternate_number}}@endif')
-                ->editColumn('is_active', '@if($is_active == 1) <span class="label bg-green">@lang("business.is_active")</span> @else <span class="label bg-gray">@lang("lang_v1.inactive")</span> @endif')
+                ->editColumn('is_active', function ($row) {
+                    if ($row->is_active == 1) {
+                        return '<span class="tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-rounded-full tw-bg-emerald-50 tw-text-emerald-700 tw-border tw-border-emerald-300">' . __("business.is_active") . '</span>';
+                    } else {
+                        return '<span class="tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-rounded-full tw-bg-gray-100 tw-text-gray-700 tw-border tw-border-gray-300">' . __("lang_v1.inactive") . '</span>';
+                    }
+                })
                 ->addColumn('action', function ($row) {
-                    $html = '<a href="'.
-                            action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'show'], [$row->id]).'"
-                                class=" tw-m-0.5 tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-info">'.__('superadmin::lang.manage').'</a>
-                            <button type="button" class=" tw-m-0.5 tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-info btn-modal" data-href="'.action([\Modules\Superadmin\Http\Controllers\SuperadminSubscriptionsController::class, 'create'], ['business_id' => $row->id]).'" data-container=".view_modal">'
-                                  .__('superadmin::lang.add_subscription').'</button>';
+                    $html = '<div class="btn-group">
+                                <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info dropdown-toggle" data-toggle="dropdown" aria-expanded="false">'
+                                    . __('messages.actions') . ' <span class="caret"></span><span class="sr-only">Toggle Dropdown</span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-right" role="menu">';
+
+                    $html .= '<li><a href="' . action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'show'], [$row->id]) . '"><i class="fa fa-briefcase"></i> ' . __('superadmin::lang.manage') . '</a></li>';
+
+                    $html .= '<li><a href="#" class="btn-modal" data-href="' . action([\Modules\Superadmin\Http\Controllers\SuperadminSubscriptionsController::class, 'create'], ['business_id' => $row->id]) . '" data-container=".view_modal"><i class="fa fa-sync"></i> ' . __('superadmin::lang.add_subscription') . '</a></li>';
 
                     if ($row->is_active == 1) {
-                        $html .= ' <a href="'.action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'toggleActive'], [$row->id, 0]).'"
-                                    class="tw-m-0.5 tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-error link_confirmation">'.__('lang_v1.deactivate').'
-                                </a>';
+                        $html .= '<li><a href="' . action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'toggleActive'], [$row->id, 0]) . '" class="link_confirmation"><i class="fa fa-power-off text-warning"></i> ' . __('lang_v1.deactivate') . '</a></li>';
                     } else {
-                        $html .= ' <a href="'.action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'toggleActive'], [$row->id, 1]).'"
-                                    class="tw-m-0.5 tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent link_confirmation">'.__('lang_v1.activate').'
-                                </a>';
+                        $html .= '<li><a href="' . action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'toggleActive'], [$row->id, 1]) . '" class="link_confirmation"><i class="fa fa-power-off text-success"></i> ' . __('lang_v1.activate') . '</a></li>';
                     }
 
-                    $html .= ' <button type="button" class="tw-m-0.5 tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-error btn-modal" data-href="'.action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'getResetModal'], [$row->id]).'" data-container=".view_modal">'.__('superadmin::lang.reset_business_data').'</button>';
+                    $html .= '<li><a href="#" class="btn-modal" data-href="' . action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'getResetModal'], [$row->id]) . '" data-container=".view_modal"><i class="fa fa-undo"></i> ' . __('superadmin::lang.reset_business_data') . '</a></li>';
 
                     if (request()->session()->get('user.business_id') != $row->id) {
-                        $html .= ' <a href="'.action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'destroy'], [$row->id]).'"
-                                    class="tw-m-0.5 tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-error delete_business_confirmation">'.__('messages.delete').'</a>';
+                        $html .= '<li class="divider"></li>';
+                        $html .= '<li><a href="' . action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'destroy'], [$row->id]) . '" class="delete_business_confirmation" style="color: #ef4444 !important;"><i class="fa fa-trash text-danger" style="color: #ef4444 !important;"></i> ' . __('messages.delete') . '</a></li>';
                     }
+
+                    $html .= '</ul></div>';
 
                     return $html;
                 })
@@ -157,9 +184,18 @@ class BusinessController extends BaseController
                         ->orWhere('bl.alternate_number', 'like', "%{$keyword}%");
                     });
                 })
-                ->addColumn('current_subscription', '{{$package_name ?? ""}} @if(!empty($start_date) && !empty($end_date)) ({{@format_date($start_date)}} - {{@format_date($end_date)}}) @endif')
+                ->addColumn('current_subscription', function ($row) {
+                    if (empty($row->package_name)) {
+                        return '';
+                    }
+                    $html = '<div class="tw-font-semibold tw-text-gray-800 tw-text-xs">' . e($row->package_name) . '</div>';
+                    if (!empty($row->start_date) && !empty($row->end_date)) {
+                        $html .= '<div class="tw-text-[10px] tw-text-gray-500 tw-mt-0.5">(' . $this->businessUtil->format_date($row->start_date) . ' - ' . $this->businessUtil->format_date($row->end_date) . ')</div>';
+                    }
+                    return $html;
+                })
                 ->editColumn('created_at', '{{@format_datetime($created_at)}}')
-                ->rawColumns(['action', 'is_active', 'created_at'])
+                ->rawColumns(['action', 'is_active', 'created_at', 'address', 'current_subscription'])
                 ->make(true);
         }
 
