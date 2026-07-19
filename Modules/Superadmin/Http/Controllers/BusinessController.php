@@ -153,7 +153,7 @@ class BusinessController extends BaseController
 
                     $html .= '<li><a href="' . action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'show'], [$row->id]) . '"><i class="fa fa-briefcase"></i> ' . __('superadmin::lang.manage') . '</a></li>';
 
-                    $html .= '<li><a href="#" class="btn-modal" data-href="' . action([\Modules\Superadmin\Http\Controllers\SuperadminSubscriptionsController::class, 'create'], ['business_id' => $row->id]) . '" data-container=".view_modal"><i class="fa fa-refresh"></i> ' . __('superadmin::lang.add_subscription') . '</a></li>';
+                    $html .= '<li><a href="#" class="btn-modal" data-href="' . action([\Modules\Superadmin\Http\Controllers\SuperadminSubscriptionsController::class, 'create'], ['business_id' => $row->id]) . '" data-container=".view_modal"><i class="fa fa-sync"></i> ' . __('superadmin::lang.add_subscription') . '</a></li>';
 
                     if ($row->is_active == 1) {
                         $html .= '<li><a href="' . action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'toggleActive'], [$row->id, 0]) . '" class="link_confirmation"><i class="fa fa-power-off text-warning"></i> ' . __('lang_v1.deactivate') . '</a></li>';
