@@ -9,17 +9,22 @@
     .pf-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .3s cubic-bezier(.4,0,.2,1); }
     .pf-body--open { grid-template-rows: 1fr; }
     .pf-inner { overflow: hidden; }
-    /* left accent bar via pseudo-element */
+
+    /* Elegant floating left accent pill */
     .pf-btn { position: relative; }
     .pf-btn::before {
         content: '';
         position: absolute;
-        left: 0; top: 0; bottom: 0;
-        width: 3.5px;
+        left: 0;
+        top: 8px;
+        bottom: 8px;
+        width: 4px;
         background: var(--theme-700, #004EEB);
         transform: scaleY(0);
-        transform-origin: left;
+        transform-origin: center;
         transition: transform .25s cubic-bezier(.4,0,.2,1);
+        border-top-right-radius: 4px;
+        border-bottom-right-radius: 4px;
     }
     .pf-open .pf-btn::before { transform: scaleY(1); }
     .pf-open .pf-btn { border-bottom-color: #f3f4f6 !important; background-color: #f9fafb !important; }
@@ -49,7 +54,7 @@ function pfToggle(id) {
     {{-- Header --}}
     <button type="button"
             id="{{ $filterId }}_btn"
-            class="pf-btn tw-w-full tw-flex tw-items-center tw-justify-between tw-px-5 tw-py-3.5 tw-border-0 tw-border-b tw-border-transparent tw-bg-transparent tw-cursor-pointer tw-transition-colors tw-duration-200 hover:tw-bg-gray-50/80"
+            class="pf-btn tw-w-full tw-flex tw-items-center tw-justify-between tw-px-5 tw-py-3.5 tw-border-0 tw-border-b tw-border-transparent tw-bg-transparent tw-cursor-pointer tw-transition-colors tw-duration-200 hover:tw-bg-gray-50/80 tw-outline-none focus:tw-outline-none"
             onclick="pfToggle('{{ $filterId }}')"
             aria-expanded="{{ $isOpen ? 'true' : 'false' }}"
             aria-controls="{{ $filterId }}_body">
