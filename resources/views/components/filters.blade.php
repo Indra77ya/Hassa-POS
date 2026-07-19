@@ -15,14 +15,14 @@
         content: '';
         position: absolute;
         left: 0; top: 0; bottom: 0;
-        width: 3px;
+        width: 3.5px;
         background: var(--theme-700, #004EEB);
-        transform: scaleX(0);
+        transform: scaleY(0);
         transform-origin: left;
         transition: transform .25s cubic-bezier(.4,0,.2,1);
     }
-    .pf-open .pf-btn::before { transform: scaleX(1); }
-    .pf-open .pf-btn { border-bottom-color: #e5e7eb !important; }
+    .pf-open .pf-btn::before { transform: scaleY(1); }
+    .pf-open .pf-btn { border-bottom-color: #e5e7eb !important; background-color: #f9fafb !important; }
 </style>
 @endonce
 
@@ -44,38 +44,38 @@ function pfToggle(id) {
 @endonce
 
 <div id="{{ $filterId }}"
-     class="tw-bg-white tw-rounded-xl tw-shadow-sm tw-ring-1 tw-ring-gray-200 tw-mb-4 tw-overflow-hidden tw-transition-shadow tw-duration-200 hover:tw-shadow-md {{ $isOpen ? 'pf-open' : '' }}">
+     class="tw-bg-white tw-rounded-2xl tw-shadow-sm tw-ring-1 tw-ring-gray-100 tw-mb-5 tw-overflow-hidden tw-transition-all tw-duration-300 hover:tw-shadow-md hover:tw-ring-gray-200 {{ $isOpen ? 'pf-open' : '' }}">
 
     {{-- Header --}}
     <button type="button"
             id="{{ $filterId }}_btn"
-            class="pf-btn tw-w-full tw-flex tw-items-center tw-justify-between tw-px-4 tw-py-3 tw-border-0 tw-border-b tw-border-transparent tw-bg-transparent tw-cursor-pointer tw-transition-colors tw-duration-150 hover:tw-bg-gray-50"
+            class="pf-btn tw-w-full tw-flex tw-items-center tw-justify-between tw-px-5 tw-py-4 tw-border-0 tw-border-b tw-border-transparent tw-bg-transparent tw-cursor-pointer tw-transition-colors tw-duration-200 hover:tw-bg-gray-50/80"
             onclick="pfToggle('{{ $filterId }}')"
             aria-expanded="{{ $isOpen ? 'true' : 'false' }}"
             aria-controls="{{ $filterId }}_body">
 
-        <span class="tw-flex tw-items-center tw-gap-2.5">
+        <span class="tw-flex tw-items-center tw-gap-3">
             {{-- Icon badge --}}
-            <span class="tw-flex tw-items-center tw-justify-center tw-w-7 tw-h-7 tw-rounded-lg tw-shrink-0 tw-text-xs tw-transition-colors tw-duration-200"
-                  style="background: color-mix(in srgb, var(--theme-700, #004EEB) 10%, transparent); color: var(--theme-700, #004EEB);">
+            <span class="tw-flex tw-items-center tw-justify-center tw-w-8 tw-h-8 tw-rounded-xl tw-shrink-0 tw-text-sm tw-transition-all tw-duration-300 shadow-sm"
+                  style="background: color-mix(in srgb, var(--theme-700, #004EEB) 8%, transparent); color: var(--theme-700, #004EEB);">
                 @if (!empty($icon))
                     {!! $icon !!}
                 @else
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
-                         fill="none" stroke="currentColor" stroke-width="2.2"
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2.5"
                          stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
                     </svg>
                 @endif
             </span>
             {{-- Title --}}
-            <span class="tw-text-sm tw-font-semibold tw-text-gray-900 tw-tracking-tight">
+            <span class="tw-text-sm tw-font-bold tw-text-gray-800 tw-tracking-tight tw-transition-colors tw-duration-200">
                 {{ $title ?? __('report.filters') }}
             </span>
         </span>
 
         {{-- Chevron --}}
-        <svg class="pf-chevron tw-w-4 tw-h-4 tw-shrink-0 tw-transition-all tw-duration-300 {{ $isOpen ? 'tw-rotate-180' : '' }}"
+        <svg class="pf-chevron tw-w-4.5 tw-h-4.5 tw-shrink-0 tw-transition-all tw-duration-300 {{ $isOpen ? 'tw-rotate-180' : '' }}"
              style="color: var(--theme-700, #004EEB);"
              xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
              fill="none" stroke="currentColor" stroke-width="2.5"
@@ -87,7 +87,7 @@ function pfToggle(id) {
     {{-- Collapsible body --}}
     <div id="{{ $filterId }}_body" class="pf-body {{ $isOpen ? 'pf-body--open' : '' }}">
         <div class="pf-inner">
-            <div class="tw-px-4 tw-pt-3 tw-pb-4">
+            <div class="tw-px-6 tw-pt-4 tw-pb-5 tw-bg-gray-50/30">
                 {{ $slot }}
             </div>
         </div>
