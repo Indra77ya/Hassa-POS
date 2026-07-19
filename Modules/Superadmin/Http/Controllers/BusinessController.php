@@ -641,6 +641,10 @@ class BusinessController extends BaseController
 
             // Sub-category: sales
             if ($reset_all_tx || in_array('sales', $reset_transactions)) {
+                if (\Illuminate\Support\Facades\Schema::hasTable('repair_job_sheets')) {
+                    DB::table('repair_job_sheets')->where('business_id', $business_id)->delete();
+                }
+
                 $sales_ids = DB::table('transactions')
                     ->where('business_id', $business_id)
                     ->whereIn('type', ['sell', 'sell_return', 'sales_order'])
@@ -754,16 +758,31 @@ class BusinessController extends BaseController
 
             // Sub-category: contacts
             if ($reset_all_mst || in_array('contacts', $reset_master)) {
+                if (\Illuminate\Support\Facades\Schema::hasTable('repair_job_sheets')) {
+                    DB::table('repair_job_sheets')->where('business_id', $business_id)->delete();
+                }
                 DB::table('contacts')->where('business_id', $business_id)->delete();
             }
 
             // Sub-category: categories
             if ($reset_all_mst || in_array('categories', $reset_master)) {
+                if (\Illuminate\Support\Facades\Schema::hasTable('repair_device_models')) {
+                    DB::table('repair_device_models')->where('business_id', $business_id)->update(['device_id' => null]);
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('repair_job_sheets')) {
+                    DB::table('repair_job_sheets')->where('business_id', $business_id)->update(['device_id' => null]);
+                }
                 DB::table('categories')->where('business_id', $business_id)->delete();
             }
 
             // Sub-category: brands
             if ($reset_all_mst || in_array('brands', $reset_master)) {
+                if (\Illuminate\Support\Facades\Schema::hasTable('repair_device_models')) {
+                    DB::table('repair_device_models')->where('business_id', $business_id)->update(['brand_id' => null]);
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('repair_job_sheets')) {
+                    DB::table('repair_job_sheets')->where('business_id', $business_id)->update(['brand_id' => null]);
+                }
                 DB::table('brands')->where('business_id', $business_id)->delete();
             }
 
