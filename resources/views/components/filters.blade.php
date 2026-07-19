@@ -62,7 +62,7 @@ function pfToggle(id) {
         <span class="tw-flex tw-items-center tw-gap-3">
             {{-- Icon badge --}}
             <span class="tw-inline-flex tw-items-center tw-justify-center tw-shrink-0 tw-transition-all tw-duration-300"
-                  style="width: 32px; height: 32px; min-width: 32px; min-height: 32px; border-radius: 8px; background: color-mix(in srgb, var(--theme-700, #004EEB) 10%, transparent); color: var(--theme-700, #004EEB);">
+                  style="width: 20px; height: 20px; min-width: 20px; min-height: 20px; color: var(--theme-700, #004EEB);">
                 @if (!empty($icon))
                     {!! $icon !!}
                 @else
