@@ -61,14 +61,14 @@ function pfToggle(id) {
 
         <span class="tw-flex tw-items-center tw-gap-3">
             {{-- Icon badge --}}
-            <span class="tw-flex tw-items-center tw-justify-center tw-w-8 tw-h-8 tw-rounded-lg tw-shrink-0 tw-text-sm tw-transition-all tw-duration-300"
-                  style="background: color-mix(in srgb, var(--theme-700, #004EEB) 8%, transparent); color: var(--theme-700, #004EEB);">
+            <span class="tw-inline-flex tw-items-center tw-justify-center tw-shrink-0 tw-transition-all tw-duration-300"
+                  style="width: 32px; height: 32px; min-width: 32px; min-height: 32px; border-radius: 8px; background: color-mix(in srgb, var(--theme-700, #004EEB) 10%, transparent); color: var(--theme-700, #004EEB);">
                 @if (!empty($icon))
                     {!! $icon !!}
                 @else
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
                          fill="none" stroke="currentColor" stroke-width="2.5"
-                         stroke-linecap="round" stroke-linejoin="round">
+                         stroke-linecap="round" stroke-linejoin="round" style="display: block; width: 16px; height: 16px;">
                         <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
                     </svg>
                 @endif
