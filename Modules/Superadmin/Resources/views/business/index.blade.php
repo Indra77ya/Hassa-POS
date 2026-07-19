@@ -100,7 +100,7 @@
                                             <th>@lang('business.email')</th>
                                             <th>@lang('superadmin::lang.owner_number')</th>
                                             <th>@lang('superadmin::lang.business_contact_number')</th>
-                                            <th>@lang('business.address')</th>
+                                            <th style="min-width: 250px;">@lang('business.address')</th>
                                             <th>@lang('sale.status')</th>
                                             <th>@lang('superadmin::lang.current_subscription')</th>
                                             <th>@lang('business.created_by')</th>

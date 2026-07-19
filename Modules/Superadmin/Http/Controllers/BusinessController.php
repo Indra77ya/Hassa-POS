@@ -134,7 +134,7 @@ class BusinessController extends BaseController
                         $address_parts[] = $row->zip_code;
                     }
                     $address_str = implode(', ', $address_parts);
-                    return '<div class="tw-text-xs tw-text-gray-600 tw-max-w-[200px] tw-break-words">' . e($address_str) . '</div>';
+                    return '<div class="tw-text-xs tw-text-gray-600 tw-min-w-[250px] tw-break-words">' . e($address_str) . '</div>';
                 })
                 ->addColumn('business_contact_number', '{{$mobile}} @if(!empty($alternate_number)), {{$alternate_number}}@endif')
                 ->editColumn('is_active', function ($row) {
@@ -184,9 +184,18 @@ class BusinessController extends BaseController
                         ->orWhere('bl.alternate_number', 'like', "%{$keyword}%");
                     });
                 })
-                ->addColumn('current_subscription', '{{$package_name ?? ""}} @if(!empty($start_date) && !empty($end_date)) ({{@format_date($start_date)}} - {{@format_date($end_date)}}) @endif')
+                ->addColumn('current_subscription', function ($row) {
+                    if (empty($row->package_name)) {
+                        return '';
+                    }
+                    $html = '<div class="tw-font-semibold tw-text-gray-800 tw-text-xs">' . e($row->package_name) . '</div>';
+                    if (!empty($row->start_date) && !empty($row->end_date)) {
+                        $html .= '<div class="tw-text-[10px] tw-text-gray-500 tw-mt-0.5">(' . $this->businessUtil->format_date($row->start_date) . ' - ' . $this->businessUtil->format_date($row->end_date) . ')</div>';
+                    }
+                    return $html;
+                })
                 ->editColumn('created_at', '{{@format_datetime($created_at)}}')
-                ->rawColumns(['action', 'is_active', 'created_at', 'address'])
+                ->rawColumns(['action', 'is_active', 'created_at', 'address', 'current_subscription'])
                 ->make(true);
         }
 
