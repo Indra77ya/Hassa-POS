@@ -56,7 +56,7 @@
         @endcan
         @if( auth()->user()->can('so.view_own') || auth()->user()->can('so.view_all'))
         <div class="table-responsive">
-            <table class="table table-bordered table-striped ajax_view" id="sell_table">
+            <table class="table table-bordered table-striped ajax_view" id="sell_table" style="width: 100%;">
                 <thead>
                     <tr>
                         <th class="not-export">@lang('messages.action')</th>
@@ -98,6 +98,8 @@ $(document).ready( function(){
         processing: true,
         serverSide: true,
         fixedHeader:false,
+        scrollX: true,
+        scrollCollapse: true,
         aaSorting: [[1, 'desc']],
         "ajax": {
             "url": '/sells?sale_type=sales_order',
@@ -150,4 +152,12 @@ $(document).ready( function(){
 });
 </script>
 	
+@endsection
+
+@section('css')
+<style>
+    #sell_table th {
+        white-space: nowrap !important;
+    }
+</style>
 @endsection
