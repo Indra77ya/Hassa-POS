@@ -54,7 +54,7 @@ function pfToggle(id) {
     {{-- Header --}}
     <button type="button"
             id="{{ $filterId }}_btn"
-            class="pf-btn tw-w-full tw-flex tw-items-center tw-justify-between tw-px-5 tw-py-4 tw-border-0 tw-border-b tw-border-transparent tw-bg-transparent tw-cursor-pointer tw-transition-colors tw-duration-200 hover:tw-bg-gray-50/80 tw-outline-none focus:tw-outline-none"
+            class="pf-btn tw-w-full tw-flex tw-items-center tw-justify-between tw-pl-5 tw-pr-8 tw-py-4 tw-border-0 tw-border-b tw-border-transparent tw-bg-transparent tw-cursor-pointer tw-transition-colors tw-duration-200 hover:tw-bg-gray-50/80 tw-outline-none focus:tw-outline-none"
             onclick="pfToggle('{{ $filterId }}')"
             aria-expanded="{{ $isOpen ? 'true' : 'false' }}"
             aria-controls="{{ $filterId }}_body">
