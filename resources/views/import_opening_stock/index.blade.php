@@ -40,7 +40,7 @@
                         </div>
                         <div class="col-sm-4">
                         <br>
-                            <button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white">@lang('messages.submit')</button>
+                            <button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white theme-btn-bg tw-rounded-xl">@lang('messages.submit')</button>
                         </div>
                         </div>
                     </div>
@@ -48,8 +48,10 @@
                 {!! Form::close() !!}
                 <br><br>
                 <div class="row">
-                    <div class="col-sm-4">
-                        <a href="{{ asset('files/import_opening_stock_csv_template.xls') }}" class="tw-dw-btn tw-dw-btn-success tw-text-white" download><i class="fa fa-download"></i> @lang('lang_v1.download_template_file')</a>
+                    <div class="col-sm-6">
+                        <a href="{{ url('files/import_opening_stock_csv_template.csv') }}" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-rounded-xl" download><i class="fa fa-download"></i> @lang('lang_v1.download_template_file') (CSV)</a>
+                        &nbsp;
+                        <a href="{{ url('files/import_opening_stock_csv_template.xls') }}" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-rounded-xl" download><i class="fa fa-download"></i> @lang('lang_v1.download_template_file') (Excel)</a>
                     </div>
                 </div>
             @endcomponent
