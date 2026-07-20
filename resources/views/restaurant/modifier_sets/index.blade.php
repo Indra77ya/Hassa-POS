@@ -23,7 +23,7 @@
         <h3 class="box-title">@lang( 'restaurant.all_your_modifiers' )</h3>
         @can('restaurant.create')
             <div class="box-tools">
-                    <button class="tw-dw-btn tw-bg-gradient-to-r tw-from-indigo-600 tw-to-blue-500 tw-font-bold tw-text-white tw-border-none tw-rounded-full btn-modal"
+                    <button class="tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] btn-modal"
                     data-href="{{action([\App\Http\Controllers\Restaurant\ModifierSetsController::class, 'create'])}}" 
                     data-container=".modifier_modal">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"

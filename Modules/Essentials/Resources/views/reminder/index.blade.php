@@ -12,7 +12,7 @@
 						<div class="row">
 					    	<div class="col-md-12">
 								<div class="box-tools pull-right">
-										<button data-href="#" class="tw-dw-btn tw-bg-gradient-to-r tw-from-indigo-600 tw-to-blue-500 tw-font-bold tw-text-white tw-border-none tw-rounded-full tw-text-white pull-righ add_reminder">
+										<button data-href="#" class="tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] tw-text-white pull-righ add_reminder">
 											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
 												stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
 												class="icon icon-tabler icons-tabler-outline icon-tabler-plus">
