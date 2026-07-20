@@ -194,6 +194,13 @@ class AdminSidebarMenu
                                 ['icon' => '', 'active' => request()->segment(1) == 'import-opening-stock']
                             );
                         }
+                        if (auth()->user()->can('unit.create')) {
+                            $sub->url(
+                                action([\App\Http\Controllers\ImportUnitsController::class, 'index']),
+                                __('unit.import_units'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'import-units']
+                            );
+                        }
                         if (auth()->user()->can('product.create')) {
                             $sub->url(
                                 action([\App\Http\Controllers\SellingPriceGroupController::class, 'index']),

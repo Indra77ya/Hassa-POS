@@ -24,6 +24,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ImportOpeningStockController;
 use App\Http\Controllers\ImportProductsController;
 use App\Http\Controllers\ImportSalesController;
+use App\Http\Controllers\ImportUnitsController;
 use App\Http\Controllers\Install;
 use App\Http\Controllers\InvoiceLayoutController;
 use App\Http\Controllers\InvoiceSchemeController;
@@ -352,6 +353,10 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     //Import products
     Route::get('/import-products', [ImportProductsController::class, 'index']);
     Route::post('/import-products/store', [ImportProductsController::class, 'store']);
+
+    //Import units
+    Route::get('/import-units', [ImportUnitsController::class, 'index']);
+    Route::post('/import-units/store', [ImportUnitsController::class, 'store']);
 
     //Sales Commission Agent
     Route::resource('sales-commission-agents', SalesCommissionAgentController::class);

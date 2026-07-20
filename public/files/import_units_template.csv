@@ -1,0 +1,4 @@
+Name,Short Name,Allow Decimal,Define Base Unit,Base Unit Multiplier,Base Unit
+Piece,Pcs,0,0,,
+Dozen,Dzn,0,1,12,Piece
+Kilogram,Kg,1,0,,
