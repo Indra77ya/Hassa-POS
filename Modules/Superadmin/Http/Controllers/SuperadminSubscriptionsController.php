@@ -61,11 +61,15 @@ class SuperadminSubscriptionsController extends BaseController
             return DataTables::of($superadmin_subscription)
                         ->addColumn(
                             'action',
-                            '<button data-href ="{{action(\'\Modules\Superadmin\Http\Controllers\SuperadminSubscriptionsController@edit\',[$id])}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-info change_status" data-toggle="modal" data-target="#statusModal">
-                            @lang( "superadmin::lang.status")
-                            </button> <button data-href ="{{action(\'\Modules\Superadmin\Http\Controllers\SuperadminSubscriptionsController@editSubscription\',["id" => $id])}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary btn-modal tw-m-1" data-container=".view_modal">
-                            @lang( "messages.edit")
-                            </button>'
+                            '<div class="btn-group">
+                                <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                    @lang("messages.actions") <span class="caret"></span><span class="sr-only">Toggle Dropdown</span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                    <li><a href="#" data-href="{{action(\'\Modules\Superadmin\Http\Controllers\SuperadminSubscriptionsController@edit\',[$id])}}" class="change_status" data-toggle="modal" data-target="#statusModal"><i class="fa fa-edit"></i> @lang("superadmin::lang.status")</a></li>
+                                    <li><a href="#" data-href="{{action(\'\Modules\Superadmin\Http\Controllers\SuperadminSubscriptionsController@editSubscription\',["id" => $id])}}" class="btn-modal" data-container=".view_modal"><i class="fa fa-pencil-alt"></i> @lang("messages.edit")</a></li>
+                                </ul>
+                            </div>'
                         )
                         ->editColumn('created_at', '{{@format_datetime($created_at)}}')
                         ->editColumn('trial_end_date', '@if(!empty($trial_end_date)){{@format_date($trial_end_date)}} @endif')
