@@ -54,7 +54,7 @@
                     <div class="tw-mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
                         <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
                             @can('superadmin')
-                                <table class="table table-bordered table-striped" id="superadmin_subscription_table">
+                                <table class="table table-bordered table-striped" id="superadmin_subscription_table" style="width: 100%;">
                                     <thead>
                                         <tr>
                                             <th>@lang('superadmin::lang.business_name')</th>
@@ -113,6 +113,8 @@
                 processing: true,
                 serverSide: true,
                 fixedHeader:false,
+                scrollX: true,
+                scrollCollapse: true,
                 ajax: {
                     url: '/superadmin/superadmin-subscription',
                     data: function(d) {
@@ -206,4 +208,12 @@
 
         });
     </script>
+@endsection
+
+@section('css')
+    <style>
+        #superadmin_subscription_table th {
+            white-space: nowrap !important;
+        }
+    </style>
 @endsection
