@@ -161,7 +161,7 @@
                     <table class="table table-bordered table-striped" id="contact_table" style="width: 100%;">
                         <thead>
                             <tr>
-                                <th class="tw-w-full not-export" style="white-space: nowrap !important;">@lang('messages.action')</th>
+                                <th class="not-export" style="white-space: nowrap !important;">@lang('messages.action')</th>
                                 <th style="white-space: nowrap !important;">@lang('lang_v1.contact_id')</th>
                                 @if ($type == 'supplier')
                                     <th style="white-space: nowrap !important;">@lang('business.business_name')</th>
