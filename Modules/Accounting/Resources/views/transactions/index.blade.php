@@ -172,6 +172,7 @@
             sell_payment_table = $('#sell_payment_table').DataTable({
                 processing: true,
                 serverSide: true,
+                scrollX: true,
                 "ajax": {
                     "url": base_path + "/accounting/transactions?transaction_type=sell&datatable=payment",
                     "data": function(d) {
@@ -228,6 +229,7 @@
             purchase_payment_table = $('#purchase_payment_table').DataTable({
                 processing: true,
                 serverSide: true,
+                scrollX: true,
                 "ajax": {
                     "url": base_path +
                         "/accounting/transactions?transaction_type=purchase&datatable=payment",
@@ -287,6 +289,7 @@
             purchase_table = $('#purchase_table').DataTable({
                 processing: true,
                 serverSide: true,
+                scrollX: true,
                 ajax: {
                     url: '/accounting/transactions?datatable=purchase',
                     data: function(d) {
