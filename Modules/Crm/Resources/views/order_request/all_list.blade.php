@@ -40,18 +40,18 @@
     @component('components.widget', ['class' => 'box-primary'])
         @if( auth()->user()->can('so.view_own') || auth()->user()->can('so.view_all'))
         <div class="table-responsive">
-            <table class="table table-bordered table-striped ajax_view" id="sell_table">
+            <table class="table table-bordered table-striped ajax_view" id="sell_table" style="width: 100%;">
                 <thead>
                     <tr>
-                        <th>@lang('messages.action')</th>
-                        <th>@lang('messages.date')</th>
-                        <th>@lang('restaurant.order_no')</th>
-                        <th>@lang('sale.customer_name')</th>
-                        <th>@lang('lang_v1.contact_no')</th>
-                        <th>@lang('sale.location')</th>
-                        <th>@lang('sale.status')</th>
-                        <th>@lang('lang_v1.quantity_remaining')</th>
-                        <th>@lang('lang_v1.added_by')</th>
+                        <th style="white-space: nowrap !important;">@lang('messages.action')</th>
+                        <th style="white-space: nowrap !important;">@lang('messages.date')</th>
+                        <th style="white-space: nowrap !important;">@lang('restaurant.order_no')</th>
+                        <th style="white-space: nowrap !important;">@lang('sale.customer_name')</th>
+                        <th style="white-space: nowrap !important;">@lang('lang_v1.contact_no')</th>
+                        <th style="white-space: nowrap !important;">@lang('sale.location')</th>
+                        <th style="white-space: nowrap !important;">@lang('sale.status')</th>
+                        <th style="white-space: nowrap !important;">@lang('lang_v1.quantity_remaining')</th>
+                        <th style="white-space: nowrap !important;">@lang('lang_v1.added_by')</th>
                     </tr>
                 </thead>
             </table>
@@ -80,6 +80,7 @@ $(document).ready( function(){
     sell_table = $('#sell_table').DataTable({
         processing: true,
         serverSide: true,
+        scrollX: true,
         aaSorting: [[1, 'desc']],
         "ajax": {
             "url": '/sells?sale_type=sales_order',

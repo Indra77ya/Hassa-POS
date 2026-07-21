@@ -705,19 +705,19 @@
                                 <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
                                     <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
                                         <table class="table table-bordered table-striped ajax_view"
-                                            id="sales_order_table">
+                                            id="sales_order_table" style="width: 100%;">
                                             <thead>
                                                 <tr>
-                                                    <th class="not-export">@lang('messages.action')</th>
-                                                    <th>@lang('messages.date')</th>
-                                                    <th>@lang('restaurant.order_no')</th>
-                                                    <th>@lang('sale.customer_name')</th>
-                                                    <th>@lang('lang_v1.contact_no')</th>
-                                                    <th>@lang('sale.location')</th>
-                                                    <th>@lang('sale.status')</th>
-                                                    <th>@lang('lang_v1.shipping_status')</th>
-                                                    <th>@lang('lang_v1.quantity_remaining')</th>
-                                                    <th>@lang('lang_v1.added_by')</th>
+                                                    <th class="not-export" style="white-space: nowrap !important;">@lang('messages.action')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('messages.date')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('restaurant.order_no')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('sale.customer_name')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('lang_v1.contact_no')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('sale.location')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('sale.status')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('lang_v1.shipping_status')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('lang_v1.quantity_remaining')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('lang_v1.added_by')</th>
                                                 </tr>
                                             </thead>
                                         </table>
