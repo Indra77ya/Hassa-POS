@@ -29,18 +29,18 @@
             </div>
         @endslot
         <div class="table-responsive">
-            <table class="table table-bordered table-striped ajax_view" id="stock_transfer_table">
+            <table class="table table-bordered table-striped ajax_view" id="stock_transfer_table" style="width: 100%;">
                 <thead>
                     <tr>
-                        <th>@lang('messages.date')</th>
-                        <th>@lang('purchase.ref_no')</th>
-                        <th>@lang('lang_v1.location_from')</th>
-                        <th>@lang('lang_v1.location_to')</th>
-                        <th>@lang('sale.status')</th>
-                        <th>@lang('lang_v1.shipping_charges')</th>
-                        <th>@lang('stock_adjustment.total_amount')</th>
-                        <th>@lang('purchase.additional_notes')</th>
-                        <th class="tw-w-full not-export">@lang('messages.action')</th>
+                        <th style="white-space: nowrap !important;">@lang('messages.date')</th>
+                        <th style="white-space: nowrap !important;">@lang('purchase.ref_no')</th>
+                        <th style="white-space: nowrap !important;">@lang('lang_v1.location_from')</th>
+                        <th style="white-space: nowrap !important;">@lang('lang_v1.location_to')</th>
+                        <th style="white-space: nowrap !important;">@lang('sale.status')</th>
+                        <th style="white-space: nowrap !important;">@lang('lang_v1.shipping_charges')</th>
+                        <th style="white-space: nowrap !important;">@lang('stock_adjustment.total_amount')</th>
+                        <th style="white-space: nowrap !important;">@lang('purchase.additional_notes')</th>
+                        <th class="tw-w-full not-export" style="white-space: nowrap !important;">@lang('messages.action')</th>
                     </tr>
                 </thead>
             </table>
