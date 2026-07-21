@@ -492,10 +492,10 @@
                                             style="width: 100%;">
                                             <thead>
                                                 <tr>
-                                                    <th>@lang('contact.customer')</th>
-                                                    <th>@lang('sale.invoice_no')</th>
-                                                    <th>@lang('home.due_amount')</th>
-                                                    <th class="not-export">@lang('messages.action')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('contact.customer')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('sale.invoice_no')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('home.due_amount')</th>
+                                                    <th class="not-export" style="white-space: nowrap !important;">@lang('messages.action')</th>
                                                 </tr>
                                             </thead>
                                         </table>
@@ -549,10 +549,10 @@
                                             style="width: 100%;">
                                             <thead>
                                                 <tr>
-                                                    <th>@lang('purchase.supplier')</th>
-                                                    <th>@lang('purchase.ref_no')</th>
-                                                    <th>@lang('home.due_amount')</th>
-                                                    <th class="not-export">@lang('messages.action')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('purchase.supplier')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('purchase.ref_no')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('home.due_amount')</th>
+                                                    <th class="not-export" style="white-space: nowrap !important;">@lang('messages.action')</th>
                                                 </tr>
                                             </thead>
                                         </table>
@@ -603,9 +603,9 @@
                                             style="width: 100%;">
                                             <thead>
                                                 <tr>
-                                                    <th>@lang('sale.product')</th>
-                                                    <th>@lang('business.location')</th>
-                                                    <th>@lang('report.current_stock')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('sale.product')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('business.location')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('report.current_stock')</th>
                                                 </tr>
                                             </thead>
                                         </table>
