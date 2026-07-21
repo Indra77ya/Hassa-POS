@@ -75,44 +75,44 @@
          auth()->user()->can('access_own_shipping') ||
           auth()->user()->can('access_commission_agent_shipping') )
             <div class="table-responsive">
-                <table class="table table-bordered table-striped ajax_view" id="sell_table">
+                <table class="table table-bordered table-striped ajax_view" id="sell_table" style="width: 100%;">
                     <thead>
                         <tr>
-                            <th class="not-export">@lang('messages.action')</th>
-                            <th>@lang('messages.date')</th>
-                            <th>@lang('sale.invoice_no')</th>
-                            <th>@lang('sale.customer_name')</th>
-                            <th>@lang('lang_v1.contact_no')</th>
-                            <th>@lang('sale.location')</th>
-                            <th>@lang('lang_v1.delivery_person')</th>
-                            <th>@lang('lang_v1.shipping_status')</th>
+                            <th class="not-export" style="white-space: nowrap !important;">@lang('messages.action')</th>
+                            <th style="white-space: nowrap !important;">@lang('messages.date')</th>
+                            <th style="white-space: nowrap !important;">@lang('sale.invoice_no')</th>
+                            <th style="white-space: nowrap !important;">@lang('sale.customer_name')</th>
+                            <th style="white-space: nowrap !important;">@lang('lang_v1.contact_no')</th>
+                            <th style="white-space: nowrap !important;">@lang('sale.location')</th>
+                            <th style="white-space: nowrap !important;">@lang('lang_v1.delivery_person')</th>
+                            <th style="white-space: nowrap !important;">@lang('lang_v1.shipping_status')</th>
                             @if(!empty($custom_labels['shipping']['custom_field_1']))
-                                <th>
+                                <th style="white-space: nowrap !important;">
                                     {{$custom_labels['shipping']['custom_field_1']}}
                                 </th>
                             @endif
                             @if(!empty($custom_labels['shipping']['custom_field_2']))
-                                <th>
+                                <th style="white-space: nowrap !important;">
                                     {{$custom_labels['shipping']['custom_field_2']}}
                                 </th>
                             @endif
                             @if(!empty($custom_labels['shipping']['custom_field_3']))
-                                <th>
+                                <th style="white-space: nowrap !important;">
                                     {{$custom_labels['shipping']['custom_field_3']}}
                                 </th>
                             @endif
                             @if(!empty($custom_labels['shipping']['custom_field_4']))
-                                <th>
+                                <th style="white-space: nowrap !important;">
                                     {{$custom_labels['shipping']['custom_field_4']}}
                                 </th>
                             @endif
                             @if(!empty($custom_labels['shipping']['custom_field_5']))
-                                <th>
+                                <th style="white-space: nowrap !important;">
                                     {{$custom_labels['shipping']['custom_field_5']}}
                                 </th>
                             @endif
-                            <th>@lang('sale.payment_status')</th>
-                            <th>@lang('restaurant.service_staff')</th>
+                            <th style="white-space: nowrap !important;">@lang('sale.payment_status')</th>
+                            <th style="white-space: nowrap !important;">@lang('restaurant.service_staff')</th>
                         </tr>
                     </thead>
                 </table>
