@@ -262,21 +262,23 @@
 							</div>
 							<div class="col-md-12">
 								<br>
-								<table class="table table-bordered table-striped" id="account_sub_type_table">
-									<thead>
-										<tr>
-											<th>
-												@lang('accounting::lang.account_sub_type')
-											</th>
-											<th>
-												@lang('accounting::lang.account_type')
-											</th>
-											<th>
-												@lang('messages.action')
-											</th>
-										</tr>
-									</thead>
-								</table>
+								<div class="table-responsive">
+									<table class="table table-bordered table-striped" id="account_sub_type_table" style="width: 100%;">
+										<thead>
+											<tr>
+												<th style="white-space: nowrap !important;">
+													@lang('accounting::lang.account_sub_type')
+												</th>
+												<th style="white-space: nowrap !important;">
+													@lang('accounting::lang.account_type')
+												</th>
+												<th class="not-export" style="white-space: nowrap !important;">
+													@lang('messages.action')
+												</th>
+											</tr>
+										</thead>
+									</table>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -295,24 +297,26 @@
 							</div>
 							<div class="col-md-12">
 								<br>
-								<table class="table table-striped" id="detail_type_table" style="width: 100%;">
-									<thead>
-										<tr>
-											<th>
-												@lang('accounting::lang.detail_type')
-											</th>
-											<th>
-												@lang('accounting::lang.parent_type')
-											</th>
-											<th>
-												@lang('lang_v1.description')
-											</th>
-											<th>
-												@lang('messages.action')
-											</th>
-										</tr>
-									</thead>
-								</table>
+								<div class="table-responsive">
+									<table class="table table-striped table-bordered" id="detail_type_table" style="width: 100%;">
+										<thead>
+											<tr>
+												<th style="white-space: nowrap !important;">
+													@lang('accounting::lang.detail_type')
+												</th>
+												<th style="white-space: nowrap !important;">
+													@lang('accounting::lang.parent_type')
+												</th>
+												<th style="white-space: nowrap !important;">
+													@lang('lang_v1.description')
+												</th>
+												<th class="not-export" style="white-space: nowrap !important;">
+													@lang('messages.action')
+												</th>
+											</tr>
+										</thead>
+									</table>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -335,6 +339,8 @@
 		account_sub_type_table = $('#account_sub_type_table').DataTable({
 			processing: true,
 			serverSide: true,
+			fixedHeader: false,
+			scrollX: true,
 			ajax: "{{action([\Modules\Accounting\Http\Controllers\AccountTypeController::class, 'index'])}}?account_type=sub_type",
 			columnDefs: [{
 				targets: [2],
@@ -359,6 +365,8 @@
 		detail_type_table = $('#detail_type_table').DataTable({
 			processing: true,
 			serverSide: true,
+			fixedHeader: false,
+			scrollX: true,
 			ajax: "{{action([\Modules\Accounting\Http\Controllers\AccountTypeController::class, 'index'])}}?account_type=detail_type",
 			columnDefs: [{
 				targets: 3,
