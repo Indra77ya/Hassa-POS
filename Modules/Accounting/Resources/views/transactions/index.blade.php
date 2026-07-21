@@ -491,6 +491,16 @@
                     __currency_convert_recursively($('#transaction_expense_table'));
                 }
             });
+
+            $('div.pos-tab-menu>div.list-group>a').click(function (e) {
+                setTimeout(function() {
+                    if (typeof sell_table !== 'undefined') { sell_table.columns.adjust(); }
+                    if (typeof sell_payment_table !== 'undefined') { sell_payment_table.columns.adjust(); }
+                    if (typeof purchase_table !== 'undefined') { purchase_table.columns.adjust(); }
+                    if (typeof purchase_payment_table !== 'undefined') { purchase_payment_table.columns.adjust(); }
+                    if (typeof transaction_expense_table !== 'undefined') { transaction_expense_table.columns.adjust(); }
+                }, 150);
+            });
         });
     </script>
 @stop

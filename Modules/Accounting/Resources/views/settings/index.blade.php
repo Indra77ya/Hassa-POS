@@ -408,7 +408,20 @@
 			$('#parent_id_div').removeClass('hide');
 			$('#account_type_div').addClass('hide');
 			$('#create_account_type_modal').modal('show');
-		})
+		});
+
+		$('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+			var target = $(e.target).attr('href');
+			if (target == '#sub_type_tab') {
+				if (typeof account_sub_type_table !== 'undefined') {
+					account_sub_type_table.columns.adjust().draw();
+				}
+			} else if (target == '#detail_type_tab') {
+				if (typeof detail_type_table !== 'undefined') {
+					detail_type_table.columns.adjust().draw();
+				}
+			}
+		});
 	});
 	$(document).on('hidden.bs.modal', '#create_account_type_modal', function(e) {
 		$('#create_account_type_form')[0].reset();
