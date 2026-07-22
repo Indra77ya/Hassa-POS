@@ -163,6 +163,49 @@
         //     $(picker.container).insertAfter($(this));
         // });
    
+        // Fix Bootstrap dropdown menu clipping inside scrollable/responsive containers (like DataTables)
+        (function() {
+            var dropdownMenu;
+            $(document).on('show.bs.dropdown', '.table-responsive, .dataTables_scrollBody', function (e) {
+                dropdownMenu = $(e.target).find('.dropdown-menu');
+                if (!dropdownMenu.length) return;
+
+                dropdownMenu.data('original-parent', $(e.target));
+
+                $('body').append(dropdownMenu.detach());
+                var eOffset = $(e.target).offset();
+
+                var top = eOffset.top + $(e.target).outerHeight();
+                var left = eOffset.left;
+
+                if (dropdownMenu.hasClass('dropdown-menu-right')) {
+                    left = eOffset.left + $(e.target).outerWidth() - dropdownMenu.outerWidth();
+                }
+
+                dropdownMenu.css({
+                    'display': 'block',
+                    'position': 'absolute',
+                    'top': top + 'px',
+                    'left': left + 'px',
+                    'z-index': 10000
+                });
+            });
+
+            $(document).on('hide.bs.dropdown', '.table-responsive, .dataTables_scrollBody', function (e) {
+                if (dropdownMenu && dropdownMenu.length) {
+                    var originalParent = dropdownMenu.data('original-parent');
+                    if (originalParent && originalParent.length) {
+                        originalParent.append(dropdownMenu.css({
+                            'display': '',
+                            'position': '',
+                            'top': '',
+                            'left': '',
+                            'z-index': ''
+                        }).detach());
+                    }
+                }
+            });
+        })();
     });
 </script>
 
