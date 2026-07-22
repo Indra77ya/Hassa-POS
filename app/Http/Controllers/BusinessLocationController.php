@@ -81,11 +81,28 @@ class BusinessLocationController extends Controller
             return Datatables::of($locations)
                 ->addColumn(
                     'action',
-                    '<button type="button" data-href="{{action(\'App\Http\Controllers\BusinessLocationController@edit\', [$id])}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-primary btn-modal" data-container=".location_edit_modal"><i class="glyphicon glyphicon-edit"></i> @lang("messages.edit")</button>
-                    <a href="{{route(\'location.settings\', [$id])}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent"><i class="fa fa-wrench"></i> @lang("messages.settings")</a>
-
-                    <button type="button" data-href="{{action(\'App\Http\Controllers\BusinessLocationController@activateDeactivateLocation\', [$id])}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline   activate-deactivate-location @if($is_active) tw-dw-btn-error @else tw-dw-btn-accent @endif tw-w-max"><i class="fa fa-power-off"></i> @if($is_active) @lang("lang_v1.deactivate_location") @else @lang("lang_v1.activate_location") @endif </button>
-                    '
+                    '<div class="btn-group">
+                        <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info tw-w-max dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            @lang("messages.actions") <span class="caret"></span><span class="sr-only">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-left" role="menu">
+                            <li>
+                                <a href="#" data-href="{{action(\'App\Http\Controllers\BusinessLocationController@edit\', [$id])}}" class="btn-modal" data-container=".location_edit_modal">
+                                    <i class="glyphicon glyphicon-edit"></i> @lang("messages.edit")
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{route(\'location.settings\', [$id])}}">
+                                    <i class="fa fa-wrench"></i> @lang("messages.settings")
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" data-href="{{action(\'App\Http\Controllers\BusinessLocationController@activateDeactivateLocation\', [$id])}}" class="activate-deactivate-location">
+                                    <i class="fa fa-power-off"></i> @if($is_active) @lang("lang_v1.deactivate_location") @else @lang("lang_v1.activate_location") @endif
+                                </a>
+                            </li>
+                        </ul>
+                    </div>'
                 )
                 ->removeColumn('id')
                 ->removeColumn('is_active')
