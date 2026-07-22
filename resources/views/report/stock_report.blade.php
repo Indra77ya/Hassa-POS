@@ -96,5 +96,16 @@
 @endsection
 
 @section('javascript')
+    @php
+        $custom_labels = json_decode(session('business.custom_labels'), true);
+    @endphp
+    <script type="text/javascript">
+        window.product_custom_labels = {
+            custom_field_1: "{{ !empty($custom_labels['product']['custom_field_1']) ? 1 : 0 }}",
+            custom_field_2: "{{ !empty($custom_labels['product']['custom_field_2']) ? 1 : 0 }}",
+            custom_field_3: "{{ !empty($custom_labels['product']['custom_field_3']) ? 1 : 0 }}",
+            custom_field_4: "{{ !empty($custom_labels['product']['custom_field_4']) ? 1 : 0 }}"
+        };
+    </script>
     <script src="{{ asset('js/report.js?v=' . $asset_v) }}"></script>
 @endsection
