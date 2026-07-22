@@ -1155,6 +1155,7 @@ $(document).ready(function() {
         serverSide: true,
         bPaginate: false,
         fixedHeader:false,
+        scrollX: true,
         buttons: [],
         ajax: '/invoice-schemes',
         columnDefs: [
@@ -1190,7 +1191,7 @@ $(document).ready(function() {
             },
         });
     });
-    $(document).on('click', 'button.set_default_invoice', function() {
+    $(document).on('click', '.set_default_invoice', function() {
         var href = $(this).data('href');
         var data = $(this).serialize();
 
@@ -1212,7 +1213,7 @@ $(document).ready(function() {
     $('.invoice_edit_modal').on('shown.bs.modal', function() {
         show_invoice_preview();
     });
-    $(document).on('click', 'button.delete_invoice_button', function() {
+    $(document).on('click', '.delete_invoice_button', function() {
         swal({
             title: LANG.sure,
             text: LANG.delete_invoice_confirm,
