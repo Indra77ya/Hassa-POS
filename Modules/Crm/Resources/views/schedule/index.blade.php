@@ -99,27 +99,27 @@
 						            	<table class="table table-bordered table-striped" id="follow_up_table" style="width: 100%">
 									        <thead>
 									            <tr>
-									            	<th>@lang('messages.action')</th>
-									            	<th>
+											<th style="white-space: nowrap !important;">@lang('messages.action')</th>
+											<th style="white-space: nowrap !important;">
 									            		@lang('contact.contact')
 									            	</th>
-									            	<th>@lang('crm::lang.start_datetime')</th>
-									                <th>@lang('crm::lang.end_datetime')</th>
-									                <th>@lang('sale.status')</th>
-									                <th>@lang('crm::lang.schedule_type')</th>
-									                <th>@lang('crm::lang.followup_category')</th>
-									                <th>@lang('lang_v1.assigned_to')</th>
-									                <th>
+											<th style="white-space: nowrap !important;">@lang('crm::lang.start_datetime')</th>
+									                <th style="white-space: nowrap !important;">@lang('crm::lang.end_datetime')</th>
+									                <th style="white-space: nowrap !important;">@lang('sale.status')</th>
+									                <th style="white-space: nowrap !important;">@lang('crm::lang.schedule_type')</th>
+									                <th style="white-space: nowrap !important;">@lang('crm::lang.followup_category')</th>
+									                <th style="white-space: nowrap !important;">@lang('lang_v1.assigned_to')</th>
+									                <th style="white-space: nowrap !important;">
 									                	@lang('crm::lang.description')
 									                </th>
-									                <th>
+									                <th style="white-space: nowrap !important;">
 									                	@lang('crm::lang.additional_info')
 									                </th>
-									                <th>@lang('crm::lang.title')</th>
-									                <th>
+									                <th style="white-space: nowrap !important;">@lang('crm::lang.title')</th>
+									                <th style="white-space: nowrap !important;">
 									                	@lang('lang_v1.added_by')
 									                </th>
-									                <th>
+									                <th style="white-space: nowrap !important;">
 									                	@lang('lang_v1.added_on')
 									                </th>
 									            </tr>
@@ -143,24 +143,24 @@
 						            	<table class="table table-bordered table-striped" id="recursive_follow_up_table" style="width: 100%">
 									        <thead>
 									            <tr>
-									            	<th>@lang('messages.action')</th>
-									                <th>@lang('sale.status')</th>
-									                <th>@lang('crm::lang.schedule_type')</th>
-									                <th>@lang('crm::lang.followup_category')</th>
-									                <th>@lang('crm::lang.follow_up_by')</th>
-									                <th>@lang('crm::lang.in_days')</th>
-									                <th>@lang('lang_v1.assigned_to')</th>
-									                <th>
+											<th style="white-space: nowrap !important;">@lang('messages.action')</th>
+									                <th style="white-space: nowrap !important;">@lang('sale.status')</th>
+									                <th style="white-space: nowrap !important;">@lang('crm::lang.schedule_type')</th>
+									                <th style="white-space: nowrap !important;">@lang('crm::lang.followup_category')</th>
+									                <th style="white-space: nowrap !important;">@lang('crm::lang.follow_up_by')</th>
+									                <th style="white-space: nowrap !important;">@lang('crm::lang.in_days')</th>
+									                <th style="white-space: nowrap !important;">@lang('lang_v1.assigned_to')</th>
+									                <th style="white-space: nowrap !important;">
 									                	@lang('crm::lang.description')
 									                </th>
-									                <th>
+									                <th style="white-space: nowrap !important;">
 									                	@lang('crm::lang.additional_info')
 									                </th>
-									                <th>@lang('crm::lang.title')</th>
-									                <th>
+									                <th style="white-space: nowrap !important;">@lang('crm::lang.title')</th>
+									                <th style="white-space: nowrap !important;">
 									                	@lang('lang_v1.added_by')
 									                </th>
-									                <th>
+									                <th style="white-space: nowrap !important;">
 									                	@lang('lang_v1.added_on')
 									                </th>
 									            </tr>
@@ -307,6 +307,18 @@
 	            $('#follow_up_date_range').data('daterangepicker').setEndDate('{{$default_end_date}}');
 	            follow_up_datatable.ajax.reload();
 	        @endif
+
+			$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+				if ($(e.target).attr('href') == '#all_followup_tab') {
+					if (typeof follow_up_datatable !== 'undefined') {
+						follow_up_datatable.columns.adjust();
+					}
+				} else if ($(e.target).attr('href') == '#recur_followup_tab') {
+					if (typeof recursive_follow_up_table !== 'undefined') {
+						recursive_follow_up_table.columns.adjust();
+					}
+				}
+			});
 		        
 		});
 	</script>
