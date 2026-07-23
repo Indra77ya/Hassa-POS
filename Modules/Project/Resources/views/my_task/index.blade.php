@@ -64,28 +64,28 @@
 	@endphp
 	@component('components.widget', ['class' => 'box-primary', 'title' => __( 'project::lang.my_tasks'), 'tool' => $tool])
 		<div class="table-responsive">
-		    <table class="table table-bordered table-striped" id="my_task_table">
+		    <table class="table table-bordered table-striped" id="my_task_table" style="width: 100%">
 		        <thead>
 		            <tr>
-		            	<th> @lang('messages.action')</th>
-		            	<th class="col-md-2">
+				<th style="white-space: nowrap !important;"> @lang('messages.action')</th>
+				<th class="col-md-2" style="white-space: nowrap !important;">
 		            		@lang('project::lang.project')
 		            	</th>
-		                <th class="col-md-3">
+		                <th class="col-md-3" style="white-space: nowrap !important;">
 		                	@lang('project::lang.subject')
 		                </th>
-		                <th class="col-md-2">
+		                <th class="col-md-2" style="white-space: nowrap !important;">
 		                	@lang('project::lang.assigned_to')
 		                </th>
-		                <th> @lang('project::lang.priority')</th>
-		                <th> @lang('business.start_date')</th>
-		                <th>@lang('project::lang.due_date')</th>
-		                <th>@lang('sale.status')</th>
-		                <th> @lang('project::lang.assigned_by')</th>
-		                <th>@lang('project::lang.task_custom_field_1')</th>
-		                <th>@lang('project::lang.task_custom_field_2')</th>
-		                <th>@lang('project::lang.task_custom_field_3')</th>
-		                <th>@lang('project::lang.task_custom_field_4')</th>
+		                <th style="white-space: nowrap !important;"> @lang('project::lang.priority')</th>
+		                <th style="white-space: nowrap !important;"> @lang('business.start_date')</th>
+		                <th style="white-space: nowrap !important;">@lang('project::lang.due_date')</th>
+		                <th style="white-space: nowrap !important;">@lang('sale.status')</th>
+		                <th style="white-space: nowrap !important;"> @lang('project::lang.assigned_by')</th>
+		                <th style="white-space: nowrap !important;">@lang('project::lang.task_custom_field_1')</th>
+		                <th style="white-space: nowrap !important;">@lang('project::lang.task_custom_field_2')</th>
+		                <th style="white-space: nowrap !important;">@lang('project::lang.task_custom_field_3')</th>
+		                <th style="white-space: nowrap !important;">@lang('project::lang.task_custom_field_4')</th>
 		            </tr>
 		        </thead>
 		    </table>

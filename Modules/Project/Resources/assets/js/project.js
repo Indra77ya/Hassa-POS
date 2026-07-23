@@ -239,6 +239,9 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
     var target = $(e.target).attr('href');
     if ( target == '#project_task') {
         initializeProjectTaskDatatable();
+        if (typeof project_task_datatable !== 'undefined') {
+            project_task_datatable.columns.adjust();
+        }
     } else if(target == '#time_log') {
         initializeTimeLogDatatable();
     } else if(target == '#documents_and_notes') {
@@ -604,6 +607,7 @@ function initializeMyTaskDataTable() {
         my_task_datatable = $("#my_task_table").DataTable({
                 processing: true,
                 serverSide: true,
+                scrollX: true,
                 ajax:{
                     url: '/project/project-task',
                     data: function(d) {
@@ -620,6 +624,10 @@ function initializeMyTaskDataTable() {
                         targets: [0, 1, 3, 7, 8],
                         orderable: false,
                         searchable: false,
+                    },
+                    {
+                        targets: [9, 10, 11, 12],
+                        visible: false,
                     },
                 ],
                 aaSorting: [[7, 'asc']],
@@ -888,6 +896,7 @@ function initializeProjectTaskDatatable() {
         project_task_datatable = $('#project_task_table').DataTable({
                 processing: true,
                 serverSide: true,
+                scrollX: true,
                 ajax:{
                     url: '/project/project-task',
                     data: function(d) {
@@ -904,6 +913,10 @@ function initializeProjectTaskDatatable() {
                         targets: [0, 2, 6, 7],
                         orderable: false,
                         searchable: false,
+                    },
+                    {
+                        targets: [8, 9, 10, 11],
+                        visible: false,
                     },
                 ],
                 aaSorting: [[6, 'asc']],
