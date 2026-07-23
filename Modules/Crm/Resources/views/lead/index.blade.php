@@ -56,72 +56,74 @@
             </div>
         @endslot
         @if($lead_view == 'list_view')
-        	<table class="table table-bordered table-striped" id="leads_table">
-		        <thead>
-		            <tr>
-		                <th> @lang('messages.action')</th>
-		                <th>@lang('lang_v1.contact_id')</th>
-		                <th>@lang('contact.name')</th>
-                        <th>@lang('contact.mobile')</th>
-                        <th>@lang('business.email')</th>
-                        <th>@lang('crm::lang.source')</th>
-                        <th style="width: 200px !important">
-                            @lang('crm::lang.last_follow_up')
-                        </th>
-                        <th style="width: 200px !important">
-                            @lang('crm::lang.upcoming_follow_up')
-                        </th>
-                        <th>@lang('crm::lang.life_stage')</th>
-                        <th>@lang('lang_v1.assigned_to')</th>
-                        <th>@lang('business.address')</th>
-                        <th>@lang('contact.tax_no')</th>
-                        <th>@lang('lang_v1.added_on')</th>
-                        @php
-                            $custom_labels = json_decode(session('business.custom_labels'), true);
-                        @endphp
-                        <th>
-                            {{ $custom_labels['contact']['custom_field_1'] ?? __('lang_v1.contact_custom_field1') }}
-                        </th>
-                        <th>
-                            {{ $custom_labels['contact']['custom_field_2'] ?? __('lang_v1.contact_custom_field2') }}
-                        </th>
-                        <th>
-                            {{ $custom_labels['contact']['custom_field_3'] ?? __('lang_v1.contact_custom_field3') }}
-                        </th>
-                        <th>
-                            {{ $custom_labels['contact']['custom_field_4'] ?? __('lang_v1.contact_custom_field4') }}
-                        </th>
-                        <th>
-                            {{ $custom_labels['contact']['custom_field_5'] ?? __('lang_v1.custom_field', ['number' => 5]) }}
-                        </th>
-                        <th>
-                            {{ $custom_labels['contact']['custom_field_6'] ?? __('lang_v1.custom_field', ['number' => 6]) }}
-                        </th>
-                        <th>
-                            {{ $custom_labels['contact']['custom_field_7'] ?? __('lang_v1.custom_field', ['number' => 7]) }}
-                        </th>
-                        <th>
-                            {{ $custom_labels['contact']['custom_field_8'] ?? __('lang_v1.custom_field', ['number' => 8]) }}
-                        </th>
-                        <th>
-                            {{ $custom_labels['contact']['custom_field_9'] ?? __('lang_v1.custom_field', ['number' => 9]) }}
-                        </th>
-                        <th>
-                            {{ $custom_labels['contact']['custom_field_10'] ?? __('lang_v1.custom_field', ['number' => 10]) }}
-                        </th>
-		            </tr>
-		        </thead>
-                <tfoot>
-                    <!-- Code commented temporarily as no relevant codes found -->
-                    <!-- <tr class="bg-gray font-17 text-center footer-total">
-                        <td colspan="23" class="text-left">
-                            <button type="button" class="btn btn-xs btn-success update_contact_location" data-type="add">@lang('lang_v1.add_to_location')</button>
-                                &nbsp;
-                                <button type="button" class="btn btn-xs bg-navy update_contact_location" data-type="remove">@lang('lang_v1.remove_from_location')</button>
-                        </td>
-                    </tr> -->
-                </tfoot>
-		    </table>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped" id="leads_table" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th style="white-space: nowrap !important;"> @lang('messages.action')</th>
+                            <th style="white-space: nowrap !important;">@lang('lang_v1.contact_id')</th>
+                            <th style="white-space: nowrap !important;">@lang('contact.name')</th>
+                            <th style="white-space: nowrap !important;">@lang('contact.mobile')</th>
+                            <th style="white-space: nowrap !important;">@lang('business.email')</th>
+                            <th style="white-space: nowrap !important;">@lang('crm::lang.source')</th>
+                            <th style="width: 200px !important; white-space: nowrap !important;">
+                                @lang('crm::lang.last_follow_up')
+                            </th>
+                            <th style="width: 200px !important; white-space: nowrap !important;">
+                                @lang('crm::lang.upcoming_follow_up')
+                            </th>
+                            <th style="white-space: nowrap !important;">@lang('crm::lang.life_stage')</th>
+                            <th style="white-space: nowrap !important;">@lang('lang_v1.assigned_to')</th>
+                            <th style="white-space: nowrap !important;">@lang('business.address')</th>
+                            <th style="white-space: nowrap !important;">@lang('contact.tax_no')</th>
+                            <th style="white-space: nowrap !important;">@lang('lang_v1.added_on')</th>
+                            @php
+                                $custom_labels = json_decode(session('business.custom_labels'), true);
+                            @endphp
+                            <th style="white-space: nowrap !important;">
+                                {{ $custom_labels['contact']['custom_field_1'] ?? __('lang_v1.contact_custom_field1') }}
+                            </th>
+                            <th style="white-space: nowrap !important;">
+                                {{ $custom_labels['contact']['custom_field_2'] ?? __('lang_v1.contact_custom_field2') }}
+                            </th>
+                            <th style="white-space: nowrap !important;">
+                                {{ $custom_labels['contact']['custom_field_3'] ?? __('lang_v1.contact_custom_field3') }}
+                            </th>
+                            <th style="white-space: nowrap !important;">
+                                {{ $custom_labels['contact']['custom_field_4'] ?? __('lang_v1.contact_custom_field4') }}
+                            </th>
+                            <th style="white-space: nowrap !important;">
+                                {{ $custom_labels['contact']['custom_field_5'] ?? __('lang_v1.custom_field', ['number' => 5]) }}
+                            </th>
+                            <th style="white-space: nowrap !important;">
+                                {{ $custom_labels['contact']['custom_field_6'] ?? __('lang_v1.custom_field', ['number' => 6]) }}
+                            </th>
+                            <th style="white-space: nowrap !important;">
+                                {{ $custom_labels['contact']['custom_field_7'] ?? __('lang_v1.custom_field', ['number' => 7]) }}
+                            </th>
+                            <th style="white-space: nowrap !important;">
+                                {{ $custom_labels['contact']['custom_field_8'] ?? __('lang_v1.custom_field', ['number' => 8]) }}
+                            </th>
+                            <th style="white-space: nowrap !important;">
+                                {{ $custom_labels['contact']['custom_field_9'] ?? __('lang_v1.custom_field', ['number' => 9]) }}
+                            </th>
+                            <th style="white-space: nowrap !important;">
+                                {{ $custom_labels['contact']['custom_field_10'] ?? __('lang_v1.custom_field', ['number' => 10]) }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <!-- Code commented temporarily as no relevant codes found -->
+                        <!-- <tr class="bg-gray font-17 text-center footer-total">
+                            <td colspan="23" class="text-left">
+                                <button type="button" class="btn btn-xs btn-success update_contact_location" data-type="add">@lang('lang_v1.add_to_location')</button>
+                                    &nbsp;
+                                    <button type="button" class="btn btn-xs bg-navy update_contact_location" data-type="remove">@lang('lang_v1.remove_from_location')</button>
+                            </td>
+                        </tr> -->
+                    </tfoot>
+                </table>
+            </div>
         @endif
         @if($lead_view == 'kanban')
             <div class="lead-kanban-board">
@@ -144,6 +146,23 @@
 </section>
 @endsection
 @section('javascript')
+    @php
+        $custom_labels = json_decode(session('business.custom_labels'), true);
+    @endphp
+    <script type="text/javascript">
+        window.contact_custom_labels = {
+            custom_field_1: "{{ !empty($custom_labels['contact']['custom_field_1']) ? 1 : 0 }}",
+            custom_field_2: "{{ !empty($custom_labels['contact']['custom_field_2']) ? 1 : 0 }}",
+            custom_field_3: "{{ !empty($custom_labels['contact']['custom_field_3']) ? 1 : 0 }}",
+            custom_field_4: "{{ !empty($custom_labels['contact']['custom_field_4']) ? 1 : 0 }}",
+            custom_field_5: "{{ !empty($custom_labels['contact']['custom_field_5']) ? 1 : 0 }}",
+            custom_field_6: "{{ !empty($custom_labels['contact']['custom_field_6']) ? 1 : 0 }}",
+            custom_field_7: "{{ !empty($custom_labels['contact']['custom_field_7']) ? 1 : 0 }}",
+            custom_field_8: "{{ !empty($custom_labels['contact']['custom_field_8']) ? 1 : 0 }}",
+            custom_field_9: "{{ !empty($custom_labels['contact']['custom_field_9']) ? 1 : 0 }}",
+            custom_field_10: "{{ !empty($custom_labels['contact']['custom_field_10']) ? 1 : 0 }}"
+        };
+    </script>
 	<script src="{{ asset('modules/crm/js/crm.js?v=' . $asset_v) }}"></script>
     <script type="text/javascript">
         $(document).ready(function() {
