@@ -172,6 +172,7 @@
             sell_payment_table = $('#sell_payment_table').DataTable({
                 processing: true,
                 serverSide: true,
+                scrollX: true,
                 "ajax": {
                     "url": base_path + "/accounting/transactions?transaction_type=sell&datatable=payment",
                     "data": function(d) {
@@ -228,6 +229,7 @@
             purchase_payment_table = $('#purchase_payment_table').DataTable({
                 processing: true,
                 serverSide: true,
+                scrollX: true,
                 "ajax": {
                     "url": base_path +
                         "/accounting/transactions?transaction_type=purchase&datatable=payment",
@@ -287,6 +289,7 @@
             purchase_table = $('#purchase_table').DataTable({
                 processing: true,
                 serverSide: true,
+                scrollX: true,
                 ajax: {
                     url: '/accounting/transactions?datatable=purchase',
                     data: function(d) {
@@ -487,6 +490,16 @@
                 fnDrawCallback: function(oSettings) {
                     __currency_convert_recursively($('#transaction_expense_table'));
                 }
+            });
+
+            $('div.pos-tab-menu>div.list-group>a').click(function (e) {
+                setTimeout(function() {
+                    if (typeof sell_table !== 'undefined') { sell_table.columns.adjust(); }
+                    if (typeof sell_payment_table !== 'undefined') { sell_payment_table.columns.adjust(); }
+                    if (typeof purchase_table !== 'undefined') { purchase_table.columns.adjust(); }
+                    if (typeof purchase_payment_table !== 'undefined') { purchase_payment_table.columns.adjust(); }
+                    if (typeof transaction_expense_table !== 'undefined') { transaction_expense_table.columns.adjust(); }
+                }, 150);
             });
         });
     </script>

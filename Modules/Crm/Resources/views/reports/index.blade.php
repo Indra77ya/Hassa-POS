@@ -69,15 +69,17 @@
     <div class="row">
         <div class="col-md-12">
             @component('components.widget', ['class' => 'box-solid', 'title' => __('crm::lang.lead_to_customer_conversion')])
-                <table class="table table-bordered table-striped" id="lead_to_customer_conversion" style="width: 100%;">
-                    <thead>
-                        <tr>
-                            <th>&nbsp;</th>
-                            <th>@lang('crm::lang.converted_by')</th>
-                            <th>@lang('sale.total')</th>
-                        </tr>
-                    </thead>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped" id="lead_to_customer_conversion" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th style="white-space: nowrap !important;">&nbsp;</th>
+                                <th style="white-space: nowrap !important;">@lang('crm::lang.converted_by')</th>
+                                <th style="white-space: nowrap !important;">@lang('sale.total')</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
             @endcomponent
         </div>
     </div>

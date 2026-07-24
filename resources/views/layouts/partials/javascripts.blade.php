@@ -163,6 +163,14 @@
         //     $(picker.container).insertAfter($(this));
         // });
    
+        // Fix Bootstrap dropdown menu clipping inside scrollable/responsive containers (like DataTables)
+        $(document).on('show.bs.dropdown', '.table-responsive, .dataTables_scrollBody', function (e) {
+            $(this).addClass('dropdown-opened');
+        });
+
+        $(document).on('hide.bs.dropdown', '.table-responsive, .dataTables_scrollBody', function (e) {
+            $(this).removeClass('dropdown-opened');
+        });
     });
 </script>
 

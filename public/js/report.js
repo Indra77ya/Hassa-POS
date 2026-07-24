@@ -118,10 +118,10 @@ $(document).ready(function() {
         stock_report_cols.push({ data: 'total_sold', name: 'total_sold', searchable: false });
         stock_report_cols.push({ data: 'total_transfered', name: 'total_transfered', searchable: false });
         stock_report_cols.push({ data: 'total_adjusted', name: 'total_adjusted', searchable: false });
-        stock_report_cols.push({ data: 'product_custom_field1', name: 'p.product_custom_field1'});
-        stock_report_cols.push({ data: 'product_custom_field2', name: 'p.product_custom_field2'});
-        stock_report_cols.push({ data: 'product_custom_field3', name: 'p.product_custom_field3'});
-        stock_report_cols.push({ data: 'product_custom_field4', name: 'p.product_custom_field4'});
+        stock_report_cols.push({ data: 'product_custom_field1', name: 'p.product_custom_field1', visible: (window.product_custom_labels && window.product_custom_labels.custom_field_1 === "1") ? true : false});
+        stock_report_cols.push({ data: 'product_custom_field2', name: 'p.product_custom_field2', visible: (window.product_custom_labels && window.product_custom_labels.custom_field_2 === "1") ? true : false});
+        stock_report_cols.push({ data: 'product_custom_field3', name: 'p.product_custom_field3', visible: (window.product_custom_labels && window.product_custom_labels.custom_field_3 === "1") ? true : false});
+        stock_report_cols.push({ data: 'product_custom_field4', name: 'p.product_custom_field4', visible: (window.product_custom_labels && window.product_custom_labels.custom_field_4 === "1") ? true : false});
 
         if ($('th.current_stock_mfg').length) {
             stock_report_cols.push({ data: 'total_mfg_stock', name: 'total_mfg_stock', searchable: false });
@@ -307,13 +307,13 @@ $(document).ready(function() {
             { data: 'total_cash_payment', name: 'total_cash_payment', searchable: false },
             { data: 'total_bank_transfer_payment', name: 'total_bank_transfer_payment', searchable: false },
             { data: 'total_advance_payment', name: 'total_advance_payment', searchable: false },
-            { data: 'total_custom_pay_1', name: 'total_custom_pay_1', searchable: false },
-            { data: 'total_custom_pay_2', name: 'total_custom_pay_2', searchable: false },
-            { data: 'total_custom_pay_3', name: 'total_custom_pay_3', searchable: false },
-            { data: 'total_custom_pay_4', name: 'total_custom_pay_4', searchable: false },
-            { data: 'total_custom_pay_5', name: 'total_custom_pay_5', searchable: false },
-            { data: 'total_custom_pay_6', name: 'total_custom_pay_6', searchable: false },
-            { data: 'total_custom_pay_7', name: 'total_custom_pay_7', searchable: false },
+            { data: 'total_custom_pay_1', name: 'total_custom_pay_1', searchable: false, visible: (window.register_payment_labels && window.register_payment_labels.custom_pay_1 === "1") ? true : false },
+            { data: 'total_custom_pay_2', name: 'total_custom_pay_2', searchable: false, visible: (window.register_payment_labels && window.register_payment_labels.custom_pay_2 === "1") ? true : false },
+            { data: 'total_custom_pay_3', name: 'total_custom_pay_3', searchable: false, visible: (window.register_payment_labels && window.register_payment_labels.custom_pay_3 === "1") ? true : false },
+            { data: 'total_custom_pay_4', name: 'total_custom_pay_4', searchable: false, visible: (window.register_payment_labels && window.register_payment_labels.custom_pay_4 === "1") ? true : false },
+            { data: 'total_custom_pay_5', name: 'total_custom_pay_5', searchable: false, visible: (window.register_payment_labels && window.register_payment_labels.custom_pay_5 === "1") ? true : false },
+            { data: 'total_custom_pay_6', name: 'total_custom_pay_6', searchable: false, visible: (window.register_payment_labels && window.register_payment_labels.custom_pay_6 === "1") ? true : false },
+            { data: 'total_custom_pay_7', name: 'total_custom_pay_7', searchable: false, visible: (window.register_payment_labels && window.register_payment_labels.custom_pay_7 === "1") ? true : false },
             { data: 'total_other_payment', name: 'total_other_payment', searchable: false },
             { data: 'total', name: 'total', orderable: false, searchable: false },
             { data: 'action', name: 'action', orderable: false, searchable: false },

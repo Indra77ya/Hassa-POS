@@ -492,10 +492,10 @@
                                             style="width: 100%;">
                                             <thead>
                                                 <tr>
-                                                    <th>@lang('contact.customer')</th>
-                                                    <th>@lang('sale.invoice_no')</th>
-                                                    <th>@lang('home.due_amount')</th>
-                                                    <th class="not-export">@lang('messages.action')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('contact.customer')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('sale.invoice_no')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('home.due_amount')</th>
+                                                    <th class="not-export" style="white-space: nowrap !important;">@lang('messages.action')</th>
                                                 </tr>
                                             </thead>
                                         </table>
@@ -549,10 +549,10 @@
                                             style="width: 100%;">
                                             <thead>
                                                 <tr>
-                                                    <th>@lang('purchase.supplier')</th>
-                                                    <th>@lang('purchase.ref_no')</th>
-                                                    <th>@lang('home.due_amount')</th>
-                                                    <th class="not-export">@lang('messages.action')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('purchase.supplier')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('purchase.ref_no')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('home.due_amount')</th>
+                                                    <th class="not-export" style="white-space: nowrap !important;">@lang('messages.action')</th>
                                                 </tr>
                                             </thead>
                                         </table>
@@ -603,9 +603,9 @@
                                             style="width: 100%;">
                                             <thead>
                                                 <tr>
-                                                    <th>@lang('sale.product')</th>
-                                                    <th>@lang('business.location')</th>
-                                                    <th>@lang('report.current_stock')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('sale.product')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('business.location')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('report.current_stock')</th>
                                                 </tr>
                                             </thead>
                                         </table>
@@ -705,19 +705,19 @@
                                 <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
                                     <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
                                         <table class="table table-bordered table-striped ajax_view"
-                                            id="sales_order_table">
+                                            id="sales_order_table" style="width: 100%;">
                                             <thead>
                                                 <tr>
-                                                    <th class="not-export">@lang('messages.action')</th>
-                                                    <th>@lang('messages.date')</th>
-                                                    <th>@lang('restaurant.order_no')</th>
-                                                    <th>@lang('sale.customer_name')</th>
-                                                    <th>@lang('lang_v1.contact_no')</th>
-                                                    <th>@lang('sale.location')</th>
-                                                    <th>@lang('sale.status')</th>
-                                                    <th>@lang('lang_v1.shipping_status')</th>
-                                                    <th>@lang('lang_v1.quantity_remaining')</th>
-                                                    <th>@lang('lang_v1.added_by')</th>
+                                                    <th class="not-export" style="white-space: nowrap !important;">@lang('messages.action')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('messages.date')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('restaurant.order_no')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('sale.customer_name')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('lang_v1.contact_no')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('sale.location')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('sale.status')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('lang_v1.shipping_status')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('lang_v1.quantity_remaining')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('lang_v1.added_by')</th>
                                                 </tr>
                                             </thead>
                                         </table>
@@ -896,43 +896,43 @@
                             <div class="tw-flow-root tw-mt-5  tw-border-gray-200">
                                 <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
                                     <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
-                                        <table class="table table-bordered table-striped ajax_view" id="shipments_table">
+                                        <table class="table table-bordered table-striped ajax_view" id="shipments_table" style="width: 100%;">
                                             <thead>
                                                 <tr>
-                                                    <th class="not-export">@lang('messages.action')</th>
-                                                    <th>@lang('messages.date')</th>
-                                                    <th>@lang('sale.invoice_no')</th>
-                                                    <th>@lang('sale.customer_name')</th>
-                                                    <th>@lang('lang_v1.contact_no')</th>
-                                                    <th>@lang('sale.location')</th>
-                                                    <th>@lang('lang_v1.shipping_status')</th>
+                                                    <th class="not-export" style="white-space: nowrap !important;">@lang('messages.action')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('messages.date')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('sale.invoice_no')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('sale.customer_name')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('lang_v1.contact_no')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('sale.location')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('lang_v1.shipping_status')</th>
                                                     @if (!empty($custom_labels['shipping']['custom_field_1']))
-                                                        <th>
+                                                        <th style="white-space: nowrap !important;">
                                                             {{ $custom_labels['shipping']['custom_field_1'] }}
                                                         </th>
                                                     @endif
                                                     @if (!empty($custom_labels['shipping']['custom_field_2']))
-                                                        <th>
+                                                        <th style="white-space: nowrap !important;">
                                                             {{ $custom_labels['shipping']['custom_field_2'] }}
                                                         </th>
                                                     @endif
                                                     @if (!empty($custom_labels['shipping']['custom_field_3']))
-                                                        <th>
+                                                        <th style="white-space: nowrap !important;">
                                                             {{ $custom_labels['shipping']['custom_field_3'] }}
                                                         </th>
                                                     @endif
                                                     @if (!empty($custom_labels['shipping']['custom_field_4']))
-                                                        <th>
+                                                        <th style="white-space: nowrap !important;">
                                                             {{ $custom_labels['shipping']['custom_field_4'] }}
                                                         </th>
                                                     @endif
                                                     @if (!empty($custom_labels['shipping']['custom_field_5']))
-                                                        <th>
+                                                        <th style="white-space: nowrap !important;">
                                                             {{ $custom_labels['shipping']['custom_field_5'] }}
                                                         </th>
                                                     @endif
-                                                    <th>@lang('sale.payment_status')</th>
-                                                    <th>@lang('restaurant.service_staff')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('sale.payment_status')</th>
+                                                    <th style="white-space: nowrap !important;">@lang('restaurant.service_staff')</th>
                                                 </tr>
                                             </thead>
                                         </table>

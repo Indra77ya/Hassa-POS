@@ -621,6 +621,22 @@ function initializeMyTaskDataTable() {
                         orderable: false,
                         searchable: false,
                     },
+                    {
+                        targets: [9],
+                        visible: (window.project_task_custom_labels && window.project_task_custom_labels.custom_field_1 === '1') ? true : false,
+                    },
+                    {
+                        targets: [10],
+                        visible: (window.project_task_custom_labels && window.project_task_custom_labels.custom_field_2 === '1') ? true : false,
+                    },
+                    {
+                        targets: [11],
+                        visible: (window.project_task_custom_labels && window.project_task_custom_labels.custom_field_3 === '1') ? true : false,
+                    },
+                    {
+                        targets: [12],
+                        visible: (window.project_task_custom_labels && window.project_task_custom_labels.custom_field_4 === '1') ? true : false,
+                    },
                 ],
                 aaSorting: [[7, 'asc']],
                 columns: [
@@ -904,6 +920,22 @@ function initializeProjectTaskDatatable() {
                         targets: [0, 2, 6, 7],
                         orderable: false,
                         searchable: false,
+                    },
+                    {
+                        targets: [8],
+                        visible: (window.project_task_custom_labels && window.project_task_custom_labels.custom_field_1 === '1') ? true : false,
+                    },
+                    {
+                        targets: [9],
+                        visible: (window.project_task_custom_labels && window.project_task_custom_labels.custom_field_2 === '1') ? true : false,
+                    },
+                    {
+                        targets: [10],
+                        visible: (window.project_task_custom_labels && window.project_task_custom_labels.custom_field_3 === '1') ? true : false,
+                    },
+                    {
+                        targets: [11],
+                        visible: (window.project_task_custom_labels && window.project_task_custom_labels.custom_field_4 === '1') ? true : false,
                     },
                 ],
                 aaSorting: [[6, 'asc']],

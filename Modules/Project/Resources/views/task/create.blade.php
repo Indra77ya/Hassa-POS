@@ -1,3 +1,12 @@
+@php
+    $business_id = request()->session()->get('user.business_id');
+    $business = \App\Business::find($business_id);
+    $prj_setting = !empty($business->prj_setting) ? json_decode($business->prj_setting, true) : [];
+    $task_custom_field_1 = !empty($prj_setting['custom_fields']['custom_field1']) ? $prj_setting['custom_fields']['custom_field1'] : __('project::lang.task_custom_field_1');
+    $task_custom_field_2 = !empty($prj_setting['custom_fields']['custom_field2']) ? $prj_setting['custom_fields']['custom_field2'] : __('project::lang.task_custom_field_2');
+    $task_custom_field_3 = !empty($prj_setting['custom_fields']['custom_field3']) ? $prj_setting['custom_fields']['custom_field3'] : __('project::lang.task_custom_field_3');
+    $task_custom_field_4 = !empty($prj_setting['custom_fields']['custom_field4']) ? $prj_setting['custom_fields']['custom_field4'] : __('project::lang.task_custom_field_4');
+@endphp
 <div class="modal-dialog modal-lg" role="document">
     {!! Form::open(['action' => '\Modules\Project\Http\Controllers\TaskController@store', 'id' => 'project_task_form', 'method' => 'post']) !!}
     <div class="modal-content">
@@ -63,7 +72,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
-                        {!! Form::label('custom_field_1', __('project::lang.task_custom_field_1') . ':' )!!}
+                        {!! Form::label('custom_field_1', $task_custom_field_1 . ':' )!!}
                         {!! Form::text('custom_field_1', null, ['class' => 'form-control']) !!}
                    </div>
                 </div>
@@ -71,19 +80,19 @@
             <div class="row">
                 <div class="col-md-4">
                     <div class="form-group">
-                        {!! Form::label('custom_field_2', __('project::lang.task_custom_field_2') . ':' )!!}
+                        {!! Form::label('custom_field_2', $task_custom_field_2 . ':' )!!}
                         {!! Form::text('custom_field_2', null, ['class' => 'form-control']) !!}
                    </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
-                        {!! Form::label('custom_field_3', __('project::lang.task_custom_field_3') . ':' )!!}
+                        {!! Form::label('custom_field_3', $task_custom_field_3 . ':' )!!}
                         {!! Form::text('custom_field_3', null, ['class' => 'form-control']) !!}
                    </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
-                        {!! Form::label('custom_field_4', __('project::lang.task_custom_field_4') . ':' )!!}
+                        {!! Form::label('custom_field_4', $task_custom_field_4 . ':' )!!}
                         {!! Form::text('custom_field_4', null, ['class' => 'form-control']) !!}
                    </div>
                 </div>

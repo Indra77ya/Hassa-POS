@@ -391,25 +391,27 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-12">
                     @component('components.widget', ['class' => 'box-solid', 'title' => __('crm::lang.lead_to_customer_conversion')])
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped" id="lead_to_customer_conversion"
                                 style="width: 100%;">
                                 <thead>
                                     <tr>
-                                        <th>&nbsp;</th>
-                                        <th>@lang('crm::lang.converted_by')</th>
-                                        <th>@lang('sale.total')</th>
+                                        <th style="white-space: nowrap !important;">&nbsp;</th>
+                                        <th style="white-space: nowrap !important;">@lang('crm::lang.converted_by')</th>
+                                        <th style="white-space: nowrap !important;">@lang('sale.total')</th>
                                     </tr>
                                 </thead>
                             </table>
                         </div>
                     @endcomponent
                 </div>
+            </div>
 
-                @if (config('constants.enable_crm_call_log'))
-                    <div class="col-md-6">
+            @if (config('constants.enable_crm_call_log'))
+                <div class="row">
+                    <div class="col-md-12">
                         <div class="box box-solid">
                             <div class="box-header with-border">
                                 <h3 class="box-title">@lang('crm::lang.all_users_call_log')</h3>
@@ -419,27 +421,29 @@
                                     <table class="table" id="all_users_call_log" style="width: 100%;">
                                         <thead>
                                             <tr>
-                                                <th>
+                                                <th style="white-space: nowrap !important;">
                                                     @lang('role.user')
                                                 </th>
-                                                <th>
+                                                <th style="white-space: nowrap !important;">
                                                     @lang('crm::lang.calls_today')
                                                 </th>
-                                                <th>
+                                                <th style="white-space: nowrap !important;">
                                                     @lang('crm::lang.calls_this_month')
                                                 </th>
-                                                <th>
+                                                <th style="white-space: nowrap !important;">
                                                     @lang('lang_v1.all')
                                                 </th>
                                             </tr>
                                         </thead>
+                                        <tbody>
+                                        </tbody>
                                     </table>
                                 </div>
                             </div>
                         </div>
                     </div>
-                @endif
-            </div>
+                </div>
+            @endif
         @endif
     </section>
 @endsection

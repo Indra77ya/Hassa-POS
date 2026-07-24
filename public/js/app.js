@@ -391,16 +391,16 @@ $(document).ready(function() {
             { data: 'mobile', name: 'mobile' },
             { data: 'due', searchable: false, orderable: false },
             { data: 'return_due', searchable: false, orderable: false },
-            { data: 'custom_field1', name: 'custom_field1'},
-            { data: 'custom_field2', name: 'custom_field2'},
-            { data: 'custom_field3', name: 'custom_field3'},
-            { data: 'custom_field4', name: 'custom_field4'},
-            { data: 'custom_field5', name: 'custom_field5'},
-            { data: 'custom_field6', name: 'custom_field6'},
-            { data: 'custom_field7', name: 'custom_field7'},
-            { data: 'custom_field8', name: 'custom_field8'},
-            { data: 'custom_field9', name: 'custom_field9'},
-            { data: 'custom_field10', name: 'custom_field10'},
+            { data: 'custom_field1', name: 'custom_field1', visible: (window.contact_custom_labels && window.contact_custom_labels.custom_field_1 === "1") ? true : false},
+            { data: 'custom_field2', name: 'custom_field2', visible: (window.contact_custom_labels && window.contact_custom_labels.custom_field_2 === "1") ? true : false},
+            { data: 'custom_field3', name: 'custom_field3', visible: (window.contact_custom_labels && window.contact_custom_labels.custom_field_3 === "1") ? true : false},
+            { data: 'custom_field4', name: 'custom_field4', visible: (window.contact_custom_labels && window.contact_custom_labels.custom_field_4 === "1") ? true : false},
+            { data: 'custom_field5', name: 'custom_field5', visible: (window.contact_custom_labels && window.contact_custom_labels.custom_field_5 === "1") ? true : false},
+            { data: 'custom_field6', name: 'custom_field6', visible: (window.contact_custom_labels && window.contact_custom_labels.custom_field_6 === "1") ? true : false},
+            { data: 'custom_field7', name: 'custom_field7', visible: (window.contact_custom_labels && window.contact_custom_labels.custom_field_7 === "1") ? true : false},
+            { data: 'custom_field8', name: 'custom_field8', visible: (window.contact_custom_labels && window.contact_custom_labels.custom_field_8 === "1") ? true : false},
+            { data: 'custom_field9', name: 'custom_field9', visible: (window.contact_custom_labels && window.contact_custom_labels.custom_field_9 === "1") ? true : false},
+            { data: 'custom_field10', name: 'custom_field10', visible: (window.contact_custom_labels && window.contact_custom_labels.custom_field_10 === "1") ? true : false},
         ];
     } else if (contact_table_type == 'customer') {
         var columns = [
@@ -425,16 +425,16 @@ $(document).ready(function() {
             { data: 'mobile', name: 'mobile' },
             { data: 'due', searchable: false, orderable: false },
             { data: 'return_due', searchable: false, orderable: false },
-            { data: 'custom_field1', name: 'custom_field1'},
-            { data: 'custom_field2', name: 'custom_field2'},
-            { data: 'custom_field3', name: 'custom_field3'},
-            { data: 'custom_field4', name: 'custom_field4'},
-            { data: 'custom_field5', name: 'custom_field5'},
-            { data: 'custom_field6', name: 'custom_field6'},
-            { data: 'custom_field7', name: 'custom_field7'},
-            { data: 'custom_field8', name: 'custom_field8'},
-            { data: 'custom_field9', name: 'custom_field9'},
-            { data: 'custom_field10', name: 'custom_field10'},
+            { data: 'custom_field1', name: 'custom_field1', visible: (window.contact_custom_labels && window.contact_custom_labels.custom_field_1 === "1") ? true : false},
+            { data: 'custom_field2', name: 'custom_field2', visible: (window.contact_custom_labels && window.contact_custom_labels.custom_field_2 === "1") ? true : false},
+            { data: 'custom_field3', name: 'custom_field3', visible: (window.contact_custom_labels && window.contact_custom_labels.custom_field_3 === "1") ? true : false},
+            { data: 'custom_field4', name: 'custom_field4', visible: (window.contact_custom_labels && window.contact_custom_labels.custom_field_4 === "1") ? true : false},
+            { data: 'custom_field5', name: 'custom_field5', visible: (window.contact_custom_labels && window.contact_custom_labels.custom_field_5 === "1") ? true : false},
+            { data: 'custom_field6', name: 'custom_field6', visible: (window.contact_custom_labels && window.contact_custom_labels.custom_field_6 === "1") ? true : false},
+            { data: 'custom_field7', name: 'custom_field7', visible: (window.contact_custom_labels && window.contact_custom_labels.custom_field_7 === "1") ? true : false},
+            { data: 'custom_field8', name: 'custom_field8', visible: (window.contact_custom_labels && window.contact_custom_labels.custom_field_8 === "1") ? true : false},
+            { data: 'custom_field9', name: 'custom_field9', visible: (window.contact_custom_labels && window.contact_custom_labels.custom_field_9 === "1") ? true : false},
+            { data: 'custom_field10', name: 'custom_field10', visible: (window.contact_custom_labels && window.contact_custom_labels.custom_field_10 === "1") ? true : false},
             ]);
     }
     
@@ -1155,6 +1155,7 @@ $(document).ready(function() {
         serverSide: true,
         bPaginate: false,
         fixedHeader:false,
+        scrollX: true,
         buttons: [],
         ajax: '/invoice-schemes',
         columnDefs: [
@@ -1190,7 +1191,7 @@ $(document).ready(function() {
             },
         });
     });
-    $(document).on('click', 'button.set_default_invoice', function() {
+    $(document).on('click', '.set_default_invoice', function() {
         var href = $(this).data('href');
         var data = $(this).serialize();
 
@@ -1212,7 +1213,7 @@ $(document).ready(function() {
     $('.invoice_edit_modal').on('shown.bs.modal', function() {
         show_invoice_preview();
     });
-    $(document).on('click', 'button.delete_invoice_button', function() {
+    $(document).on('click', '.delete_invoice_button', function() {
         swal({
             title: LANG.sure,
             text: LANG.delete_invoice_confirm,
@@ -1302,6 +1303,7 @@ $(document).ready(function() {
         serverSide: true,
         bPaginate: false,
         fixedHeader:false,
+        scrollX: true,
         buttons: [],
         ajax: '/business-location',
         columnDefs: [

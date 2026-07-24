@@ -48,16 +48,16 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-striped" id="invoice_table">
+                                    <table class="table table-bordered table-striped" id="invoice_table" style="width: 100%;">
                                         <thead>
                                             <tr>
-                                                <th>@lang( 'invoice.name' ) @show_tooltip(__('tooltip.invoice_scheme_name'))</th>
-                                                <th>@lang( 'invoice.prefix' ) @show_tooltip(__('tooltip.invoice_scheme_prefix'))</th>
-                                                <th>@lang( 'invoice.number_type' ) @show_tooltip(__('invoice.number_type_tooltip'))</th>
-                                                <th>@lang( 'invoice.start_number' ) @show_tooltip(__('tooltip.invoice_scheme_start_number'))</th>
-                                                <th>@lang( 'invoice.invoice_count' ) @show_tooltip(__('tooltip.invoice_scheme_count'))</th>
-                                                <th>@lang( 'invoice.total_digits' ) @show_tooltip(__('tooltip.invoice_scheme_total_digits'))</th>
-                                                <th class="not-export">@lang( 'messages.action' )</th>
+                                                <th style="white-space: nowrap !important;">@lang( 'invoice.name' ) @show_tooltip(__('tooltip.invoice_scheme_name'))</th>
+                                                <th style="white-space: nowrap !important;">@lang( 'invoice.prefix' ) @show_tooltip(__('tooltip.invoice_scheme_prefix'))</th>
+                                                <th style="white-space: nowrap !important;">@lang( 'invoice.number_type' ) @show_tooltip(__('invoice.number_type_tooltip'))</th>
+                                                <th style="white-space: nowrap !important;">@lang( 'invoice.start_number' ) @show_tooltip(__('tooltip.invoice_scheme_start_number'))</th>
+                                                <th style="white-space: nowrap !important;">@lang( 'invoice.invoice_count' ) @show_tooltip(__('tooltip.invoice_scheme_count'))</th>
+                                                <th style="white-space: nowrap !important;">@lang( 'invoice.total_digits' ) @show_tooltip(__('tooltip.invoice_scheme_total_digits'))</th>
+                                                <th class="not-export" style="white-space: nowrap !important;">@lang( 'messages.action' )</th>
                                             </tr>
                                         </thead>
                                     </table>
