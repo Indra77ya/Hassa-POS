@@ -704,6 +704,9 @@
                             <div class="tw-flow-root tw-mt-5  tw-border-gray-200">
                                 <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
                                     <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
+                                        @php
+                                            $so_custom_labels = json_decode(session('business.custom_labels'), true);
+                                        @endphp
                                         <table class="table table-bordered table-striped ajax_view"
                                             id="sales_order_table" style="width: 100%;">
                                             <thead>
@@ -717,6 +720,10 @@
                                                     <th style="white-space: nowrap !important;">@lang('sale.status')</th>
                                                     <th style="white-space: nowrap !important;">@lang('lang_v1.shipping_status')</th>
                                                     <th style="white-space: nowrap !important;">@lang('lang_v1.quantity_remaining')</th>
+                                                    <th style="white-space: nowrap !important;">{{ $so_custom_labels['sell']['custom_field_1'] ?? '' }}</th>
+                                                    <th style="white-space: nowrap !important;">{{ $so_custom_labels['sell']['custom_field_2'] ?? '' }}</th>
+                                                    <th style="white-space: nowrap !important;">{{ $so_custom_labels['sell']['custom_field_3'] ?? '' }}</th>
+                                                    <th style="white-space: nowrap !important;">{{ $so_custom_labels['sell']['custom_field_4'] ?? '' }}</th>
                                                     <th style="white-space: nowrap !important;">@lang('lang_v1.added_by')</th>
                                                 </tr>
                                             </thead>
@@ -1100,6 +1107,34 @@
                         data: 'so_qty_remaining',
                         name: 'so_qty_remaining',
                         "searchable": false
+                    },
+                    {
+                        data: 'custom_field_1',
+                        name: 'transactions.custom_field_1',
+                        @if (empty($so_custom_labels['sell']['custom_field_1']))
+                            visible: false
+                        @endif
+                    },
+                    {
+                        data: 'custom_field_2',
+                        name: 'transactions.custom_field_2',
+                        @if (empty($so_custom_labels['sell']['custom_field_2']))
+                            visible: false
+                        @endif
+                    },
+                    {
+                        data: 'custom_field_3',
+                        name: 'transactions.custom_field_3',
+                        @if (empty($so_custom_labels['sell']['custom_field_3']))
+                            visible: false
+                        @endif
+                    },
+                    {
+                        data: 'custom_field_4',
+                        name: 'transactions.custom_field_4',
+                        @if (empty($so_custom_labels['sell']['custom_field_4']))
+                            visible: false
+                        @endif
                     },
                     {
                         data: 'added_by',
