@@ -239,9 +239,6 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
     var target = $(e.target).attr('href');
     if ( target == '#project_task') {
         initializeProjectTaskDatatable();
-        if (typeof project_task_datatable !== 'undefined') {
-            project_task_datatable.columns.adjust();
-        }
     } else if(target == '#time_log') {
         initializeTimeLogDatatable();
     } else if(target == '#documents_and_notes') {
@@ -607,7 +604,6 @@ function initializeMyTaskDataTable() {
         my_task_datatable = $("#my_task_table").DataTable({
                 processing: true,
                 serverSide: true,
-                scrollX: true,
                 ajax:{
                     url: '/project/project-task',
                     data: function(d) {
@@ -626,8 +622,20 @@ function initializeMyTaskDataTable() {
                         searchable: false,
                     },
                     {
-                        targets: [9, 10, 11, 12],
-                        visible: false,
+                        targets: [9],
+                        visible: (window.project_task_custom_labels && window.project_task_custom_labels.custom_field_1 === '1') ? true : false,
+                    },
+                    {
+                        targets: [10],
+                        visible: (window.project_task_custom_labels && window.project_task_custom_labels.custom_field_2 === '1') ? true : false,
+                    },
+                    {
+                        targets: [11],
+                        visible: (window.project_task_custom_labels && window.project_task_custom_labels.custom_field_3 === '1') ? true : false,
+                    },
+                    {
+                        targets: [12],
+                        visible: (window.project_task_custom_labels && window.project_task_custom_labels.custom_field_4 === '1') ? true : false,
                     },
                 ],
                 aaSorting: [[7, 'asc']],
@@ -896,7 +904,6 @@ function initializeProjectTaskDatatable() {
         project_task_datatable = $('#project_task_table').DataTable({
                 processing: true,
                 serverSide: true,
-                scrollX: true,
                 ajax:{
                     url: '/project/project-task',
                     data: function(d) {
@@ -915,8 +922,20 @@ function initializeProjectTaskDatatable() {
                         searchable: false,
                     },
                     {
-                        targets: [8, 9, 10, 11],
-                        visible: false,
+                        targets: [8],
+                        visible: (window.project_task_custom_labels && window.project_task_custom_labels.custom_field_1 === '1') ? true : false,
+                    },
+                    {
+                        targets: [9],
+                        visible: (window.project_task_custom_labels && window.project_task_custom_labels.custom_field_2 === '1') ? true : false,
+                    },
+                    {
+                        targets: [10],
+                        visible: (window.project_task_custom_labels && window.project_task_custom_labels.custom_field_3 === '1') ? true : false,
+                    },
+                    {
+                        targets: [11],
+                        visible: (window.project_task_custom_labels && window.project_task_custom_labels.custom_field_4 === '1') ? true : false,
                     },
                 ],
                 aaSorting: [[6, 'asc']],

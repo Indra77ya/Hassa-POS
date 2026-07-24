@@ -2,6 +2,23 @@
 @section('title', __('project::lang.my_tasks'))
 @section('content')
 @include('project::layouts.nav')
+@php
+    $business_id = request()->session()->get('user.business_id');
+    $business = \App\Business::find($business_id);
+    $prj_setting = !empty($business->prj_setting) ? json_decode($business->prj_setting, true) : [];
+    $task_custom_field_1 = !empty($prj_setting['custom_fields']['custom_field1']) ? $prj_setting['custom_fields']['custom_field1'] : __('project::lang.task_custom_field_1');
+    $task_custom_field_2 = !empty($prj_setting['custom_fields']['custom_field2']) ? $prj_setting['custom_fields']['custom_field2'] : __('project::lang.task_custom_field_2');
+    $task_custom_field_3 = !empty($prj_setting['custom_fields']['custom_field3']) ? $prj_setting['custom_fields']['custom_field3'] : __('project::lang.task_custom_field_3');
+    $task_custom_field_4 = !empty($prj_setting['custom_fields']['custom_field4']) ? $prj_setting['custom_fields']['custom_field4'] : __('project::lang.task_custom_field_4');
+@endphp
+<script type="text/javascript">
+    window.project_task_custom_labels = {
+        custom_field_1: "{{ !empty($prj_setting['custom_fields']['custom_field1']) ? 1 : 0 }}",
+        custom_field_2: "{{ !empty($prj_setting['custom_fields']['custom_field2']) ? 1 : 0 }}",
+        custom_field_3: "{{ !empty($prj_setting['custom_fields']['custom_field3']) ? 1 : 0 }}",
+        custom_field_4: "{{ !empty($prj_setting['custom_fields']['custom_field4']) ? 1 : 0 }}"
+    };
+</script>
 <section class="content-header">
 	<h3 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black" >
 		<i class="fa fa-tasks"></i>
@@ -64,28 +81,28 @@
 	@endphp
 	@component('components.widget', ['class' => 'box-primary', 'title' => __( 'project::lang.my_tasks'), 'tool' => $tool])
 		<div class="table-responsive">
-		    <table class="table table-bordered table-striped" id="my_task_table" style="width: 100%">
+		    <table class="table table-bordered table-striped" id="my_task_table">
 		        <thead>
 		            <tr>
-				<th style="white-space: nowrap !important;"> @lang('messages.action')</th>
-				<th class="col-md-2" style="white-space: nowrap !important;">
+				<th> @lang('messages.action')</th>
+				<th class="col-md-2">
 		            		@lang('project::lang.project')
 		            	</th>
-		                <th class="col-md-3" style="white-space: nowrap !important;">
+		                <th class="col-md-3">
 		                	@lang('project::lang.subject')
 		                </th>
-		                <th class="col-md-2" style="white-space: nowrap !important;">
+		                <th class="col-md-2">
 		                	@lang('project::lang.assigned_to')
 		                </th>
-		                <th style="white-space: nowrap !important;"> @lang('project::lang.priority')</th>
-		                <th style="white-space: nowrap !important;"> @lang('business.start_date')</th>
-		                <th style="white-space: nowrap !important;">@lang('project::lang.due_date')</th>
-		                <th style="white-space: nowrap !important;">@lang('sale.status')</th>
-		                <th style="white-space: nowrap !important;"> @lang('project::lang.assigned_by')</th>
-		                <th style="white-space: nowrap !important;">@lang('project::lang.task_custom_field_1')</th>
-		                <th style="white-space: nowrap !important;">@lang('project::lang.task_custom_field_2')</th>
-		                <th style="white-space: nowrap !important;">@lang('project::lang.task_custom_field_3')</th>
-		                <th style="white-space: nowrap !important;">@lang('project::lang.task_custom_field_4')</th>
+		                <th> @lang('project::lang.priority')</th>
+		                <th> @lang('business.start_date')</th>
+		                <th>@lang('project::lang.due_date')</th>
+		                <th>@lang('sale.status')</th>
+		                <th> @lang('project::lang.assigned_by')</th>
+		                <th>{{ $task_custom_field_1 }}</th>
+		                <th>{{ $task_custom_field_2 }}</th>
+		                <th>{{ $task_custom_field_3 }}</th>
+		                <th>{{ $task_custom_field_4 }}</th>
 		            </tr>
 		        </thead>
 		    </table>
