@@ -1099,6 +1099,13 @@ class CoaController extends Controller
 
         if (AccountingAccount::where('business_id', $business_id)->doesntExist()) {
             AccountingAccount::insert($default_accounts);
+
+            // Run bidirectional sync to create corresponding Cash/Bank accounts in POS Payment Accounts
+            try {
+                \Illuminate\Support\Facades\Artisan::call('pos:sync-payment-accounting');
+            } catch (\Exception $e) {
+                \Log::error('Error running pos:sync-payment-accounting after creating default accounts: ' . $e->getMessage());
+            }
         }
 
         //redirect back

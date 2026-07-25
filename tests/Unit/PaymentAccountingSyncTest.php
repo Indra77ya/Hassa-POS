@@ -328,4 +328,60 @@ class PaymentAccountingSyncTest extends TestCase
         $this->assertNotNull($aat);
         $this->assertEquals(777000, $aat->amount);
     }
+
+    /**
+     * Test that bulk inserting default accounts (simulating 'Create Default Accounts')
+     * followed by the pos:sync-payment-accounting sync command correctly synchronizes
+     * Cash and cash equivalents accounts.
+     */
+    public function testDefaultAccountsSync()
+    {
+        // 1. Prepare default accounts mimicking CoaController@createDefaultAccounts
+        $default_accounts = [
+            [
+                'name' => 'Cash and cash equivalents',
+                'business_id' => 1,
+                'account_primary_type' => 'asset',
+                'account_sub_type_id' => 3,
+                'detail_type_id' => 31,
+                'status' => 'active',
+                'created_by' => 1,
+            ],
+            [
+                'name' => 'Accounts Payable (A/P)',
+                'business_id' => 1,
+                'account_primary_type' => 'liability',
+                'account_sub_type_id' => 6,
+                'detail_type_id' => 58,
+                'status' => 'active',
+                'created_by' => 1,
+            ]
+        ];
+
+        // Ensure there are no accounts first
+        Account::truncate();
+        AccountingAccount::truncate();
+
+        // Bulk insert to simulate bypassing model events
+        AccountingAccount::insert($default_accounts);
+
+        // Verify that no POS Account has been created yet (since event is bypassed)
+        $this->assertEquals(0, Account::count());
+
+        // 2. Run the bidirectional sync command (same as inside createDefaultAccounts())
+        Artisan::call('pos:sync-payment-accounting');
+
+        // 3. Verify that corresponding POS Account has been created for Cash and cash equivalents
+        // but NOT for Accounts Payable (A/P) since A/P is not an asset sub_type 3
+        $this->assertEquals(1, Account::count());
+
+        $posAccount = Account::first();
+        $this->assertEquals('Cash and cash equivalents', $posAccount->name);
+        $this->assertEquals(1, $posAccount->business_id);
+
+        // Ensure they are correctly linked
+        $accountingAccount = AccountingAccount::where('name', 'Cash and cash equivalents')->first();
+        $this->assertEquals($accountingAccount->id, $posAccount->accounting_account_id);
+        $this->assertEquals($posAccount->id, $accountingAccount->account_id);
+    }
 }
