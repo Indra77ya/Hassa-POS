@@ -18,7 +18,7 @@
             <tr class="bg-gray">
                 <td>
                     <div class="btn-group"><button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info tw-w-max dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{{__("messages.actions")}}<span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button>
-                        <ul class="dropdown-menu dropdown-menu-left" role="menu">
+                        <ul class="dropdown-menu" style="left: 0px !important; right: auto !important; min-width: 120px !important;" role="menu">
                             <li>
                                 <a
                                 href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'ledger'], $account->id)}}">
@@ -72,7 +72,7 @@
                     <tr>
                         <td>
                         <div class="btn-group"><button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info tw-w-max dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{{__("messages.actions")}}<span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button>
-                            <ul class="dropdown-menu dropdown-menu-left" role="menu">
+                            <ul class="dropdown-menu" style="left: 0px !important; right: auto !important; min-width: 120px !important;" role="menu">
                                 <li>
                                     <a
                                     href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'ledger'], $child_account->id)}}">
