@@ -110,17 +110,46 @@ class AccountController extends Controller
             return DataTables::of($accounts)
                             ->addColumn(
                                 'action',
-                                '<button data-href="{{action(\'App\Http\Controllers\AccountController@edit\',[$id])}}" data-container=".account_model" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-primary btn-modal"><i class="glyphicon glyphicon-edit"></i> @lang("messages.edit")</button>
-                                <a href="{{action(\'App\Http\Controllers\AccountController@show\',[$id])}}" class="tw-dw-btn tw-dw-btn-outline tw-dw-btn-xs tw-dw-btn-warning btn-xs"><i class="fa fa-book"></i> @lang("account.account_book")</a>&nbsp;
-                                @if($is_closed == 0)
-                                <button data-href="{{action(\'App\Http\Controllers\AccountController@getFundTransfer\',[$id])}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info btn-modal" data-container=".view_modal"><i class="fas fa-calculator"></i> @lang("account.fund_transfer")</button>
-
-                                <button data-href="{{action(\'App\Http\Controllers\AccountController@getDeposit\',[$id])}}" class="tw-dw-btn tw-dw-btn-outline tw-dw-btn-xs tw-dw-btn-success btn-modal" data-container=".view_modal"><i class="fas fa-money-bill-alt"></i> @lang("account.deposit")</button>
-
-                                <button data-url="{{action(\'App\Http\Controllers\AccountController@close\',[$id])}}" class="tw-dw-btn tw-dw-btn-outline tw-dw-btn-xs tw-dw-btn-error close_account"><i class="fa fa-power-off"></i> @lang("messages.close")</button>
-                                @elseif($is_closed == 1)
-                                    <button data-url="{{action(\'App\Http\Controllers\AccountController@activate\',[$id])}}" class="tw-dw-btn tw-dw-btn-outline tw-dw-btn-xs tw-dw-btn-success activate_account"><i class="fa fa-power-off"></i> @lang("messages.activate")</button>
-                                @endif'
+                                '<div class="btn-group">
+                                    <button type="button" class="btn btn-info dropdown-toggle btn-xs" data-toggle="dropdown" aria-expanded="false">
+                                        @lang("messages.actions") <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                        <li>
+                                            <a data-href="{{action(\'App\Http\Controllers\AccountController@edit\',[$id])}}" data-container=".account_model" class="btn-modal" style="cursor: pointer;">
+                                                <i class="glyphicon glyphicon-edit"></i> @lang("messages.edit")
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="{{action(\'App\Http\Controllers\AccountController@show\',[$id])}}">
+                                                <i class="fa fa-book"></i> @lang("account.account_book")
+                                            </a>
+                                        </li>
+                                        @if($is_closed == 0)
+                                        <li>
+                                            <a data-href="{{action(\'App\Http\Controllers\AccountController@getFundTransfer\',[$id])}}" class="btn-modal" data-container=".view_modal" style="cursor: pointer;">
+                                                <i class="fas fa-calculator"></i> @lang("account.fund_transfer")
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a data-href="{{action(\'App\Http\Controllers\AccountController@getDeposit\',[$id])}}" class="btn-modal" data-container=".view_modal" style="cursor: pointer;">
+                                                <i class="fas fa-money-bill-alt"></i> @lang("account.deposit")
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a data-url="{{action(\'App\Http\Controllers\AccountController@close\',[$id])}}" class="close_account" style="cursor: pointer;">
+                                                <i class="fa fa-power-off"></i> @lang("messages.close")
+                                            </a>
+                                        </li>
+                                        @elseif($is_closed == 1)
+                                        <li>
+                                            <a data-url="{{action(\'App\Http\Controllers\AccountController@activate\',[$id])}}" class="activate_account" style="cursor: pointer;">
+                                                <i class="fa fa-power-off"></i> @lang("messages.activate")
+                                            </a>
+                                        </li>
+                                        @endif
+                                    </ul>
+                                </div>'
                             )
                             ->editColumn('name', function ($row) {
                                 if ($row->is_closed == 1) {

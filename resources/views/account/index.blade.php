@@ -146,7 +146,7 @@
     <script>
         $(document).ready(function() {
 
-            $(document).on('click', 'button.close_account', function() {
+            $(document).on('click', '.close_account', function() {
                 swal({
                     title: LANG.sure,
                     icon: "warning",
@@ -393,7 +393,7 @@
             });
         })
 
-        $(document).on('click', 'button.activate_account', function() {
+        $(document).on('click', '.activate_account', function() {
             swal({
                 title: LANG.sure,
                 icon: "warning",
