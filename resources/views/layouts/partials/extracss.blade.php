@@ -744,6 +744,13 @@
     }
   </style>
   <style>
+    /* Prevent Datatables responsive scroll container from clipping dropdown menus when opened */
+    .table-responsive.dropdown-opened,
+    .dataTables_scrollBody.dropdown-opened {
+      overflow: visible !important;
+    }
+  </style>
+  <style>
     .action-link[data-v-397d14ca] {
       cursor: pointer;
     }

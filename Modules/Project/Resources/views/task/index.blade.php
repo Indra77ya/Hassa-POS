@@ -1,3 +1,20 @@
+@php
+    $business_id = request()->session()->get('user.business_id');
+    $business = \App\Business::find($business_id);
+    $prj_setting = !empty($business->prj_setting) ? json_decode($business->prj_setting, true) : [];
+    $task_custom_field_1 = !empty($prj_setting['custom_fields']['custom_field1']) ? $prj_setting['custom_fields']['custom_field1'] : __('project::lang.task_custom_field_1');
+    $task_custom_field_2 = !empty($prj_setting['custom_fields']['custom_field2']) ? $prj_setting['custom_fields']['custom_field2'] : __('project::lang.task_custom_field_2');
+    $task_custom_field_3 = !empty($prj_setting['custom_fields']['custom_field3']) ? $prj_setting['custom_fields']['custom_field3'] : __('project::lang.task_custom_field_3');
+    $task_custom_field_4 = !empty($prj_setting['custom_fields']['custom_field4']) ? $prj_setting['custom_fields']['custom_field4'] : __('project::lang.task_custom_field_4');
+@endphp
+<script type='text/javascript'>
+    window.project_task_custom_labels = {
+        custom_field_1: '{{ !empty($prj_setting["custom_fields"]["custom_field1"]) ? 1 : 0 }}',
+        custom_field_2: '{{ !empty($prj_setting["custom_fields"]["custom_field2"]) ? 1 : 0 }}',
+        custom_field_3: '{{ !empty($prj_setting["custom_fields"]["custom_field3"]) ? 1 : 0 }}',
+        custom_field_4: '{{ !empty($prj_setting["custom_fields"]["custom_field4"]) ? 1 : 0 }}'
+    };
+</script>
 @if($can_crud_task || $is_lead_or_admin)
 <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm task_btn pull-right m-5" data-href="{{action([\Modules\Project\Http\Controllers\TaskController::class, 'create'], ['project_id' => $project->id])}}">
     @lang('messages.add')&nbsp;
@@ -47,10 +64,10 @@
                 <th>@lang('project::lang.due_date')</th>
                 <th>@lang('sale.status')</th>
                 <th>@lang('project::lang.assigned_by')</th>
-                <th>@lang('project::lang.task_custom_field_1')</th>
-                <th>@lang('project::lang.task_custom_field_2')</th>
-                <th>@lang('project::lang.task_custom_field_3')</th>
-                <th>@lang('project::lang.task_custom_field_4')</th>
+                <th>{{ $task_custom_field_1 }}</th>
+                <th>{{ $task_custom_field_2 }}</th>
+                <th>{{ $task_custom_field_3 }}</th>
+                <th>{{ $task_custom_field_4 }}</th>
             </tr>
         </thead>
     </table>

@@ -55,20 +55,27 @@
             @endslot
         @endcan
         @if( auth()->user()->can('so.view_own') || auth()->user()->can('so.view_all'))
+        @php
+            $custom_labels = json_decode(session('business.custom_labels'), true);
+        @endphp
         <div class="table-responsive">
-            <table class="table table-bordered table-striped ajax_view" id="sell_table">
+            <table class="table table-bordered table-striped ajax_view" id="sell_table" style="width: 100%;">
                 <thead>
                     <tr>
-                        <th class="not-export">@lang('messages.action')</th>
-                        <th>@lang('messages.date')</th>
-                        <th>@lang('restaurant.order_no')</th>
-                        <th>@lang('sale.customer_name')</th>
-                        <th>@lang('lang_v1.contact_no')</th>
-                        <th>@lang('sale.location')</th>
-                        <th>@lang('sale.status')</th>
-                        <th>@lang('lang_v1.shipping_status')</th>
-                        <th>@lang('lang_v1.quantity_remaining')</th>
-                        <th>@lang('lang_v1.added_by')</th>
+                        <th class="not-export" style="white-space: nowrap !important;">@lang('messages.action')</th>
+                        <th style="white-space: nowrap !important;">@lang('messages.date')</th>
+                        <th style="white-space: nowrap !important;">@lang('restaurant.order_no')</th>
+                        <th style="white-space: nowrap !important;">@lang('sale.customer_name')</th>
+                        <th style="white-space: nowrap !important;">@lang('lang_v1.contact_no')</th>
+                        <th style="white-space: nowrap !important;">@lang('sale.location')</th>
+                        <th style="white-space: nowrap !important;">@lang('sale.status')</th>
+                        <th style="white-space: nowrap !important;">@lang('lang_v1.shipping_status')</th>
+                        <th style="white-space: nowrap !important;">@lang('lang_v1.quantity_remaining')</th>
+                        <th style="white-space: nowrap !important;">{{ $custom_labels['sell']['custom_field_1'] ?? '' }}</th>
+                        <th style="white-space: nowrap !important;">{{ $custom_labels['sell']['custom_field_2'] ?? '' }}</th>
+                        <th style="white-space: nowrap !important;">{{ $custom_labels['sell']['custom_field_3'] ?? '' }}</th>
+                        <th style="white-space: nowrap !important;">{{ $custom_labels['sell']['custom_field_4'] ?? '' }}</th>
+                        <th style="white-space: nowrap !important;">@lang('lang_v1.added_by')</th>
                     </tr>
                 </thead>
             </table>
@@ -98,6 +105,7 @@ $(document).ready( function(){
         processing: true,
         serverSide: true,
         fixedHeader:false,
+        scrollX: true,
         aaSorting: [[1, 'desc']],
         "ajax": {
             "url": '/sells?sale_type=sales_order',
@@ -141,6 +149,10 @@ $(document).ready( function(){
             { data: 'status', name: 'status'},
             { data: 'shipping_status', name: 'shipping_status'},
             { data: 'so_qty_remaining', name: 'so_qty_remaining', "searchable": false},
+            { data: 'custom_field_1', name: 'transactions.custom_field_1', @if(empty($custom_labels['sell']['custom_field_1'])) visible: false @endif },
+            { data: 'custom_field_2', name: 'transactions.custom_field_2', @if(empty($custom_labels['sell']['custom_field_2'])) visible: false @endif },
+            { data: 'custom_field_3', name: 'transactions.custom_field_3', @if(empty($custom_labels['sell']['custom_field_3'])) visible: false @endif },
+            { data: 'custom_field_4', name: 'transactions.custom_field_4', @if(empty($custom_labels['sell']['custom_field_4'])) visible: false @endif },
             { data: 'added_by', name: 'u.first_name'},
         ]
     });

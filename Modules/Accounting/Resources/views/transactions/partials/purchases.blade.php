@@ -36,24 +36,24 @@
 
     <div class="row">
         <div class="col-md-12">
-            
-
-        <table class="table table-bordered table-striped" id="purchase_table">
-            <thead>
-                <tr>
-                    <th>@lang('messages.action')</th>
-                    <th>@lang('messages.date')</th>
-                    <th>@lang('purchase.ref_no')</th>
-                    <th>@lang('purchase.location')</th>
-                    <th>@lang('purchase.supplier')</th>
-                    <th>@lang('purchase.purchase_status')</th>
-                    <th>@lang('purchase.payment_status')</th>
-                    <th>@lang('purchase.grand_total')</th>
-                    <th>@lang('purchase.payment_due') &nbsp;&nbsp;<i class="fa fa-info-circle text-info no-print" data-toggle="tooltip" data-placement="bottom" data-html="true" data-original-title="{{ __('messages.purchase_due_tooltip')}}" aria-hidden="true"></i></th>
-                    <th>@lang('lang_v1.added_by')</th>
-                </tr>
-            </thead>
-        </table>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped" id="purchase_table" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th class="not-export" style="white-space: nowrap !important;">@lang('messages.action')</th>
+                            <th style="white-space: nowrap !important;">@lang('messages.date')</th>
+                            <th style="white-space: nowrap !important;">@lang('purchase.ref_no')</th>
+                            <th style="white-space: nowrap !important;">@lang('purchase.location')</th>
+                            <th style="white-space: nowrap !important;">@lang('purchase.supplier')</th>
+                            <th style="white-space: nowrap !important;">@lang('purchase.purchase_status')</th>
+                            <th style="white-space: nowrap !important;">@lang('purchase.payment_status')</th>
+                            <th style="white-space: nowrap !important;">@lang('purchase.grand_total')</th>
+                            <th style="white-space: nowrap !important;">@lang('purchase.payment_due') &nbsp;&nbsp;<i class="fa fa-info-circle text-info no-print" data-toggle="tooltip" data-placement="bottom" data-html="true" data-original-title="{{ __('messages.purchase_due_tooltip')}}" aria-hidden="true"></i></th>
+                            <th style="white-space: nowrap !important;">@lang('lang_v1.added_by')</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
         </div>
     </div>
 </div>

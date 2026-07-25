@@ -35,15 +35,36 @@ class InvoiceSchemeController extends Controller
             return Datatables::of($schemes)
                 ->addColumn(
                     'action',
-                    '<button type="button" data-href="{{action(\'App\Http\Controllers\InvoiceSchemeController@edit\', [$id])}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-primary btn-modal" data-container=".invoice_edit_modal"><i class="glyphicon glyphicon-edit"></i> @lang("messages.edit")</button>
-                        &nbsp;
-                        <button type="button" data-href="{{action(\'App\Http\Controllers\InvoiceSchemeController@destroy\', [$id])}}" class="tw-dw-btn tw-dw-btn-outline tw-dw-btn-xs tw-dw-btn-error delete_invoice_button" @if($is_default) disabled @endif><i class="glyphicon glyphicon-trash"></i> @lang("messages.delete")</button>&nbsp;
-                        @if($is_default)
-                            <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-accent" disabled><i class="fa fa-check-square-o" aria-hidden="true"></i> @lang("barcode.default")</button>
-                        @else
-                            <button class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info set_default_invoice" data-href="{{action(\'App\Http\Controllers\InvoiceSchemeController@setDefault\', [$id])}}">@lang("barcode.set_as_default")</button>
-                        @endif
-                        '
+                    '<div class="btn-group">
+                        <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info tw-w-max dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            @lang("messages.actions") <span class="caret"></span><span class="sr-only">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                            <li>
+                                <a href="#" data-href="{{action(\'App\Http\Controllers\InvoiceSchemeController@edit\', [$id])}}" class="btn-modal" data-container=".invoice_edit_modal">
+                                    <i class="glyphicon glyphicon-edit"></i> @lang("messages.edit")
+                                </a>
+                            </li>
+                            @if(!$is_default)
+                                <li>
+                                    <a href="#" data-href="{{action(\'App\Http\Controllers\InvoiceSchemeController@destroy\', [$id])}}" class="delete_invoice_button">
+                                        <i class="glyphicon glyphicon-trash"></i> @lang("messages.delete")
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="set_default_invoice" data-href="{{action(\'App\Http\Controllers\InvoiceSchemeController@setDefault\', [$id])}}">
+                                        <i class="fa fa-check-square-o" aria-hidden="true"></i> @lang("barcode.set_as_default")
+                                    </a>
+                                </li>
+                            @else
+                                <li class="disabled">
+                                    <a href="#">
+                                        <i class="fa fa-check-square-o" aria-hidden="true"></i> @lang("barcode.default")
+                                    </a>
+                                </li>
+                            @endif
+                        </ul>
+                    </div>'
                 )
                 ->editColumn('number_type', function ($row) {
                     return $this->number_types[$row->number_type];

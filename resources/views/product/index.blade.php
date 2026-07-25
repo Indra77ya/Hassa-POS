@@ -223,6 +223,17 @@
 @endsection
 
 @section('javascript')
+    @php
+        $custom_labels = json_decode(session('business.custom_labels'), true);
+    @endphp
+    <script type="text/javascript">
+        window.product_custom_labels = {
+            custom_field_1: "{{ !empty($custom_labels['product']['custom_field_1']) ? 1 : 0 }}",
+            custom_field_2: "{{ !empty($custom_labels['product']['custom_field_2']) ? 1 : 0 }}",
+            custom_field_3: "{{ !empty($custom_labels['product']['custom_field_3']) ? 1 : 0 }}",
+            custom_field_4: "{{ !empty($custom_labels['product']['custom_field_4']) ? 1 : 0 }}"
+        };
+    </script>
     <script src="{{ asset('js/product.js?v=' . $asset_v) }}"></script>
     <script src="{{ asset('js/opening_stock.js?v=' . $asset_v) }}"></script>
     <script type="text/javascript">
@@ -706,19 +717,23 @@
                     });
                     stock_report_cols.push({
                         data: 'product_custom_field1',
-                        name: 'p.product_custom_field1'
+                        name: 'p.product_custom_field1',
+                        visible: (window.product_custom_labels && window.product_custom_labels.custom_field_1 === "1") ? true : false
                     });
                     stock_report_cols.push({
                         data: 'product_custom_field2',
-                        name: 'p.product_custom_field2'
+                        name: 'p.product_custom_field2',
+                        visible: (window.product_custom_labels && window.product_custom_labels.custom_field_2 === "1") ? true : false
                     });
                     stock_report_cols.push({
                         data: 'product_custom_field3',
-                        name: 'p.product_custom_field3'
+                        name: 'p.product_custom_field3',
+                        visible: (window.product_custom_labels && window.product_custom_labels.custom_field_3 === "1") ? true : false
                     });
                     stock_report_cols.push({
                         data: 'product_custom_field4',
-                        name: 'p.product_custom_field4'
+                        name: 'p.product_custom_field4',
+                        visible: (window.product_custom_labels && window.product_custom_labels.custom_field_4 === "1") ? true : false
                     });
 
                     if ($('th.current_stock_mfg').length) {
