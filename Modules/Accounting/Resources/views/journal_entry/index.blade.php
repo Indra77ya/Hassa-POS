@@ -46,11 +46,11 @@
         <table class="table table-bordered table-striped" id="journal_table">
             <thead>
                 <tr>
-                    <th>@lang('messages.action')</th>
                     <th>@lang('accounting::lang.journal_date')</th>
                     <th>@lang('purchase.ref_no')</th>
                     <th>@lang('lang_v1.added_by')</th>
                     <th>@lang('lang_v1.additional_notes')</th>
+                    <th style="width: 10%;">@lang('messages.action')</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -88,13 +88,13 @@
                     d.end_date = end;
                 },
             },
-            aaSorting: [[1, 'desc']],
+            aaSorting: [[0, 'desc']],
             columns: [
-                { data: 'action', name: 'action', orderable: false, searchable: false },
                 { data: 'operation_date', name: 'operation_date' },
                 { data: 'ref_no', name: 'ref_no' },
                 { data: 'added_by', name: 'added_by' },
-                { data: 'note', name: 'note' }
+                { data: 'note', name: 'note' },
+                { data: 'action', name: 'action', orderable: false, searchable: false, width: '10%' }
             ]
         });
 

@@ -11,6 +11,132 @@ class AccountTransaction extends Model
 
     protected $guarded = ['id'];
 
+    public static $is_syncing = false;
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($at) {
+            if (self::$is_syncing || (class_exists(\Modules\Accounting\Entities\AccountingAccountsTransaction::class) && \Modules\Accounting\Entities\AccountingAccountsTransaction::$is_syncing)) {
+                return;
+            }
+
+            $account = \App\Account::find($at->account_id);
+            if ($account && !empty($account->accounting_account_id)) {
+                self::$is_syncing = true;
+                if (class_exists(\Modules\Accounting\Entities\AccountingAccountsTransaction::class)) {
+                    \Modules\Accounting\Entities\AccountingAccountsTransaction::$is_syncing = true;
+                }
+
+                try {
+                    $aat = \Modules\Accounting\Entities\AccountingAccountsTransaction::create([
+                        'accounting_account_id' => $account->accounting_account_id,
+                        'transaction_id' => $at->transaction_id,
+                        'transaction_payment_id' => $at->transaction_payment_id,
+                        'amount' => $at->amount,
+                        'type' => $at->type,
+                        'sub_type' => $at->sub_type ?? 'other',
+                        'created_by' => $at->created_by ?? 1,
+                        'operation_date' => $at->operation_date,
+                        'note' => $at->note,
+                        'account_transaction_id' => $at->id,
+                    ]);
+
+                    if ($aat) {
+                        $at->accounting_accounts_transaction_id = $aat->id;
+                        $at->save();
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Error syncing AccountTransaction to Accounting: ' . $e->getMessage());
+                } finally {
+                    self::$is_syncing = false;
+                    if (class_exists(\Modules\Accounting\Entities\AccountingAccountsTransaction::class)) {
+                        \Modules\Accounting\Entities\AccountingAccountsTransaction::$is_syncing = false;
+                    }
+                }
+            }
+        });
+
+        static::updated(function ($at) {
+            if (self::$is_syncing || (class_exists(\Modules\Accounting\Entities\AccountingAccountsTransaction::class) && \Modules\Accounting\Entities\AccountingAccountsTransaction::$is_syncing)) {
+                return;
+            }
+
+            $account = \App\Account::find($at->account_id);
+            if ($account && !empty($account->accounting_account_id)) {
+                self::$is_syncing = true;
+                if (class_exists(\Modules\Accounting\Entities\AccountingAccountsTransaction::class)) {
+                    \Modules\Accounting\Entities\AccountingAccountsTransaction::$is_syncing = true;
+                }
+
+                try {
+                    $aat = null;
+                    if (!empty($at->accounting_accounts_transaction_id)) {
+                        $aat = \Modules\Accounting\Entities\AccountingAccountsTransaction::find($at->accounting_accounts_transaction_id);
+                    }
+
+                    if (!$aat) {
+                        $aat = \Modules\Accounting\Entities\AccountingAccountsTransaction::where('account_transaction_id', $at->id)->first();
+                    }
+
+                    if ($aat) {
+                        $aat->update([
+                            'accounting_account_id' => $account->accounting_account_id,
+                            'transaction_id' => $at->transaction_id,
+                            'transaction_payment_id' => $at->transaction_payment_id,
+                            'amount' => $at->amount,
+                            'type' => $at->type,
+                            'sub_type' => $at->sub_type ?? 'other',
+                            'operation_date' => $at->operation_date,
+                            'note' => $at->note,
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Error updating Accounting Transaction from AccountTransaction: ' . $e->getMessage());
+                } finally {
+                    self::$is_syncing = false;
+                    if (class_exists(\Modules\Accounting\Entities\AccountingAccountsTransaction::class)) {
+                        \Modules\Accounting\Entities\AccountingAccountsTransaction::$is_syncing = false;
+                    }
+                }
+            }
+        });
+
+        static::deleted(function ($at) {
+            if (self::$is_syncing || (class_exists(\Modules\Accounting\Entities\AccountingAccountsTransaction::class) && \Modules\Accounting\Entities\AccountingAccountsTransaction::$is_syncing)) {
+                return;
+            }
+
+            self::$is_syncing = true;
+            if (class_exists(\Modules\Accounting\Entities\AccountingAccountsTransaction::class)) {
+                \Modules\Accounting\Entities\AccountingAccountsTransaction::$is_syncing = true;
+            }
+
+            try {
+                $aat = null;
+                if (!empty($at->accounting_accounts_transaction_id)) {
+                    $aat = \Modules\Accounting\Entities\AccountingAccountsTransaction::find($at->accounting_accounts_transaction_id);
+                }
+
+                if (!$aat) {
+                    $aat = \Modules\Accounting\Entities\AccountingAccountsTransaction::where('account_transaction_id', $at->id)->first();
+                }
+
+                if ($aat) {
+                    $aat->delete();
+                }
+            } catch (\Exception $e) {
+                \Log::error('Error deleting Accounting Transaction from AccountTransaction: ' . $e->getMessage());
+            } finally {
+                self::$is_syncing = false;
+                if (class_exists(\Modules\Accounting\Entities\AccountingAccountsTransaction::class)) {
+                    \Modules\Accounting\Entities\AccountingAccountsTransaction::$is_syncing = false;
+                }
+            }
+        });
+    }
+
     protected $casts = [
         'operation_date' => 'datetime',
     ];

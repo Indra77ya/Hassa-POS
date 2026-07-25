@@ -332,7 +332,10 @@ class JournalEntryController extends Controller
                         $accounts_transactions->save();
                     }
                 } elseif (! empty($accounts_transactions_id[$index])) {
-                    AccountingAccountsTransaction::delete($accounts_transactions_id[$index]);
+                    $item = AccountingAccountsTransaction::find($accounts_transactions_id[$index]);
+                    if ($item) {
+                        $item->delete();
+                    }
                 }
             }
 
@@ -377,7 +380,10 @@ class JournalEntryController extends Controller
 
         if (! empty($acc_trans_mapping)) {
             $acc_trans_mapping->delete();
-            AccountingAccountsTransaction::where('acc_trans_mapping_id', $id)->delete();
+            $txs = AccountingAccountsTransaction::where('acc_trans_mapping_id', $id)->get();
+            foreach ($txs as $tx) {
+                $tx->delete();
+            }
         }
 
         return ['success' => 1,
