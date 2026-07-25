@@ -50,7 +50,7 @@
                     <th>@lang('purchase.ref_no')</th>
                     <th>@lang('lang_v1.added_by')</th>
                     <th>@lang('lang_v1.additional_notes')</th>
-                    <th>@lang('messages.action')</th>
+                    <th style="width: 10%;">@lang('messages.action')</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -94,7 +94,7 @@
                 { data: 'ref_no', name: 'ref_no' },
                 { data: 'added_by', name: 'added_by' },
                 { data: 'note', name: 'note' },
-                { data: 'action', name: 'action', orderable: false, searchable: false }
+                { data: 'action', name: 'action', orderable: false, searchable: false, width: '10%' }
             ]
         });
 
