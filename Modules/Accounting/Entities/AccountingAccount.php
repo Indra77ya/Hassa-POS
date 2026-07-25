@@ -13,6 +13,134 @@ class AccountingAccount extends Model
      */
     protected $guarded = ['id'];
 
+    public static $is_syncing = false;
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($accountingAccount) {
+            if (self::$is_syncing) {
+                return;
+            }
+
+            // Only sync if the account belongs to Asset -> Cash and cash equivalents
+            if ($accountingAccount->account_primary_type == 'asset' && $accountingAccount->account_sub_type_id == 3) {
+                if (class_exists(\App\Account::class)) {
+                    self::$is_syncing = true;
+                    \App\Account::$is_syncing = true;
+
+                    try {
+                        $account = null;
+                        if (!empty($accountingAccount->account_id)) {
+                            $account = \App\Account::find($accountingAccount->account_id);
+                        }
+
+                        if (!$account) {
+                            $account = \App\Account::create([
+                                'name' => $accountingAccount->name,
+                                'business_id' => $accountingAccount->business_id,
+                                'created_by' => $accountingAccount->created_by ?? 1,
+                                'note' => $accountingAccount->description,
+                                'account_number' => $accountingAccount->gl_code,
+                                'is_closed' => $accountingAccount->status == 'active' ? 0 : 1,
+                                'accounting_account_id' => $accountingAccount->id,
+                            ]);
+                        } else {
+                            $account->accounting_account_id = $accountingAccount->id;
+                            $account->save();
+                        }
+
+                        if ($account) {
+                            $accountingAccount->account_id = $account->id;
+                            $accountingAccount->save();
+                        }
+                    } catch (\Exception $e) {
+                        \Log::error('Error syncing Accounting Account to Payment Account: ' . $e->getMessage());
+                    } finally {
+                        self::$is_syncing = false;
+                        \App\Account::$is_syncing = false;
+                    }
+                }
+            }
+        });
+
+        static::updated(function ($accountingAccount) {
+            if (self::$is_syncing) {
+                return;
+            }
+
+            // Only sync if mapped to Payment Account or meets the Cash and cash equivalents criteria
+            if (($accountingAccount->account_primary_type == 'asset' && $accountingAccount->account_sub_type_id == 3) || !empty($accountingAccount->account_id)) {
+                if (class_exists(\App\Account::class)) {
+                    self::$is_syncing = true;
+                    \App\Account::$is_syncing = true;
+
+                    try {
+                        $account = null;
+                        if (!empty($accountingAccount->account_id)) {
+                            $account = \App\Account::find($accountingAccount->account_id);
+                        }
+
+                        if (!$account) {
+                            // Fallback matching by name and business_id
+                            $account = \App\Account::where('business_id', $accountingAccount->business_id)
+                                ->where('name', $accountingAccount->name)
+                                ->first();
+                        }
+
+                        if ($account) {
+                            $account->update([
+                                'name' => $accountingAccount->name,
+                                'note' => $accountingAccount->description,
+                                'account_number' => $accountingAccount->gl_code,
+                                'is_closed' => $accountingAccount->status == 'active' ? 0 : 1,
+                                'accounting_account_id' => $accountingAccount->id,
+                            ]);
+
+                            if (empty($accountingAccount->account_id)) {
+                                $accountingAccount->account_id = $account->id;
+                                $accountingAccount->save();
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        \Log::error('Error updating Payment Account from Accounting Account: ' . $e->getMessage());
+                    } finally {
+                        self::$is_syncing = false;
+                        \App\Account::$is_syncing = false;
+                    }
+                }
+            }
+        });
+
+        static::deleted(function ($accountingAccount) {
+            if (self::$is_syncing) {
+                return;
+            }
+
+            if (class_exists(\App\Account::class)) {
+                self::$is_syncing = true;
+                \App\Account::$is_syncing = true;
+
+                try {
+                    $account = null;
+                    if (!empty($accountingAccount->account_id)) {
+                        $account = \App\Account::find($accountingAccount->account_id);
+                    }
+
+                    if ($account) {
+                        $account->delete();
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Error deleting Payment Account from Accounting Account: ' . $e->getMessage());
+                } finally {
+                    self::$is_syncing = false;
+                    \App\Account::$is_syncing = false;
+                }
+            }
+        });
+    }
+
     public function child_accounts()
     {
         return $this->hasMany(\Modules\Accounting\Entities\AccountingAccount::class, 'parent_account_id');
