@@ -18,6 +18,16 @@ class PaymentAccountingSyncTest extends TestCase
         parent::setUp();
 
         // 1. Manually create required minimal schema tables in SQLite in-memory database
+        Schema::dropIfExists('account_types');
+        Schema::create('account_types', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->integer('parent_account_type_id')->nullable();
+            $table->integer('business_id');
+            $table->string('fixed_key')->nullable();
+            $table->timestamps();
+        });
+
         Schema::dropIfExists('accounts');
         Schema::create('accounts', function (Blueprint $table) {
             $table->bigIncrements('id');
@@ -26,6 +36,7 @@ class PaymentAccountingSyncTest extends TestCase
             $table->integer('created_by')->nullable();
             $table->string('note')->nullable();
             $table->string('account_number')->nullable();
+            $table->integer('account_type_id')->nullable();
             $table->tinyInteger('is_closed')->default(0);
             $table->unsignedBigInteger('accounting_account_id')->nullable();
             $table->softDeletes();
@@ -327,5 +338,101 @@ class PaymentAccountingSyncTest extends TestCase
         $aat = AccountingAccountsTransaction::find($at->accounting_accounts_transaction_id);
         $this->assertNotNull($aat);
         $this->assertEquals(777000, $aat->amount);
+    }
+
+    /**
+     * Test that bulk inserting default accounts (simulating 'Create Default Accounts')
+     * followed by the pos:sync-payment-accounting sync command correctly synchronizes
+     * Cash and cash equivalents accounts and also verifies that POS default accounts are seeded.
+     */
+    public function testDefaultAccountsSync()
+    {
+        // Setup initial clean state
+        Account::truncate();
+        AccountingAccount::truncate();
+        \App\AccountType::truncate();
+
+        // Simulate session/environment variables
+        $business_id = 1;
+        $user_id = 1;
+
+        // 1. Prepare default accounts mimicking CoaController@createDefaultAccounts
+        $default_accounts = [
+            [
+                'name' => 'Cash and cash equivalents',
+                'business_id' => $business_id,
+                'account_primary_type' => 'asset',
+                'account_sub_type_id' => 3,
+                'detail_type_id' => 31,
+                'status' => 'active',
+                'created_by' => $user_id,
+            ],
+            [
+                'name' => 'Accounts Payable (A/P)',
+                'business_id' => $business_id,
+                'account_primary_type' => 'liability',
+                'account_sub_type_id' => 6,
+                'detail_type_id' => 58,
+                'status' => 'active',
+                'created_by' => $user_id,
+            ]
+        ];
+
+        // 2. Run POS default account types and accounts seeding (mimicked from CoaController)
+        $default_types = [
+            ['key' => 'kas_dan_bank', 'parent' => null],
+            ['key' => 'piutang_usaha', 'parent' => null],
+        ];
+
+        $created_types = [];
+        foreach ($default_types as $at) {
+            $type = \App\AccountType::create([
+                'name' => 'Mock ' . $at['key'],
+                'business_id' => $business_id,
+                'parent_account_type_id' => null,
+                'fixed_key' => $at['key']
+            ]);
+            $created_types[$at['key']] = $type->id;
+        }
+
+        $default_pos_accounts = [
+            ['name' => 'Kas', 'type' => 'kas_dan_bank', 'number' => '1101', 'balance' => 'debit'],
+            ['name' => 'Bank', 'type' => 'kas_dan_bank', 'number' => '1102', 'balance' => 'debit'],
+        ];
+
+        foreach ($default_pos_accounts as $da) {
+            Account::create([
+                'name' => $da['name'],
+                'business_id' => $business_id,
+                'account_number' => $da['number'],
+                'account_type_id' => $created_types[$da['type']],
+                'normal_balance' => $da['balance'],
+                'created_by' => $user_id
+            ]);
+        }
+
+        // Verify that POS accounts are created and they automatically triggered Accounting Account equivalents
+        $this->assertEquals(2, Account::count());
+        $this->assertEquals(2, AccountingAccount::count());
+
+        // Now do bulk insert for other Accounting default accounts (which bypass model events)
+        AccountingAccount::insert($default_accounts);
+
+        // Verify total AccountingAccount count is 4 (2 from POS creation, 2 from bulk insert)
+        $this->assertEquals(4, AccountingAccount::count());
+
+        // 3. Run the bidirectional sync command (same as inside createDefaultAccounts())
+        Artisan::call('pos:sync-payment-accounting');
+
+        // 4. Verify that "Cash and cash equivalents" is now successfully synced/propagated to POS accounts list
+        // and mapped to each other
+        $cashAndEquivalentPOS = Account::where('name', 'Cash and cash equivalents')->first();
+        $this->assertNotNull($cashAndEquivalentPOS);
+
+        $cashAndEquivalentAccounting = AccountingAccount::where('name', 'Cash and cash equivalents')->first();
+        $this->assertNotNull($cashAndEquivalentAccounting);
+
+        $this->assertEquals($cashAndEquivalentAccounting->id, $cashAndEquivalentPOS->accounting_account_id);
+        $this->assertEquals($cashAndEquivalentPOS->id, $cashAndEquivalentAccounting->account_id);
     }
 }
