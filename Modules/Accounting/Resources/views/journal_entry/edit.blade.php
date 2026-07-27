@@ -50,8 +50,9 @@
                     <tr>
                         <th class="col-md-1">#</th>
                         <th class="col-md-5">@lang( 'accounting::lang.account' )</th>
-                        <th class="col-md-3">@lang( 'accounting::lang.debit' )</th>
-                        <th class="col-md-3">@lang( 'accounting::lang.credit' )</th>
+                        <th class="col-md-2_5">@lang( 'accounting::lang.debit' )</th>
+                        <th class="col-md-2_5">@lang( 'accounting::lang.credit' )</th>
+                        <th class="col-md-1 text-center">@lang( 'messages.action' )</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -80,10 +81,10 @@
 
                                 @endphp
 
-                                {!! Form::hidden('accounts_transactions_id[' . $i . ']', $accounts_transactions[$i-1]['id']); !!}
+                                {!! Form::hidden('accounts_transactions_id[' . $i . ']', $accounts_transactions[$i-1]['id'], ['class' => 'accounts_transactions_id']); !!}
                             @endif
                         
-                            <td>{{$i}}</td>
+                            <td class="row-index">{{$i}}</td>
                             <td>
                                 {!! Form::select('account_id[' . $i . ']', $default_array, $account_id, 
                                             ['class' => 'form-control accounts-dropdown account_id', 
@@ -97,12 +98,17 @@
                             <td>
                                 {!! Form::text('credit[' . $i . ']', $credit, ['class' => 'form-control input_number credit']); !!}
                             </td>
+
+                            <td class="text-center">
+                                <button type="button" class="btn btn-danger btn-xs delete-row"><i class="fa fa-trash"></i></button>
+                            </td>
                         </tr>
                     @endfor
                 </tbody>
 
                 <tfoot>
                     <tr>
+                        <td></td>
                         <td></td>
                         <td></td>
                         <td></td>
@@ -115,6 +121,7 @@
                         <th class="text-center">@lang( 'accounting::lang.total' )</th>
                         <th><input type="hidden" class="total_debit_hidden"><span class="total_debit"></span></th>
                         <th><input type="hidden" class="total_credit_hidden"><span class="total_credit"></span></th>
+                        <th></th>
                     </tr>
                 </tfoot>
             </table>
@@ -191,22 +198,27 @@
             rowCount++;
             var newRow = `
                 <tr>
-                    <td>${rowCount}</td>
+                    <td class="row-index">${rowCount}</td>
                     <td>
-                        {!! Form::select('account_id[${rowCount}]', [], null, 
+                        {!! Form::select('account_id[\${rowCount}]', [], null,
                             ['class' => 'form-control accounts-dropdown account_id', 
                             'placeholder' => __('messages.please_select'), 'style' => 'width: 100%;']); !!}
                     </td>
                     <td>
-                        {!! Form::text('debit[${rowCount}]', null, ['class' => 'form-control input_number debit']); !!}
+                        {!! Form::text('debit[\${rowCount}]', null, ['class' => 'form-control input_number debit']); !!}
                     </td>
                     <td>
-                        {!! Form::text('credit[${rowCount}]', null, ['class' => 'form-control input_number credit']); !!}
+                        {!! Form::text('credit[\${rowCount}]', null, ['class' => 'form-control input_number credit']); !!}
+                    </td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-danger btn-xs delete-row"><i class="fa fa-trash"></i></button>
                     </td>
                 </tr>
             `;
             // Append the new row to the table body
             $('#tableBody').append(newRow);
+
+            reorder_rows();
 
             $('#tableBody tr:last-child select.accounts-dropdown').select2({
                 ajax: {
@@ -229,6 +241,44 @@
                 }
             });
         });
+
+        $(document).on('click', '.delete-row', function() {
+            var row_count = $('#tableBody tr').length;
+            if (row_count <= 2) {
+                alert("Minimal harus ada 2 baris jurnal.");
+                return false;
+            }
+            $(this).closest('tr').remove();
+            reorder_rows();
+            calculate_total();
+        });
+
+        function reorder_rows() {
+            var index = 1;
+            $('#tableBody tr').each(function() {
+                $(this).find('.row-index').text(index);
+
+                var select = $(this).find('select.account_id');
+                var debit = $(this).find('input.debit');
+                var credit = $(this).find('input.credit');
+                var tx_id = $(this).find('.accounts_transactions_id');
+
+                if (select.length) {
+                    select.attr('name', 'account_id[' + index + ']');
+                }
+                if (debit.length) {
+                    debit.attr('name', 'debit[' + index + ']');
+                }
+                if (credit.length) {
+                    credit.attr('name', 'credit[' + index + ']');
+                }
+                if (tx_id.length) {
+                    tx_id.attr('name', 'accounts_transactions_id[' + index + ']');
+                }
+                index++;
+            });
+            rowCount = index - 1;
+        }
 	});
 
     function calculate_total(){

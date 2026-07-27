@@ -301,6 +301,13 @@ class JournalEntryController extends Controller
             $acc_trans_mapping->operation_date = $this->util->uf_date($journal_date, true);
             $acc_trans_mapping->update();
 
+            // Find existing transaction IDs for this journal entry to identify deleted rows
+            $existing_tx_ids = AccountingAccountsTransaction::where('acc_trans_mapping_id', $acc_trans_mapping->id)
+                ->pluck('id')
+                ->toArray();
+
+            $submitted_tx_ids = [];
+
             //save details in account trnsactions table
             foreach ($account_ids as $index => $account_id) {
                 if (! empty($account_id)) {
@@ -324,18 +331,31 @@ class JournalEntryController extends Controller
 
                     if (! empty($accounts_transactions_id[$index])) {
                         $accounts_transactions = AccountingAccountsTransaction::find($accounts_transactions_id[$index]);
-                        $accounts_transactions->fill($transaction_row);
-                        $accounts_transactions->update();
+                        if ($accounts_transactions) {
+                            $accounts_transactions->fill($transaction_row);
+                            $accounts_transactions->update();
+                            $submitted_tx_ids[] = $accounts_transactions->id;
+                        }
                     } else {
                         $accounts_transactions = new AccountingAccountsTransaction();
                         $accounts_transactions->fill($transaction_row);
                         $accounts_transactions->save();
+                        $submitted_tx_ids[] = $accounts_transactions->id;
                     }
                 } elseif (! empty($accounts_transactions_id[$index])) {
                     $item = AccountingAccountsTransaction::find($accounts_transactions_id[$index]);
                     if ($item) {
                         $item->delete();
                     }
+                }
+            }
+
+            // Delete any transactions that were completely removed from the form
+            $txs_to_delete = array_diff($existing_tx_ids, $submitted_tx_ids);
+            if (! empty($txs_to_delete)) {
+                $deleted_items = AccountingAccountsTransaction::whereIn('id', $txs_to_delete)->get();
+                foreach ($deleted_items as $item) {
+                    $item->delete();
                 }
             }
 
