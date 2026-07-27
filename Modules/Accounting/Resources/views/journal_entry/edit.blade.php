@@ -74,8 +74,8 @@
                                 @php
 
                                     $account_id = $accounts_transactions[$i-1]['accounting_account_id'];
-                                    $debit = ($accounts_transactions[$i-1]['type'] == 'debit') ? $accounts_transactions[$i-1]['amount'] : '';
-                                    $credit = ($accounts_transactions[$i-1]['type'] == 'credit') ? $accounts_transactions[$i-1]['amount'] : '';
+                                    $debit = ($accounts_transactions[$i-1]['type'] == 'debit') ? (float)$accounts_transactions[$i-1]['amount'] : '';
+                                    $credit = ($accounts_transactions[$i-1]['type'] == 'credit') ? (float)$accounts_transactions[$i-1]['amount'] : '';
                                     $default_array = [$account_id => $accounts_transactions[$i-1]['account']['name']];
                                     
 
