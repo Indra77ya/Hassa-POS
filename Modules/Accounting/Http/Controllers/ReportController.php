@@ -81,18 +81,55 @@ class ReportController extends Controller
             $end_date = $fy['end'];
         }
 
-        $accounts = AccountingAccount::join('accounting_accounts_transactions as AAT',
-                                'AAT.accounting_account_id', '=', 'accounting_accounts.id')
-                            ->where('business_id', $business_id)
-                            ->whereDate('AAT.operation_date', '>=', $start_date)
-                            ->whereDate('AAT.operation_date', '<=', $end_date)
+        // Standard Trial Balance retrieves all transactions up to $end_date to calculate net balances.
+        $raw_accounts = AccountingAccount::leftJoin('accounting_accounts_transactions as AAT', function($join) use ($end_date) {
+                                $join->on('AAT.accounting_account_id', '=', 'accounting_accounts.id')
+                                     ->whereDate('AAT.operation_date', '<=', $end_date);
+                            })
+                            ->where('accounting_accounts.business_id', $business_id)
                             ->select(
-                                DB::raw("SUM(IF(AAT.type = 'credit', AAT.amount, 0)) as credit_balance"),
-                                DB::raw("SUM(IF(AAT.type = 'debit', AAT.amount, 0)) as debit_balance"),
-                                'accounting_accounts.name'
+                                'accounting_accounts.name',
+                                'accounting_accounts.account_primary_type',
+                                DB::raw("SUM(IF(AAT.type = 'credit', AAT.amount, 0)) as total_credit"),
+                                DB::raw("SUM(IF(AAT.type = 'debit', AAT.amount, 0)) as total_debit")
                             )
-                            ->groupBy('accounting_accounts.name')
+                            ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'accounting_accounts.account_primary_type')
                             ->get();
+
+        $accounts = [];
+        foreach ($raw_accounts as $act) {
+            $total_debit = $act->total_debit ?? 0;
+            $total_credit = $act->total_credit ?? 0;
+
+            if ($total_debit == 0 && $total_credit == 0) {
+                continue;
+            }
+
+            $debit_balance = 0;
+            $credit_balance = 0;
+
+            if (in_array($act->account_primary_type, ['asset', 'expenses'])) {
+                $net = $total_debit - $total_credit;
+                if ($net >= 0) {
+                    $debit_balance = $net;
+                } else {
+                    $credit_balance = abs($net);
+                }
+            } else {
+                $net = $total_credit - $total_debit;
+                if ($net >= 0) {
+                    $credit_balance = $net;
+                } else {
+                    $debit_balance = abs($net);
+                }
+            }
+
+            $accounts[] = (object)[
+                'name' => $act->name,
+                'debit_balance' => $debit_balance,
+                'credit_balance' => $credit_balance,
+            ];
+        }
 
         return view('accounting::report.trial_balance')
             ->with(compact('accounts', 'start_date', 'end_date'));
@@ -124,40 +161,38 @@ class ReportController extends Controller
 
         $balance_formula = $this->accountingUtil->balanceFormula();
 
+        // Neraca / Balance Sheet calculates cumulative assets, liabilities, equities up to $end_date
         $assets = AccountingAccount::join('accounting_accounts_transactions as AAT',
                                 'AAT.accounting_account_id', '=', 'accounting_accounts.id')
                     ->join('accounting_account_types as AATP',
                                 'AATP.id', '=', 'accounting_accounts.account_sub_type_id')
-                    ->whereDate('AAT.operation_date', '>=', $start_date)
                     ->whereDate('AAT.operation_date', '<=', $end_date)
                     ->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
                     ->where('accounting_accounts.business_id', $business_id)
                     ->whereIn('accounting_accounts.account_primary_type', ['asset'])
-                    ->groupBy('accounting_accounts.name')
+                    ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
                     ->get();
 
         $liabilities = AccountingAccount::join('accounting_accounts_transactions as AAT',
                                 'AAT.accounting_account_id', '=', 'accounting_accounts.id')
                     ->join('accounting_account_types as AATP',
                                 'AATP.id', '=', 'accounting_accounts.account_sub_type_id')
-                    ->whereDate('AAT.operation_date', '>=', $start_date)
                     ->whereDate('AAT.operation_date', '<=', $end_date)
                     ->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
                     ->where('accounting_accounts.business_id', $business_id)
                     ->whereIn('accounting_accounts.account_primary_type', ['liability'])
-                    ->groupBy('accounting_accounts.name')
+                    ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
                     ->get();
 
         $equities = AccountingAccount::join('accounting_accounts_transactions as AAT',
                                 'AAT.accounting_account_id', '=', 'accounting_accounts.id')
                     ->join('accounting_account_types as AATP',
                                 'AATP.id', '=', 'accounting_accounts.account_sub_type_id')
-                    ->whereDate('AAT.operation_date', '>=', $start_date)
                     ->whereDate('AAT.operation_date', '<=', $end_date)
                     ->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
                     ->where('accounting_accounts.business_id', $business_id)
                     ->whereIn('accounting_accounts.account_primary_type', ['equity'])
-                    ->groupBy('accounting_accounts.name')
+                    ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
                     ->get();
 
         return view('accounting::report.balance_sheet')
