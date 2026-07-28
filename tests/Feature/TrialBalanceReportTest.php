@@ -134,6 +134,7 @@ class TrialBalanceReportTest extends TestCase
         $user->allow_login = 1;
 
         $this->actingAs($user);
+        $this->withoutMiddleware([\App\Http\Middleware\SetSessionData::class]);
 
         // Put business_id, date_format, and timezone in session
         session([
@@ -225,6 +226,7 @@ class TrialBalanceReportTest extends TestCase
         $user->allow_login = 1;
 
         $this->actingAs($user);
+        $this->withoutMiddleware([\App\Http\Middleware\SetSessionData::class]);
 
         session([
             'user.business_id' => 1,
