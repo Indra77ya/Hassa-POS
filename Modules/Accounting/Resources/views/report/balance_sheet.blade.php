@@ -43,7 +43,7 @@
                         <table class="table table-bordered table-striped">
                             <thead>
                                 <tr class="info">
-                                    <th colspan="2" class="text-center" style="font-size: 1.15em;"><strong>SISI KIRI: AKTIVA (ASET)</strong></th>
+                                    <th colspan="2" class="text-center" style="font-size: 1.15em;"><strong>AKTIVA (ASET)</strong></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -66,12 +66,12 @@
                         </table>
                     </div>
 
-                    <!-- SISI KANAN: PASIVA (LIABILITAS & EKUITAS) -->
+                    <!-- PASIVA (LIABILITAS & EKUITAS) -->
                     <div class="col-md-6" style="min-height: 400px;">
                         <table class="table table-bordered table-striped">
                             <thead>
                                 <tr class="info">
-                                    <th colspan="2" class="text-center" style="font-size: 1.15em;"><strong>SISI KANAN: PASIVA (LIABILITAS & EKUITAS)</strong></th>
+                                    <th colspan="2" class="text-center" style="font-size: 1.15em;"><strong>PASIVA (LIABILITAS & EKUITAS)</strong></th>
                                 </tr>
                             </thead>
                             <tbody>
