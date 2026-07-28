@@ -744,6 +744,12 @@
     }
   </style>
   <style>
+    .account_model .modal-body {
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+  </style>
+  <style>
     /* Prevent Datatables responsive scroll container from clipping dropdown menus when opened */
     .table-responsive.dropdown-opened,
     .dataTables_scrollBody.dropdown-opened {

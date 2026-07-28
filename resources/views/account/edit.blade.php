@@ -39,15 +39,21 @@
             </div>
 
             <label>@lang('lang_v1.account_details'):</label>
-            <table class="table table-striped">
-                <tr>
-                    <th>
-                        @lang('lang_v1.label')
-                    </th>
-                    <th>
-                        @lang('product.value')
-                    </th>
-                </tr>
+            <table class="table table-striped" id="account_details_table">
+                <thead>
+                    <tr>
+                        <th>
+                            @lang('lang_v1.label')
+                        </th>
+                        <th>
+                            @lang('product.value')
+                        </th>
+                        <th style="width: 10%;">
+                            @lang('messages.action')
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="account_details_tbody">
                 @if(!empty($account->account_details))
                     @foreach($account->account_details as $key => $account_detail)
                         <tr>
@@ -57,10 +63,13 @@
                             <td>
                                 {!! Form::text('account_details['.$key.'][value]', !empty($account->account_details[$key]['value'])?$account->account_details[$key]['value']:null, ['class' => 'form-control']); !!}      
                             </td>
+                            <td>
+                                <button type="button" class="tw-dw-btn tw-dw-btn-error tw-dw-btn-xs tw-text-white remove_account_detail_row"><i class="fas fa-trash"></i></button>
+                            </td>
                         </tr>
                     @endforeach
                 @else
-                    @for ($i = 0; $i < 6; $i++)
+                    @for ($i = 0; $i < 3; $i++)
                         <tr>
                             <td>
                                 {!! Form::text('account_details['.$i.'][label]', null, ['class' => 'form-control']); !!}
@@ -68,10 +77,15 @@
                             <td>
                                 {!! Form::text('account_details['.$i.'][value]', null, ['class' => 'form-control']); !!}      
                             </td>
+                            <td>
+                                <button type="button" class="tw-dw-btn tw-dw-btn-error tw-dw-btn-xs tw-text-white remove_account_detail_row"><i class="fas fa-trash"></i></button>
+                            </td>
                         </tr>
                     @endfor
                 @endif
+                </tbody>
             </table>
+            <button type="button" class="tw-dw-btn tw-dw-btn-info tw-dw-btn-xs tw-text-white" id="add_account_detail_row" style="margin-bottom: 15px;"><i class="fas fa-plus"></i> Tambah Baris</button>
             
             <div class="form-group">
                 {!! Form::label('note', __( 'brand.note' )) !!}
@@ -88,3 +102,33 @@
 
   </div><!-- /.modal-content -->
 </div><!-- /.modal-dialog -->
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $(document).off('click', '#add_account_detail_row').on('click', '#add_account_detail_row', function() {
+            var table = $(this).closest('.modal-content').find('#account_details_tbody');
+            var indices = [];
+            table.find('tr').each(function() {
+                var inputName = $(this).find('input').first().attr('name');
+                if (inputName) {
+                    var match = inputName.match(/account_details\[(\d+)\]/);
+                    if (match) {
+                        indices.push(parseInt(match[1]));
+                    }
+                }
+            });
+            var next_idx = indices.length > 0 ? Math.max.apply(null, indices) + 1 : 0;
+
+            var html = '<tr>' +
+                '<td><input class="form-control" name="account_details[' + next_idx + '][label]" type="text"></td>' +
+                '<td><input class="form-control" name="account_details[' + next_idx + '][value]" type="text"></td>' +
+                '<td><button type="button" class="tw-dw-btn tw-dw-btn-error tw-dw-btn-xs tw-text-white remove_account_detail_row"><i class="fas fa-trash"></i></button></td>' +
+                '</tr>';
+            table.append(html);
+        });
+
+        $(document).off('click', '.remove_account_detail_row').on('click', '.remove_account_detail_row', function() {
+            $(this).closest('tr').remove();
+        });
+    });
+</script>
