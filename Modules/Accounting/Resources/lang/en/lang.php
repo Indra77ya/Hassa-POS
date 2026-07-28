@@ -419,4 +419,12 @@ return [
     '91_and_over_past_due' => '91 days and over past due',
     'map_transactions_help' => 'Set default accounts to which transactions will be automatically mapped',
     'add_more_row' => 'Add more row',
+    'profit_loss' => 'Profit & Loss',
+    'profit_loss_description' => 'This report presents revenues, cost of sales, and operating expenses over a specific period to measure the company\'s financial performance.',
+    'gross_profit' => 'Gross Profit',
+    'operating_profit' => 'Operating Profit',
+    'net_profit_before_tax' => 'Net Profit Before Tax',
+    'net_profit' => 'Net Profit',
+    'other_income_expense' => 'Non-Operating Income & Expenses',
+    'total_operating_expenses' => 'Total Operating Expenses',
 ];
