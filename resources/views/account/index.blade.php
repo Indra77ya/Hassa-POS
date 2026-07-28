@@ -90,6 +90,7 @@
                                                             <th>@lang('lang_v1.account_type')</th>
                                                             <th>@lang('account.account_category')</th>
                                                             <th>@lang('account.account_number')</th>
+                                                            <th>Debit/Kredit</th>
                                                             <th>@lang('brand.note')</th>
                                                             <th>@lang('lang_v1.balance')</th>
                                                             <th>@lang('lang_v1.account_details')</th>
@@ -99,7 +100,7 @@
                                                     </thead>
                                                     <tfoot>
                                                         <tr class="bg-gray font-17 footer-total text-center">
-                                                            <td colspan="5"><strong>@lang('sale.total'):</strong></td>
+                                                            <td colspan="6"><strong>@lang('sale.total'):</strong></td>
                                                             <td class="footer_total_balance"></td>
                                                             <td colspan="3"></td>
                                                         </tr>
@@ -266,7 +267,7 @@
                     }
                 },
                 columnDefs: [{
-                    "targets": [6, 8],
+                    "targets": [7, 9],
                     "orderable": false,
                     "searchable": false
                 }],
@@ -286,6 +287,10 @@
                     {
                         data: 'account_number',
                         name: 'accounts.account_number'
+                    },
+                    {
+                        data: 'normal_balance',
+                        name: 'accounts.normal_balance'
                     },
                     {
                         data: 'note',
