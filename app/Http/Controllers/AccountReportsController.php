@@ -231,64 +231,129 @@ class AccountReportsController extends Controller
         $business_id = session()->get('user.business_id');
 
         if (request()->ajax()) {
-            $end_date = ! empty(request()->input('end_date')) ? $this->transactionUtil->uf_date(request()->input('end_date')) : \Carbon::now()->format('Y-m-d');
+            if (! empty(request()->start_date) && ! empty(request()->end_date)) {
+                $start_date = $this->transactionUtil->uf_date(request()->start_date);
+                $end_date = $this->transactionUtil->uf_date(request()->end_date);
+            } else {
+                $business_util = new \App\Utils\BusinessUtil();
+                $fy = $business_util->getCurrentFinancialYear($business_id);
+                $start_date = $fy['start'];
+                $end_date = $fy['end'];
+            }
             $location_id = ! empty(request()->input('location_id')) ? request()->input('location_id') : null;
 
-            $purchase_details = $this->transactionUtil->getPurchaseTotals(
-                $business_id,
-                null,
-                $end_date,
-                $location_id
-            );
-            $sell_details = $this->transactionUtil->getSellTotals(
-                $business_id,
-                null,
-                $end_date,
-                $location_id
-            );
+            // Query to fetch the trial balance details of accounting accounts
+            $raw_accounts_query = \Modules\Accounting\Entities\AccountingAccount::leftJoin('accounting_accounts_transactions as AAT', function($join) use ($end_date) {
+                                $join->on('AAT.accounting_account_id', '=', 'accounting_accounts.id')
+                                     ->whereRaw('AAT.operation_date <= ?', [$end_date]);
+                            })
+                            ->where('accounting_accounts.business_id', $business_id);
 
-            $transaction_types = ['sell_return'];
-            $sell_return_details = $this->transactionUtil->getTransactionTotals(
-                $business_id,
-                $transaction_types,
-                null,
-                $end_date,
-                $location_id
-            );
+            // Filter by location_id (business location) if provided
+            if (! empty($location_id)) {
+                $raw_accounts_query->where(function ($q) use ($location_id) {
+                    $q->whereIn('AAT.transaction_id', function($subQuery) use ($location_id) {
+                        $subQuery->select('id')->from('transactions')->where('location_id', $location_id);
+                    })
+                    ->orWhereIn('AAT.transaction_payment_id', function($subQuery) use ($location_id) {
+                        $subQuery->select('TP.id')
+                            ->from('transaction_payments as TP')
+                            ->join('transactions as T', 'TP.transaction_id', '=', 'T.id')
+                            ->where('T.location_id', $location_id);
+                    });
+                });
+            }
 
-            $account_details = $this->getAccountBalance($business_id, $end_date, 'others', $location_id);
+            $raw_accounts = $raw_accounts_query->select(
+                                'accounting_accounts.id',
+                                'accounting_accounts.name',
+                                'accounting_accounts.account_primary_type',
+                                DB::raw("SUM(CASE WHEN AAT.type = 'debit' AND AAT.operation_date < '{$start_date}' THEN AAT.amount ELSE 0 END) as opening_debit_raw"),
+                                DB::raw("SUM(CASE WHEN AAT.type = 'credit' AND AAT.operation_date < '{$start_date}' THEN AAT.amount ELSE 0 END) as opening_credit_raw"),
+                                DB::raw("SUM(CASE WHEN AAT.type = 'debit' AND AAT.operation_date >= '{$start_date}' AND AAT.operation_date <= '{$end_date}' THEN AAT.amount ELSE 0 END) as current_debit_raw"),
+                                DB::raw("SUM(CASE WHEN AAT.type = 'credit' AND AAT.operation_date >= '{$start_date}' AND AAT.operation_date <= '{$end_date}' THEN AAT.amount ELSE 0 END) as current_credit_raw")
+                            )
+                            ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'accounting_accounts.account_primary_type')
+                            ->get();
 
-            $permitted_locations = auth()->user()->permitted_locations();
-            $pl_details = $this->transactionUtil->getProfitLossDetails($business_id, $location_id, '1970-01-01', $end_date, null, $permitted_locations);
+            $accounts = [];
+            foreach ($raw_accounts as $act) {
+                $op_deb = floatval($act->opening_debit_raw ?? 0);
+                $op_crd = floatval($act->opening_credit_raw ?? 0);
+                $cur_deb = floatval($act->current_debit_raw ?? 0);
+                $cur_crd = floatval($act->current_credit_raw ?? 0);
 
-            $output = [
-                'supplier_due' => $purchase_details['purchase_due'],
-                'customer_due' => $sell_details['invoice_due'] - $sell_return_details['total_sell_return_inc_tax'],
-                'account_balances' => $account_details,
-                'total_sell' => $pl_details['total_sell'],
-                'total_purchase' => $pl_details['total_purchase'],
-                'total_expense' => $pl_details['total_expense'],
-                'total_adjustment' => $pl_details['total_adjustment'],
-                'total_recovered' => $pl_details['total_recovered'],
-                'total_purchase_return' => $pl_details['total_purchase_return'],
-                'total_sell_return' => $pl_details['total_sell_return'],
-                'opening_stock' => $pl_details['opening_stock'],
-                'total_sell_discount' => $pl_details['total_sell_discount'],
-                'total_purchase_discount' => $pl_details['total_purchase_discount'],
-                'total_reward_amount' => $pl_details['total_reward_amount'],
-                'total_sell_round_off' => $pl_details['total_sell_round_off'],
-                'total_sell_tax' => $pl_details['total_sell_tax'] ?? 0,
-                'total_purchase_tax' => $pl_details['total_purchase_tax'] ?? 0,
-                'total_sell_shipping_charge' => $pl_details['total_sell_shipping_charge'] ?? 0,
-                'total_sell_additional_expense' => $pl_details['total_sell_additional_expense'] ?? 0,
-            ];
+                // Skip if no activity at all (all are 0)
+                if ($op_deb == 0 && $op_crd == 0 && $cur_deb == 0 && $cur_crd == 0) {
+                    continue;
+                }
 
-            return $output;
+                // Calculations
+                $opening_debit = 0;
+                $opening_credit = 0;
+                $ending_debit = 0;
+                $ending_credit = 0;
+
+                // Debit-Normal accounts
+                if (in_array($act->account_primary_type, ['asset', 'expenses'])) {
+                    $op_net = $op_deb - $op_crd;
+                    if ($op_net >= 0) {
+                        $opening_debit = $op_net;
+                    } else {
+                        $opening_credit = abs($op_net);
+                    }
+
+                    $end_net = $op_net + $cur_deb - $cur_crd;
+                    if ($end_net >= 0) {
+                        $ending_debit = $end_net;
+                    } else {
+                        $ending_credit = abs($end_net);
+                    }
+                }
+                // Credit-Normal accounts
+                else {
+                    $op_net = $op_crd - $op_deb;
+                    if ($op_net >= 0) {
+                        $opening_credit = $op_net;
+                    } else {
+                        $opening_debit = abs($op_net);
+                    }
+
+                    $end_net = $op_net + $cur_crd - $cur_deb;
+                    if ($end_net >= 0) {
+                        $ending_credit = $end_net;
+                    } else {
+                        $ending_debit = abs($end_net);
+                    }
+                }
+
+                $accounts[] = (object)[
+                    'name' => $act->name,
+                    'opening_debit' => $opening_debit,
+                    'opening_credit' => $opening_credit,
+                    'current_debit' => $cur_deb,
+                    'current_credit' => $cur_crd,
+                    'ending_debit' => $ending_debit,
+                    'ending_credit' => $ending_credit,
+                ];
+            }
+
+            return response()->json([
+                'accounts' => $accounts,
+                'start_date' => $start_date,
+                'end_date' => $end_date,
+            ]);
         }
 
         $business_locations = BusinessLocation::forDropdown($business_id, true);
 
-        return view('account_reports.trial_balance')->with(compact('business_locations'));
+        // Get default start & end dates
+        $business_util = new \App\Utils\BusinessUtil();
+        $fy = $business_util->getCurrentFinancialYear($business_id);
+        $start_date = $fy['start'];
+        $end_date = $fy['end'];
+
+        return view('account_reports.trial_balance')->with(compact('business_locations', 'start_date', 'end_date'));
     }
 
     /**

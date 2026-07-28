@@ -20,31 +20,22 @@
                     {!! Form::select('trial_bal_location_id', $business_locations, null, ['class' => 'form-control select2', 'style' => 'width:100%']); !!}
                 </div>
             </div>
-            <div class="col-sm-3 col-xs-6">
-                    <label for="start_date">@lang('report.start_date'):</label>
-                    <div class="input-group">
-                        <span class="input-group-addon">
-                            <i class="fa fa-calendar"></i>
-                        </span>
-                        <input type="text" id="start_date" value="{{@format_date('first day of this month')}}" class="form-control" readonly>
-                    </div>
-            </div>
-            <div class="col-sm-3 col-xs-6">
-                    <label for="end_date">@lang('report.end_date'):</label>
-                    <div class="input-group">
-                        <span class="input-group-addon">
-                            <i class="fa fa-calendar"></i>
-                        </span>
-                        <input type="text" id="end_date" value="{{@format_date('now')}}" class="form-control" readonly>
-                    </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    {!! Form::label('date_range_filter', __('report.date_range') . ':') !!}
+                    {!! Form::text('date_range_filter', null,
+                        ['placeholder' => __('lang_v1.select_a_date_range'),
+                        'class' => 'form-control', 'readonly', 'id' => 'date_range_filter']); !!}
+                </div>
             </div>
             @endcomponent
         </div>
     </div>
     <br>
     <div class="box box-solid">
-        <div class="box-header print_section">
-            <h3 class="box-title">{{session()->get('business.name')}} - @lang( 'account.trial_balance')</h3>
+        <div class="box-header print_section text-center">
+            <h2 class="box-title" style="font-weight: bold;">@lang( 'account.trial_balance')</h2>
+            <p id="trial_balance_period_text">{{@format_date($start_date)}} ~ {{@format_date($end_date)}}</p>
         </div>
         <div class="box-body">
             <table class="table table-bordered table-pl-12" id="trial_balance_table">
@@ -92,16 +83,26 @@
 
 <script type="text/javascript">
     $(document).ready( function(){
-        //Date picker
-        $('#start_date, #end_date').datepicker({
-            autoclose: true,
-            format: datepicker_date_format
-        });
-        update_trial_balance();
+        dateRangeSettings.startDate = moment('{{$start_date}}');
+        dateRangeSettings.endDate = moment('{{$end_date}}');
 
-        $('#start_date, #end_date').change( function() {
+        $('#date_range_filter').daterangepicker(
+            dateRangeSettings,
+            function (start, end) {
+                $('#date_range_filter').val(start.format(moment_date_format) + ' ~ ' + end.format(moment_date_format));
+                update_trial_balance();
+            }
+        );
+        $('#date_range_filter').on('cancel.daterangepicker', function(ev, picker) {
+            $('#date_range_filter').val('');
             update_trial_balance();
         });
+
+        // Set initial val of the input to match the configured daterangepicker start & end dates
+        $('#date_range_filter').val(dateRangeSettings.startDate.format(moment_date_format) + ' ~ ' + dateRangeSettings.endDate.format(moment_date_format));
+
+        update_trial_balance();
+
         $('#trial_bal_location_id').change( function() {
             update_trial_balance();
         });
@@ -110,119 +111,73 @@
     function update_trial_balance(){
         $('#trial_balance_details').html('<tr><td colspan="7" class="text-center"><i class="fas fa-sync fa-spin fa-fw"></i></td></tr>');
 
-        var start_date = $('input#start_date').val();
-        var end_date = $('input#end_date').val();
+        var start = '';
+        var end = '';
+
+        if ($('#date_range_filter').val()) {
+            start = $('input#date_range_filter')
+                .data('daterangepicker')
+                .startDate.format('YYYY-MM-DD');
+            end = $('input#date_range_filter')
+                .data('daterangepicker')
+                .endDate.format('YYYY-MM-DD');
+        }
+
         var location_id = $('#trial_bal_location_id').val()
         $.ajax({
-            url: "{{action([\App\Http\Controllers\AccountReportsController::class, 'trialBalance'])}}?start_date=" + start_date + "&end_date=" + end_date + '&location_id=' + location_id,
+            url: "{{action([\App\Http\Controllers\AccountReportsController::class, 'trialBalance'])}}?start_date=" + start + "&end_date=" + end + '&location_id=' + location_id,
             dataType: "json",
             success: function(result){
                 var total_opening_debit = 0;
                 var total_opening_credit = 0;
-                var total_debit = 0;
-                var total_credit = 0;
-                var total_balance_debit = 0;
-                var total_balance_credit = 0;
+                var total_current_debit = 0;
+                var total_current_credit = 0;
+                var total_ending_debit = 0;
+                var total_ending_credit = 0;
                 var rows = '';
 
-                var accounts = result.account_balances;
-
-                // Virtual accounts to complete the Trial Balance parity
-                var customer_due = parseFloat(result.customer_due) || 0;
-                var supplier_due = parseFloat(result.supplier_due) || 0;
-                var total_sell = parseFloat(result.total_sell) || 0;
-                var total_purchase = parseFloat(result.total_purchase) || 0;
-                var total_expense = parseFloat(result.total_expense) || 0;
-                var closing_stock = parseFloat(result.closing_stock) || 0;
-                var opening_stock = parseFloat(result.opening_stock) || 0;
-                var total_sell_tax = parseFloat(result.total_sell_tax) || 0;
-                var total_purchase_tax = parseFloat(result.total_purchase_tax) || 0;
-                var total_shipping = parseFloat(result.total_sell_shipping_charge) || 0;
-                var total_additional_expense = parseFloat(result.total_sell_additional_expense) || 0;
-                var total_round_off = parseFloat(result.total_sell_round_off) || 0;
-
-                // Add virtual rows
-                accounts.push({name: "{{__('account.customer_due')}}", opening_debit: 0, opening_credit: 0, total_debit: customer_due, total_credit: 0, normal_balance: 'debit'});
-                accounts.push({name: "{{__('account.supplier_due')}}", opening_debit: 0, opening_credit: 0, total_debit: 0, total_credit: supplier_due, normal_balance: 'credit'});
-                accounts.push({name: "{{__('account.inventory_account')}}", opening_debit: opening_stock, opening_credit: 0, total_debit: closing_stock, total_credit: opening_stock, normal_balance: 'debit'});
-                accounts.push({name: "{{__('account.sales_account')}}", opening_debit: 0, opening_credit: 0, total_debit: 0, total_credit: total_sell, normal_balance: 'credit'});
-                accounts.push({name: "{{__('account.purchase_account')}}", opening_debit: 0, opening_credit: 0, total_debit: total_purchase, total_credit: 0, normal_balance: 'debit'});
-                accounts.push({name: "{{__('account.tax_payable_account')}}", opening_debit: 0, opening_credit: 0, total_debit: total_purchase_tax, total_credit: total_sell_tax, normal_balance: 'credit'});
-                accounts.push({name: "{{__('account.shipping_income_account')}}", opening_debit: 0, opening_credit: 0, total_debit: 0, total_credit: total_shipping, normal_balance: 'credit'});
-                accounts.push({name: "{{__('account.packing_charge_account')}}", opening_debit: 0, opening_credit: 0, total_debit: 0, total_credit: total_additional_expense, normal_balance: 'credit'});
-
-                if (total_round_off != 0) {
-                    var is_rounding_debit = total_round_off < 0;
-                    accounts.push({
-                        name: "{{__('account.rounding_account')}}",
-                        opening_debit: 0,
-                        opening_credit: 0,
-                        total_debit: is_rounding_debit ? Math.abs(total_round_off) : 0,
-                        total_credit: is_rounding_debit ? 0 : total_round_off,
-                        normal_balance: 'debit'
-                    });
+                // Update period text in the header
+                if (result.start_date && result.end_date) {
+                    var formatted_start = moment(result.start_date).format(moment_date_format);
+                    var formatted_end = moment(result.end_date).format(moment_date_format);
+                    $('#trial_balance_period_text').text(formatted_start + ' ~ ' + formatted_end);
                 }
+
+                var accounts = result.accounts;
 
                 accounts.forEach(function(account) {
                     var opening_debit = parseFloat(account.opening_debit) || 0;
                     var opening_credit = parseFloat(account.opening_credit) || 0;
-                    var debit = parseFloat(account.total_debit) || 0;
-                    var credit = parseFloat(account.total_credit) || 0;
-
-                    var fixed_key = account.fixed_key;
-
-                    // Normal balance check
-                    var is_debit_normal = account.normal_balance == 'debit';
-                    if (!account.normal_balance) {
-                        var debit_keys = ['kas_dan_bank', 'piutang_usaha', 'persediaan', 'aktiva_lancar_lainnya', 'aktiva_tetap', 'aktiva_lainnya', 'harga_pokok_penjualan', 'beban_operasional', 'beban_lain_lain', 'beban_pajak'];
-                        is_debit_normal = debit_keys.includes(fixed_key);
-                    }
-
-                    // Final Balance calculation
-                    var final_bal = 0;
-                    if (is_debit_normal) {
-                        final_bal = opening_debit - opening_credit + debit - credit;
-                    } else {
-                        final_bal = opening_credit - opening_debit + credit - debit;
-                    }
-
-                    var final_debit = 0;
-                    var final_credit = 0;
-                    if (final_bal > 0) {
-                        if (is_debit_normal) final_debit = final_bal; else final_credit = final_bal;
-                    } else if (final_bal < 0) {
-                        if (is_debit_normal) final_credit = Math.abs(final_bal); else final_debit = Math.abs(final_bal);
-                    }
-
-                    if (opening_debit == 0 && opening_credit == 0 && debit == 0 && credit == 0 && final_debit == 0 && final_credit == 0) {
-                        return;
-                    }
+                    var current_debit = parseFloat(account.current_debit) || 0;
+                    var current_credit = parseFloat(account.current_credit) || 0;
+                    var ending_debit = parseFloat(account.ending_debit) || 0;
+                    var ending_credit = parseFloat(account.ending_credit) || 0;
 
                     rows += '<tr>' +
                         '<td>' + account.name + '</td>' +
                         '<td class="text-right">' + (opening_debit > 0 ? __currency_trans_from_en(opening_debit, true) : '') + '</td>' +
                         '<td class="text-right">' + (opening_credit > 0 ? __currency_trans_from_en(opening_credit, true) : '') + '</td>' +
-                        '<td class="text-right">' + (debit > 0 ? __currency_trans_from_en(debit, true) : '') + '</td>' +
-                        '<td class="text-right">' + (credit > 0 ? __currency_trans_from_en(credit, true) : '') + '</td>' +
-                        '<td class="text-right">' + (final_debit > 0 ? __currency_trans_from_en(final_debit, true) : '') + '</td>' +
-                        '<td class="text-right">' + (final_credit > 0 ? __currency_trans_from_en(final_credit, true) : '') + '</td>' +
+                        '<td class="text-right">' + (current_debit > 0 ? __currency_trans_from_en(current_debit, true) : '') + '</td>' +
+                        '<td class="text-right">' + (current_credit > 0 ? __currency_trans_from_en(current_credit, true) : '') + '</td>' +
+                        '<td class="text-right">' + (ending_debit > 0 ? __currency_trans_from_en(ending_debit, true) : '') + '</td>' +
+                        '<td class="text-right">' + (ending_credit > 0 ? __currency_trans_from_en(ending_credit, true) : '') + '</td>' +
                     '</tr>';
 
                     total_opening_debit += opening_debit;
                     total_opening_credit += opening_credit;
-                    total_debit += debit;
-                    total_credit += credit;
-                    total_balance_debit += final_debit;
-                    total_balance_credit += final_credit;
+                    total_current_debit += current_debit;
+                    total_current_credit += current_credit;
+                    total_ending_debit += ending_debit;
+                    total_ending_credit += ending_credit;
                 });
 
                 $('#trial_balance_details').html(rows);
                 $('#total_opening_debit').text(__currency_trans_from_en(total_opening_debit, true));
                 $('#total_opening_credit').text(__currency_trans_from_en(total_opening_credit, true));
-                $('#total_debit').text(__currency_trans_from_en(total_debit, true));
-                $('#total_credit').text(__currency_trans_from_en(total_credit, true));
-                $('#total_balance_debit').text(__currency_trans_from_en(total_balance_debit, true));
-                $('#total_balance_credit').text(__currency_trans_from_en(total_balance_credit, true));
+                $('#total_debit').text(__currency_trans_from_en(total_current_debit, true));
+                $('#total_credit').text(__currency_trans_from_en(total_current_credit, true));
+                $('#total_balance_debit').text(__currency_trans_from_en(total_ending_debit, true));
+                $('#total_balance_credit').text(__currency_trans_from_en(total_ending_credit, true));
             }
         });
     }
