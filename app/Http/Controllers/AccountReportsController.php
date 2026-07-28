@@ -44,119 +44,169 @@ class AccountReportsController extends Controller
             $end_date = ! empty(request()->input('end_date')) ? $this->transactionUtil->uf_date(request()->input('end_date')) : \Carbon::now()->format('Y-m-d');
             $location_id = ! empty(request()->input('location_id')) ? request()->input('location_id') : null;
 
-            $purchase_details = $this->transactionUtil->getPurchaseTotals(
-                $business_id,
-                null,
-                $end_date,
-                $location_id
-            );
-            $sell_details = $this->transactionUtil->getSellTotals(
-                $business_id,
-                null,
-                $end_date,
-                $location_id
-            );
+            // Calculate start_date (beginning of financial year of the given end_date)
+            $business = \App\Business::where('id', $business_id)->first();
+            $start_month = $business ? $business->fy_start_month : 1;
 
-            $transaction_types = ['sell_return'];
+            $end_time = strtotime($end_date);
+            $end_year = date('Y', $end_time);
+            $end_month_num = date('n', $end_time);
 
-            $sell_return_details = $this->transactionUtil->getTransactionTotals(
-                $business_id,
-                $transaction_types,
-                null,
-                $end_date,
-                $location_id
-            );
+            if ($end_month_num < $start_month) {
+                $start_year = $end_year - 1;
+            } else {
+                $start_year = $end_year;
+            }
+            $start_date = $start_year.'-'.str_pad($start_month, 2, '0', STR_PAD_LEFT).'-01';
 
-            //Get Closing stock
-            $permitted_locations = auth()->user()->permitted_locations();
+            // Balance formula compatible with both 'expenses' and 'expense' primary types
+            $balance_formula = "SUM( IF(
+                (accounting_accounts.account_primary_type='asset' AND AAT.type='debit')
+                OR (accounting_accounts.account_primary_type='expenses' AND AAT.type='debit')
+                OR (accounting_accounts.account_primary_type='expense' AND AAT.type='debit')
+                OR (accounting_accounts.account_primary_type='income' AND AAT.type='credit')
+                OR (accounting_accounts.account_primary_type='equity' AND AAT.type='credit')
+                OR (accounting_accounts.account_primary_type='liability' AND AAT.type='credit'),
+                amount, -1*amount)) as balance";
+
+            // Assets query
+            $assets_query = \Modules\Accounting\Entities\AccountingAccount::join('accounting_accounts_transactions as AAT',
+                                    'AAT.accounting_account_id', '=', 'accounting_accounts.id')
+                        ->join('accounting_account_types as AATP',
+                                    'AATP.id', '=', 'accounting_accounts.account_sub_type_id')
+                        ->whereDate('AAT.operation_date', '<=', $end_date)
+                        ->where('accounting_accounts.business_id', $business_id)
+                        ->whereIn('accounting_accounts.account_primary_type', ['asset']);
             
-            $closing_stock = $this->transactionUtil->getOpeningClosingStock(
-                $business_id,
-                $end_date,
-                $location_id,
-                $permitted_locations
-            );
-
-            $accounts = Account::leftjoin(
-                'account_transactions as AT',
-                'AT.account_id',
-                '=',
-                'accounts.id'
-            )
-            ->leftjoin('account_types as ATY', 'accounts.account_type_id', '=', 'ATY.id')
-            ->leftjoin('account_types as PATY', 'ATY.parent_account_type_id', '=', 'PATY.id')
-            ->whereNull('AT.deleted_at')
-            ->where('accounts.business_id', $business_id)
-            ->whereDate('AT.operation_date', '<=', $end_date);
-
-            // Removed restrictive filtering to include all accounts in Balance Sheet
-
-            $accounts = $accounts->select([
-                'accounts.id',
-                'accounts.name as account_name',
-                'accounts.normal_balance',
-                'ATY.name as type_name',
-                'ATY.fixed_key as fixed_key',
-                'PATY.name as parent_type_name',
-                DB::raw("SUM( IF(AT.type='credit', amount, 0) ) as credit_balance"),
-                DB::raw("SUM( IF(AT.type='debit', amount, 0) ) as debit_balance"),
-            ])
-            ->groupBy('accounts.id', 'accounts.name', 'ATY.name', 'ATY.fixed_key', 'PATY.name')
-            ->get();
-
-            $assets = [
-                'current_assets' => [],
-                'fixed_assets' => [],
-                'other_assets' => [],
-            ];
-            $liabilities = [
-                'current_liabilities' => [],
-                'long_term_liabilities' => [],
-            ];
-            $equity = [];
-
-            foreach ($accounts as $account) {
-                $fixed_key = $account->fixed_key;
-                $is_debit_normal = $account->normal_balance == 'debit';
-                if (empty($account->normal_balance)) {
-                    $is_debit_normal = in_array($fixed_key, ['kas_dan_bank', 'piutang_usaha', 'persediaan', 'aktiva_lancar_lainnya', 'aktiva_tetap', 'akumulasi_penyusutan', 'aktiva_lainnya']);
-                }
-
-                if ($is_debit_normal) {
-                    $account->balance = $account->debit_balance - $account->credit_balance;
-                } else {
-                    $account->balance = $account->credit_balance - $account->debit_balance;
-                }
-
-                // AKTIVA
-                if (in_array($fixed_key, ['kas_dan_bank', 'piutang_usaha', 'persediaan', 'aktiva_lancar_lainnya'])) {
-                    $assets['current_assets'][] = $account;
-                } elseif (in_array($fixed_key, ['aktiva_tetap', 'akumulasi_penyusutan'])) {
-                    $assets['fixed_assets'][] = $account;
-                } elseif ($fixed_key == 'aktiva_lainnya') {
-                    $assets['other_assets'][] = $account;
-                }
-                // PASIVA
-                elseif (in_array($fixed_key, ['hutang_usaha', 'hutang_lancar_lainnya'])) {
-                    $liabilities['current_liabilities'][] = $account;
-                } elseif ($fixed_key == 'hutang_jangka_panjang') {
-                    $liabilities['long_term_liabilities'][] = $account;
-                } elseif ($fixed_key == 'ekuitas') {
-                    $equity[] = $account;
-                }
+            if (!empty($location_id)) {
+                $assets_query->where(function ($q) use ($location_id) {
+                    $q->whereIn('AAT.transaction_id', function($subQuery) use ($location_id) {
+                        $subQuery->select('id')->from('transactions')->where('location_id', $location_id);
+                    })
+                    ->orWhereIn('AAT.transaction_payment_id', function($subQuery) use ($location_id) {
+                        $subQuery->select('TP.id')
+                            ->from('transaction_payments as TP')
+                            ->join('transactions as T', 'TP.transaction_id', '=', 'T.id')
+                            ->where('T.location_id', $location_id);
+                    });
+                });
             }
 
-            // Calculate Retained Earnings
-            $retained_earnings = $this->transactionUtil->getProfitLossDetails($business_id, $location_id, '1970-01-01', $end_date, null, $permitted_locations);
+            $assets = $assets_query->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
+                        ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
+                        ->get();
+
+            // Liabilities query
+            $liabilities_query = \Modules\Accounting\Entities\AccountingAccount::join('accounting_accounts_transactions as AAT',
+                                    'AAT.accounting_account_id', '=', 'accounting_accounts.id')
+                        ->join('accounting_account_types as AATP',
+                                    'AATP.id', '=', 'accounting_accounts.account_sub_type_id')
+                        ->whereDate('AAT.operation_date', '<=', $end_date)
+                        ->where('accounting_accounts.business_id', $business_id)
+                        ->whereIn('accounting_accounts.account_primary_type', ['liability']);
+
+            if (!empty($location_id)) {
+                $liabilities_query->where(function ($q) use ($location_id) {
+                    $q->whereIn('AAT.transaction_id', function($subQuery) use ($location_id) {
+                        $subQuery->select('id')->from('transactions')->where('location_id', $location_id);
+                    })
+                    ->orWhereIn('AAT.transaction_payment_id', function($subQuery) use ($location_id) {
+                        $subQuery->select('TP.id')
+                            ->from('transaction_payments as TP')
+                            ->join('transactions as T', 'TP.transaction_id', '=', 'T.id')
+                            ->where('T.location_id', $location_id);
+                    });
+                });
+            }
+
+            $liabilities = $liabilities_query->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
+                        ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
+                        ->get();
+
+            // Equities query
+            $equities_query = \Modules\Accounting\Entities\AccountingAccount::join('accounting_accounts_transactions as AAT',
+                                    'AAT.accounting_account_id', '=', 'accounting_accounts.id')
+                        ->join('accounting_account_types as AATP',
+                                    'AATP.id', '=', 'accounting_accounts.account_sub_type_id')
+                        ->whereDate('AAT.operation_date', '<=', $end_date)
+                        ->where('accounting_accounts.business_id', $business_id)
+                        ->whereIn('accounting_accounts.account_primary_type', ['equity']);
+
+            if (!empty($location_id)) {
+                $equities_query->where(function ($q) use ($location_id) {
+                    $q->whereIn('AAT.transaction_id', function($subQuery) use ($location_id) {
+                        $subQuery->select('id')->from('transactions')->where('location_id', $location_id);
+                    })
+                    ->orWhereIn('AAT.transaction_payment_id', function($subQuery) use ($location_id) {
+                        $subQuery->select('TP.id')
+                            ->from('transaction_payments as TP')
+                            ->join('transactions as T', 'TP.transaction_id', '=', 'T.id')
+                            ->where('T.location_id', $location_id);
+                    });
+                });
+            }
+
+            $equities = $equities_query->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
+                        ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
+                        ->get();
+
+            // Income query for current period net profit
+            $total_income_query = \Modules\Accounting\Entities\AccountingAccount::join('accounting_accounts_transactions as AAT',
+                                    'AAT.accounting_account_id', '=', 'accounting_accounts.id')
+                        ->whereBetween('AAT.operation_date', [$start_date, $end_date])
+                        ->where('accounting_accounts.business_id', $business_id)
+                        ->where('accounting_accounts.account_primary_type', 'income');
+
+            if (!empty($location_id)) {
+                $total_income_query->where(function ($q) use ($location_id) {
+                    $q->whereIn('AAT.transaction_id', function($subQuery) use ($location_id) {
+                        $subQuery->select('id')->from('transactions')->where('location_id', $location_id);
+                    })
+                    ->orWhereIn('AAT.transaction_payment_id', function($subQuery) use ($location_id) {
+                        $subQuery->select('TP.id')
+                            ->from('transaction_payments as TP')
+                            ->join('transactions as T', 'TP.transaction_id', '=', 'T.id')
+                            ->where('T.location_id', $location_id);
+                    });
+                });
+            }
+
+            $total_income = $total_income_query->select(DB::raw($balance_formula))
+                        ->first()->balance ?? 0;
+
+            // Expenses query for current period net profit
+            $total_expenses_query = \Modules\Accounting\Entities\AccountingAccount::join('accounting_accounts_transactions as AAT',
+                                    'AAT.accounting_account_id', '=', 'accounting_accounts.id')
+                        ->whereBetween('AAT.operation_date', [$start_date, $end_date])
+                        ->where('accounting_accounts.business_id', $business_id)
+                        ->where('accounting_accounts.account_primary_type', 'expenses');
+
+            if (!empty($location_id)) {
+                $total_expenses_query->where(function ($q) use ($location_id) {
+                    $q->whereIn('AAT.transaction_id', function($subQuery) use ($location_id) {
+                        $subQuery->select('id')->from('transactions')->where('location_id', $location_id);
+                    })
+                    ->orWhereIn('AAT.transaction_payment_id', function($subQuery) use ($location_id) {
+                        $subQuery->select('TP.id')
+                            ->from('transaction_payments as TP')
+                            ->join('transactions as T', 'TP.transaction_id', '=', 'T.id')
+                            ->where('T.location_id', $location_id);
+                    });
+                });
+            }
+
+            $total_expenses = $total_expenses_query->select(DB::raw($balance_formula))
+                        ->first()->balance ?? 0;
+
+            $current_period_net_profit = $total_income - $total_expenses;
 
             $output = [
-                'supplier_due' => $purchase_details['purchase_due'],
-                'customer_due' => $sell_details['invoice_due'] - $sell_return_details['total_sell_return_inc_tax'],
-                'closing_stock' => $closing_stock,
                 'assets' => $assets,
                 'liabilities' => $liabilities,
-                'equity' => $equity,
-                'retained_earnings' => $retained_earnings['net_profit'],
+                'equities' => $equities,
+                'current_period_net_profit' => $current_period_net_profit,
+                'start_date' => $start_date,
+                'end_date' => $end_date,
             ];
 
             return $output;
