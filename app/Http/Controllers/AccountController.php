@@ -175,6 +175,15 @@ class AccountController extends Controller
                             ->addColumn('category', function ($row) {
                                 return Account::getCategoryStatic($row->fixed_key);
                             })
+                            ->editColumn('normal_balance', function ($row) {
+                                $normal_balance = Account::getBalanceTypeStatic($row->normal_balance, $row->fixed_key, $row->account_type_name, $row->parent_account_type_name);
+                                if ($normal_balance == 'debit') {
+                                    return __('account.debit');
+                                } elseif ($normal_balance == 'credit') {
+                                    return __('account.credit');
+                                }
+                                return '';
+                            })
                             ->editColumn('account_details', function ($row) {
                                 $html = '';
                                 if (! empty($row->account_details)) {
