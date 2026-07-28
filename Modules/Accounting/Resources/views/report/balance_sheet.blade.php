@@ -22,11 +22,11 @@
         </div>
     </div>
 
-    <div class="col-md-10 col-md-offset-1">
+    <div class="col-md-12">
         <div class="box box-warning">
             <div class="box-header with-border text-center">
-                <h2 class="box-title">@lang( 'accounting::lang.balance_sheet')</h2>
-                <p>{{@format_date($start_date)}} ~ {{@format_date($end_date)}}</p>
+                <h2 class="box-title" style="font-weight: bold; font-size: 1.5em;">@lang( 'accounting::lang.balance_sheet')</h2>
+                <p style="font-size: 1.1em; color: #555;">{{@format_date($start_date)}} ~ {{@format_date($end_date)}}</p>
             </div>
 
             <div class="box-body">
@@ -37,88 +37,122 @@
                     $total_equities = 0;
                 @endphp
 
-                <table class="table table-bordered table-striped">
-                    <tbody>
-                        <!-- ASET (AKTIVA) -->
-                        <tr class="info" style="font-size: 1.1em;">
-                            <th colspan="2"><strong>ASET (AKTIVA)</strong></th>
-                        </tr>
-                        @foreach($assets as $asset)
-                            @if($asset->balance != 0)
-                                @php $total_assets += $asset->balance @endphp
-                                <tr>
-                                    <td style="padding-left: 30px;">{{$asset->name}}</td>
-                                    <td class="text-right">@format_currency($asset->balance)</td>
+                <div class="row">
+                    <!-- SISI KIRI: AKTIVA (ASET) -->
+                    <div class="col-md-6" style="border-right: 2px solid #ddd; min-height: 400px;">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr class="info">
+                                    <th colspan="2" class="text-center" style="font-size: 1.15em;"><strong>SISI KIRI: AKTIVA (ASET)</strong></th>
                                 </tr>
-                            @endif
-                        @endforeach
-                        <tr class="success" style="font-size: 1.1em; border-top: 2px solid #000;">
-                            <th><strong>TOTAL ASET</strong></th>
-                            <th class="text-right"><strong>@format_currency($total_assets)</strong></th>
-                        </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($assets as $asset)
+                                    @if($asset->balance != 0)
+                                        @php $total_assets += $asset->balance @endphp
+                                        <tr>
+                                            <td style="padding-left: 20px;">{{$asset->name}}</td>
+                                            <td class="text-right" style="width: 35%;">@format_currency($asset->balance)</td>
+                                        </tr>
+                                    @endif
+                                    @endforeach
 
-                        <!-- SPACING -->
-                        <tr><td colspan="2" style="background-color: #f5f5f5; height: 15px; padding: 0;"></td></tr>
+                                    @if($total_assets == 0)
+                                        <tr>
+                                            <td colspan="2" class="text-center text-muted"><em>Tidak ada aset tercatat</em></td>
+                                        </tr>
+                                    @endif
+                            </tbody>
+                        </table>
+                    </div>
 
-                        <!-- KEWAJIBAN (LIABILITAS) -->
-                        <tr class="info" style="font-size: 1.1em;">
-                            <th colspan="2"><strong>LIABILITAS (KEWAJIBAN / HUTANG)</strong></th>
-                        </tr>
-                        @foreach($liabilities as $liability)
-                            @if($liability->balance != 0)
-                                @php $total_liabilities += $liability->balance @endphp
-                                <tr>
-                                    <td style="padding-left: 30px;">{{$liability->name}}</td>
-                                    <td class="text-right">@format_currency($liability->balance)</td>
+                    <!-- SISI KANAN: PASIVA (LIABILITAS & EKUITAS) -->
+                    <div class="col-md-6" style="min-height: 400px;">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr class="info">
+                                    <th colspan="2" class="text-center" style="font-size: 1.15em;"><strong>SISI KANAN: PASIVA (LIABILITAS & EKUITAS)</strong></th>
                                 </tr>
-                            @endif
-                        @endforeach
-                        <tr class="warning" style="font-size: 1.1em; border-top: 1px solid #ddd;">
-                            <th><strong>TOTAL LIABILITAS</strong></th>
-                            <th class="text-right"><strong>@format_currency($total_liabilities)</strong></th>
-                        </tr>
-
-                        <!-- SPACING -->
-                        <tr><td colspan="2" style="background-color: #f5f5f5; height: 15px; padding: 0;"></td></tr>
-
-                        <!-- EKUITAS (MODAL) -->
-                        <tr class="info" style="font-size: 1.1em;">
-                            <th colspan="2"><strong>EKUITAS (MODAL)</strong></th>
-                        </tr>
-                        @foreach($equities as $equity)
-                            @if($equity->balance != 0)
-                                @php $total_equities += $equity->balance @endphp
-                                <tr>
-                                    <td style="padding-left: 30px;">{{$equity->name}}</td>
-                                    <td class="text-right">@format_currency($equity->balance)</td>
+                            </thead>
+                            <tbody>
+                                <!-- KEWAJIBAN / LIABILITAS -->
+                                <tr style="background-color: #f5f5f5;">
+                                    <th colspan="2" style="padding-left: 10px; color: #444;"><strong>LIABILITAS (KEWAJIBAN / HUTANG)</strong></th>
                                 </tr>
-                            @endif
-                        @endforeach
+                                @foreach($liabilities as $liability)
+                                    @if($liability->balance != 0)
+                                        @php $total_liabilities += $liability->balance @endphp
+                                        <tr>
+                                            <td style="padding-left: 20px;">{{$liability->name}}</td>
+                                            <td class="text-right" style="width: 35%;">@format_currency($liability->balance)</td>
+                                        </tr>
+                                    @endif
+                                @endforeach
+                                @if($total_liabilities == 0)
+                                    <tr>
+                                        <td colspan="2" class="text-center text-muted"><em>Tidak ada liabilitas tercatat</em></td>
+                                    </tr>
+                                @endif
+                                <tr style="background-color: #fafafa; border-top: 1px solid #ddd;">
+                                    <th style="padding-left: 15px;"><strong>TOTAL LIABILITAS</strong></th>
+                                    <th class="text-right"><strong>@format_currency($total_liabilities)</strong></th>
+                                </tr>
 
-                        <!-- Laba Bersih Tahun Berjalan -->
-                        @php $total_equities += $current_period_net_profit; @endphp
-                        <tr>
-                            <td style="padding-left: 30px;"><strong>Laba Bersih Tahun Berjalan</strong></td>
-                            <td class="text-right">@format_currency($current_period_net_profit)</td>
-                        </tr>
+                                <!-- EKUITAS / MODAL -->
+                                <tr style="background-color: #f5f5f5;">
+                                    <th colspan="2" style="padding-left: 10px; color: #444; border-top: 2px solid #ddd;"><strong>EKUITAS (MODAL)</strong></th>
+                                </tr>
+                                @foreach($equities as $equity)
+                                    @if($equity->balance != 0)
+                                        @php $total_equities += $equity->balance @endphp
+                                        <tr>
+                                            <td style="padding-left: 20px;">{{$equity->name}}</td>
+                                            <td class="text-right">@format_currency($equity->balance)</td>
+                                        </tr>
+                                    @endif
+                                @endforeach
 
-                        <tr class="warning" style="font-size: 1.1em; border-top: 1px solid #ddd;">
-                            <th><strong>TOTAL EKUITAS</strong></th>
-                            <th class="text-right"><strong>@format_currency($total_equities)</strong></th>
-                        </tr>
+                                <!-- Laba Bersih Tahun Berjalan -->
+                                @php $total_equities += $current_period_net_profit; @endphp
+                                <tr>
+                                    <td style="padding-left: 20px;"><strong>Laba Bersih Tahun Berjalan</strong></td>
+                                    <td class="text-right">@format_currency($current_period_net_profit)</td>
+                                </tr>
 
-                        <!-- SPACING -->
-                        <tr><td colspan="2" style="background-color: #f5f5f5; height: 15px; padding: 0;"></td></tr>
+                                <tr style="background-color: #fafafa; border-top: 1px solid #ddd;">
+                                    <th style="padding-left: 15px;"><strong>TOTAL EKUITAS</strong></th>
+                                    <th class="text-right"><strong>@format_currency($total_equities)</strong></th>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
-                        <!-- TOTAL PASIVA (LIABILITAS + EKUITAS) -->
-                        @php $total_liab_owners = $total_liabilities + $total_equities; @endphp
-                        <tr class="success" style="font-size: 1.2em; border-top: 2px solid #000; border-bottom: 2px solid #000;">
-                            <th><strong>TOTAL LIABILITAS & EKUITAS (PASIVA)</strong></th>
-                            <th class="text-right"><strong>@format_currency($total_liab_owners)</strong></th>
-                        </tr>
+                <!-- GRAND TOTAL BAR DI BAGIAN BAWAH YANG SEJAJAR DAN SEIMBANG -->
+                <div class="row" style="margin-top: 20px; border-top: 3px double #aaa; padding-top: 15px;">
+                    <div class="col-md-6" style="border-right: 2px solid #ddd;">
+                        <table class="table table-bordered">
+                            <tbody>
+                                <tr class="success" style="font-size: 1.25em;">
+                                    <th><strong>TOTAL AKTIVA (ASET)</strong></th>
+                                    <th class="text-right" style="width: 35%;"><strong>@format_currency($total_assets)</strong></th>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-                    </tbody>
-                </table>
+                    <div class="col-md-6">
+                        <table class="table table-bordered">
+                            <tbody>
+                                @php $total_pasiva = $total_liabilities + $total_equities; @endphp
+                                <tr class="success" style="font-size: 1.25em;">
+                                    <th><strong>TOTAL PASIVA (LIABILITAS & EKUITAS)</strong></th>
+                                    <th class="text-right" style="width: 35%;"><strong>@format_currency($total_pasiva)</strong></th>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
                 
                 <div class="row no-print" style="margin-top: 20px;">
                     <div class="col-xs-12">
