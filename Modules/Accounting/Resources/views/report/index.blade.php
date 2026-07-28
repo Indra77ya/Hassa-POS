@@ -31,6 +31,21 @@
         <div class="col-md-6">
             <div class="box box-warning">
                 <div class="box-header with-border">
+                    <h3 class="box-title">@lang( 'accounting::lang.profit_loss')</h3>
+                </div>
+
+                <div class="box-body">
+                    @lang( 'accounting::lang.profit_loss_description')
+                    <br/>
+                    <a href="{{route('accounting.profitLoss')}}" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm pt-2">@lang( 'accounting::lang.view_report')</a>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="box box-warning">
+                <div class="box-header with-border">
                     <h3 class="box-title">@lang( 'accounting::lang.ledger_report')</h3>
                 </div>
 

@@ -1267,10 +1267,44 @@ class CoaController extends Controller
                 'Accounts Receivable (A/R)' => 'Piutang Usaha (A/R)',
             ];
 
+            $counters = [
+                'asset' => 1000,
+                'liability' => 1000,
+                'equity' => 1000,
+                'income' => 1000,
+                'hpp' => 1000,
+                'expense' => 1000,
+            ];
+
             foreach ($default_accounts as $key => $account) {
                 if (isset($translation_map[$account['name']])) {
                     $default_accounts[$key]['name'] = $translation_map[$account['name']];
                 }
+
+                $primary_type = $account['account_primary_type'];
+                $sub_type_id = $account['account_sub_type_id'] ?? null;
+
+                if ($primary_type == 'asset') {
+                    $counters['asset']++;
+                    $gl_code = '1' . $counters['asset'];
+                } elseif ($primary_type == 'liability') {
+                    $counters['liability']++;
+                    $gl_code = '2' . $counters['liability'];
+                } elseif ($primary_type == 'equity') {
+                    $counters['equity']++;
+                    $gl_code = '3' . $counters['equity'];
+                } elseif ($primary_type == 'income') {
+                    $counters['income']++;
+                    $gl_code = '4' . $counters['income'];
+                } elseif ($primary_type == 'expenses' && $sub_type_id == 13) {
+                    $counters['hpp']++;
+                    $gl_code = '5' . $counters['hpp'];
+                } else {
+                    $counters['expense']++;
+                    $gl_code = '6' . $counters['expense'];
+                }
+
+                $default_accounts[$key]['gl_code'] = $gl_code;
             }
 
             // 2. Bulk insert default Accounting Accounts

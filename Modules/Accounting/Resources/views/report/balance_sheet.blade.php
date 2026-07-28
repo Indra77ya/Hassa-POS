@@ -13,7 +13,7 @@
 
 <section class="content">
 
-    <div class="col-md-3">
+    <div class="col-md-3 no-print">
         <div class="form-group">
             {!! Form::label('date_range_filter', __('report.date_range') . ':') !!}
             {!! Form::text('date_range_filter', null, 
@@ -33,81 +33,101 @@
                 
                 @php
                     $total_assets = 0;
-                    $total_liab_owners = 0;
+                    $total_liabilities = 0;
+                    $total_equities = 0;
                 @endphp
 
-                    <table class="table table-stripped table-bordered" style="min-height: 300px">
-                        <thead>
-                            <tr>
-                                <th class="success">@lang( 'accounting::lang.assets')</th>
-                                <th class="warning">@lang( 'accounting::lang.liab_owners_capital')</th>
-                            </tr>
-                        </thead>
-
-                        <tr>
-                            <td class="col-md-6">
-                                <table class="table">
-                                    @foreach($assets as $asset)
-                                        @php
-                                            $total_assets += $asset->balance
-                                        @endphp
-
-                                        <tr>
-                                            <th>{{$asset->name}}</th>
-                                            <td>@format_currency($asset->balance)</td>
-                                        </tr>
-                                    @endforeach
-                                </table>
-                            </td>
-
-                            <td class="col-md-6">
-                                <table class="table">
-                                    @foreach($liabilities as $liability)
-
-                                        @php
-                                            $total_liab_owners += $liability->balance
-                                        @endphp
-
-                                        <tr>
-                                            <th>{{$liability->name}}</th>
-                                            <td>@format_currency($liability->balance)</td>
-                                        </tr>
-                                    @endforeach
-
-                                    @foreach($equities as $equity)
-                                        @php
-                                            $total_liab_owners += $equity->balance
-                                        @endphp
-                                        
-                                        <tr>
-                                            <th>{{$equity->name}}</th>
-                                            <td>@format_currency($equity->balance)</td>
-                                        </tr>
-                                    @endforeach
-                                </table>
-                            </td>
+                <table class="table table-bordered table-striped">
+                    <tbody>
+                        <!-- ASET (AKTIVA) -->
+                        <tr class="info" style="font-size: 1.1em;">
+                            <th colspan="2"><strong>ASET (AKTIVA)</strong></th>
+                        </tr>
+                        @foreach($assets as $asset)
+                            @if($asset->balance != 0)
+                                @php $total_assets += $asset->balance @endphp
+                                <tr>
+                                    <td style="padding-left: 30px;">{{$asset->name}}</td>
+                                    <td class="text-right">@format_currency($asset->balance)</td>
+                                </tr>
+                            @endif
+                        @endforeach
+                        <tr class="success" style="font-size: 1.1em; border-top: 2px solid #000;">
+                            <th><strong>TOTAL ASET</strong></th>
+                            <th class="text-right"><strong>@format_currency($total_assets)</strong></th>
                         </tr>
 
-                        <tr>
-                            <td class="col-md-6">
-                                <span>
-                                    <strong>@lang( 'accounting::lang.total_assets'): </strong>
-                                </span>
+                        <!-- SPACING -->
+                        <tr><td colspan="2" style="background-color: #f5f5f5; height: 15px; padding: 0;"></td></tr>
 
-                                <span>@format_currency($total_assets)</span>
-                            </td>
-
-                            <td class="col-md-6">
-                                <span>
-                                    <strong>@lang( 'accounting::lang.total_liab_owners'): </strong>
-                                </span>
-
-                                <span>@format_currency($total_liab_owners)</span>
-                            </td>
+                        <!-- KEWAJIBAN (LIABILITAS) -->
+                        <tr class="info" style="font-size: 1.1em;">
+                            <th colspan="2"><strong>LIABILITAS (KEWAJIBAN / HUTANG)</strong></th>
+                        </tr>
+                        @foreach($liabilities as $liability)
+                            @if($liability->balance != 0)
+                                @php $total_liabilities += $liability->balance @endphp
+                                <tr>
+                                    <td style="padding-left: 30px;">{{$liability->name}}</td>
+                                    <td class="text-right">@format_currency($liability->balance)</td>
+                                </tr>
+                            @endif
+                        @endforeach
+                        <tr class="warning" style="font-size: 1.1em; border-top: 1px solid #ddd;">
+                            <th><strong>TOTAL LIABILITAS</strong></th>
+                            <th class="text-right"><strong>@format_currency($total_liabilities)</strong></th>
                         </tr>
 
-                    </table>
+                        <!-- SPACING -->
+                        <tr><td colspan="2" style="background-color: #f5f5f5; height: 15px; padding: 0;"></td></tr>
+
+                        <!-- EKUITAS (MODAL) -->
+                        <tr class="info" style="font-size: 1.1em;">
+                            <th colspan="2"><strong>EKUITAS (MODAL)</strong></th>
+                        </tr>
+                        @foreach($equities as $equity)
+                            @if($equity->balance != 0)
+                                @php $total_equities += $equity->balance @endphp
+                                <tr>
+                                    <td style="padding-left: 30px;">{{$equity->name}}</td>
+                                    <td class="text-right">@format_currency($equity->balance)</td>
+                                </tr>
+                            @endif
+                        @endforeach
+
+                        <!-- Laba Bersih Tahun Berjalan -->
+                        @php $total_equities += $current_period_net_profit; @endphp
+                        <tr>
+                            <td style="padding-left: 30px;"><strong>Laba Bersih Tahun Berjalan</strong></td>
+                            <td class="text-right">@format_currency($current_period_net_profit)</td>
+                        </tr>
+
+                        <tr class="warning" style="font-size: 1.1em; border-top: 1px solid #ddd;">
+                            <th><strong>TOTAL EKUITAS</strong></th>
+                            <th class="text-right"><strong>@format_currency($total_equities)</strong></th>
+                        </tr>
+
+                        <!-- SPACING -->
+                        <tr><td colspan="2" style="background-color: #f5f5f5; height: 15px; padding: 0;"></td></tr>
+
+                        <!-- TOTAL PASIVA (LIABILITAS + EKUITAS) -->
+                        @php $total_liab_owners = $total_liabilities + $total_equities; @endphp
+                        <tr class="success" style="font-size: 1.2em; border-top: 2px solid #000; border-bottom: 2px solid #000;">
+                            <th><strong>TOTAL LIABILITAS & EKUITAS (PASIVA)</strong></th>
+                            <th class="text-right"><strong>@format_currency($total_liab_owners)</strong></th>
+                        </tr>
+
+                    </tbody>
+                </table>
                 
+                <div class="row no-print" style="margin-top: 20px;">
+                    <div class="col-xs-12">
+                        <button type="button" class="btn btn-primary pull-right" aria-label="Print Report" onclick="window.print();">
+                            <i class="fa fa-print"></i> @lang('messages.print')
+                        </button>
+                    </div>
+                </div>
+
             </div>
 
         </div>
