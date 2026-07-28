@@ -170,53 +170,83 @@ class ReportController extends Controller
             $end_date = $fy['end'];
         }
 
-        // Standard Trial Balance retrieves all transactions up to $end_date to calculate net balances.
+        // Query with support for Opening Balance, Current Period mutation, and Ending Balance
         $raw_accounts = AccountingAccount::leftJoin('accounting_accounts_transactions as AAT', function($join) use ($end_date) {
                                 $join->on('AAT.accounting_account_id', '=', 'accounting_accounts.id')
                                      ->whereDate('AAT.operation_date', '<=', $end_date);
                             })
                             ->where('accounting_accounts.business_id', $business_id)
                             ->select(
+                                'accounting_accounts.id',
                                 'accounting_accounts.name',
                                 'accounting_accounts.account_primary_type',
-                                DB::raw("SUM(IF(AAT.type = 'credit', AAT.amount, 0)) as total_credit"),
-                                DB::raw("SUM(IF(AAT.type = 'debit', AAT.amount, 0)) as total_debit")
+                                DB::raw("SUM(CASE WHEN AAT.type = 'debit' AND AAT.operation_date < '{$start_date}' THEN AAT.amount ELSE 0 END) as opening_debit_raw"),
+                                DB::raw("SUM(CASE WHEN AAT.type = 'credit' AND AAT.operation_date < '{$start_date}' THEN AAT.amount ELSE 0 END) as opening_credit_raw"),
+                                DB::raw("SUM(CASE WHEN AAT.type = 'debit' AND AAT.operation_date >= '{$start_date}' AND AAT.operation_date <= '{$end_date}' THEN AAT.amount ELSE 0 END) as current_debit_raw"),
+                                DB::raw("SUM(CASE WHEN AAT.type = 'credit' AND AAT.operation_date >= '{$start_date}' AND AAT.operation_date <= '{$end_date}' THEN AAT.amount ELSE 0 END) as current_credit_raw")
                             )
                             ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'accounting_accounts.account_primary_type')
                             ->get();
 
         $accounts = [];
         foreach ($raw_accounts as $act) {
-            $total_debit = $act->total_debit ?? 0;
-            $total_credit = $act->total_credit ?? 0;
+            $op_deb = floatval($act->opening_debit_raw ?? 0);
+            $op_crd = floatval($act->opening_credit_raw ?? 0);
+            $cur_deb = floatval($act->current_debit_raw ?? 0);
+            $cur_crd = floatval($act->current_credit_raw ?? 0);
 
-            if ($total_debit == 0 && $total_credit == 0) {
+            // Skip if no activity at all (all are 0)
+            if ($op_deb == 0 && $op_crd == 0 && $cur_deb == 0 && $cur_crd == 0) {
                 continue;
             }
 
-            $debit_balance = 0;
-            $credit_balance = 0;
+            // Calculations
+            $opening_debit = 0;
+            $opening_credit = 0;
+            $ending_debit = 0;
+            $ending_credit = 0;
 
+            // Debit-Normal accounts
             if (in_array($act->account_primary_type, ['asset', 'expenses'])) {
-                $net = $total_debit - $total_credit;
-                if ($net >= 0) {
-                    $debit_balance = $net;
+                $op_net = $op_deb - $op_crd;
+                if ($op_net >= 0) {
+                    $opening_debit = $op_net;
                 } else {
-                    $credit_balance = abs($net);
+                    $opening_credit = abs($op_net);
                 }
-            } else {
-                $net = $total_credit - $total_debit;
-                if ($net >= 0) {
-                    $credit_balance = $net;
+
+                $end_net = $op_net + $cur_deb - $cur_crd;
+                if ($end_net >= 0) {
+                    $ending_debit = $end_net;
                 } else {
-                    $debit_balance = abs($net);
+                    $ending_credit = abs($end_net);
+                }
+            }
+            // Credit-Normal accounts
+            else {
+                $op_net = $op_crd - $op_deb;
+                if ($op_net >= 0) {
+                    $opening_credit = $op_net;
+                } else {
+                    $opening_debit = abs($op_net);
+                }
+
+                $end_net = $op_net + $cur_crd - $cur_deb;
+                if ($end_net >= 0) {
+                    $ending_credit = $end_net;
+                } else {
+                    $ending_debit = abs($end_net);
                 }
             }
 
             $accounts[] = (object)[
                 'name' => $act->name,
-                'debit_balance' => $debit_balance,
-                'credit_balance' => $credit_balance,
+                'opening_debit' => $opening_debit,
+                'opening_credit' => $opening_credit,
+                'current_debit' => $cur_deb,
+                'current_credit' => $cur_crd,
+                'ending_debit' => $ending_debit,
+                'ending_credit' => $ending_credit,
             ];
         }
 

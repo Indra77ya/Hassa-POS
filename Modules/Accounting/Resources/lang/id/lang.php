@@ -421,4 +421,6 @@ return [
     'net_profit' => 'Laba Bersih Tahun Berjalan',
     'other_income_expense' => 'Pendapatan & Beban Non-Operasional / Lain-lain',
     'total_operating_expenses' => 'Total Beban Operasional',
+    'current_period' => 'Periode Berjalan',
+    'ending_balance' => 'Saldo Akhir',
 ];

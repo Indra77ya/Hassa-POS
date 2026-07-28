@@ -427,4 +427,6 @@ return [
     'net_profit' => 'Net Profit',
     'other_income_expense' => 'Non-Operating Income & Expenses',
     'total_operating_expenses' => 'Total Operating Expenses',
+    'current_period' => 'Current Period',
+    'ending_balance' => 'Ending Balance',
 ];
