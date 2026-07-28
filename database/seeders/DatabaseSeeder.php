@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
             PermissionsTableSeeder::class,
             CurrenciesTableSeeder::class,
             AccountTypesSeeder::class,
-            PaymentAccountingTestSeeder::class,
+            //PaymentAccountingTestSeeder::class,
            //RolesTableSeeder::class,
            //UsersTableSeeder::class,
            //SuppliersTableSeeder::class,
