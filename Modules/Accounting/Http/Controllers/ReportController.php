@@ -58,6 +58,95 @@ class ReportController extends Controller
     }
 
     /**
+     * Profit & Loss Statement (Laporan Laba Rugi)
+     *
+     * @return Response
+     */
+    public function profitLoss()
+    {
+        $business_id = request()->session()->get('user.business_id');
+
+        if (! (auth()->user()->can('superadmin') ||
+            $this->moduleUtil->hasThePermissionInSubscription($business_id, 'accounting_module')) ||
+            ! (auth()->user()->can('accounting.view_reports'))) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if (! empty(request()->start_date) && ! empty(request()->end_date)) {
+            $start_date = request()->start_date;
+            $end_date = request()->end_date;
+        } else {
+            $fy = $this->businessUtil->getCurrentFinancialYear($business_id);
+            $start_date = $fy['start'];
+            $end_date = $fy['end'];
+        }
+
+        // Laba Rugi: Calculates balances of Income, Cost of Sales, Expenses within the date range.
+        $balance_formula = $this->accountingUtil->balanceFormula();
+
+        // 1. Pendapatan (Income)
+        $incomes = AccountingAccount::join('accounting_accounts_transactions as AAT',
+                                'AAT.accounting_account_id', '=', 'accounting_accounts.id')
+                    ->join('accounting_account_types as AATP',
+                                'AATP.id', '=', 'accounting_accounts.account_sub_type_id')
+                    ->whereBetween('AAT.operation_date', [$start_date, $end_date])
+                    ->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
+                    ->where('accounting_accounts.business_id', $business_id)
+                    ->where('accounting_accounts.account_primary_type', 'income')
+                    ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
+                    ->get();
+
+        // 2. Harga Pokok Penjualan (Cost of Sale / HPP - sub_type_id = 13)
+        $cost_of_sales = AccountingAccount::join('accounting_accounts_transactions as AAT',
+                                'AAT.accounting_account_id', '=', 'accounting_accounts.id')
+                    ->join('accounting_account_types as AATP',
+                                'AATP.id', '=', 'accounting_accounts.account_sub_type_id')
+                    ->whereBetween('AAT.operation_date', [$start_date, $end_date])
+                    ->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
+                    ->where('accounting_accounts.business_id', $business_id)
+                    ->where('accounting_accounts.account_primary_type', 'expenses')
+                    ->where('accounting_accounts.account_sub_type_id', 13)
+                    ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
+                    ->get();
+
+        // 3. Beban Operasional (Expenses - sub_type_id = 14)
+        $operating_expenses = AccountingAccount::join('accounting_accounts_transactions as AAT',
+                                'AAT.accounting_account_id', '=', 'accounting_accounts.id')
+                    ->join('accounting_account_types as AATP',
+                                'AATP.id', '=', 'accounting_accounts.account_sub_type_id')
+                    ->whereBetween('AAT.operation_date', [$start_date, $end_date])
+                    ->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
+                    ->where('accounting_accounts.business_id', $business_id)
+                    ->where('accounting_accounts.account_primary_type', 'expenses')
+                    ->where('accounting_accounts.account_sub_type_id', 14)
+                    ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
+                    ->get();
+
+        // 4. Pendapatan/Beban Non-Operasional / Lain-lain (other_income / other_expense - sub_type_id = 12 / 15)
+        $other_incomes = AccountingAccount::join('accounting_accounts_transactions as AAT',
+                                'AAT.accounting_account_id', '=', 'accounting_accounts.id')
+                    ->join('accounting_account_types as AATP',
+                                'AATP.id', '=', 'accounting_accounts.account_sub_type_id')
+                    ->whereBetween('AAT.operation_date', [$start_date, $end_date])
+                    ->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
+                    ->where('accounting_accounts.business_id', $business_id)
+                    ->where(function($q) {
+                        $q->where(function($sub) {
+                            $sub->where('accounting_accounts.account_primary_type', 'income')
+                                ->where('accounting_accounts.account_sub_type_id', 12);
+                        })->orWhere(function($sub) {
+                            $sub->where('accounting_accounts.account_primary_type', 'expenses')
+                                ->where('accounting_accounts.account_sub_type_id', 15);
+                        });
+                    })
+                    ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
+                    ->get();
+
+        return view('accounting::report.profit_loss')
+            ->with(compact('incomes', 'cost_of_sales', 'operating_expenses', 'other_incomes', 'start_date', 'end_date'));
+    }
+
+    /**
      * Trial Balance
      *
      * @return Response
@@ -195,8 +284,28 @@ class ReportController extends Controller
                     ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
                     ->get();
 
+        // Calculate Net Profit of the current period up to $end_date to balance the Balance Sheet dynamically
+        // Profit = Income - Expenses for the period.
+        $total_income = AccountingAccount::join('accounting_accounts_transactions as AAT',
+                                'AAT.accounting_account_id', '=', 'accounting_accounts.id')
+                    ->whereBetween('AAT.operation_date', [$start_date, $end_date])
+                    ->where('accounting_accounts.business_id', $business_id)
+                    ->where('accounting_accounts.account_primary_type', 'income')
+                    ->select(DB::raw($balance_formula))
+                    ->first()->balance ?? 0;
+
+        $total_expenses = AccountingAccount::join('accounting_accounts_transactions as AAT',
+                                'AAT.accounting_account_id', '=', 'accounting_accounts.id')
+                    ->whereBetween('AAT.operation_date', [$start_date, $end_date])
+                    ->where('accounting_accounts.business_id', $business_id)
+                    ->where('accounting_accounts.account_primary_type', 'expenses')
+                    ->select(DB::raw($balance_formula))
+                    ->first()->balance ?? 0;
+
+        $current_period_net_profit = $total_income - $total_expenses;
+
         return view('accounting::report.balance_sheet')
-            ->with(compact('assets', 'liabilities', 'equities', 'start_date', 'end_date'));
+            ->with(compact('assets', 'liabilities', 'equities', 'current_period_net_profit', 'start_date', 'end_date'));
     }
 
     public function accountReceivableAgeingReport()

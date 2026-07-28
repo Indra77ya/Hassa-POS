@@ -413,4 +413,12 @@ return [
     'account_payable_ageing_details_description' => 'Laporan ini menunjukkan detail semua pembelian tertunda faktur dalam kisaran hari yang disebutkan sesuai dengan tanggal jatuh tempo.',
     '91_and_over_past_due' => 'Lewat jatuh tempo 91 hari atau lebih',
     'add_more_row' => 'Tambahkan lebih banyak baris',
+    'profit_loss' => 'Laporan Laba Rugi',
+    'profit_loss_description' => 'Laporan Laba Rugi menyajikan pendapatan, harga pokok penjualan, dan beban usaha selama periode tertentu untuk mengukur kinerja keuangan perusahaan.',
+    'gross_profit' => 'Laba Kotor',
+    'operating_profit' => 'Laba Operasional',
+    'net_profit_before_tax' => 'Laba Bersih Sebelum Pajak',
+    'net_profit' => 'Laba Bersih Tahun Berjalan',
+    'other_income_expense' => 'Pendapatan & Beban Non-Operasional / Lain-lain',
+    'total_operating_expenses' => 'Total Beban Operasional',
 ];
