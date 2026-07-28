@@ -7,118 +7,120 @@
 @include('accounting::layouts.nav')
 
 <section class="content">
-        
-    <div class="col-md-3">
-        <div class="form-group">
-            {!! Form::label('date_range_filter', __('report.date_range') . ':') !!}
-            {!! Form::text('date_range_filter', null, 
-                ['placeholder' => __('lang_v1.select_a_date_range'), 
-                'class' => 'form-control', 'readonly', 'id' => 'date_range_filter']); !!}
+    <div class="row">
+        <div class="col-md-3">
+            <div class="form-group">
+                {!! Form::label('date_range_filter', __('report.date_range') . ':') !!}
+                {!! Form::text('date_range_filter', null,
+                    ['placeholder' => __('lang_v1.select_a_date_range'),
+                    'class' => 'form-control', 'readonly', 'id' => 'date_range_filter']); !!}
+            </div>
         </div>
     </div>
 
-    <div class="col-md-10 col-md-offset-1">
-        
-        <div class="box box-warning">
-            <div class="box-header with-border text-center">
-                <h2 class="box-title">@lang( 'accounting::lang.trial_balance')</h2>
-                <p>{{@format_date($start_date)}} ~ {{@format_date($end_date)}}</p>
-            </div>
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
 
-            <div class="box-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped" style="width: 100%;">
-                        <thead>
-                            <tr class="bg-gray">
-                                <th rowspan="2" class="text-center" style="vertical-align: middle;">@lang('accounting::lang.account')</th>
-                                <th colspan="2" class="text-center">@lang('accounting::lang.opening_balance')</th>
-                                <th colspan="2" class="text-center">@lang('accounting::lang.current_period')</th>
-                                <th colspan="2" class="text-center">@lang('accounting::lang.ending_balance')</th>
-                            </tr>
-                            <tr class="bg-gray">
-                                <th class="text-center">@lang('accounting::lang.debit')</th>
-                                <th class="text-center">@lang('accounting::lang.credit')</th>
-                                <th class="text-center">@lang('accounting::lang.debit')</th>
-                                <th class="text-center">@lang('accounting::lang.credit')</th>
-                                <th class="text-center">@lang('accounting::lang.debit')</th>
-                                <th class="text-center">@lang('accounting::lang.credit')</th>
-                            </tr>
-                        </thead>
-
-                        @php
-                            $total_opening_debit = 0;
-                            $total_opening_credit = 0;
-                            $total_current_debit = 0;
-                            $total_current_credit = 0;
-                            $total_ending_debit = 0;
-                            $total_ending_credit = 0;
-                        @endphp
-
-                        <tbody>
-                            @foreach($accounts as $account)
-                                @php
-                                    $total_opening_debit += $account->opening_debit;
-                                    $total_opening_credit += $account->opening_credit;
-                                    $total_current_debit += $account->current_debit;
-                                    $total_current_credit += $account->current_credit;
-                                    $total_ending_debit += $account->ending_debit;
-                                    $total_ending_credit += $account->ending_credit;
-                                @endphp
-
-                                <tr>
-                                    <td>{{$account->name}}</td>
-                                    <td class="text-right">
-                                        @if($account->opening_debit != 0)
-                                            @format_currency($account->opening_debit)
-                                        @endif
-                                    </td>
-                                    <td class="text-right">
-                                        @if($account->opening_credit != 0)
-                                            @format_currency($account->opening_credit)
-                                        @endif
-                                    </td>
-                                    <td class="text-right">
-                                        @if($account->current_debit != 0)
-                                            @format_currency($account->current_debit)
-                                        @endif
-                                    </td>
-                                    <td class="text-right">
-                                        @if($account->current_credit != 0)
-                                            @format_currency($account->current_credit)
-                                        @endif
-                                    </td>
-                                    <td class="text-right">
-                                        @if($account->ending_debit != 0)
-                                            @format_currency($account->ending_debit)
-                                        @endif
-                                    </td>
-                                    <td class="text-right">
-                                        @if($account->ending_credit != 0)
-                                            @format_currency($account->ending_credit)
-                                        @endif
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-
-                        <tfoot>
-                            <tr class="bg-gray font-weight-bold">
-                                <th class="text-center">@lang('sale.total')</th>
-                                <th class="text-right">@format_currency($total_opening_debit)</th>
-                                <th class="text-right">@format_currency($total_opening_credit)</th>
-                                <th class="text-right">@format_currency($total_current_debit)</th>
-                                <th class="text-right">@format_currency($total_current_credit)</th>
-                                <th class="text-right">@format_currency($total_ending_debit)</th>
-                                <th class="text-right">@format_currency($total_ending_credit)</th>
-                            </tr>
-                        </tfoot>
-                    </table>
+            <div class="box box-warning">
+                <div class="box-header with-border text-center">
+                    <h2 class="box-title">@lang( 'accounting::lang.trial_balance')</h2>
+                    <p>{{@format_date($start_date)}} ~ {{@format_date($end_date)}}</p>
                 </div>
-            </div>
 
+                <div class="box-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped" style="width: 100%;">
+                            <thead>
+                                <tr class="bg-gray">
+                                    <th rowspan="2" class="text-center" style="vertical-align: middle;">@lang('accounting::lang.account')</th>
+                                    <th colspan="2" class="text-center">@lang('accounting::lang.opening_balance')</th>
+                                    <th colspan="2" class="text-center">@lang('accounting::lang.current_period')</th>
+                                    <th colspan="2" class="text-center">@lang('accounting::lang.ending_balance')</th>
+                                </tr>
+                                <tr class="bg-gray">
+                                    <th class="text-center">@lang('accounting::lang.debit')</th>
+                                    <th class="text-center">@lang('accounting::lang.credit')</th>
+                                    <th class="text-center">@lang('accounting::lang.debit')</th>
+                                    <th class="text-center">@lang('accounting::lang.credit')</th>
+                                    <th class="text-center">@lang('accounting::lang.debit')</th>
+                                    <th class="text-center">@lang('accounting::lang.credit')</th>
+                                </tr>
+                            </thead>
+
+                            @php
+                                $total_opening_debit = 0;
+                                $total_opening_credit = 0;
+                                $total_current_debit = 0;
+                                $total_current_credit = 0;
+                                $total_ending_debit = 0;
+                                $total_ending_credit = 0;
+                            @endphp
+
+                            <tbody>
+                                @foreach($accounts as $account)
+                                    @php
+                                        $total_opening_debit += $account->opening_debit;
+                                        $total_opening_credit += $account->opening_credit;
+                                        $total_current_debit += $account->current_debit;
+                                        $total_current_credit += $account->current_credit;
+                                        $total_ending_debit += $account->ending_debit;
+                                        $total_ending_credit += $account->ending_credit;
+                                    @endphp
+
+                                    <tr>
+                                        <td>{{$account->name}}</td>
+                                        <td class="text-right">
+                                            @if($account->opening_debit != 0)
+                                                @format_currency($account->opening_debit)
+                                            @endif
+                                        </td>
+                                        <td class="text-right">
+                                            @if($account->opening_credit != 0)
+                                                @format_currency($account->opening_credit)
+                                            @endif
+                                        </td>
+                                        <td class="text-right">
+                                            @if($account->current_debit != 0)
+                                                @format_currency($account->current_debit)
+                                            @endif
+                                        </td>
+                                        <td class="text-right">
+                                            @if($account->current_credit != 0)
+                                                @format_currency($account->current_credit)
+                                            @endif
+                                        </td>
+                                        <td class="text-right">
+                                            @if($account->ending_debit != 0)
+                                                @format_currency($account->ending_debit)
+                                            @endif
+                                        </td>
+                                        <td class="text-right">
+                                            @if($account->ending_credit != 0)
+                                                @format_currency($account->ending_credit)
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+
+                            <tfoot>
+                                <tr class="bg-gray font-weight-bold">
+                                    <th class="text-center">@lang('sale.total')</th>
+                                    <th class="text-right">@format_currency($total_opening_debit)</th>
+                                    <th class="text-right">@format_currency($total_opening_credit)</th>
+                                    <th class="text-right">@format_currency($total_current_debit)</th>
+                                    <th class="text-right">@format_currency($total_current_credit)</th>
+                                    <th class="text-right">@format_currency($total_ending_debit)</th>
+                                    <th class="text-right">@format_currency($total_ending_credit)</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
-
 </section>
 
 
