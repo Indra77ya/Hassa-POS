@@ -53,11 +53,27 @@ class TransferController extends Controller
                         ->join('users as u', 'accounting_acc_trans_mappings.created_by', 'u.id')
                         ->join('accounting_accounts_transactions as from_transaction', function ($join) {
                             $join->on('from_transaction.acc_trans_mapping_id', '=', 'accounting_acc_trans_mappings.id')
-                                    ->where('from_transaction.type', 'debit');
+                                 ->where(function($query) {
+                                     $query->where(function($q) {
+                                         $q->where('from_transaction.sub_type', 'fund_transfer')
+                                           ->where('from_transaction.type', 'credit');
+                                     })->orWhere(function($q) {
+                                         $q->where('from_transaction.sub_type', '!=', 'fund_transfer')
+                                           ->where('from_transaction.type', 'debit');
+                                     });
+                                 });
                         })
                         ->join('accounting_accounts_transactions as to_transaction', function ($join) {
                             $join->on('to_transaction.acc_trans_mapping_id', '=', 'accounting_acc_trans_mappings.id')
-                                    ->where('to_transaction.type', 'credit');
+                                 ->where(function($query) {
+                                     $query->where(function($q) {
+                                         $q->where('to_transaction.sub_type', 'fund_transfer')
+                                           ->where('to_transaction.type', 'debit');
+                                     })->orWhere(function($q) {
+                                         $q->where('to_transaction.sub_type', '!=', 'fund_transfer')
+                                           ->where('to_transaction.type', 'credit');
+                                     });
+                                 });
                         })
                         ->join('accounting_accounts as from_account',
                         'from_transaction.accounting_account_id', 'from_account.id')

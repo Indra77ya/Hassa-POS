@@ -74,6 +74,7 @@ class PaymentAccountingSyncTest extends TestCase
             $table->integer('transaction_payment_id')->nullable();
             $table->text('note')->nullable();
             $table->unsignedBigInteger('accounting_accounts_transaction_id')->nullable();
+            $table->integer('transfer_transaction_id')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });
@@ -434,5 +435,153 @@ class PaymentAccountingSyncTest extends TestCase
 
         $this->assertEquals($cashAndEquivalentAccounting->id, $cashAndEquivalentPOS->accounting_account_id);
         $this->assertEquals($cashAndEquivalentPOS->id, $cashAndEquivalentAccounting->account_id);
+    }
+
+    /**
+     * Test POS-originating Fund Transfer synchronization and mapping.
+     */
+    public function testPOSFundTransferSynchronization()
+    {
+        // Setup table `accounting_acc_trans_mappings` in in-memory sqlite
+        Schema::dropIfExists('accounting_acc_trans_mappings');
+        Schema::create('accounting_acc_trans_mappings', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->integer('business_id');
+            $table->string('ref_no', 100);
+            $table->string('type', 100);
+            $table->integer('created_by');
+            $table->dateTime('operation_date');
+            $table->text('note')->nullable();
+            $table->timestamps();
+        });
+
+        $fromAcc = Account::create([
+            'name' => 'From Account',
+            'business_id' => 1,
+        ]);
+
+        $toAcc = Account::create([
+            'name' => 'To Account',
+            'business_id' => 1,
+        ]);
+
+        // Creating the source transaction first (debit/credit according to transfer)
+        $tx1 = AccountTransaction::create([
+            'account_id' => $fromAcc->id,
+            'type' => 'credit',
+            'amount' => 5000,
+            'sub_type' => 'fund_transfer',
+            'operation_date' => now(),
+            'note' => 'Transfer note test',
+        ]);
+
+        // Creating the destination transaction pointing back to tx1
+        $tx2 = AccountTransaction::create([
+            'account_id' => $toAcc->id,
+            'type' => 'debit',
+            'amount' => 5000,
+            'sub_type' => 'fund_transfer',
+            'transfer_transaction_id' => $tx1->id,
+            'operation_date' => now(),
+            'note' => 'Transfer note test',
+        ]);
+
+        // Update tx1 with tx2's ID to fully link them (mimicking AccountController@postFundTransfer)
+        $tx1->update([
+            'transfer_transaction_id' => $tx2->id,
+        ]);
+
+        // Trigger sync manually/indirectly via model event (on update)
+        $tx1->refresh();
+        $this->assertEquals($tx2->id, $tx1->transfer_transaction_id, "transfer_transaction_id was null. tx1 is: " . json_encode($tx1));
+
+        // Verify that both AccountingAccountsTransactions are linked to this mapping
+        $aat1 = \Modules\Accounting\Entities\AccountingAccountsTransaction::where('account_transaction_id', $tx1->id)->first();
+        $aat2 = \Modules\Accounting\Entities\AccountingAccountsTransaction::where('account_transaction_id', $tx2->id)->first();
+
+        // Verify that a mapping has been automatically created under Accounting
+        $mapping = \Modules\Accounting\Entities\AccountingAccTransMapping::where('business_id', 1)->first();
+
+        $this->assertNotNull($mapping);
+        $this->assertEquals('transfer', $mapping->type);
+        $this->assertEquals('Transfer note test', $mapping->note);
+
+        $this->assertNotNull($aat1);
+        $this->assertNotNull($aat2);
+        $this->assertEquals($mapping->id, $aat1->acc_trans_mapping_id);
+        $this->assertEquals($mapping->id, $aat2->acc_trans_mapping_id);
+    }
+
+    /**
+     * Test Accounting-originated Transfer synchronization and POS linking.
+     */
+    public function testAccountingTransferSynchronization()
+    {
+        // Setup table `accounting_acc_trans_mappings`
+        Schema::dropIfExists('accounting_acc_trans_mappings');
+        Schema::create('accounting_acc_trans_mappings', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->integer('business_id');
+            $table->string('ref_no', 100);
+            $table->string('type', 100);
+            $table->integer('created_by');
+            $table->dateTime('operation_date');
+            $table->text('note')->nullable();
+            $table->timestamps();
+        });
+
+        // 1. Create two AccountingAccounts with linked POS Accounts
+        $paymentAccountFrom = Account::create(['name' => 'From Acc POS', 'business_id' => 1]);
+        $paymentAccountTo = Account::create(['name' => 'To Acc POS', 'business_id' => 1]);
+
+        $this->assertNotNull($paymentAccountFrom->accounting_account_id);
+        $this->assertNotNull($paymentAccountTo->accounting_account_id);
+
+        // 2. Create Transfer Mapping in Accounting
+        $mapping = \Modules\Accounting\Entities\AccountingAccTransMapping::create([
+            'business_id' => 1,
+            'ref_no' => 'TRX-ACCOUNTING-001',
+            'type' => 'transfer',
+            'created_by' => 1,
+            'operation_date' => now(),
+            'note' => 'Accounting transfer note',
+        ]);
+
+        // 3. Create the two Accounting transaction legs linked to the mapping
+        $aat1 = \Modules\Accounting\Entities\AccountingAccountsTransaction::create([
+            'accounting_account_id' => $paymentAccountFrom->accounting_account_id,
+            'acc_trans_mapping_id' => $mapping->id,
+            'amount' => 3000,
+            'type' => 'debit',
+            'sub_type' => 'transfer',
+            'created_by' => 1,
+            'operation_date' => now(),
+            'note' => 'Accounting transfer note',
+        ]);
+
+        $aat2 = \Modules\Accounting\Entities\AccountingAccountsTransaction::create([
+            'accounting_account_id' => $paymentAccountTo->accounting_account_id,
+            'acc_trans_mapping_id' => $mapping->id,
+            'amount' => 3000,
+            'type' => 'credit',
+            'sub_type' => 'transfer',
+            'created_by' => 1,
+            'operation_date' => now(),
+            'note' => 'Accounting transfer note',
+        ]);
+
+        // Trigger manual sync or update to trigger linkPOSFundTransfer
+        \Modules\Accounting\Entities\AccountingAccountsTransaction::linkPOSFundTransfer($aat1);
+
+        // 4. Verify that corresponding POS AccountTransactions are created, linked and have sub_type = 'fund_transfer'
+        $at1 = \App\AccountTransaction::where('accounting_accounts_transaction_id', $aat1->id)->first();
+        $at2 = \App\AccountTransaction::where('accounting_accounts_transaction_id', $aat2->id)->first();
+
+        $this->assertNotNull($at1);
+        $this->assertNotNull($at2);
+        $this->assertEquals('fund_transfer', $at1->sub_type);
+        $this->assertEquals('fund_transfer', $at2->sub_type);
+        $this->assertEquals($at2->id, $at1->transfer_transaction_id);
+        $this->assertEquals($at1->id, $at2->transfer_transaction_id);
     }
 }
