@@ -232,8 +232,8 @@ class AccountReportsController extends Controller
 
         if (request()->ajax()) {
             if (! empty(request()->start_date) && ! empty(request()->end_date)) {
-                $start_date = $this->transactionUtil->uf_date(request()->start_date);
-                $end_date = $this->transactionUtil->uf_date(request()->end_date);
+                $start_date = (preg_match('/^\d{4}-\d{2}-\d{2}$/', request()->start_date)) ? request()->start_date : $this->transactionUtil->uf_date(request()->start_date);
+                $end_date = (preg_match('/^\d{4}-\d{2}-\d{2}$/', request()->end_date)) ? request()->end_date : $this->transactionUtil->uf_date(request()->end_date);
             } else {
                 $business_util = new \App\Utils\BusinessUtil();
                 $fy = $business_util->getCurrentFinancialYear($business_id);
