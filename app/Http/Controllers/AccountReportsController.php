@@ -245,7 +245,7 @@ class AccountReportsController extends Controller
             // Query to fetch the trial balance details of accounting accounts
             $raw_accounts_query = \Modules\Accounting\Entities\AccountingAccount::leftJoin('accounting_accounts_transactions as AAT', function($join) use ($end_date) {
                                 $join->on('AAT.accounting_account_id', '=', 'accounting_accounts.id')
-                                     ->whereRaw('AAT.operation_date <= ?', [$end_date]);
+                                     ->whereRaw('DATE(AAT.operation_date) <= ?', [$end_date]);
                             })
                             ->where('accounting_accounts.business_id', $business_id);
 
@@ -268,10 +268,10 @@ class AccountReportsController extends Controller
                                 'accounting_accounts.id',
                                 'accounting_accounts.name',
                                 'accounting_accounts.account_primary_type',
-                                DB::raw("SUM(CASE WHEN AAT.type = 'debit' AND AAT.operation_date < '{$start_date}' THEN AAT.amount ELSE 0 END) as opening_debit_raw"),
-                                DB::raw("SUM(CASE WHEN AAT.type = 'credit' AND AAT.operation_date < '{$start_date}' THEN AAT.amount ELSE 0 END) as opening_credit_raw"),
-                                DB::raw("SUM(CASE WHEN AAT.type = 'debit' AND AAT.operation_date >= '{$start_date}' AND AAT.operation_date <= '{$end_date}' THEN AAT.amount ELSE 0 END) as current_debit_raw"),
-                                DB::raw("SUM(CASE WHEN AAT.type = 'credit' AND AAT.operation_date >= '{$start_date}' AND AAT.operation_date <= '{$end_date}' THEN AAT.amount ELSE 0 END) as current_credit_raw")
+                                DB::raw("SUM(CASE WHEN AAT.type = 'debit' AND DATE(AAT.operation_date) < '{$start_date}' THEN AAT.amount ELSE 0 END) as opening_debit_raw"),
+                                DB::raw("SUM(CASE WHEN AAT.type = 'credit' AND DATE(AAT.operation_date) < '{$start_date}' THEN AAT.amount ELSE 0 END) as opening_credit_raw"),
+                                DB::raw("SUM(CASE WHEN AAT.type = 'debit' AND DATE(AAT.operation_date) >= '{$start_date}' AND DATE(AAT.operation_date) <= '{$end_date}' THEN AAT.amount ELSE 0 END) as current_debit_raw"),
+                                DB::raw("SUM(CASE WHEN AAT.type = 'credit' AND DATE(AAT.operation_date) >= '{$start_date}' AND DATE(AAT.operation_date) <= '{$end_date}' THEN AAT.amount ELSE 0 END) as current_credit_raw")
                             )
                             ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'accounting_accounts.account_primary_type')
                             ->get();

@@ -112,7 +112,7 @@
                                     <th>@lang( 'lang_v1.added_by' )</th>
                                     <th>@lang('account.debit')</th>
                                     <th>@lang('account.credit')</th>
-                    				<!-- <th>@lang( 'lang_v1.balance' )</th> -->
+						<th>@lang( 'lang_v1.balance' )</th>
                                     <th>@lang( 'messages.action' )</th>
                     			</tr>
                     		</thead>
@@ -124,6 +124,7 @@
                                     <td colspan="4"><strong>@lang('sale.total'):</strong></td>
                                     <td class="footer_total_debit"></td>
                                     <td class="footer_total_credit"></td>
+                                    <td></td>
                                     <td></td>
                                 </tr>
                             </tfoot>
@@ -186,7 +187,7 @@
                                 {data: 'added_by', name: 'added_by'},
                                 {data: 'debit', name: 'amount', searchable: false},
                                 {data: 'credit', name: 'amount', searchable: false},
-                                //{data: 'balance', name: 'balance', searchable: false},
+                                {data: 'balance', name: 'balance', searchable: false},
                                 {data: 'action', name: 'action', searchable: false}
                             ],
                             "fnDrawCallback": function (oSettings) {
