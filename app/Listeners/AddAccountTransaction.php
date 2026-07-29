@@ -55,17 +55,17 @@ class AddAccountTransaction
                 'transaction_payment_id' => $event->transactionPayment->id,
             ];
 
-            //If change return then set type as debit
+            //If change return then set type as credit
             if ($event->formInput['transaction_type'] == 'sell' && isset($event->formInput['is_return']) && $event->formInput['is_return'] == 1) {
-                $account_transaction_data['type'] = 'debit';
+                $account_transaction_data['type'] = 'credit';
             }
 
             if ($event->formInput['transaction_type'] == 'hms_booking' && isset($event->formInput['is_return']) && $event->formInput['is_return'] == 1) {
-                $account_transaction_data['type'] = 'debit';
+                $account_transaction_data['type'] = 'credit';
             }
 
             if ($event->formInput['transaction_type'] == 'gym_subscription' && isset($event->formInput['is_return']) && $event->formInput['is_return'] == 1) {
-                $account_transaction_data['type'] = 'debit';
+                $account_transaction_data['type'] = 'credit';
             }
 
             
