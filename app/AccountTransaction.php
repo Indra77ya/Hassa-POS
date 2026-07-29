@@ -234,7 +234,7 @@ class AccountTransaction extends Model
                 ];
 
                 //If change return then set type as credit
-                if (!empty($transaction_payment->transaction) && $transaction_payment->transaction->type == 'sell' && $transaction_payment->is_return == 1) {
+                if (!empty($transaction_payment->transaction) && in_array($transaction_payment->transaction->type, ['sell', 'hms_booking', 'gym_subscription']) && $transaction_payment->is_return == 1) {
                     $accnt_trans_data['type'] = 'credit';
                 }
 

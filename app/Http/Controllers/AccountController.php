@@ -478,14 +478,26 @@ class AccountController extends Controller
 
                                 return '';
                             })
-                            ->addColumn('balance', function ($row) use ($bal_before_start_date, $start_date) {
-                                //TODO:: Need to fix same balance showing for transactions having same operation date
+                            ->addColumn('balance', function ($row) {
                                 $is_debit_normal = Account::getBalanceTypeStatic($row->normal_balance, $row->fixed_key) == 'debit';
 
+                                $row_priority = ($row->sub_type == 'opening_balance') ? 0 : 1;
+
                                 $current_details = AccountTransaction::where('account_id', $row->account_id)
-                                                ->where('operation_date', '>=', $start_date)
-                                                ->where('operation_date', '<=', $row->operation_date)
                                                 ->whereNull('deleted_at')
+                                                ->where(function($query) use ($row, $row_priority) {
+                                                    $query->where('operation_date', '<', $row->operation_date)
+                                                          ->orWhere(function($q) use ($row, $row_priority) {
+                                                              $q->where('operation_date', '=', $row->operation_date)
+                                                                ->where(function($sub_q) use ($row, $row_priority) {
+                                                                    $sub_q->whereRaw("CASE WHEN sub_type = 'opening_balance' THEN 0 ELSE 1 END < ?", [$row_priority])
+                                                                          ->orWhere(function($inner_q) use ($row, $row_priority) {
+                                                                              $inner_q->whereRaw("CASE WHEN sub_type = 'opening_balance' THEN 0 ELSE 1 END = ?", [$row_priority])
+                                                                                      ->where('id', '<=', $row->id);
+                                                                          });
+                                                                });
+                                                          });
+                                                })
                                                 ->select(
                                                     DB::raw("SUM(IF(type='debit', amount, 0)) as total_debit"),
                                                     DB::raw("SUM(IF(type='credit', amount, 0)) as total_credit")
@@ -493,9 +505,9 @@ class AccountController extends Controller
                                                 ->first();
 
                                 if ($is_debit_normal) {
-                                    $bal = $bal_before_start_date + ($current_details->total_debit ?? 0) - ($current_details->total_credit ?? 0);
+                                    $bal = ($current_details->total_debit ?? 0) - ($current_details->total_credit ?? 0);
                                 } else {
-                                    $bal = $bal_before_start_date + ($current_details->total_credit ?? 0) - ($current_details->total_debit ?? 0);
+                                    $bal = ($current_details->total_credit ?? 0) - ($current_details->total_debit ?? 0);
                                 }
 
                                 return '<span class="balance" data-orig-value="'.$bal.'">'.$this->commonUtil->num_f($bal, true).'</span>';
@@ -1101,9 +1113,23 @@ class AccountController extends Controller
                 ->addColumn('balance', function ($row) {
                     $is_debit_normal = Account::getBalanceTypeStatic($row->normal_balance, $row->fixed_key) == 'debit';
 
+                    $row_priority = ($row->sub_type == 'opening_balance') ? 0 : 1;
+
                     $details = AccountTransaction::where('account_id', $row->account_id)
-                                    ->where('operation_date', '<=', $row->operation_date)
                                     ->whereNull('deleted_at')
+                                    ->where(function($query) use ($row, $row_priority) {
+                                        $query->where('operation_date', '<', $row->operation_date)
+                                              ->orWhere(function($q) use ($row, $row_priority) {
+                                                  $q->where('operation_date', '=', $row->operation_date)
+                                                    ->where(function($sub_q) use ($row, $row_priority) {
+                                                        $sub_q->whereRaw("CASE WHEN sub_type = 'opening_balance' THEN 0 ELSE 1 END < ?", [$row_priority])
+                                                              ->orWhere(function($inner_q) use ($row, $row_priority) {
+                                                                  $inner_q->whereRaw("CASE WHEN sub_type = 'opening_balance' THEN 0 ELSE 1 END = ?", [$row_priority])
+                                                                          ->where('id', '<=', $row->id);
+                                                              });
+                                                    });
+                                              });
+                                    })
                                     ->select(
                                         DB::raw("SUM(IF(type='debit', amount, 0)) as total_debit"),
                                         DB::raw("SUM(IF(type='credit', amount, 0)) as total_credit")
