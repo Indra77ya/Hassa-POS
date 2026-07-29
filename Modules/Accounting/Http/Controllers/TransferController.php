@@ -53,27 +53,11 @@ class TransferController extends Controller
                         ->join('users as u', 'accounting_acc_trans_mappings.created_by', 'u.id')
                         ->join('accounting_accounts_transactions as from_transaction', function ($join) {
                             $join->on('from_transaction.acc_trans_mapping_id', '=', 'accounting_acc_trans_mappings.id')
-                                 ->where(function($query) {
-                                     $query->where(function($q) {
-                                         $q->where('from_transaction.sub_type', 'fund_transfer')
-                                           ->where('from_transaction.type', 'credit');
-                                     })->orWhere(function($q) {
-                                         $q->where('from_transaction.sub_type', '!=', 'fund_transfer')
-                                           ->where('from_transaction.type', 'debit');
-                                     });
-                                 });
+                                 ->where('from_transaction.type', 'credit');
                         })
                         ->join('accounting_accounts_transactions as to_transaction', function ($join) {
                             $join->on('to_transaction.acc_trans_mapping_id', '=', 'accounting_acc_trans_mappings.id')
-                                 ->where(function($query) {
-                                     $query->where(function($q) {
-                                         $q->where('to_transaction.sub_type', 'fund_transfer')
-                                           ->where('to_transaction.type', 'debit');
-                                     })->orWhere(function($q) {
-                                         $q->where('to_transaction.sub_type', '!=', 'fund_transfer')
-                                           ->where('to_transaction.type', 'credit');
-                                     });
-                                 });
+                                 ->where('to_transaction.type', 'debit');
                         })
                         ->join('accounting_accounts as from_account',
                         'from_transaction.accounting_account_id', 'from_account.id')
@@ -224,7 +208,7 @@ class TransferController extends Controller
             $from_transaction_data = [
                 'acc_trans_mapping_id' => $acc_trans_mapping->id,
                 'amount' => $this->util->num_uf($amount),
-                'type' => 'debit',
+                'type' => 'credit',
                 'sub_type' => 'transfer',
                 'accounting_account_id' => $from_account,
                 'created_by' => $user_id,
@@ -233,7 +217,7 @@ class TransferController extends Controller
 
             $to_transaction_data = $from_transaction_data;
             $to_transaction_data['accounting_account_id'] = $to_account;
-            $to_transaction_data['type'] = 'credit';
+            $to_transaction_data['type'] = 'debit';
 
             AccountingAccountsTransaction::create($from_transaction_data);
             AccountingAccountsTransaction::create($to_transaction_data);
@@ -287,10 +271,10 @@ class TransferController extends Controller
                             ->where('business_id', $business_id)->firstOrFail();
 
             $debit_tansaction = AccountingAccountsTransaction::where('acc_trans_mapping_id', $id)
-                                    ->where('type', 'debit')
+                                    ->where('type', 'credit')
                                     ->first();
             $credit_tansaction = AccountingAccountsTransaction::where('acc_trans_mapping_id', $id)
-                                    ->where('type', 'credit')
+                                    ->where('type', 'debit')
                                     ->first();
 
             return view('accounting::transfer.edit')->with(compact('mapping_transaction',
@@ -320,10 +304,10 @@ class TransferController extends Controller
                             ->where('business_id', $business_id)->firstOrFail();
 
             $debit_tansaction = AccountingAccountsTransaction::where('acc_trans_mapping_id', $id)
-                                    ->where('type', 'debit')
+                                    ->where('type', 'credit')
                                     ->first();
             $credit_tansaction = AccountingAccountsTransaction::where('acc_trans_mapping_id', $id)
-                                    ->where('type', 'credit')
+                                    ->where('type', 'debit')
                                     ->first();
 
             DB::beginTransaction();
