@@ -64,7 +64,6 @@
                 <table class="table table-bordered table-striped" id="transfer_table">
                     <thead>
                         <tr>
-                            <th>@lang('messages.action')</th>
                             <th>@lang( 'messages.date' )</th>
                             <th>@lang('purchase.ref_no')</th>
                             <th>@lang('account.from')</th>
@@ -72,6 +71,7 @@
                             <th>@lang('sale.amount')</th>
                             <th>@lang('lang_v1.added_by')</th>
                             <th>@lang('lang_v1.additional_notes')</th>
+                            <th>@lang('messages.action')</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -144,16 +144,16 @@
                     d.transfer_to = $('#transfer_to_filter').val();
                 },
             },
-            aaSorting: [[1, 'desc']],
+            aaSorting: [[0, 'desc']],
             columns: [
-                { data: 'action', name: 'action', orderable: false, searchable: false },
                 { data: 'operation_date', name: 'operation_date' },
                 { data: 'ref_no', name: 'ref_no' },
                 { data: 'from_account_name', name: 'from_account.name' },
                 { data: 'to_account_name', name: 'to_account.name' },
                 { data: 'amount', name: 'from_transaction.amount' },
                 { data: 'added_by', name: 'added_by' },
-                { data: 'note', name: 'accounting_acc_trans_mappings.note' }
+                { data: 'note', name: 'accounting_acc_trans_mappings.note' },
+                { data: 'action', name: 'action', orderable: false, searchable: false }
             ]
         });
         $(document).on('change', '#transfer_from_filter, #transfer_to_filter', function(){
