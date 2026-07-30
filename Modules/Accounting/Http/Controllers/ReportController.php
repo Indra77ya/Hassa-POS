@@ -104,7 +104,7 @@ class ReportController extends Controller
                     ->whereBetween('AAT.operation_date', [$start_date, $end_date])
                     ->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
                     ->where('accounting_accounts.business_id', $business_id)
-                    ->where('accounting_accounts.account_primary_type', 'expenses')
+                    ->whereIn('accounting_accounts.account_primary_type', ['expense', 'expenses'])
                     ->where('accounting_accounts.account_sub_type_id', 13)
                     ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
                     ->get();
@@ -117,7 +117,7 @@ class ReportController extends Controller
                     ->whereBetween('AAT.operation_date', [$start_date, $end_date])
                     ->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
                     ->where('accounting_accounts.business_id', $business_id)
-                    ->where('accounting_accounts.account_primary_type', 'expenses')
+                    ->whereIn('accounting_accounts.account_primary_type', ['expense', 'expenses'])
                     ->where('accounting_accounts.account_sub_type_id', 14)
                     ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
                     ->get();
@@ -135,7 +135,7 @@ class ReportController extends Controller
                             $sub->where('accounting_accounts.account_primary_type', 'income')
                                 ->where('accounting_accounts.account_sub_type_id', 12);
                         })->orWhere(function($sub) {
-                            $sub->where('accounting_accounts.account_primary_type', 'expenses')
+                            $sub->whereIn('accounting_accounts.account_primary_type', ['expense', 'expenses'])
                                 ->where('accounting_accounts.account_sub_type_id', 15);
                         });
                     })
@@ -207,7 +207,7 @@ class ReportController extends Controller
             $ending_credit = 0;
 
             // Debit-Normal accounts
-            if (in_array($act->account_primary_type, ['asset', 'expenses'])) {
+            if (in_array($act->account_primary_type, ['asset', 'expense', 'expenses'])) {
                 $op_net = $op_deb - $op_crd;
                 if ($op_net >= 0) {
                     $opening_debit = $op_net;
@@ -328,7 +328,7 @@ class ReportController extends Controller
                                 'AAT.accounting_account_id', '=', 'accounting_accounts.id')
                     ->whereBetween('AAT.operation_date', [$start_date, $end_date])
                     ->where('accounting_accounts.business_id', $business_id)
-                    ->where('accounting_accounts.account_primary_type', 'expenses')
+                    ->whereIn('accounting_accounts.account_primary_type', ['expense', 'expenses'])
                     ->select(DB::raw($balance_formula))
                     ->first()->balance ?? 0;
 

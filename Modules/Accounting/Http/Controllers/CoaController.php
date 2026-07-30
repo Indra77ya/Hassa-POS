@@ -1454,7 +1454,7 @@ class CoaController extends Controller
                 ];
 
                 //Opening balance
-                $data['type'] = in_array($input['account_primary_type'], ['asset', 'expenses']) ? 'debit' : 'credit';
+                $data['type'] = in_array($input['account_primary_type'], ['asset', 'expense', 'expenses']) ? 'debit' : 'credit';
                 $data['sub_type'] = 'opening_balance';
                 AccountingAccountsTransaction::createTransaction($data);
             }

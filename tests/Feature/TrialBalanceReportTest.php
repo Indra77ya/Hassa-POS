@@ -252,4 +252,65 @@ class TrialBalanceReportTest extends TestCase
         $this->assertCount(1, $accounts2);
         $this->assertEquals(900, $accounts2[0]['current_debit']);
     }
+
+    public function testTrialBalanceExpenseAndExpensesCalculations()
+    {
+        // Insert mock accounts with both 'expense' and 'expenses' as primary types
+        DB::table('accounting_accounts')->insert([
+            ['id' => 4, 'name' => 'Expense Account Singular', 'business_id' => 1, 'account_primary_type' => 'expense'],
+            ['id' => 5, 'name' => 'Expenses Account Plural', 'business_id' => 1, 'account_primary_type' => 'expenses'],
+        ]);
+
+        DB::table('accounting_accounts_transactions')->insert([
+            // Singular: Opening 500 (debit)
+            [
+                'accounting_account_id' => 4,
+                'amount' => 500,
+                'type' => 'debit',
+                'operation_date' => '2023-12-15 10:00:00',
+            ],
+            // Plural: Opening 600 (debit)
+            [
+                'accounting_account_id' => 5,
+                'amount' => 600,
+                'type' => 'debit',
+                'operation_date' => '2023-12-15 10:00:00',
+            ],
+        ]);
+
+        // Mock login
+        $user = \Mockery::mock(\App\User::class)->makePartial();
+        $user->shouldReceive('can')->with('account.access')->andReturn(true);
+        $user->id = 1;
+        $user->business_id = 1;
+        $user->user_type = 'user';
+        $user->allow_login = 1;
+
+        $this->actingAs($user);
+
+        session([
+            'user.business_id' => 1,
+            'business.time_zone' => 'Asia/Jakarta',
+            'business.date_format' => 'Y-m-d',
+        ]);
+
+        // Get Trial Balance
+        $response = $this->get('/account/trial-balance?start_date=2024-01-01&end_date=2024-01-31', [
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Accept' => 'application/json'
+        ]);
+
+        $response->assertStatus(200);
+        $accounts = $response->json('accounts');
+
+        $singular = collect($accounts)->firstWhere('name', 'Expense Account Singular');
+        $this->assertNotNull($singular);
+        $this->assertEquals(500, $singular['opening_debit']);
+        $this->assertEquals(0, $singular['opening_credit']);
+
+        $plural = collect($accounts)->firstWhere('name', 'Expenses Account Plural');
+        $this->assertNotNull($plural);
+        $this->assertEquals(600, $plural['opening_debit']);
+        $this->assertEquals(0, $plural['opening_credit']);
+    }
 }
