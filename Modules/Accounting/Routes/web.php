@@ -27,6 +27,7 @@ Route::middleware('web', 'SetSessionData', 'auth', 'language', 'timezone', 'Admi
 
     Route::get('settings', [\Modules\Accounting\Http\Controllers\SettingsController::class, 'index']);
     Route::get('reset-data', [\Modules\Accounting\Http\Controllers\SettingsController::class, 'resetData']);
+    Route::get('auto-map-settings', [\Modules\Accounting\Http\Controllers\SettingsController::class, 'autoMapSettings'])->name('accounting.auto-map-settings');
 
     Route::resource('account-type', \Modules\Accounting\Http\Controllers\AccountTypeController::class);
 
