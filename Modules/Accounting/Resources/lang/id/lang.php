@@ -423,4 +423,9 @@ return [
     'total_operating_expenses' => 'Total Beban Operasional',
     'current_period' => 'Periode Berjalan',
     'ending_balance' => 'Saldo Akhir',
+    'auto_map_default_accounts' => 'Petakan Akun Default Otomatis',
+    'auto_map_default_accounts_confirmation_title' => 'Petakan Akun Default Otomatis?',
+    'auto_map_default_accounts_confirmation_text' => 'Tindakan ini akan memetakan penjualan, pembelian, pembayaran, dan beban ke akun default secara otomatis berdasarkan daftar akun (CoA) yang aktif.',
+    'coa_not_available_title' => 'Chart of Accounts (CoA) Belum Tersedia',
+    'coa_not_available_text' => 'Anda belum memiliki Daftar Akun (CoA) untuk bisnis ini. Silakan buat akun default terlebih dahulu sebelum melakukan pemetaan transaksi.',
 ];
