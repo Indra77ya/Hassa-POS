@@ -44,7 +44,7 @@
 								</button>
 								@if($account_exist)
 									<a href="{{route('accounting.auto-map-settings')}}" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-sm tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] auto_map_default_accounts" style="margin-left: 10px;">
-										Petakan Akun Default Otomatis
+										@lang('accounting::lang.auto_map_default_accounts')
 									</a>
 								@endif
 							</div>
@@ -72,8 +72,8 @@
 
 						@if(!$account_exist)
 							<div class="alert alert-danger" style="border-radius: 12px; padding: 20px; margin-top: 20px;">
-								<h4 style="margin-top: 0; font-weight: bold;"><i class="icon fas fa-ban"></i> Chart of Accounts (CoA) Belum Tersedia</h4>
-								<p>Anda belum memiliki Daftar Akun (CoA) untuk bisnis ini. Silakan buat akun default terlebih dahulu sebelum melakukan pemetaan transaksi.</p>
+								<h4 style="margin-top: 0; font-weight: bold;"><i class="icon fas fa-ban"></i> @lang('accounting::lang.coa_not_available_title')</h4>
+								<p>@lang('accounting::lang.coa_not_available_text')</p>
 								<br>
 								<a href="{{route('accounting.create-default-accounts')}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-accent" style="border: 1px solid currentColor;">
 									@lang( 'accounting::lang.add_default_accounts' ) <i class="fas fa-file-import"></i>
@@ -544,8 +544,8 @@
 	$(document).on('click', 'a.auto_map_default_accounts', function(e) {
 		e.preventDefault();
 		swal({
-			title: "Petakan Akun Default Otomatis?",
-			text: "Tindakan ini akan memetakan penjualan, pembelian, pembayaran, dan beban ke akun default secara otomatis berdasarkan daftar akun (CoA) yang aktif.",
+			title: "{{__('accounting::lang.auto_map_default_accounts_confirmation_title')}}",
+			text: "{{__('accounting::lang.auto_map_default_accounts_confirmation_text')}}",
 			icon: 'info',
 			buttons: true,
 			dangerMode: false,

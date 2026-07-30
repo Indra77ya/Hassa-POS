@@ -68,7 +68,7 @@ return [
     'total_liability_equity' => 'Total Pasiva',
     'balance' => 'Saldo',
     'ending_balance' => 'Saldo Akhir',
-    'add_default_account_types' => 'Petakan Akun Default Otomatis',
+    'add_default_account_types' => 'Tambahkan Akun Default',
     'total_current_assets' => 'Total Aktiva Lancar',
     'total_fixed_assets' => 'Total Aktiva Tetap',
     'total_other_assets' => 'Total Aktiva Lainnya',
