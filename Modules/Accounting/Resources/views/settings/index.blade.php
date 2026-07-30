@@ -44,7 +44,7 @@
 								</button>
 								@if($account_exist)
 									<a href="{{route('accounting.auto-map-settings')}}" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-sm auto_map_default_accounts" style="margin-left: 10px;">
-										<i class="fas fa-magic"></i> Petakan Akun Default Otomatis
+										Petakan Akun Default Otomatis
 									</a>
 								@endif
 							</div>
