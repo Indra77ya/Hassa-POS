@@ -73,8 +73,8 @@
                                                     </button>
 
                                                     {!! Form::open(['url' => action([\App\Http\Controllers\AccountTypeController::class, 'seedDefault']), 'method' => 'post', 'class' => 'pull-right', 'id' => 'add_default_accounts_form', 'style' => 'margin-right: 10px;']) !!}
-                                                        <button type="submit" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-font-bold tw-rounded-full">
-                                                            <i class="fas fa-magic"></i> @lang('account.add_default_account_types')
+                                                        <button type="submit" class="tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98]">
+                                                            @lang('account.add_default_account_types')
                                                         </button>
                                                     {!! Form::close() !!}
                                             </div>
