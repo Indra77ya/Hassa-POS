@@ -60,7 +60,99 @@ class SettingsController extends Controller
 
          $expence_categories = ExpenseCategory::where('business_id', $business_id)->get();
 
-        return view('accounting::settings.index')->with(compact('account_sub_types', 'account_types', 'accounting_settings', 'business_locations', 'expence_categories'));
+        $account_exist = AccountingAccount::where('business_id', $business_id)->exists();
+
+        return view('accounting::settings.index')->with(compact('account_sub_types', 'account_types', 'accounting_settings', 'business_locations', 'expence_categories', 'account_exist'));
+    }
+
+    public function autoMapSettings()
+    {
+        $business_id = request()->session()->get('user.business_id');
+
+        if (! (auth()->user()->can('superadmin') || ($this->moduleUtil->hasThePermissionInSubscription($business_id,
+        'accounting_module')))) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+            $accounts = AccountingAccount::where('business_id', $business_id)->get();
+
+            if ($accounts->isEmpty()) {
+                $output = ['success' => false,
+                    'msg' => 'Chart of Accounts (CoA) tidak ditemukan. Silakan buat CoA terlebih dahulu.',
+                ];
+                return redirect()->back()->with(['status' => $output]);
+            }
+
+            $findAccount = function($names) use ($accounts) {
+                foreach ($names as $name) {
+                    $match = $accounts->first(function($acc) use ($name) {
+                        return strcasecmp($acc->name, $name) === 0;
+                    });
+                    if ($match) {
+                        return $match->id;
+                    }
+                }
+                return null;
+            };
+
+            $sale_payment = $findAccount(['Pendapatan Penjualan', 'Sales', 'Revenue - General', 'Sales of Product Income']);
+            $sale_deposit = $findAccount(['Piutang Usaha', 'Piutang Usaha (A/R)', 'Accounts Receivable (A/R)', 'Accounts Receivable']);
+
+            $sell_payment_pay = $findAccount(['Piutang Usaha', 'Piutang Usaha (A/R)', 'Accounts Receivable (A/R)', 'Accounts Receivable']);
+            $sell_payment_dep = $findAccount(['Kas', 'Cash', 'Cash on hand', 'Cash and cash equivalents', 'Bank', 'Undeposited Funds']);
+
+            $purchases_pay = $findAccount(['Hutang Usaha', 'Hutang Dagang (A/P)', 'Accounts Payable (A/P)', 'Accounts Payable']);
+            $purchases_dep = $findAccount(['Persediaan Barang', 'Inventory Asset', 'Inventory']);
+
+            $purchase_payment_pay = $findAccount(['Kas', 'Cash', 'Cash on hand', 'Cash and cash equivalents', 'Bank', 'Undeposited Funds']);
+            $purchase_payment_dep = $findAccount(['Hutang Usaha', 'Hutang Dagang (A/P)', 'Accounts Payable (A/P)', 'Accounts Payable']);
+
+            $expense_pay = $findAccount(['Beban Listrik & Air', 'Utilities', 'Uncategorised Expense', 'Wage expenses']);
+            $expense_dep = $findAccount(['Kas', 'Cash', 'Cash on hand', 'Cash and cash equivalents', 'Bank', 'Undeposited Funds']);
+
+            $default_map = [
+                'sale' => [
+                    'payment_account' => $sale_payment,
+                    'deposit_to' => $sale_deposit
+                ],
+                'sell_payment' => [
+                    'payment_account' => $sell_payment_pay,
+                    'deposit_to' => $sell_payment_dep
+                ],
+                'purchases' => [
+                    'payment_account' => $purchases_pay,
+                    'deposit_to' => $purchases_dep
+                ],
+                'purchase_payment' => [
+                    'payment_account' => $purchase_payment_pay,
+                    'deposit_to' => $purchase_payment_dep
+                ],
+                'expense' => [
+                    'payment_account' => $expense_pay,
+                    'deposit_to' => $expense_dep
+                ]
+            ];
+
+            $locations = BusinessLocation::where('business_id', $business_id)->get();
+            foreach ($locations as $location) {
+                $existing_map = json_decode($location->accounting_default_map, true) ?: [];
+                $merged_map = array_merge($existing_map, $default_map);
+                $location->update(['accounting_default_map' => json_encode($merged_map)]);
+            }
+
+            $output = ['success' => true,
+                'msg' => 'Berhasil memetakan akun default secara otomatis!',
+            ];
+        } catch (\Exception $e) {
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+
+            $output = ['success' => false,
+                'msg' => __('messages.something_went_wrong'),
+            ];
+        }
+
+        return redirect()->back()->with(['status' => $output]);
     }
 
     public function resetData()

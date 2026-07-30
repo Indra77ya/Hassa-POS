@@ -38,10 +38,15 @@
 						{!! Form::open(['action' => '\Modules\Accounting\Http\Controllers\SettingsController@saveSettings',
 						'method' => 'post']) !!}
 						<div class="row mb-12">
-							<div class="col-md-4">
+							<div class="col-md-8">
 								<button type="button" class="tw-dw-btn tw-dw-btn-error tw-text-white tw-dw-btn-sm accounting_reset_data" data-href="{{action([\Modules\Accounting\Http\Controllers\SettingsController::class, 'resetData'])}}">
 									@lang('accounting::lang.reset_data')
 								</button>
+								@if($account_exist)
+									<a href="{{route('accounting.auto-map-settings')}}" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-sm auto_map_default_accounts" style="margin-left: 10px;">
+										<i class="fas fa-magic"></i> Petakan Akun Default Otomatis
+									</a>
+								@endif
 							</div>
 						</div>
 						<br>
@@ -65,9 +70,19 @@
 							</div>
 						</div>
 
-						<hr />
+						@if(!$account_exist)
+							<div class="alert alert-danger" style="border-radius: 12px; padding: 20px; margin-top: 20px;">
+								<h4 style="margin-top: 0; font-weight: bold;"><i class="icon fas fa-ban"></i> Chart of Accounts (CoA) Belum Tersedia</h4>
+								<p>Anda belum memiliki Daftar Akun (CoA) untuk bisnis ini. Silakan buat akun default terlebih dahulu sebelum melakukan pemetaan transaksi.</p>
+								<br>
+								<a href="{{route('accounting.create-default-accounts')}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-accent" style="border: 1px solid currentColor;">
+									@lang( 'accounting::lang.add_default_accounts' ) <i class="fas fa-file-import"></i>
+								</a>
+							</div>
+						@else
+							<hr />
 
-						<h3>@lang('accounting::lang.map_transactions') @show_tooltip(__('accounting::lang.map_transactions_help'))</h3>
+							<h3>@lang('accounting::lang.map_transactions') @show_tooltip(__('accounting::lang.map_transactions_help'))</h3>
 
 						@foreach($business_locations as $business_location)
 						@component('components.widget', ['title' => $business_location->name])
@@ -242,6 +257,7 @@
 								</div>
 							</div>
 						</div>
+						@endif
 						{!! Form::close() !!}
 					</div>
 
@@ -521,6 +537,21 @@
 			if (willDelete) {
 				var href = $(this).data('href');
 				window.location.href = href;
+			}
+		});
+	});
+
+	$(document).on('click', 'a.auto_map_default_accounts', function(e) {
+		e.preventDefault();
+		swal({
+			title: "Petakan Akun Default Otomatis?",
+			text: "Tindakan ini akan memetakan penjualan, pembelian, pembayaran, dan beban ke akun default secara otomatis berdasarkan daftar akun (CoA) yang aktif.",
+			icon: 'info',
+			buttons: true,
+			dangerMode: false,
+		}).then(confirm => {
+			if (confirm) {
+				window.location.href = $(this).attr('href');
 			}
 		});
 	});
