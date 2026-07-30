@@ -249,6 +249,100 @@ class SyncPaymentAccountingAccounts extends Command
                 }
             }
 
+            // 4. Sync Historical Fund Transfers into Accounting mappings
+            if (class_exists(AccountingAccountsTransaction::class) && class_exists(\Modules\Accounting\Entities\AccountingAccTransMapping::class)) {
+                $this->info('Grouping and syncing historical Fund Transfers...');
+                $fund_transfers = AccountTransaction::where('sub_type', 'fund_transfer')
+                    ->whereNotNull('transfer_transaction_id')
+                    ->get();
+
+                $processed_tx_ids = [];
+
+                foreach ($fund_transfers as $tx1) {
+                    if (in_array($tx1->id, $processed_tx_ids)) {
+                        continue;
+                    }
+
+                    $tx2 = AccountTransaction::find($tx1->transfer_transaction_id);
+                    if (!$tx2) {
+                        continue;
+                    }
+
+                    $processed_tx_ids[] = $tx1->id;
+                    $processed_tx_ids[] = $tx2->id;
+
+                    $account1 = Account::find($tx1->account_id);
+                    $account2 = Account::find($tx2->account_id);
+                    if (!$account1 || !$account2) {
+                        continue;
+                    }
+
+                    $business_id = $account1->business_id;
+
+                    $aat1 = null;
+                    if (!empty($tx1->accounting_accounts_transaction_id)) {
+                        $aat1 = AccountingAccountsTransaction::find($tx1->accounting_accounts_transaction_id);
+                    }
+                    if (!$aat1) {
+                        $aat1 = AccountingAccountsTransaction::where('account_transaction_id', $tx1->id)->first();
+                    }
+
+                    $aat2 = null;
+                    if (!empty($tx2->accounting_accounts_transaction_id)) {
+                        $aat2 = AccountingAccountsTransaction::find($tx2->accounting_accounts_transaction_id);
+                    }
+                    if (!$aat2) {
+                        $aat2 = AccountingAccountsTransaction::where('account_transaction_id', $tx2->id)->first();
+                    }
+
+                    if ($aat1 && $aat2) {
+                        $mapping = null;
+                        if (!empty($aat1->acc_trans_mapping_id)) {
+                            $mapping = \Modules\Accounting\Entities\AccountingAccTransMapping::find($aat1->acc_trans_mapping_id);
+                        }
+                        if (!$mapping && !empty($aat2->acc_trans_mapping_id)) {
+                            $mapping = \Modules\Accounting\Entities\AccountingAccTransMapping::find($aat2->acc_trans_mapping_id);
+                        }
+
+                        if (!$mapping) {
+                            $ref_no = null;
+                            if (class_exists(\Modules\Accounting\Utils\AccountingUtil::class) && \Illuminate\Support\Facades\Schema::hasTable('business')) {
+                                $accountingUtil = new \Modules\Accounting\Utils\AccountingUtil(new \App\Utils\Util());
+                                $accounting_settings = $accountingUtil->getAccountingSettings($business_id);
+                                $prefix = !empty($accounting_settings['transfer_prefix']) ? $accounting_settings['transfer_prefix'] : '';
+                                $ref_count = (new \App\Utils\Util())->setAndGetReferenceCount('accounting_transfer');
+                                $ref_no = (new \App\Utils\Util())->generateReferenceNumber('accounting_transfer', $ref_count, $business_id, $prefix);
+                            } else {
+                                $ref_no = 'TRX-' . time() . '-' . rand(100, 999);
+                            }
+
+                            $mapping = \Modules\Accounting\Entities\AccountingAccTransMapping::create([
+                                'business_id' => $business_id,
+                                'ref_no' => $ref_no,
+                                'note' => $tx1->note ?? $tx2->note,
+                                'type' => 'transfer',
+                                'created_by' => $tx1->created_by ?? 1,
+                                'operation_date' => $tx1->operation_date,
+                            ]);
+                        } else {
+                            $mapping->update([
+                                'note' => $tx1->note ?? $tx2->note,
+                                'operation_date' => $tx1->operation_date,
+                            ]);
+                        }
+
+                        $aat1->update([
+                            'acc_trans_mapping_id' => $mapping->id,
+                            'sub_type' => 'fund_transfer',
+                        ]);
+                        $aat2->update([
+                            'acc_trans_mapping_id' => $mapping->id,
+                            'sub_type' => 'fund_transfer',
+                        ]);
+                    }
+                }
+            }
+
             DB::commit();
             $this->info('Bidirectional Payment Accounts & Accounting module synchronization completed successfully!');
 

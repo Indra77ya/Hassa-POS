@@ -53,6 +53,10 @@ class AccountingAccountsTransaction extends Model
                     }
                 }
             }
+
+            if ($aat->sub_type === 'transfer' || !empty($aat->acc_trans_mapping_id)) {
+                self::linkPOSFundTransfer($aat);
+            }
         });
 
         static::updated(function ($aat) {
@@ -97,6 +101,10 @@ class AccountingAccountsTransaction extends Model
                         \App\AccountTransaction::$is_syncing = false;
                     }
                 }
+            }
+
+            if ($aat->sub_type === 'transfer' || !empty($aat->acc_trans_mapping_id)) {
+                self::linkPOSFundTransfer($aat);
             }
         });
 
@@ -177,5 +185,75 @@ class AccountingAccountsTransaction extends Model
                 'type' => $data['type'], 'sub_type' => $data['sub_type'], 'created_by' => $data['created_by'], 'operation_date' => $data['operation_date'], 'note' => $data['note']
             ]
         );
+    }
+
+    public static function linkPOSFundTransfer($aat)
+    {
+        if (empty($aat->acc_trans_mapping_id)) {
+            return;
+        }
+
+        if (self::$is_syncing || (class_exists(\App\AccountTransaction::class) && \App\AccountTransaction::$is_syncing)) {
+            return;
+        }
+
+        try {
+            $mapping = \Modules\Accounting\Entities\AccountingAccTransMapping::find($aat->acc_trans_mapping_id);
+            if (!$mapping || $mapping->type !== 'transfer') {
+                return;
+            }
+
+            $txs = \Modules\Accounting\Entities\AccountingAccountsTransaction::where('acc_trans_mapping_id', $mapping->id)->get();
+            if ($txs->count() < 2) {
+                return;
+            }
+
+            $aat1 = $txs->first();
+            $aat2 = $txs->last();
+
+            $at1 = null;
+            if (!empty($aat1->account_transaction_id)) {
+                $at1 = \App\AccountTransaction::find($aat1->account_transaction_id);
+            }
+            if (!$at1) {
+                $at1 = \App\AccountTransaction::where('accounting_accounts_transaction_id', $aat1->id)->first();
+            }
+
+            $at2 = null;
+            if (!empty($aat2->account_transaction_id)) {
+                $at2 = \App\AccountTransaction::find($aat2->account_transaction_id);
+            }
+            if (!$at2) {
+                $at2 = \App\AccountTransaction::where('accounting_accounts_transaction_id', $aat2->id)->first();
+            }
+
+            if ($at1 && $at2) {
+                self::$is_syncing = true;
+                if (class_exists(\App\AccountTransaction::class)) {
+                    \App\AccountTransaction::$is_syncing = true;
+                }
+
+                $at1->update([
+                    'sub_type' => 'fund_transfer',
+                    'transfer_transaction_id' => $at2->id,
+                ]);
+
+                $at2->update([
+                    'sub_type' => 'fund_transfer',
+                    'transfer_transaction_id' => $at1->id,
+                ]);
+
+                $aat1->update(['sub_type' => 'fund_transfer']);
+                $aat2->update(['sub_type' => 'fund_transfer']);
+            }
+
+        } catch (\Exception $e) {
+            \Log::error('Error in linkPOSFundTransfer: ' . $e->getMessage());
+        } finally {
+            self::$is_syncing = false;
+            if (class_exists(\App\AccountTransaction::class)) {
+                \App\AccountTransaction::$is_syncing = false;
+            }
+        }
     }
 }
