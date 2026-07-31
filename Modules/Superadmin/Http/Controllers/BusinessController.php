@@ -736,6 +736,30 @@ class BusinessController extends BaseController
                 }
             }
 
+            // Sub-category: finance (financial & accounting transactions and accounts)
+            if ($reset_all_tx || in_array('finance', $reset_transactions)) {
+                // POS module financial accounts & transactions
+                $account_ids = DB::table('accounts')->where('business_id', $business_id)->pluck('id')->toArray();
+                if (!empty($account_ids)) {
+                    DB::table('account_transactions')->whereIn('account_id', $account_ids)->delete();
+                }
+                DB::table('accounts')->where('business_id', $business_id)->delete();
+                DB::table('account_types')->where('business_id', $business_id)->delete();
+
+                // Accounting module accounts & transactions
+                $accounting_account_ids = DB::table('accounting_accounts')->where('business_id', $business_id)->pluck('id')->toArray();
+                if (!empty($accounting_account_ids)) {
+                    DB::table('accounting_accounts_transactions')->whereIn('accounting_account_id', $accounting_account_ids)->delete();
+                    DB::table('accounting_budgets')->whereIn('accounting_account_id', $accounting_account_ids)->delete();
+                }
+                DB::table('accounting_acc_trans_mappings')->where('business_id', $business_id)->delete();
+                DB::table('accounting_accounts')->where('business_id', $business_id)->delete();
+                DB::table('accounting_account_types')->where('business_id', $business_id)->delete();
+
+                // Set accounting_default_map in business_locations to null
+                DB::table('business_locations')->where('business_id', $business_id)->update(['accounting_default_map' => null]);
+            }
+
 
             // 2. DATA MASTER
             $select_all_master = $request->input('select_all_master');

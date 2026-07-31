@@ -1,0 +1,327 @@
+<?php
+
+namespace Tests\Feature;
+
+use Tests\TestCase;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use DB;
+
+class ResetBusinessFinanceTest extends TestCase
+{
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Register Superadmin service provider to load routes and resources
+        $this->app->register(\Modules\Superadmin\Providers\SuperadminServiceProvider::class);
+
+        // Recreate all tables needed by postResetData to prevent query errors in SQLite
+        $tables = [
+            'repair_job_sheets', 'transactions', 'transaction_payments', 'transaction_sell_lines',
+            'transaction_sell_lines_purchase_lines', 'bookings', 'purchase_lines', 'cash_registers',
+            'cash_register_transactions', 'stock_adjustment_lines', 'products', 'variation_location_details',
+            'product_locations', 'product_racks', 'variations', 'product_variations', 'contacts',
+            'categories', 'brands', 'tax_rates', 'group_sub_taxes', 'accounts', 'account_transactions',
+            'account_types', 'accounting_accounts', 'accounting_accounts_transactions', 'accounting_budgets',
+            'accounting_acc_trans_mappings', 'accounting_account_types', 'business_locations', 'business',
+            'currencies'
+        ];
+
+        foreach ($tables as $table) {
+            Schema::dropIfExists($table);
+        }
+
+        Schema::create('currencies', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('code');
+            $table->string('symbol');
+            $table->string('thousand_separator')->nullable();
+            $table->string('decimal_separator')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('business', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->integer('currency_id')->nullable();
+            $table->integer('fy_start_month')->default(1);
+            $table->timestamps();
+        });
+
+        Schema::create('transactions', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('business_id');
+            $table->string('type')->nullable();
+        });
+
+        Schema::create('transaction_payments', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('transaction_id')->nullable();
+        });
+
+        Schema::create('transaction_sell_lines', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('transaction_id');
+        });
+
+        Schema::create('transaction_sell_lines_purchase_lines', function (Blueprint $table) {
+            $table->integer('sell_line_id');
+            $table->integer('purchase_line_id');
+        });
+
+        Schema::create('bookings', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('business_id');
+        });
+
+        Schema::create('purchase_lines', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('transaction_id');
+        });
+
+        Schema::create('cash_registers', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('business_id');
+        });
+
+        Schema::create('cash_register_transactions', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('cash_register_id');
+        });
+
+        Schema::create('stock_adjustment_lines', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('transaction_id');
+        });
+
+        Schema::create('products', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('business_id');
+        });
+
+        Schema::create('variation_location_details', function (Blueprint $table) {
+            $table->integer('product_id');
+        });
+
+        Schema::create('product_locations', function (Blueprint $table) {
+            $table->integer('product_id');
+        });
+
+        Schema::create('product_racks', function (Blueprint $table) {
+            $table->integer('product_id');
+        });
+
+        Schema::create('variations', function (Blueprint $table) {
+            $table->integer('product_id');
+        });
+
+        Schema::create('product_variations', function (Blueprint $table) {
+            $table->integer('product_id');
+        });
+
+        Schema::create('contacts', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('business_id');
+        });
+
+        Schema::create('categories', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('business_id');
+        });
+
+        Schema::create('brands', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('business_id');
+        });
+
+        Schema::create('tax_rates', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('business_id');
+        });
+
+        Schema::create('group_sub_taxes', function (Blueprint $table) {
+            $table->integer('group_tax_id');
+            $table->integer('tax_id');
+        });
+
+        // POS Accounts & Transactions
+        Schema::create('accounts', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('business_id');
+            $table->string('name');
+        });
+
+        Schema::create('account_transactions', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('account_id');
+            $table->integer('transaction_id')->nullable();
+        });
+
+        Schema::create('account_types', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('business_id');
+            $table->string('name');
+        });
+
+        // Accounting Module Accounts & Transactions
+        Schema::create('accounting_accounts', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('business_id');
+            $table->string('name');
+        });
+
+        Schema::create('accounting_accounts_transactions', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('accounting_account_id');
+        });
+
+        Schema::create('accounting_budgets', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('accounting_account_id');
+        });
+
+        Schema::create('accounting_acc_trans_mappings', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('business_id');
+        });
+
+        Schema::create('accounting_account_types', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('business_id')->nullable();
+            $table->string('name');
+        });
+
+        Schema::create('business_locations', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('business_id');
+            $table->text('accounting_default_map')->nullable();
+        });
+
+        // Seed initial data
+        DB::table('currencies')->insert([
+            'id' => 1,
+            'code' => 'IDR',
+            'symbol' => 'Rp',
+            'thousand_separator' => '.',
+            'decimal_separator' => ','
+        ]);
+
+        DB::table('business')->insert([
+            'id' => 1,
+            'name' => 'Test Business',
+            'currency_id' => 1,
+            'fy_start_month' => 1
+        ]);
+    }
+
+    public function testResetBusinessFinance()
+    {
+        // 1. Prepare data for the target business (ID 1)
+        DB::table('accounts')->insert([
+            ['id' => 10, 'business_id' => 1, 'name' => 'Bank Mandiri'],
+            ['id' => 11, 'business_id' => 1, 'name' => 'Kas Toko']
+        ]);
+
+        DB::table('account_transactions')->insert([
+            ['id' => 100, 'account_id' => 10],
+            ['id' => 101, 'account_id' => 11]
+        ]);
+
+        DB::table('account_types')->insert([
+            ['id' => 1, 'business_id' => 1, 'name' => 'Kas & Setara Kas']
+        ]);
+
+        DB::table('accounting_accounts')->insert([
+            ['id' => 20, 'business_id' => 1, 'name' => 'Bank Mandiri (Accounting)'],
+            ['id' => 21, 'business_id' => 1, 'name' => 'Kas Toko (Accounting)']
+        ]);
+
+        DB::table('accounting_accounts_transactions')->insert([
+            ['id' => 200, 'accounting_account_id' => 20],
+            ['id' => 201, 'accounting_account_id' => 21]
+        ]);
+
+        DB::table('accounting_budgets')->insert([
+            ['id' => 300, 'accounting_account_id' => 20]
+        ]);
+
+        DB::table('accounting_acc_trans_mappings')->insert([
+            ['id' => 400, 'business_id' => 1]
+        ]);
+
+        // Custom account type for business 1, and system default type (business_id is null)
+        DB::table('accounting_account_types')->insert([
+            ['id' => 500, 'business_id' => 1, 'name' => 'Custom Type'],
+            ['id' => 501, 'business_id' => null, 'name' => 'System Type']
+        ]);
+
+        DB::table('business_locations')->insert([
+            ['id' => 1, 'business_id' => 1, 'accounting_default_map' => '{"sale":{"deposit_to":20}}']
+        ]);
+
+        // 2. Prepare data for another business (ID 2) to ensure it's not affected
+        DB::table('accounts')->insert([
+            ['id' => 12, 'business_id' => 2, 'name' => 'Other Business Account']
+        ]);
+        DB::table('account_transactions')->insert([
+            ['id' => 102, 'account_id' => 12]
+        ]);
+        DB::table('accounting_accounts')->insert([
+            ['id' => 22, 'business_id' => 2, 'name' => 'Other Business Accounting Account']
+        ]);
+        DB::table('accounting_accounts_transactions')->insert([
+            ['id' => 202, 'accounting_account_id' => 22]
+        ]);
+
+        // Mock login as superadmin
+        $user = \Mockery::mock(\App\User::class)->makePartial();
+        $user->shouldReceive('can')->with('superadmin')->andReturn(true);
+        $user->id = 1;
+        $user->business_id = 1;
+        $user->surname = 'Mr';
+        $user->first_name = 'Admin';
+        $user->last_name = 'Super';
+        $user->email = 'admin@example.com';
+        $user->language = 'en';
+        $user->user_type = 'superadmin';
+        $user->allow_login = 1;
+
+        $this->actingAs($user);
+
+        // Call postResetData
+        $response = $this->post('/superadmin/business/1/reset-data', [
+            'reset_transactions' => ['finance']
+        ], [
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Accept' => 'application/json'
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson(['success' => true]);
+
+        // 3. Assertions: Business 1 finance data should be deleted
+        $this->assertEmpty(DB::table('accounts')->where('business_id', 1)->get());
+        $this->assertEmpty(DB::table('account_transactions')->whereIn('account_id', [10, 11])->get());
+        $this->assertEmpty(DB::table('account_types')->where('business_id', 1)->get());
+
+        $this->assertEmpty(DB::table('accounting_accounts')->where('business_id', 1)->get());
+        $this->assertEmpty(DB::table('accounting_accounts_transactions')->whereIn('accounting_account_id', [20, 21])->get());
+        $this->assertEmpty(DB::table('accounting_budgets')->whereIn('accounting_account_id', [20, 21])->get());
+        $this->assertEmpty(DB::table('accounting_acc_trans_mappings')->where('business_id', 1)->get());
+
+        // Custom accounting account type should be deleted, but system default type should NOT
+        $this->assertEmpty(DB::table('accounting_account_types')->where('business_id', 1)->get());
+        $this->assertNotEmpty(DB::table('accounting_account_types')->whereNull('business_id')->get());
+
+        // accounting_default_map in business locations should be cleared/null
+        $location = DB::table('business_locations')->where('id', 1)->first();
+        $this->assertNull($location->accounting_default_map);
+
+        // 4. Assertions: Business 2 data should remain intact
+        $this->assertNotEmpty(DB::table('accounts')->where('business_id', 2)->get());
+        $this->assertNotEmpty(DB::table('account_transactions')->where('account_id', 12)->get());
+        $this->assertNotEmpty(DB::table('accounting_accounts')->where('business_id', 2)->get());
+        $this->assertNotEmpty(DB::table('accounting_accounts_transactions')->where('accounting_account_id', 22)->get());
+    }
+}

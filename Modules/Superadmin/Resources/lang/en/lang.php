@@ -283,6 +283,7 @@ return [
     'reset_expenses' => 'Expenses',
     'reset_registers' => 'Cash Register',
     'reset_stock_adjustments' => 'Stock Adjustments & Transfers',
+    'reset_finance' => 'Finance',
     'reset_products' => 'Products',
     'reset_contacts' => 'Contacts',
     'reset_categories' => 'Categories',

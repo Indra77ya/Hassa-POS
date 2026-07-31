@@ -276,6 +276,7 @@ return [
     'reset_expenses' => 'Pengeluaran (Expenses)',
     'reset_registers' => 'Laporan Kas (Register)',
     'reset_stock_adjustments' => 'Penyesuaian & Transfer Stok',
+    'reset_finance' => 'Keuangan (Finance)',
     'reset_products' => 'Produk (Products)',
     'reset_contacts' => 'Kontak (Contacts)',
     'reset_categories' => 'Kategori (Categories)',
