@@ -12,6 +12,7 @@ use Modules\Accounting\Entities\AccountingAccount;
 use Modules\Accounting\Entities\AccountingAccountsTransaction;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Gate;
 use DB;
 
 class TransactionMappingTest extends TestCase
@@ -24,6 +25,11 @@ class TransactionMappingTest extends TestCase
         $this->app->register(\Modules\Accounting\Providers\AccountingServiceProvider::class);
         request()->setLaravelSession($this->app['session']->driver());
 
+        // Bypass Spatie permission DB queries by defining a global Gate::before rule
+        Gate::before(function () {
+            return true;
+        });
+
         // Create standard business table
         Schema::dropIfExists('business');
         Schema::create('business', function (Blueprint $table) {
@@ -31,6 +37,27 @@ class TransactionMappingTest extends TestCase
             $table->string('name');
             $table->integer('fy_start_month')->default(1);
             $table->string('time_zone')->nullable();
+            $table->timestamps();
+        });
+
+        // Create account_types table
+        Schema::dropIfExists('account_types');
+        Schema::create('account_types', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->string('fixed_key')->nullable();
+            $table->timestamps();
+        });
+
+        // Create accounts table
+        Schema::dropIfExists('accounts');
+        Schema::create('accounts', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->string('name');
+            $table->integer('business_id');
+            $table->integer('account_type_id')->nullable();
+            $table->string('account_number')->nullable();
+            $table->string('normal_balance')->nullable();
             $table->timestamps();
         });
 
@@ -112,6 +139,22 @@ class TransactionMappingTest extends TestCase
             $table->integer('transaction_id')->nullable();
             $table->integer('business_id')->nullable();
             $table->decimal('amount', 22, 4)->default(0);
+            $table->string('payment_ref_no')->nullable();
+            $table->boolean('is_return')->default(0);
+            $table->boolean('is_advance')->default(0);
+            $table->string('method')->nullable();
+            $table->string('transaction_no')->nullable();
+            $table->string('card_transaction_number')->nullable();
+            $table->string('card_number')->nullable();
+            $table->string('card_type')->nullable();
+            $table->string('card_holder_name')->nullable();
+            $table->string('card_month')->nullable();
+            $table->string('card_year')->nullable();
+            $table->string('card_security')->nullable();
+            $table->string('cheque_number')->nullable();
+            $table->string('bank_account_number')->nullable();
+            $table->integer('payment_for')->nullable();
+            $table->integer('parent_id')->nullable();
             $table->timestamps();
         });
 
@@ -141,6 +184,44 @@ class TransactionMappingTest extends TestCase
             $table->integer('created_by')->nullable();
             $table->dateTime('operation_date');
             $table->text('note')->nullable();
+            $table->timestamps();
+        });
+
+        // Create users table
+        Schema::dropIfExists('users');
+        Schema::create('users', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('surname')->nullable();
+            $table->string('first_name')->nullable();
+            $table->string('last_name')->nullable();
+            $table->timestamps();
+        });
+
+        // Create contacts table
+        Schema::dropIfExists('contacts');
+        Schema::create('contacts', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name')->nullable();
+            $table->string('type')->nullable();
+            $table->string('supplier_business_name')->nullable();
+            $table->timestamps();
+        });
+
+        // Create account_transactions table with softDeletes
+        Schema::dropIfExists('account_transactions');
+        Schema::create('account_transactions', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('account_id');
+            $table->string('type', 100);
+            $table->decimal('amount', 22, 4);
+            $table->string('sub_type', 100)->nullable();
+            $table->dateTime('operation_date');
+            $table->integer('created_by')->nullable();
+            $table->integer('transaction_id')->nullable();
+            $table->integer('transaction_payment_id')->nullable();
+            $table->integer('transfer_transaction_id')->nullable();
+            $table->text('note')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
 
@@ -179,9 +260,26 @@ class TransactionMappingTest extends TestCase
 
         // Mock login
         $user = \Mockery::mock(\App\User::class)->makePartial();
+        $user->shouldReceive('can')->with('account.access')->andReturn(true);
+        $user->shouldReceive('permitted_locations')->andReturn('all');
         $user->id = 1;
         $user->business_id = 1;
+        $user->user_type = 'user';
+        $user->allow_login = 1;
         $this->actingAs($user);
+
+        session([
+            'user.business_id' => 1,
+            'business.time_zone' => 'Asia/Jakarta',
+            'business.date_format' => 'Y-m-d',
+            'currency' => [
+                'symbol' => 'Rp',
+                'decimal_separator' => ',',
+                'thousand_separator' => '.',
+            ],
+            'business.currency_symbol_placement' => 'before',
+            'business.currency_precision' => 2,
+        ]);
     }
 
     /**
@@ -328,5 +426,63 @@ class TransactionMappingTest extends TestCase
         $this->assertNotNull($inv_tx);
         $this->assertEquals('credit', $inv_tx->type);
         $this->assertEquals(3000, $inv_tx->amount);
+    }
+
+    /**
+     * Test that the Cash Flow report strictly retrieves and renders only transactions
+     * of accounts belonging to 'kas_dan_bank' (cash_and_cash_equivalents).
+     */
+    public function testCashFlowFilterToKasDanBank()
+    {
+        // 1. Create account types
+        $kasType = DB::table('account_types')->insertGetId([
+            'name' => 'Kas dan Bank',
+            'fixed_key' => 'kas_dan_bank',
+        ]);
+        $piutangType = DB::table('account_types')->insertGetId([
+            'name' => 'Piutang',
+            'fixed_key' => 'piutang_usaha',
+        ]);
+
+        // 2. Create accounts
+        $kasAcc = DB::table('accounts')->insertGetId([
+            'name' => 'Kas Bank Utama',
+            'business_id' => 1,
+            'account_type_id' => $kasType,
+        ]);
+        $piutangAcc = DB::table('accounts')->insertGetId([
+            'name' => 'Piutang Utama',
+            'business_id' => 1,
+            'account_type_id' => $piutangType,
+        ]);
+
+        // 3. Create transactions on those accounts
+        DB::table('account_transactions')->insert([
+            [
+                'account_id' => $kasAcc,
+                'type' => 'debit',
+                'amount' => 1000000,
+                'operation_date' => '2026-07-31 14:36:00',
+            ],
+            [
+                'account_id' => $piutangAcc,
+                'type' => 'debit',
+                'amount' => 5000000,
+                'operation_date' => '2026-07-31 14:36:00',
+            ],
+        ]);
+
+        // 4. Request the cash flow endpoint via ajax
+        $response = $this->get('/account/cash-flow', [
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Accept' => 'application/json'
+        ]);
+
+        $response->assertStatus(200);
+        $data = $response->json('data');
+
+        // We should ONLY see the transaction on Kas Bank Utama (1 transaction)
+        $this->assertCount(1, $data);
+        $this->assertEquals('Kas Bank Utama', $data[0]['account_name']);
     }
 }
