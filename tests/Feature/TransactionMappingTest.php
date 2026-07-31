@@ -485,4 +485,61 @@ class TransactionMappingTest extends TestCase
         $this->assertCount(1, $data);
         $this->assertEquals('Kas Bank Utama', $data[0]['account_name']);
     }
+
+    /**
+     * Test overpayment (change return) mapping correctly records net flow to Kas and Revenue, bypassing Piutang.
+     */
+    public function testChangeReturnPaymentMapping()
+    {
+        // 1. Create a sell transaction for 720,000
+        $transaction = Transaction::create([
+            'business_id' => 1,
+            'location_id' => 1,
+            'type' => 'sell',
+            'payment_status' => 'paid',
+            'invoice_no' => 'INV-0009',
+            'final_total' => 720000,
+        ]);
+
+        // 2. Create the overpayment (750,000) and change return (30,000)
+        DB::table('transaction_payments')->insert([
+            [
+                'transaction_id' => $transaction->id,
+                'business_id' => 1,
+                'amount' => 750000,
+                'is_return' => 0,
+                'created_at' => now(),
+            ],
+            [
+                'transaction_id' => $transaction->id,
+                'business_id' => 1,
+                'amount' => 30000,
+                'is_return' => 1,
+                'created_at' => now(),
+            ]
+        ]);
+
+        // 3. Trigger mapping listener
+        $event = new \App\Events\SellCreatedOrModified($transaction);
+        $listener = new \Modules\Accounting\Listeners\MapSellTransaction();
+        $listener->handle($event);
+
+        // 4. Verify results
+        $txs = AccountingAccountsTransaction::where('transaction_id', $transaction->id)->get();
+
+        // Credit to Pendapatan Penjualan (12) must be 720,000
+        $rev_tx = $txs->where('accounting_account_id', 12)->first();
+        $this->assertNotNull($rev_tx);
+        $this->assertEquals('credit', $rev_tx->type);
+        $this->assertEquals(720000, $rev_tx->amount);
+
+        // Debit to Kas (10) must be net 720,000 (payments 750k - returns 30k = 720k)
+        $kas_tx = $txs->where('accounting_account_id', 10)->first();
+        $this->assertNotNull($kas_tx);
+        $this->assertEquals('debit', $kas_tx->type);
+        $this->assertEquals(720000, $kas_tx->amount);
+
+        // Piutang (11) must have 0 entries
+        $this->assertNull($txs->where('accounting_account_id', 11)->first());
+    }
 }

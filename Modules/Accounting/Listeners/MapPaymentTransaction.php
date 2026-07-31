@@ -29,30 +29,39 @@ class MapPaymentTransaction
     {
         $payment = $event->transactionPayment;
         
-        //if payment is deleted then delete the mapping
-        if(isset($event->isDeleted) && $event->isDeleted){
-            $accountingUtil = new \Modules\Accounting\Utils\AccountingUtil();
-            $accountingUtil->deleteMap($payment->transaction_id, null);
-            return;
-        }
-
-        if(empty($payment->transaction_id)){
+        if (empty($payment->transaction_id)) {
             return;
         }
 
         $transaction = Transaction::find($payment->transaction_id);
-
-        // For cash sale, the sell mapping already directly maps Debit Kas and Credit Revenue.
-        // Therefore, we bypass mapping the payment separately.
-        if ($transaction->type == 'sell' && $transaction->payment_status == 'paid') {
+        if (!$transaction) {
             return;
         }
 
-        if($transaction->type == 'purchase'){
-            $type = 'purchase_payment';
-        } elseif($transaction->type == 'sell'){
-            $type = 'sell_payment';
+        if ($transaction->type == 'sell') {
+            // Re-run MapSellTransaction for this sale to update cash, receivable and revenue legs
+            $mapSell = new \Modules\Accounting\Listeners\MapSellTransaction();
+            $mapSell->handle(new \App\Events\SellCreatedOrModified($transaction));
+            return;
+        }
+
+        if ($transaction->type == 'purchase') {
+            // Re-run MapPurchaseTransaction for this purchase to update cash, payable and inventory legs
+            $mapPurchase = new \Modules\Accounting\Listeners\MapPurchaseTransaction();
+            $mapPurchase->handle(new \App\Events\PurchaseCreatedOrModified($transaction));
+            return;
+        }
+
+        if ($transaction->type == 'expense') {
+            $type = 'expense_payment';
         } else {
+            return;
+        }
+
+        // if payment is deleted then delete the mapping
+        if (isset($event->isDeleted) && $event->isDeleted) {
+            $accountingUtil = new \Modules\Accounting\Utils\AccountingUtil();
+            $accountingUtil->deleteMap($payment->transaction_id, null);
             return;
         }
 
@@ -64,13 +73,11 @@ class MapPaymentTransaction
         $deposit_to = isset($accounting_default_map[$type]['deposit_to']) ? $accounting_default_map[$type]['deposit_to'] : null;
         $payment_account = isset($accounting_default_map[$type]['payment_account']) ? $accounting_default_map[$type]['payment_account'] : null;
 
-        if(!isset($event->isDeleted) || !$event->isDeleted){
-
+        if (!isset($event->isDeleted) || !$event->isDeleted) {
             //Do the mapping
-            if(!is_null($deposit_to) && !is_null($payment_account)){
-
+            if (!is_null($deposit_to) && !is_null($payment_account)) {
                 $payment_id = $payment->id;
-                $user_id = request()->session()->get('user.id');
+                $user_id = request()->session()->get('user.id') ?? 1;
                 $business_id = $transaction->business_id;
                 
                 $accountingUtil = new \Modules\Accounting\Utils\AccountingUtil();
