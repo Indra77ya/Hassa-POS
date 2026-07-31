@@ -153,7 +153,7 @@ class AccountReportsController extends Controller
             // Income query for current period net profit
             $total_income_query = \Modules\Accounting\Entities\AccountingAccount::join('accounting_accounts_transactions as AAT',
                                     'AAT.accounting_account_id', '=', 'accounting_accounts.id')
-                        ->whereBetween('AAT.operation_date', [$start_date, $end_date])
+                        ->whereDate('AAT.operation_date', '<=', $end_date)
                         ->where('accounting_accounts.business_id', $business_id)
                         ->where('accounting_accounts.account_primary_type', 'income');
 
@@ -177,9 +177,9 @@ class AccountReportsController extends Controller
             // Expenses query for current period net profit
             $total_expenses_query = \Modules\Accounting\Entities\AccountingAccount::join('accounting_accounts_transactions as AAT',
                                     'AAT.accounting_account_id', '=', 'accounting_accounts.id')
-                        ->whereBetween('AAT.operation_date', [$start_date, $end_date])
+                        ->whereDate('AAT.operation_date', '<=', $end_date)
                         ->where('accounting_accounts.business_id', $business_id)
-                        ->where('accounting_accounts.account_primary_type', 'expenses');
+                        ->whereIn('accounting_accounts.account_primary_type', ['expense', 'expenses']);
 
             if (!empty($location_id)) {
                 $total_expenses_query->where(function ($q) use ($location_id) {
