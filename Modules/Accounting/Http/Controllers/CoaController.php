@@ -1457,13 +1457,41 @@ class CoaController extends Controller
                 $data['type'] = in_array($input['account_primary_type'], ['asset', 'expense', 'expenses']) ? 'debit' : 'credit';
                 $data['sub_type'] = 'opening_balance';
                 AccountingAccountsTransaction::createTransaction($data);
+
+                // Create counterpart transaction for balancing (Laba Ditahan / Opening Balance Equity)
+                $offset_account_id = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $input['business_id'])
+                    ->where('status', 'active')
+                    ->where(function($q) {
+                        $q->where('name', 'like', '%Laba Ditahan%')
+                          ->orWhere('name', 'like', '%Opening Balance Equity%')
+                          ->orWhere('name', 'like', '%Ekuitas Saldo Awal%')
+                          ->orWhere('account_sub_type_id', 10);
+                    })
+                    ->value('id');
+
+                if ($offset_account_id) {
+                    $offset_data = $data;
+                    $offset_data['accounting_account_id'] = $offset_account_id;
+                    $offset_data['type'] = ($data['type'] === 'debit') ? 'credit' : 'debit';
+                    AccountingAccountsTransaction::createTransaction($offset_data);
+                } else {
+                    throw new \Exception("Gagal mencatatkan saldo awal: Akun Ekuitas Saldo Awal atau Laba Ditahan tidak ditemukan.");
+                }
             }
 
             DB::commit();
+            $output = ['success' => 1,
+                'msg' => __('lang_v1.added_success'),
+            ];
         } catch (\Exception $e) {
             DB::rollBack();
 
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+
+            $output = ['success' => 0,
+                'msg' => $e->getMessage(),
+            ];
+            return redirect()->back()->with('status', $output);
         }
 
         return redirect()->back();

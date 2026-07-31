@@ -152,7 +152,7 @@ class AccountingUtil extends Util
      */
     public function deleteMap($transaction_id, $transaction_payment_id){
         AccountingAccountsTransaction::where('transaction_id', $transaction_id)
-            ->whereIn('map_type', ['payment_account', 'deposit_to'])
+            ->whereIn('map_type', ['payment_account', 'deposit_to', 'cogs_debit', 'cogs_credit'])
             ->where('transaction_payment_id', $transaction_payment_id)
             ->delete();
     }
@@ -281,7 +281,19 @@ class AccountingUtil extends Util
             ];
         }
 
-        AccountingAccountsTransaction::updateOrCreateMapTransaction($payment_data);
-        AccountingAccountsTransaction::updateOrCreateMapTransaction($deposit_data);
+        \DB::transaction(function () use ($type, $id, $payment_data, $deposit_data) {
+            AccountingAccountsTransaction::updateOrCreateMapTransaction($payment_data);
+            AccountingAccountsTransaction::updateOrCreateMapTransaction($deposit_data);
+
+            $transaction_id = null;
+            $transaction_payment_id = null;
+            if (in_array($type, ['sell', 'purchase', 'expense'])) {
+                $transaction_id = $id;
+            } else {
+                $transaction_payment_id = $id;
+            }
+
+            AccountingAccountsTransaction::validateTransactionBalance($transaction_id, $transaction_payment_id);
+        });
     }
 }

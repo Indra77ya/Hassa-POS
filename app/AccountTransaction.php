@@ -13,12 +13,36 @@ class AccountTransaction extends Model
 
     public static $is_syncing = false;
 
+    public static function shouldSkipSyncStatic($at)
+    {
+        if (!empty($at->transaction_id)) {
+            $transaction = \App\Transaction::find($at->transaction_id);
+            if ($transaction && in_array($transaction->type, ['sell', 'purchase', 'expense'])) {
+                return true;
+            }
+        }
+        if (!empty($at->transaction_payment_id)) {
+            $payment = \App\TransactionPayment::find($at->transaction_payment_id);
+            if ($payment && !empty($payment->transaction_id)) {
+                $transaction = \App\Transaction::find($payment->transaction_id);
+                if ($transaction && in_array($transaction->type, ['sell', 'purchase', 'expense'])) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     protected static function boot()
     {
         parent::boot();
 
         static::created(function ($at) {
             if (self::$is_syncing || (class_exists(\Modules\Accounting\Entities\AccountingAccountsTransaction::class) && \Modules\Accounting\Entities\AccountingAccountsTransaction::$is_syncing)) {
+                return;
+            }
+
+            if (self::shouldSkipSyncStatic($at)) {
                 return;
             }
 
@@ -64,6 +88,10 @@ class AccountTransaction extends Model
 
         static::updated(function ($at) {
             if (self::$is_syncing || (class_exists(\Modules\Accounting\Entities\AccountingAccountsTransaction::class) && \Modules\Accounting\Entities\AccountingAccountsTransaction::$is_syncing)) {
+                return;
+            }
+
+            if (self::shouldSkipSyncStatic($at)) {
                 return;
             }
 
@@ -113,6 +141,10 @@ class AccountTransaction extends Model
 
         static::deleted(function ($at) {
             if (self::$is_syncing || (class_exists(\Modules\Accounting\Entities\AccountingAccountsTransaction::class) && \Modules\Accounting\Entities\AccountingAccountsTransaction::$is_syncing)) {
+                return;
+            }
+
+            if (self::shouldSkipSyncStatic($at)) {
                 return;
             }
 

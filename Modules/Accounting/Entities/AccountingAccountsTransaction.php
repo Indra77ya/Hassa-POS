@@ -256,4 +256,45 @@ class AccountingAccountsTransaction extends Model
             }
         }
     }
+
+    /**
+     * Validate that for a given transaction_id or transaction_payment_id or acc_trans_mapping_id,
+     * the sum of debits is exactly equal to the sum of credits.
+     * If not, throws an Exception to trigger DB::rollBack().
+     */
+    public static function validateTransactionBalance($transaction_id = null, $transaction_payment_id = null, $acc_trans_mapping_id = null)
+    {
+        $query = self::query();
+
+        if (!empty($acc_trans_mapping_id)) {
+            $query->where('acc_trans_mapping_id', $acc_trans_mapping_id);
+        } else {
+            $query->where(function($q) use ($transaction_id, $transaction_payment_id) {
+                $has_condition = false;
+                if (!empty($transaction_id)) {
+                    $q->where('transaction_id', $transaction_id);
+                    $has_condition = true;
+                }
+                if (!empty($transaction_payment_id)) {
+                    if ($has_condition) {
+                        $q->orWhere('transaction_payment_id', $transaction_payment_id);
+                    } else {
+                        $q->where('transaction_payment_id', $transaction_payment_id);
+                    }
+                }
+            });
+        }
+
+        $txs = $query->get();
+        if ($txs->isEmpty()) {
+            return;
+        }
+
+        $debit_sum = $txs->where('type', 'debit')->sum('amount');
+        $credit_sum = $txs->where('type', 'credit')->sum('amount');
+
+        if (abs($debit_sum - $credit_sum) > 0.001) {
+            throw new \Exception("Transaksi gagal disimpan: Ketidakseimbangan jurnal akuntansi terdeteksi. (Total Debit: " . number_format($debit_sum, 2) . ", Total Kredit: " . number_format($credit_sum, 2) . ")");
+        }
+    }
 }

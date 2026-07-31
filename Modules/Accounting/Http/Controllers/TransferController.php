@@ -222,6 +222,8 @@ class TransferController extends Controller
             AccountingAccountsTransaction::create($from_transaction_data);
             AccountingAccountsTransaction::create($to_transaction_data);
 
+            AccountingAccountsTransaction::validateTransactionBalance(null, null, $acc_trans_mapping->id);
+
             DB::commit();
 
             $output = ['success' => 1,
@@ -232,7 +234,7 @@ class TransferController extends Controller
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
 
             $output = ['success' => 0,
-                'msg' => __('messages.something_went_wrong'),
+                'msg' => $e->getMessage(),
             ];
         }
 
@@ -338,6 +340,8 @@ class TransferController extends Controller
             $credit_tansaction->amount = $this->util->num_uf($amount);
             $credit_tansaction->save();
 
+            AccountingAccountsTransaction::validateTransactionBalance(null, null, $mapping_transaction->id);
+
             DB::commit();
 
             $output = ['success' => 1,
@@ -348,7 +352,7 @@ class TransferController extends Controller
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
 
             $output = ['success' => 0,
-                'msg' => __('messages.something_went_wrong'),
+                'msg' => $e->getMessage(),
             ];
         }
 

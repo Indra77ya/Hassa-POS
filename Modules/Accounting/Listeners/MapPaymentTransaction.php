@@ -42,6 +42,12 @@ class MapPaymentTransaction
 
         $transaction = Transaction::find($payment->transaction_id);
 
+        // For cash sale, the sell mapping already directly maps Debit Kas and Credit Revenue.
+        // Therefore, we bypass mapping the payment separately.
+        if ($transaction->type == 'sell' && $transaction->payment_status == 'paid') {
+            return;
+        }
+
         if($transaction->type == 'purchase'){
             $type = 'purchase_payment';
         } elseif($transaction->type == 'sell'){

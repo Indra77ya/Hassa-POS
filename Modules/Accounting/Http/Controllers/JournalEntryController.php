@@ -201,6 +201,8 @@ class JournalEntryController extends Controller
                 }
             }
 
+            AccountingAccountsTransaction::validateTransactionBalance(null, null, $acc_trans_mapping->id);
+
             DB::commit();
 
             $output = ['success' => 1,
@@ -211,7 +213,7 @@ class JournalEntryController extends Controller
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
 
             $output = ['success' => 0,
-                'msg' => __('messages.something_went_wrong'),
+                'msg' => $e->getMessage(),
             ];
         }
 
@@ -359,6 +361,8 @@ class JournalEntryController extends Controller
                 }
             }
 
+            AccountingAccountsTransaction::validateTransactionBalance(null, null, $acc_trans_mapping->id);
+
             $output = ['success' => 1,
                 'msg' => __('lang_v1.updated_success'),
             ];
@@ -366,12 +370,10 @@ class JournalEntryController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            print_r($e->getMessage());
-            exit;
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
 
             $output = ['success' => 0,
-                'msg' => __('messages.something_went_wrong'),
+                'msg' => $e->getMessage(),
             ];
         }
 
