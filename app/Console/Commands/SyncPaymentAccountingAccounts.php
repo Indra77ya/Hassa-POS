@@ -79,6 +79,7 @@ class SyncPaymentAccountingAccounts extends Command
                 }
 
                 if (!$accounting_account) {
+                    $mapped_type = Account::getMappedAccountingType($account);
                     $this->info("Creating Accounting Account for: {$account->name} (Business ID: {$account->business_id})");
                     $accounting_account = AccountingAccount::create([
                         'name' => $account->name,
@@ -87,14 +88,17 @@ class SyncPaymentAccountingAccounts extends Command
                         'description' => $account->note,
                         'gl_code' => $account->account_number,
                         'status' => $account->is_closed ? 'inactive' : 'active',
-                        'account_primary_type' => 'asset',
-                        'account_sub_type_id' => 3, // Cash and cash equivalents
+                        'account_primary_type' => $mapped_type['primary'],
+                        'account_sub_type_id' => $mapped_type['sub_type_id'],
                         'account_id' => $account->id,
                     ]);
                 } else {
+                    $mapped_type = Account::getMappedAccountingType($account);
                     $this->info("Linking existing Accounting Account for: {$account->name}");
                     $accounting_account->update([
                         'account_id' => $account->id,
+                        'account_primary_type' => $mapped_type['primary'],
+                        'account_sub_type_id' => $mapped_type['sub_type_id'],
                     ]);
                 }
 
@@ -102,46 +106,62 @@ class SyncPaymentAccountingAccounts extends Command
                 $account->save();
             }
 
-            // 2. Sync from Accounting Accounts to Payment Accounts (for Cash and Cash equivalents)
+            // 2. Sync from Accounting Accounts to Payment Accounts (for matching categories)
             if (class_exists(AccountingAccount::class)) {
-                $accounting_accounts = AccountingAccount::where('account_primary_type', 'asset')
-                    ->where('account_sub_type_id', 3)
-                    ->get();
+                $accounting_accounts = AccountingAccount::all();
 
-                $this->info('Processing ' . $accounting_accounts->count() . ' cash and cash equivalent accounting accounts...');
+                $this->info('Processing ' . $accounting_accounts->count() . ' total accounting accounts for POS sync...');
 
                 foreach ($accounting_accounts as $aa) {
+                    $should_sync = AccountingAccount::shouldSyncToPOSStatic($aa);
                     $account = null;
                     if (!empty($aa->account_id)) {
                         $account = Account::find($aa->account_id);
                     }
 
-                    if (!$account) {
+                    if (!$account && $should_sync) {
                         $account = Account::where('business_id', $aa->business_id)
                             ->where('name', $aa->name)
                             ->first();
                     }
 
-                    if (!$account) {
-                        $this->info("Creating Payment Account for: {$aa->name} (Business ID: {$aa->business_id})");
-                        $account = Account::create([
-                            'name' => $aa->name,
-                            'business_id' => $aa->business_id,
-                            'created_by' => $aa->created_by ?? 1,
-                            'note' => $aa->description,
-                            'account_number' => $aa->gl_code,
-                            'is_closed' => $aa->status == 'active' ? 0 : 1,
-                            'accounting_account_id' => $aa->id,
-                        ]);
-                    } else {
-                        $this->info("Linking existing Payment Account for: {$aa->name}");
-                        $account->update([
-                            'accounting_account_id' => $aa->id,
-                        ]);
-                    }
+                    if ($should_sync) {
+                        $account_type_id = Account::getPOSAccountTypeIdFromAccounting(
+                            $aa->account_primary_type,
+                            $aa->account_sub_type_id,
+                            $aa->business_id
+                        );
 
-                    $aa->account_id = $account->id;
-                    $aa->save();
+                        if (!$account) {
+                            $this->info("Creating Payment Account for: {$aa->name} (Business ID: {$aa->business_id})");
+                            $account = Account::create([
+                                'name' => $aa->name,
+                                'business_id' => $aa->business_id,
+                                'created_by' => $aa->created_by ?? 1,
+                                'note' => $aa->description,
+                                'account_number' => $aa->gl_code,
+                                'is_closed' => $aa->status == 'active' ? 0 : 1,
+                                'accounting_account_id' => $aa->id,
+                                'account_type_id' => $account_type_id,
+                            ]);
+                        } else {
+                            $this->info("Linking existing Payment Account for: {$aa->name}");
+                            $account->update([
+                                'accounting_account_id' => $aa->id,
+                                'account_type_id' => $account_type_id,
+                            ]);
+                        }
+
+                        $aa->account_id = $account->id;
+                        $aa->save();
+                    } else {
+                        if ($account) {
+                            $this->info("Removing/Deleting Payment Account for: {$aa->name} because its type should not sync to POS.");
+                            $account->delete();
+                            $aa->account_id = null;
+                            $aa->save();
+                        }
+                    }
                 }
             }
 
