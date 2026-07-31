@@ -48,6 +48,12 @@
                                     @lang('superadmin::lang.reset_stock_adjustments')
                                 </label>
                             </div>
+                            <div class="checkbox">
+                                <label style="font-size: 14px; cursor: pointer;">
+                                    {!! Form::checkbox('reset_transactions[]', 'finance', false, ['class' => 'transaction_child']) !!}
+                                    @lang('superadmin::lang.reset_finance')
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
