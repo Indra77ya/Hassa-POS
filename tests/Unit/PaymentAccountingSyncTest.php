@@ -584,4 +584,149 @@ class PaymentAccountingSyncTest extends TestCase
         $this->assertEquals($at2->id, $at1->transfer_transaction_id);
         $this->assertEquals($at1->id, $at2->transfer_transaction_id);
     }
+
+    /**
+     * Test mapping resolver and POS-to-Accounting sync for different account types.
+     */
+    public function testAccountTypeMappingSync()
+    {
+        $business_id = 1;
+
+        // Create POS Account Types
+        $fixed_keys = [
+            'kas_dan_bank', 'piutang_usaha', 'persediaan', 'aktiva_lancar_lainnya',
+            'aktiva_tetap', 'akumulasi_penyusutan', 'aktiva_lainnya', 'hutang_usaha',
+            'hutang_lancar_lainnya', 'hutang_jangka_panjang', 'ekuitas', 'pendapatan_usaha',
+            'pendapatan_lainnya', 'harga_pokok_penjualan', 'beban_operasional', 'beban_lain_lain', 'beban_pajak'
+        ];
+
+        $types = [];
+        foreach ($fixed_keys as $key) {
+            $types[$key] = \App\AccountType::create([
+                'name' => 'Type ' . $key,
+                'business_id' => $business_id,
+                'fixed_key' => $key
+            ]);
+        }
+
+        // Test each type maps correctly on POS Account creation
+        foreach ($fixed_keys as $key) {
+            $acc = Account::create([
+                'name' => 'Acc for ' . $key,
+                'business_id' => $business_id,
+                'account_type_id' => $types[$key]->id
+            ]);
+
+            $this->assertNotNull($acc->accounting_account_id);
+            $aa = AccountingAccount::find($acc->accounting_account_id);
+            $this->assertNotNull($aa);
+
+            $mapped = Account::getMappedAccountingType($acc);
+            $this->assertEquals($mapped['primary'], $aa->account_primary_type);
+            $this->assertEquals($mapped['sub_type_id'], $aa->account_sub_type_id);
+        }
+    }
+
+    /**
+     * Test filter and exclusion logic for Accounting-to-POS sync.
+     */
+    public function testAccountingToPOSSyncFilters()
+    {
+        $business_id = 1;
+
+        // Set up POS Account Types
+        $fixed_keys = [
+            'kas_dan_bank', 'piutang_usaha', 'persediaan', 'hutang_usaha', 'ekuitas'
+        ];
+        $types = [];
+        foreach ($fixed_keys as $key) {
+            $types[$key] = \App\AccountType::create([
+                'name' => 'Type ' . $key,
+                'business_id' => $business_id,
+                'fixed_key' => $key
+            ]);
+        }
+
+        // Create detail type 'inventory' for testing persediaan / inventory sync
+        Schema::dropIfExists('accounting_account_types');
+        Schema::create('accounting_account_types', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->string('name');
+            $table->integer('business_id')->nullable();
+            $table->integer('created_by')->nullable();
+            $table->string('account_primary_type')->nullable();
+            $table->string('account_type')->nullable();
+            $table->bigInteger('parent_id')->nullable();
+            $table->text('description')->nullable();
+            $table->boolean('show_balance')->default(1);
+            $table->timestamps();
+        });
+
+        $detail_type = \Modules\Accounting\Entities\AccountingAccountType::create([
+            'name' => 'inventory',
+            'account_type' => 'detail_type',
+            'parent_id' => 2
+        ]);
+
+        $detail_type_non_inventory = \Modules\Accounting\Entities\AccountingAccountType::create([
+            'name' => 'other_current_assets',
+            'account_type' => 'detail_type',
+            'parent_id' => 2
+        ]);
+
+        // Allowed accounts to sync
+        $allowed_cases = [
+            ['name' => 'Allowed Bank', 'primary' => 'asset', 'sub' => 3, 'detail' => null],
+            ['name' => 'Allowed A/R', 'primary' => 'asset', 'sub' => 1, 'detail' => null],
+            ['name' => 'Allowed A/P', 'primary' => 'liability', 'sub' => 6, 'detail' => null],
+            ['name' => 'Allowed Inventory', 'primary' => 'asset', 'sub' => 2, 'detail' => $detail_type->id],
+            ['name' => 'Allowed Revenue', 'primary' => 'income', 'sub' => 11, 'detail' => null],
+            ['name' => 'Allowed COGS', 'primary' => 'expenses', 'sub' => 13, 'detail' => null],
+            ['name' => 'Allowed Expenses', 'primary' => 'expenses', 'sub' => 14, 'detail' => null]
+        ];
+
+        // Disallowed accounts to sync
+        $disallowed_cases = [
+            ['name' => 'Disallowed Non-Inventory Current Asset', 'primary' => 'asset', 'sub' => 2, 'detail' => $detail_type_non_inventory->id],
+            ['name' => 'Disallowed Equity', 'primary' => 'equity', 'sub' => 10, 'detail' => null],
+            ['name' => 'Disallowed Fixed Asset', 'primary' => 'asset', 'sub' => 4, 'detail' => null],
+            ['name' => 'Disallowed Non-current Asset', 'primary' => 'asset', 'sub' => 5, 'detail' => null],
+            ['name' => 'Disallowed Non-current Liability', 'primary' => 'liability', 'sub' => 9, 'detail' => null]
+        ];
+
+        // Test Allowed Cases sync successfully to POS
+        foreach ($allowed_cases as $case) {
+            $aa = AccountingAccount::create([
+                'name' => $case['name'],
+                'business_id' => $business_id,
+                'created_by' => 1,
+                'account_primary_type' => $case['primary'],
+                'account_sub_type_id' => $case['sub'],
+                'detail_type_id' => $case['detail'],
+                'status' => 'active'
+            ]);
+
+            $this->assertTrue(AccountingAccount::shouldSyncToPOSStatic($aa));
+            $this->assertNotNull($aa->account_id, "Allowed account [{$case['name']}] did not sync to POS.");
+            $pos = Account::find($aa->account_id);
+            $this->assertNotNull($pos);
+            $this->assertEquals($case['name'], $pos->name);
+        }
+
+        // Test Disallowed Cases are blocked and DO NOT sync to POS
+        foreach ($disallowed_cases as $case) {
+            $aa = AccountingAccount::create([
+                'name' => $case['name'],
+                'business_id' => $business_id,
+                'created_by' => 1,
+                'account_primary_type' => $case['primary'],
+                'account_sub_type_id' => $case['sub'],
+                'detail_type_id' => $case['detail'],
+                'status' => 'active'
+            ]);
+
+            $this->assertFalse(AccountingAccount::shouldSyncToPOSStatic($aa));
+            $this->assertNull($aa->account_id, "Disallowed account [{$case['name']}] synced to POS but should be blocked.");
+        }
+    }
 }

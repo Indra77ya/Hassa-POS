@@ -36,6 +36,7 @@ class Account extends Model
                     }
 
                     if (!$accounting_account) {
+                        $mapped_type = self::getMappedAccountingType($account);
                         $accounting_account = \Modules\Accounting\Entities\AccountingAccount::create([
                             'name' => $account->name,
                             'business_id' => $account->business_id,
@@ -43,8 +44,8 @@ class Account extends Model
                             'description' => $account->note,
                             'gl_code' => $account->account_number,
                             'status' => $account->is_closed ? 'inactive' : 'active',
-                            'account_primary_type' => 'asset',
-                            'account_sub_type_id' => 3, // Cash and cash equivalents
+                            'account_primary_type' => $mapped_type['primary'],
+                            'account_sub_type_id' => $mapped_type['sub_type_id'],
                             'account_id' => $account->id,
                         ]);
                     } else {
@@ -88,12 +89,15 @@ class Account extends Model
                     }
 
                     if ($accounting_account) {
+                        $mapped_type = self::getMappedAccountingType($account);
                         $accounting_account->update([
                             'name' => $account->name,
                             'description' => $account->note,
                             'gl_code' => $account->account_number,
                             'status' => $account->is_closed ? 'inactive' : 'active',
                             'account_id' => $account->id,
+                            'account_primary_type' => $mapped_type['primary'],
+                            'account_sub_type_id' => $mapped_type['sub_type_id'],
                         ]);
 
                         if (empty($account->accounting_account_id)) {
@@ -307,6 +311,122 @@ class Account extends Model
         }
 
         return 'credit';
+    }
+
+    /**
+     * Map POS account type to Accounting primary and sub type ID.
+     *
+     * @param  \App\Account  $account
+     * @return array
+     */
+    public static function getMappedAccountingType($account)
+    {
+        $fixed_key = '';
+        if ($account->account_type) {
+            $fixed_key = $account->account_type->fixed_key;
+        } else if (!empty($account->account_type_id)) {
+            $type = \App\AccountType::find($account->account_type_id);
+            if ($type) {
+                $fixed_key = $type->fixed_key;
+            }
+        }
+
+        switch ($fixed_key) {
+            case 'kas_dan_bank':
+                return ['primary' => 'asset', 'sub_type_id' => 3]; // cash_and_cash_equivalents
+            case 'piutang_usaha':
+                return ['primary' => 'asset', 'sub_type_id' => 1]; // accounts_receivable
+            case 'persediaan':
+            case 'aktiva_lancar_lainnya':
+                return ['primary' => 'asset', 'sub_type_id' => 2]; // current_assets
+            case 'aktiva_tetap':
+            case 'akumulasi_penyusutan':
+                return ['primary' => 'asset', 'sub_type_id' => 4]; // fixed_assets
+            case 'aktiva_lainnya':
+                return ['primary' => 'asset', 'sub_type_id' => 5]; // non_current_assets
+            case 'hutang_usaha':
+                return ['primary' => 'liability', 'sub_type_id' => 6]; // accounts_payable
+            case 'hutang_lancar_lainnya':
+                return ['primary' => 'liability', 'sub_type_id' => 8]; // current_liabilities
+            case 'hutang_jangka_panjang':
+                return ['primary' => 'liability', 'sub_type_id' => 9]; // non_current_liabilities
+            case 'ekuitas':
+                return ['primary' => 'equity', 'sub_type_id' => 10]; // owners_equity
+            case 'pendapatan_usaha':
+                return ['primary' => 'income', 'sub_type_id' => 11]; // income
+            case 'pendapatan_lainnya':
+                return ['primary' => 'income', 'sub_type_id' => 12]; // other_income
+            case 'harga_pokok_penjualan':
+                return ['primary' => 'expenses', 'sub_type_id' => 13]; // cost_of_sale
+            case 'beban_operasional':
+            case 'beban_pajak':
+                return ['primary' => 'expenses', 'sub_type_id' => 14]; // expenses
+            case 'beban_lain_lain':
+                return ['primary' => 'expenses', 'sub_type_id' => 15]; // other_expense
+            default:
+                return ['primary' => 'asset', 'sub_type_id' => 3]; // fallback to Cash & equivalents
+        }
+    }
+
+    /**
+     * Resolve POS account type ID from Accounting account primary and sub_type_id.
+     *
+     * @param  string  $primary
+     * @param  int  $sub_type_id
+     * @param  int  $business_id
+     * @return int|null
+     */
+    public static function getPOSAccountTypeIdFromAccounting($primary, $sub_type_id, $business_id)
+    {
+        $fixed_key = null;
+        if ($primary == 'asset') {
+            if ($sub_type_id == 3) {
+                $fixed_key = 'kas_dan_bank';
+            } elseif ($sub_type_id == 1) {
+                $fixed_key = 'piutang_usaha';
+            } elseif ($sub_type_id == 2) {
+                $fixed_key = 'persediaan'; // or aktiva_lancar_lainnya, choose persediaan as default
+            } elseif ($sub_type_id == 4) {
+                $fixed_key = 'aktiva_tetap';
+            } elseif ($sub_type_id == 5) {
+                $fixed_key = 'aktiva_lainnya';
+            }
+        } elseif ($primary == 'liability') {
+            if ($sub_type_id == 6) {
+                $fixed_key = 'hutang_usaha';
+            } elseif ($sub_type_id == 8) {
+                $fixed_key = 'hutang_lancar_lainnya';
+            } elseif ($sub_type_id == 9) {
+                $fixed_key = 'hutang_jangka_panjang';
+            }
+        } elseif ($primary == 'equity') {
+            $fixed_key = 'ekuitas';
+        } elseif ($primary == 'income') {
+            if ($sub_type_id == 11) {
+                $fixed_key = 'pendapatan_usaha';
+            } elseif ($sub_type_id == 12) {
+                $fixed_key = 'pendapatan_lainnya';
+            }
+        } elseif (in_array($primary, ['expense', 'expenses'])) {
+            if ($sub_type_id == 13) {
+                $fixed_key = 'harga_pokok_penjualan';
+            } elseif ($sub_type_id == 14) {
+                $fixed_key = 'beban_operasional';
+            } elseif ($sub_type_id == 15) {
+                $fixed_key = 'beban_lain_lain';
+            }
+        }
+
+        if ($fixed_key) {
+            $type = \App\AccountType::where('business_id', $business_id)
+                ->where('fixed_key', $fixed_key)
+                ->first();
+            if ($type) {
+                return $type->id;
+            }
+        }
+
+        return null;
     }
 
     /**

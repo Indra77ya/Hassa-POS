@@ -24,8 +24,7 @@ class AccountingAccount extends Model
                 return;
             }
 
-            // Only sync if the account belongs to Asset -> Cash and cash equivalents
-            if ($accountingAccount->account_primary_type == 'asset' && $accountingAccount->account_sub_type_id == 3) {
+            if (self::shouldSyncToPOSStatic($accountingAccount)) {
                 if (class_exists(\App\Account::class)) {
                     self::$is_syncing = true;
                     \App\Account::$is_syncing = true;
@@ -37,6 +36,12 @@ class AccountingAccount extends Model
                         }
 
                         if (!$account) {
+                            $account_type_id = \App\Account::getPOSAccountTypeIdFromAccounting(
+                                $accountingAccount->account_primary_type,
+                                $accountingAccount->account_sub_type_id,
+                                $accountingAccount->business_id
+                            );
+
                             $account = \App\Account::create([
                                 'name' => $accountingAccount->name,
                                 'business_id' => $accountingAccount->business_id,
@@ -45,9 +50,16 @@ class AccountingAccount extends Model
                                 'account_number' => $accountingAccount->gl_code,
                                 'is_closed' => $accountingAccount->status == 'active' ? 0 : 1,
                                 'accounting_account_id' => $accountingAccount->id,
+                                'account_type_id' => $account_type_id,
                             ]);
                         } else {
                             $account->accounting_account_id = $accountingAccount->id;
+                            $account_type_id = \App\Account::getPOSAccountTypeIdFromAccounting(
+                                $accountingAccount->account_primary_type,
+                                $accountingAccount->account_sub_type_id,
+                                $accountingAccount->business_id
+                            );
+                            $account->account_type_id = $account_type_id;
                             $account->save();
                         }
 
@@ -70,8 +82,9 @@ class AccountingAccount extends Model
                 return;
             }
 
-            // Only sync if mapped to Payment Account or meets the Cash and cash equivalents criteria
-            if (($accountingAccount->account_primary_type == 'asset' && $accountingAccount->account_sub_type_id == 3) || !empty($accountingAccount->account_id)) {
+            $should_sync = self::shouldSyncToPOSStatic($accountingAccount);
+
+            if ($should_sync || !empty($accountingAccount->account_id)) {
                 if (class_exists(\App\Account::class)) {
                     self::$is_syncing = true;
                     \App\Account::$is_syncing = true;
@@ -82,7 +95,7 @@ class AccountingAccount extends Model
                             $account = \App\Account::find($accountingAccount->account_id);
                         }
 
-                        if (!$account) {
+                        if (!$account && $should_sync) {
                             // Fallback matching by name and business_id
                             $account = \App\Account::where('business_id', $accountingAccount->business_id)
                                 ->where('name', $accountingAccount->name)
@@ -90,15 +103,50 @@ class AccountingAccount extends Model
                         }
 
                         if ($account) {
-                            $account->update([
+                            if (!$should_sync) {
+                                $account->delete();
+                                $accountingAccount->account_id = null;
+                                $accountingAccount->save();
+                            } else {
+                                $account_type_id = \App\Account::getPOSAccountTypeIdFromAccounting(
+                                    $accountingAccount->account_primary_type,
+                                    $accountingAccount->account_sub_type_id,
+                                    $accountingAccount->business_id
+                                );
+
+                                $account->update([
+                                    'name' => $accountingAccount->name,
+                                    'note' => $accountingAccount->description,
+                                    'account_number' => $accountingAccount->gl_code,
+                                    'is_closed' => $accountingAccount->status == 'active' ? 0 : 1,
+                                    'accounting_account_id' => $accountingAccount->id,
+                                    'account_type_id' => $account_type_id,
+                                ]);
+
+                                if (empty($accountingAccount->account_id)) {
+                                    $accountingAccount->account_id = $account->id;
+                                    $accountingAccount->save();
+                                }
+                            }
+                        } elseif ($should_sync) {
+                            $account_type_id = \App\Account::getPOSAccountTypeIdFromAccounting(
+                                $accountingAccount->account_primary_type,
+                                $accountingAccount->account_sub_type_id,
+                                $accountingAccount->business_id
+                            );
+
+                            $account = \App\Account::create([
                                 'name' => $accountingAccount->name,
+                                'business_id' => $accountingAccount->business_id,
+                                'created_by' => $accountingAccount->created_by ?? 1,
                                 'note' => $accountingAccount->description,
                                 'account_number' => $accountingAccount->gl_code,
                                 'is_closed' => $accountingAccount->status == 'active' ? 0 : 1,
                                 'accounting_account_id' => $accountingAccount->id,
+                                'account_type_id' => $account_type_id,
                             ]);
 
-                            if (empty($accountingAccount->account_id)) {
+                            if ($account) {
                                 $accountingAccount->account_id = $account->id;
                                 $accountingAccount->save();
                             }
@@ -139,6 +187,57 @@ class AccountingAccount extends Model
                 }
             }
         });
+    }
+
+    /**
+     * Determine if the Accounting account should sync to POS.
+     *
+     * @param  \Modules\Accounting\Entities\AccountingAccount  $accountingAccount
+     * @return bool
+     */
+    public static function shouldSyncToPOSStatic($accountingAccount)
+    {
+        $primary = $accountingAccount->account_primary_type;
+        $sub = $accountingAccount->account_sub_type_id;
+
+        if ($primary == 'asset') {
+            // a. Akun Kas & Bank (cash_and_cash_equivalents)
+            if ($sub == 3) {
+                return true;
+            }
+            // b. Akun Piutang Usaha (accounts_receivable)
+            if ($sub == 1) {
+                return true;
+            }
+            // d. Akun Persediaan (current_assets khusus inventory)
+            if ($sub == 2) {
+                $detail_type_name = \Modules\Accounting\Entities\AccountingAccountType::where('id', $accountingAccount->detail_type_id)->value('name');
+                if ($detail_type_name == 'inventory') {
+                    return true;
+                }
+            }
+        } elseif ($primary == 'liability') {
+            // c. Akun Hutang Usaha (accounts_payable)
+            if ($sub == 6) {
+                return true;
+            }
+        } elseif ($primary == 'income') {
+            // e. Akun Pendapatan Usaha (income)
+            if ($sub == 11) {
+                return true;
+            }
+        } elseif (in_array($primary, ['expense', 'expenses'])) {
+            // f. Akun HPP (cost_of_sale)
+            if ($sub == 13) {
+                return true;
+            }
+            // g. Akun Beban Operasional (expenses)
+            if ($sub == 14) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function child_accounts()
