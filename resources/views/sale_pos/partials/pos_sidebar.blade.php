@@ -1,7 +1,7 @@
 <div class="pos-sidebar-root tw-shadow-[0_4px_20px_rgba(0,0,0,0.02)] tw-rounded-2xl tw-bg-white tw-border tw-border-slate-100" style="padding: 10px; overflow: hidden; height: 100%;">
-<div class="tw-flex tw-items-center tw-gap-2.5 tw-flex-wrap" style="margin: 0 0 10px 0; padding: 0 4px;">
+<div class="tw-flex tw-items-center tw-gap-2.5 tw-flex-nowrap" style="margin: 0 0 10px 0; padding: 0 4px; width: 100%;">
     @if (!empty($categories))
-        <div class="tw-flex-1 tw-min-w-[120px]" id="product_category_div">
+        <div class="tw-flex-1 tw-w-0" id="product_category_div">
             <div class="tw-dw-drawer tw-dw-drawer-end">
                 <input id="my-drawer-4{{ $drawer_id_suffix ?? '' }}" type="checkbox" class="tw-dw-drawer-toggle">
                 <div class="tw-dw-drawer-content">
@@ -90,7 +90,7 @@
     @endif
 
     @if (!empty($brands))
-        <div class="tw-flex-1 tw-min-w-[120px]" id="product_brand_div">
+        <div class="tw-flex-1 tw-w-0" id="product_brand_div">
             <div class="tw-dw-drawer tw-dw-drawer-end">
                 <input id="my-drawer-brand{{ $drawer_id_suffix ?? '' }}" type="checkbox" class="tw-dw-drawer-toggle">
                 <div class="tw-dw-drawer-content">
@@ -161,7 +161,7 @@
         ) !!}
     </div>
 
-    <div class="tw-flex-1 tw-min-w-[120px]" id="feature_product_div">
+    <div class="tw-flex-1 tw-w-0" id="feature_product_div">
         <button type="button" id="show_featured_products"
             class="tw-dw-btn tw-dw-btn-sm tw-group tw-w-full tw-h-9 tw-min-h-[2.25rem] tw-rounded-xl tw-flex-nowrap tw-gap-1.5 tw-px-3 tw-text-xs tw-font-bold tw-normal-case tw-bg-slate-50 tw-border tw-border-slate-100 tw-text-slate-600 tw-shadow-none tw-transition-all tw-duration-200 hover:tw-bg-amber-50 hover:tw-border-amber-200 hover:tw-text-amber-700 hover:tw-shadow-sm focus:tw-ring-2 focus:tw-ring-amber-400 focus:tw-ring-offset-1">
             <svg xmlns="http://www.w3.org/2000/svg"
