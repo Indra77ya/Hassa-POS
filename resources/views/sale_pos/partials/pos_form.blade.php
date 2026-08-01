@@ -294,8 +294,8 @@
 			#pos_table .pos-empty-state-row:hover,
 			#pos_table .pos-empty-state-row td:hover,
 			#pos_table .pos-empty-state-row:hover td {
-				background-color: transparent !important;
-				background: transparent !important;
+				background-color: #ffffff !important;
+				background: #ffffff !important;
 			}
 		</style>
 	</div>
