@@ -5,7 +5,7 @@
 			<div class="image-container tw-h-16 tw-mx-auto tw-w-full tw-mb-2 tw-rounded-lg tw-overflow-hidden tw-bg-slate-50 tw-border tw-border-slate-100/50"
 				style="background-image: url('{{ count($product->media) > 0 ? $product->media->first()->display_url : (!empty($product->product_image) ? asset('/uploads/img/' . rawurlencode($product->product_image)) : asset('/img/default.png')) }}');
 				background-repeat: no-repeat; background-position: center;
-				background-size: cover; height: 64px;">
+				background-size: {{ count($product->media) > 0 || !empty($product->product_image) ? 'cover' : 'contain' }}; height: 64px;">
 			</div>
 
 			<div class="text_div tw-mt-1">
