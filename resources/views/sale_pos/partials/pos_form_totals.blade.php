@@ -1,4 +1,4 @@
-<div class="pos_form_totals">
+<div class="pos_form_totals tw-rounded-b-2xl tw-overflow-hidden">
 
 	<div class="pos_totals_left">
 
@@ -24,7 +24,7 @@
 					<span class="mobile-only">DISC(-)</span>
 					<span class="desktop-only">@lang('sale.discount')(-) @show_tooltip(__('tooltip.sale_discount'))</span>
 					@if($edit_discount)
-						<i class="fas fa-edit pos_totals_edit" id="pos-edit-discount" title="@lang('sale.edit_discount')" aria-hidden="true" data-toggle="modal" data-target="#posEditDiscountModal"></i>
+						<i class="fas fa-edit pos_totals_edit tw-text-slate-400 hover:tw-text-slate-600" id="pos-edit-discount" title="@lang('sale.edit_discount')" aria-hidden="true" data-toggle="modal" data-target="#posEditDiscountModal"></i>
 					@endif
 				@endif
 			</span>
@@ -49,7 +49,7 @@
 			<span class="pos_totals_label">
 				<span class="mobile-only">TAX(+)</span>
 				<span class="desktop-only">@lang('sale.order_tax')(+) @show_tooltip(__('tooltip.sale_tax'))</span>
-				<i class="fas fa-edit pos_totals_edit" title="@lang('sale.edit_order_tax')" aria-hidden="true" data-toggle="modal" data-target="#posEditOrderTaxModal" id="pos-edit-tax"></i>
+				<i class="fas fa-edit pos_totals_edit tw-text-slate-400 hover:tw-text-slate-600" title="@lang('sale.edit_order_tax')" aria-hidden="true" data-toggle="modal" data-target="#posEditOrderTaxModal" id="pos-edit-tax"></i>
 			</span>
 			<span class="pos_totals_value" id="order_tax">@if(empty($edit)) 0 @else {{$transaction->tax_amount}} @endif</span>
 			<input type="hidden" name="tax_rate_id" id="tax_rate_id" value="@if(empty($edit)) {{$business_details->default_sales_tax}} @else {{$transaction->tax_id}} @endif" data-default="{{$business_details->default_sales_tax}}">
@@ -61,7 +61,7 @@
 			<span class="pos_totals_label">
 				<span class="mobile-only">SHIP(+)</span>
 				<span class="desktop-only">@lang('sale.shipping')(+) @show_tooltip(__('tooltip.shipping'))</span>
-				<i class="fas fa-edit pos_totals_edit" title="@lang('sale.shipping')" aria-hidden="true" data-toggle="modal" data-target="#posShippingModal"></i>
+				<i class="fas fa-edit pos_totals_edit tw-text-slate-400 hover:tw-text-slate-600" title="@lang('sale.shipping')" aria-hidden="true" data-toggle="modal" data-target="#posShippingModal"></i>
 			</span>
 			<span class="pos_totals_value" id="shipping_charges_amount">0</span>
 			<input type="hidden" name="shipping_details" id="shipping_details" value="@if(empty($edit)){{''}}@else{{$transaction->shipping_details}}@endif" data-default="">
@@ -78,7 +78,7 @@
 				<span class="pos_totals_label">
 					<span class="mobile-only">PACK(+)</span>
 					<span class="desktop-only">@lang('lang_v1.packing_charge')(+)</span>
-					<i class="fas fa-edit pos_totals_edit service_modal_btn"></i>
+					<i class="fas fa-edit pos_totals_edit service_modal_btn tw-text-slate-400 hover:tw-text-slate-600"></i>
 				</span>
 				<span class="pos_totals_value" id="packing_charge_text">0</span>
 			</div>
@@ -97,7 +97,7 @@
 		@endif
 	</div>
 
-	{{-- Total Payable hero --}}
+	{{-- Total Payable hero (Soft, refined neutral/slate tones with subtle contrast) --}}
 	<div class="pos_totals_right">
 		<span class="pos_totals_right_label">@lang('sale.total_payable')</span>
 		<span id="total_payable" class="pos_totals_right_value number">0</span>
@@ -130,8 +130,8 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		padding: 3px 4px;
-		min-height: 30px;
+		padding: 4px 6px;
+		min-height: 32px;
 		overflow: hidden;
 		box-sizing: border-box;
 	}
@@ -150,20 +150,19 @@
 	.pos_form_totals .pos_totals_value {
 		font-size: 12px;
 		font-weight: 700;
-		color: #0f172a;
+		color: #334155;
 		line-height: 1.2;
 		letter-spacing: -0.2px;
 		white-space: nowrap;
 		font-variant-numeric: tabular-nums;
 	}
-	.pos_form_totals .pos_totals_value--danger { color: #dc2626; }
-	.pos_form_totals .pos_totals_value--loyalty { color: #8b5cf6; }
+	.pos_form_totals .pos_totals_value--danger { color: #e11d48; }
+	.pos_form_totals .pos_totals_value--loyalty { color: #6366f1; }
 	.pos_form_totals .pos_totals_edit {
 		cursor: pointer;
 		font-size: 9px;
 		padding: 0 2px;
 		margin-left: 1px;
-		color: #3b82f6;
 		vertical-align: middle;
 		opacity: 0.8;
 	}
@@ -175,23 +174,23 @@
 		align-items: center;
 		justify-content: space-between;
 		gap: 8px;
-		padding: 10px 12px;
-		background: #ecfdf5;
-		border-top: 1px solid #d1fae5;
+		padding: 12px 16px;
+		background: #f1f5f9;
+		border-top: 1px solid #e2e8f0;
 	}
 	.pos_form_totals .pos_totals_right_label {
 		font-size: 11px;
 		font-weight: 800;
-		color: #065f46;
+		color: #475569;
 		text-transform: uppercase;
 		letter-spacing: 0.8px;
 		white-space: nowrap;
 		line-height: 1.2;
 	}
 	.pos_form_totals .pos_totals_right_value {
-		font-size: 19px;
+		font-size: 20px;
 		font-weight: 800;
-		color: #047857;
+		color: #0f172a;
 		letter-spacing: -0.5px;
 		white-space: nowrap;
 		font-variant-numeric: tabular-nums;
@@ -219,10 +218,10 @@
 			flex-direction: column;
 			justify-content: center;
 			gap: 2px;
-			padding: 6px 12px;
+			padding: 8px 16px;
 			min-height: 56px;
 			border-top: none;
-			border-left: 1px solid #d1fae5;
+			border-left: 1px solid #e2e8f0;
 		}
 		.pos_form_totals .pos_totals_cell {
 			padding: 6px 8px;
@@ -238,7 +237,7 @@
 			font-size: 13px;
 		}
 		.pos_form_totals .pos_totals_right_label { font-size: 10px; }
-		.pos_form_totals .pos_totals_right_value { font-size: 26px; }
+		.pos_form_totals .pos_totals_right_value { font-size: 24px; }
 		.pos_form_totals .desktop-only { display: inline; }
 		.pos_form_totals .mobile-only { display: none; }
 	}
