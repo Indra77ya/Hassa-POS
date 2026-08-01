@@ -126,6 +126,9 @@ class TransactionMappingTest extends TestCase
             $table->integer('business_id');
             $table->integer('location_id')->nullable();
             $table->string('type')->nullable();
+            $table->string('status')->nullable();
+            $table->string('sub_status')->nullable();
+            $table->integer('is_quotation')->default(0);
             $table->string('payment_status')->nullable();
             $table->string('invoice_no')->nullable();
             $table->decimal('final_total', 22, 4)->default(0);
@@ -582,5 +585,89 @@ class TransactionMappingTest extends TestCase
         $this->assertNotNull($credit_tx);
         $this->assertEquals('credit', $credit_tx->type);
         $this->assertEquals(250000, $credit_tx->amount);
+    }
+
+    /**
+     * Test that Quotation and Draft documents are ignored from accounting mapping.
+     * Also test transitions: Draft -> Final (maps), Final -> Draft (deletes mapping), and Deletion (cleans up).
+     */
+    public function testQuotationAndDraftHandling()
+    {
+        // 1. Create a draft/quotation transaction
+        $transaction = Transaction::create([
+            'business_id' => 1,
+            'location_id' => 1,
+            'type' => 'sell',
+            'status' => 'draft',
+            'sub_status' => 'quotation',
+            'is_quotation' => 1,
+            'payment_status' => 'due',
+            'invoice_no' => 'QUO-0001',
+            'final_total' => 4500,
+        ]);
+
+        DB::table('transaction_sell_lines')->insert([
+            'transaction_id' => $transaction->id,
+            'product_id' => 1,
+            'variation_id' => 1,
+            'quantity' => 1,
+            'quantity_returned' => 0,
+        ]);
+
+        // Trigger mapping listener
+        $event = new \App\Events\SellCreatedOrModified($transaction);
+        $listener = new \Modules\Accounting\Listeners\MapSellTransaction();
+        $listener->handle($event);
+
+        // Verify that NO mapping exists for this transaction since it is a draft/quotation
+        $txs = AccountingAccountsTransaction::where('transaction_id', $transaction->id)->get();
+        $this->assertCount(0, $txs, 'Quotation/Draft must not generate any accounting transactions');
+
+        // 2. Transition: Convert Draft/Quotation to Final
+        $transaction->status = 'final';
+        $transaction->sub_status = null;
+        $transaction->is_quotation = 0;
+        $transaction->save();
+
+        // Trigger mapping listener again
+        $event = new \App\Events\SellCreatedOrModified($transaction);
+        $listener->handle($event);
+
+        // Verify that mapping WAS generated when transitioned to final
+        $txs = AccountingAccountsTransaction::where('transaction_id', $transaction->id)->get();
+        $this->assertGreaterThan(0, $txs->count(), 'Converting Quotation/Draft to Final must generate accounting transactions');
+
+        // 3. Transition: Convert Final back to Draft/Quotation
+        $transaction->status = 'draft';
+        $transaction->sub_status = 'quotation';
+        $transaction->is_quotation = 1;
+        $transaction->save();
+
+        // Trigger mapping listener again
+        $event = new \App\Events\SellCreatedOrModified($transaction);
+        $listener->handle($event);
+
+        // Verify that mappings are DELETED/REMOVED when transitioned back to draft/quotation
+        $txs = AccountingAccountsTransaction::where('transaction_id', $transaction->id)->get();
+        $this->assertCount(0, $txs, 'Changing status back to draft/quotation must delete/reverse existing accounting transactions');
+
+        // 4. Deletion: If a transaction is deleted, its mappings must be deleted too
+        // Convert to final first to have mappings
+        $transaction->status = 'final';
+        $transaction->sub_status = null;
+        $transaction->is_quotation = 0;
+        $transaction->save();
+
+        $event = new \App\Events\SellCreatedOrModified($transaction);
+        $listener->handle($event);
+
+        $this->assertGreaterThan(0, AccountingAccountsTransaction::where('transaction_id', $transaction->id)->count());
+
+        // Now dispatch SellCreatedOrModified with isDeleted = true
+        \App\Events\SellCreatedOrModified::dispatch($transaction, true);
+
+        // Verify that mappings are fully deleted
+        $txs = AccountingAccountsTransaction::where('transaction_id', $transaction->id)->get();
+        $this->assertCount(0, $txs, 'Deleting the sale must cleanly remove all its accounting mappings');
     }
 }

@@ -2646,6 +2646,8 @@ class SellPosController extends Controller
 
             DB::commit();
 
+            SellCreatedOrModified::dispatch($transaction);
+
             $output = ['success' => 1, 'msg' => __('lang_v1.converted_to_invoice_successfully', ['invoice_no' => $transaction->invoice_no])];
         } catch (Exception $e) {
             DB::rollBack();

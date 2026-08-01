@@ -42,6 +42,12 @@ class MapSellTransaction
                 return;
             }
 
+            // If draft or quotation, delete existing mappings and return (completely ignore drafts/quotations)
+            if ($transaction->status == 'draft') {
+                $accountingUtil->deleteMap($id, null);
+                return;
+            }
+
             // Get business location and default map
             $business_location = BusinessLocation::find($transaction->location_id);
             if (!$business_location) {

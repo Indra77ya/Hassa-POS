@@ -4915,6 +4915,8 @@ class TransactionUtil extends Util
                     $this->updateSalesOrderStatus($sales_order_ids);
                 }
 
+                \App\Events\SellCreatedOrModified::dispatch($transaction, true);
+
                 $transaction->delete();
             } else {
                 $business = Business::findOrFail($business_id);
@@ -4944,6 +4946,8 @@ class TransactionUtil extends Util
 
                 //Delete Cash register transactions
                 $transaction->cash_register_payments()->delete();
+
+                \App\Events\SellCreatedOrModified::dispatch($transaction, true);
 
                 $transaction->delete();
 
