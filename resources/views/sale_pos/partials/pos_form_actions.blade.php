@@ -26,7 +26,8 @@
 
                 @if (!Gate::check('disable_express_checkout') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
                     <button type="button"
-                        class="tw-leading-none tw-whitespace-nowrap tw-font-bold tw-text-white tw-cursor-pointer tw-text-xs md:tw-text-sm tw-bg-emerald-600 hover:tw-bg-emerald-700 tw-p-2.5 tw-rounded-xl tw-w-[5.5rem] tw-flex tw-flex-row tw-items-center tw-justify-center tw-gap-1 active:tw-scale-95 tw-transition-all no-print @if ($pos_settings['disable_express_checkout'] != 0 || !array_key_exists('cash', $payment_types)) hide @endif pos-express-finalize"
+                        class="tw-leading-none tw-whitespace-nowrap tw-font-bold tw-text-white tw-cursor-pointer tw-text-xs md:tw-text-sm tw-p-2.5 tw-rounded-xl tw-w-[5.5rem] tw-flex tw-flex-row tw-items-center tw-justify-center tw-gap-1 active:tw-scale-95 tw-transition-all no-print @if ($pos_settings['disable_express_checkout'] != 0 || !array_key_exists('cash', $payment_types)) hide @endif pos-express-finalize"
+                        style="background-color: #10b981 !important; color: #ffffff !important;"
                         data-pay_method="cash" title="@lang('tooltip.express_checkout')"> <i class="fas fa-money-bill-alt"
                             aria-hidden="true"></i> @lang('lang_v1.express_checkout_cash')</button>
                 @endif
@@ -106,7 +107,8 @@
 
                     @if (!Gate::check('disable_express_checkout') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
                         <button type="button"
-                            class="tw-leading-none tw-whitespace-nowrap tw-font-extrabold tw-text-white tw-cursor-pointer tw-text-xs md:tw-text-sm tw-bg-emerald-500 hover:tw-bg-emerald-600 tw-py-2.5 tw-px-5 tw-rounded-xl tw-w-[10rem] tw-flex tw-flex-row tw-items-center tw-justify-center tw-gap-1.5 tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95 tw-shadow-sm hover:tw-shadow-md no-print @if ($pos_settings['disable_express_checkout'] != 0 || !array_key_exists('cash', $payment_types)) hide @endif pos-express-finalize"
+                            class="tw-leading-none tw-whitespace-nowrap tw-font-extrabold tw-text-white tw-cursor-pointer tw-text-xs md:tw-text-sm tw-py-2.5 tw-px-5 tw-rounded-xl tw-w-[10rem] tw-flex tw-flex-row tw-items-center tw-justify-center tw-gap-1.5 tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95 tw-shadow-sm hover:tw-shadow-md no-print @if ($pos_settings['disable_express_checkout'] != 0 || !array_key_exists('cash', $payment_types)) hide @endif pos-express-finalize"
+                            style="background-color: #10b981 !important; color: #ffffff !important;"
                             data-pay_method="cash" title="@lang('tooltip.express_checkout')"> <i class="fas fa-money-bill-alt"
                                 aria-hidden="true"></i> @lang('lang_v1.express_checkout_cash')</button>
                     @endif
