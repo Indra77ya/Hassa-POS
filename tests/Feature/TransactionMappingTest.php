@@ -237,6 +237,7 @@ class TransactionMappingTest extends TestCase
             ['id' => 12, 'name' => 'Pendapatan Penjualan', 'business_id' => 1, 'account_primary_type' => 'income', 'account_sub_type_id' => 11],
             ['id' => 13, 'name' => 'Harga Pokok Penjualan', 'business_id' => 1, 'account_primary_type' => 'expenses', 'account_sub_type_id' => 13],
             ['id' => 14, 'name' => 'Persediaan Barang', 'business_id' => 1, 'account_primary_type' => 'asset', 'account_sub_type_id' => 2],
+            ['id' => 15, 'name' => 'Beban Air', 'business_id' => 1, 'account_primary_type' => 'expense', 'account_sub_type_id' => 14],
         ]);
 
         DB::table('business_locations')->insert([
@@ -254,6 +255,10 @@ class TransactionMappingTest extends TestCase
                 'purchases' => [
                     'payment_account' => 21,
                     'deposit_to' => 14,      // Persediaan Barang
+                ],
+                'expense' => [
+                    'payment_account' => 10, // Kas
+                    'deposit_to' => 15,      // Beban Air
                 ]
             ]),
         ]);
@@ -541,5 +546,41 @@ class TransactionMappingTest extends TestCase
 
         // Piutang (11) must have 0 entries
         $this->assertNull($txs->where('accounting_account_id', 11)->first());
+    }
+
+    /**
+     * Test Expense mapping correctly records Debit on Beban (deposit_to) and Credit on Kas (payment_account).
+     */
+    public function testExpenseMappingDebitBebanCreditKas()
+    {
+        // 1. Create an expense transaction for 250,000
+        $transaction = Transaction::create([
+            'business_id' => 1,
+            'location_id' => 1,
+            'type' => 'expense',
+            'payment_status' => 'paid',
+            'invoice_no' => 'EXP-0001',
+            'final_total' => 250000,
+        ]);
+
+        // 2. Trigger mapping listener
+        $event = new \App\Events\ExpenseCreatedOrModified($transaction);
+        $listener = new \Modules\Accounting\Listeners\MapExpenseTransactions();
+        $listener->handle($event);
+
+        // 3. Verify results
+        $txs = AccountingAccountsTransaction::where('transaction_id', $transaction->id)->get();
+
+        // Debit to Beban Air (15) must be 250,000
+        $debit_tx = $txs->where('accounting_account_id', 15)->first();
+        $this->assertNotNull($debit_tx);
+        $this->assertEquals('debit', $debit_tx->type);
+        $this->assertEquals(250000, $debit_tx->amount);
+
+        // Credit to Kas (10) must be 250,000
+        $credit_tx = $txs->where('accounting_account_id', 10)->first();
+        $this->assertNotNull($credit_tx);
+        $this->assertEquals('credit', $credit_tx->type);
+        $this->assertEquals(250000, $credit_tx->amount);
     }
 }

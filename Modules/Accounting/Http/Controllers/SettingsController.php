@@ -108,8 +108,8 @@ class SettingsController extends Controller
             $purchase_payment_pay = $findAccount(['Kas', 'Cash', 'Cash on hand', 'Cash and cash equivalents', 'Bank', 'Undeposited Funds']);
             $purchase_payment_dep = $findAccount(['Hutang Usaha', 'Hutang Dagang (A/P)', 'Accounts Payable (A/P)', 'Accounts Payable']);
 
-            $expense_pay = $findAccount(['Beban Listrik & Air', 'Utilities', 'Uncategorised Expense', 'Wage expenses']);
-            $expense_dep = $findAccount(['Kas', 'Cash', 'Cash on hand', 'Cash and cash equivalents', 'Bank', 'Undeposited Funds']);
+            $expense_pay = $findAccount(['Kas', 'Cash', 'Cash on hand', 'Cash and cash equivalents', 'Bank', 'Undeposited Funds']);
+            $expense_dep = $findAccount(['Beban Listrik & Air', 'Utilities', 'Uncategorised Expense', 'Wage expenses']);
 
             $default_map = [
                 'sale' => [
