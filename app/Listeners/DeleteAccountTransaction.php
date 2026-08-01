@@ -41,6 +41,14 @@ class DeleteAccountTransaction
             return true;
         }
 
+        $transaction_id = $event->transactionPayment->transaction_id;
+        if (!empty($transaction_id)) {
+            $transaction = \App\Transaction::find($transaction_id);
+            if ($transaction && in_array($transaction->type, ['sell', 'purchase', 'expense'])) {
+                return true;
+            }
+        }
+
         AccountTransaction::where('account_id', $event->transactionPayment->account_id)
                         ->where('transaction_payment_id', $event->transactionPayment->id)
                         ->delete();

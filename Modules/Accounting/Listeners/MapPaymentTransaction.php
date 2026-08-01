@@ -38,6 +38,16 @@ class MapPaymentTransaction
             return;
         }
 
+        // Bypass mapping inside MapPaymentTransaction if the transaction was created/updated recently (e.g., within 30 seconds),
+        // as the core mapping has already been or is being processed by MapSellTransaction, MapPurchaseTransaction, or MapExpenseTransactions.
+        // It is only allowed to trigger for past transactions (Pay Due).
+        if (in_array($transaction->type, ['sell', 'purchase', 'expense'])) {
+            $is_past_transaction = !empty($transaction->created_at) && now()->diffInSeconds($transaction->created_at) > 30;
+            if (!$is_past_transaction) {
+                return;
+            }
+        }
+
         if ($transaction->type == 'sell') {
             // Re-run MapSellTransaction for this sale to update cash, receivable and revenue legs
             $mapSell = new \Modules\Accounting\Listeners\MapSellTransaction();

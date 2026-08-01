@@ -46,9 +46,8 @@ class AccountController extends Controller
 
         $business_id = session()->get('user.business_id');
         if (request()->ajax()) {
-            $accounts = Account::leftjoin('account_transactions as AT', function ($join) {
-                    $join->on('AT.account_id', '=', 'accounts.id')
-                        ->whereNull('AT.deleted_at');
+            $accounts = Account::leftjoin('accounting_accounts_transactions as AT', function ($join) {
+                    $join->on('AT.accounting_account_id', '=', 'accounts.accounting_account_id');
                 })
             ->leftjoin(
                 'account_types as ats',
@@ -71,8 +70,8 @@ class AccountController extends Controller
                                     'pat.name as parent_account_type_name',
                                     'accounts.account_details',
                                     'is_closed',
-                                    DB::raw("SUM(IF(AT.type='credit', amount, 0)) as total_credit"),
-                                    DB::raw("SUM(IF(AT.type='debit', amount, 0)) as total_debit"),
+                                    DB::raw("SUM(CASE WHEN AT.type='credit' THEN AT.amount ELSE 0 END) as total_credit"),
+                                    DB::raw("SUM(CASE WHEN AT.type='debit' THEN AT.amount ELSE 0 END) as total_debit"),
                                     DB::raw("CONCAT(COALESCE(u.surname, ''),' ',COALESCE(u.first_name, ''),' ',COALESCE(u.last_name,'')) as added_by"),
                                 ]);
 
