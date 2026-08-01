@@ -42,6 +42,14 @@ class AddAccountTransaction
             return true;
         }
 
+        $transaction_id = $event->transactionPayment->transaction_id;
+        if (!empty($transaction_id)) {
+            $transaction = \App\Transaction::find($transaction_id);
+            if ($transaction && in_array($transaction->type, ['sell', 'purchase', 'expense'])) {
+                return true;
+            }
+        }
+
         // //Create new account transaction
         if (! empty($event->formInput['account_id']) && $event->transactionPayment->method != 'advance') {
             $type = ! empty($event->transactionPayment->payment_type) ? $event->transactionPayment->payment_type : AccountTransaction::getAccountTransactionType($event->formInput['transaction_type']);
