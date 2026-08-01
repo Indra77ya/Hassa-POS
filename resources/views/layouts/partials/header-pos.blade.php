@@ -26,35 +26,30 @@
 <div class="col-md-12 no-print pos-header">
     <input type="hidden" id="pos_redirect_url" value="{{ $pos_redirect_url }}">
     <div
-        class="tw-flex tw-flex-col lg:tw-flex-row tw-items-center tw-justify-between tw-shadow-[rgba(15,23,42,0.04)_0px_3px_12px] tw-bg-white tw-rounded-2xl tw-mx-0 tw-mt-1 tw-mb-0 tw-p-3.5 tw-gap-3">
+        class="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-between tw-shadow-[rgba(15,23,42,0.04)_0px_3px_12px] tw-bg-white tw-rounded-2xl tw-mx-0 tw-mt-1 tw-mb-0 md:tw-mb-0 tw-p-3.5 tw-gap-3">
 
-        {{-- Left Location & DateTime Info Panel --}}
-        <div class="tw-w-full lg:tw-w-auto tw-flex-shrink-0">
-            <div class="tw-flex tw-items-center tw-gap-3">
-                <div class="tw-flex tw-items-center tw-gap-1.5 tw-text-[13px] tw-text-slate-500">
-                    <span class="tw-font-bold tw-text-slate-800">@lang('sale.location'):</span>
-                    <span class="tw-font-semibold tw-text-slate-600">
-                        @if (empty($transaction->location_id))
-                            @if (count($business_locations) > 1)
-                                <div style="display: inline-block; width: 140px;">
-                                    {!! Form::select(
-                                        'select_location_id',
-                                        $business_locations,
-                                        $default_location->id ?? null,
-                                        ['class' => 'form-control input-sm tw-rounded-lg tw-border-slate-200 !tw-h-8 !tw-p-1', 'id' => 'select_location_id', 'required', 'autofocus'],
-                                        $bl_attributes,
-                                    ) !!}
-                                </div>
-                            @else
-                                {{ $default_location->name }}
-                            @endif
+        <div class="tw-w-full md:tw-w-1/3">
+            <div class="tw-flex tw-items-center tw-gap-2">
+                <p class="tw-m-0 tw-text-[13px] tw-font-bold tw-text-slate-800">@lang('sale.location'): &nbsp;</p>
+                <div style="width: 28%">
+                    @if (empty($transaction->location_id))
+                        @if (count($business_locations) > 1)
+                            {!! Form::select(
+                                'select_location_id',
+                                $business_locations,
+                                $default_location->id ?? null,
+                                ['class' => 'form-control input-sm tw-rounded-lg tw-border-slate-200 !tw-h-8 !tw-p-1', 'id' => 'select_location_id', 'required', 'autofocus'],
+                                $bl_attributes,
+                            ) !!}
                         @else
-                            {{ $transaction->location->name }}
+                            <span class="tw-text-[13px] tw-font-semibold tw-text-slate-600">{{ $default_location->name }}</span>
                         @endif
-                    </span>
+                    @else
+                        <span class="tw-text-[13px] tw-font-semibold tw-text-slate-600">{{ $transaction->location->name }}</span>
+                    @endif
                 </div>
 
-                {{-- Datetime and shortcuts trigger --}}
+                {{-- Date/Time Display --}}
                 <div
                     class="tw-hidden md:tw-flex tw-items-center tw-gap-1.5 tw-bg-slate-50 tw-border tw-border-slate-100 tw-py-1 tw-px-2.5 tw-rounded-lg">
                     <span class="curr_datetime tw-text-xs tw-font-bold tw-text-slate-600">{{ @format_datetime('now') }}</span>
@@ -79,8 +74,8 @@
             </div>
         </div>
 
-        {{-- Right Actions Row (Tightly-grouped, compact layout) --}}
-        <div class="tw-w-full lg:tw-w-auto tw-flex tw-items-center tw-justify-start lg:tw-justify-end tw-gap-1.5 tw-flex-wrap md:tw-flex-nowrap"
+        {{-- Right Actions Row (Keeping original responsiveness wrappers) --}}
+        <div class="tw-w-full md:tw-w-2/3 !tw-p-0 tw-flex tw-items-center tw-justify-start md:tw-justify-end tw-gap-1.5 tw-flex-col md:tw-flex-row tw-hidden md:tw-flex"
             id="pos_header_more_options">
 
             {{-- Back Button --}}
@@ -182,7 +177,7 @@
                 </a>
             @endif
 
-            {{-- Large Module Buttons (Styled as soft rounded-xl action chips) --}}
+            {{-- Large Module Buttons --}}
             @if (isModuleEnabled('Repair') && $transaction_sub_type != 'repair')
                 @include('repair::layouts.partials.pos_header')
             @endif
