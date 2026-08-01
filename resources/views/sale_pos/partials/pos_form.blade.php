@@ -1,8 +1,8 @@
 <div class="row">
 	<div class="col-md-4">
 		<div class="form-group tw-mb-3">
-			<div class="input-group tw-flex tw-items-center tw-w-full tw-border tw-border-slate-200 tw-rounded-xl tw-overflow-hidden tw-shadow-sm tw-transition-all focus-within:tw-border-indigo-400 focus-within:tw-ring-1 focus-within:tw-ring-indigo-400/20" style="width: 100%;">
-				<span class="!tw-bg-slate-50 !tw-border-0 !tw-text-slate-400 !tw-px-3.5 tw-h-9 tw-flex tw-items-center tw-justify-center tw-flex-shrink-0">
+			<div class="input-group tw-border tw-border-slate-200 tw-rounded-xl tw-overflow-hidden tw-shadow-sm tw-transition-all focus-within:tw-border-indigo-400 focus-within:tw-ring-1 focus-within:tw-ring-indigo-400/20" style="display: table; width: 100% !important;">
+				<span class="input-group-addon !tw-bg-slate-50 !tw-border-0 !tw-text-slate-400 !tw-px-3" style="border: 0; vertical-align: middle;">
 					<i class="fa fa-user"></i>
 				</span>
 				<input type="hidden" id="default_customer_id" 
@@ -18,36 +18,38 @@
 				value="{{ $walk_in_customer['selling_price_group_id'] ?? ''}}" >
 				@endif
 				{!! Form::select('contact_id', 
-					[], null, ['class' => 'form-control mousetrap !tw-border-0 !tw-shadow-none !tw-h-9 !tw-text-xs !tw-bg-transparent focus:tw-outline-none tw-flex-grow', 'id' => 'customer_id', 'placeholder' => 'Enter Customer name / phone', 'required', 'style' => 'height: 36px; border: 0; box-shadow: none; width: 100%;']); !!}
-				<div class="tw-flex tw-items-center tw-flex-shrink-0 tw-pr-1">
-					<button type="button" class="btn btn-default bg-white btn-flat add_new_customer !tw-border-0 !tw-h-9 !tw-text-indigo-600 hover:!tw-bg-indigo-50/50 active:tw-scale-95 tw-transition-transform" data-name="" style="border: 0; height: 36px; padding: 0 10px;" @if(!auth()->user()->can('customer.create')) disabled @endif><i class="fa fa-plus-circle fa-lg"></i></button>
+					[], null, ['class' => 'form-control mousetrap !tw-border-0 !tw-shadow-none !tw-h-9 !tw-text-xs !tw-bg-transparent focus:tw-outline-none', 'id' => 'customer_id', 'placeholder' => 'Enter Customer name / phone', 'required', 'style' => 'height: 36px; border: 0; box-shadow: none;']); !!}
+				<span class="input-group-btn" style="border: 0; vertical-align: middle;">
+					<button type="button" class="btn btn-default bg-white btn-flat add_new_customer !tw-border-0 !tw-h-9 !tw-text-indigo-600 hover:!tw-bg-indigo-50/50 active:tw-scale-95 tw-transition-transform" data-name="" style="border: 0; background: transparent; height: 36px;" @if(!auth()->user()->can('customer.create')) disabled @endif><i class="fa fa-plus-circle fa-lg"></i></button>
 					@can('sell.payments')
-					<button type="button" id="pos-receive-customer-payment" class="btn btn-default bg-white btn-flat !tw-border-0 !tw-h-9 !tw-text-emerald-600 hover:!tw-bg-emerald-50/50 active:tw-scale-95 tw-transition-transform" style="border: 0; height: 36px; padding: 0 10px;" title="@lang('lang_v1.receive_payment')"><i class="fas fa-hand-holding-usd fa-lg"></i></button>
+					<button type="button" id="pos-receive-customer-payment" class="btn btn-default bg-white btn-flat !tw-border-0 !tw-h-9 !tw-text-emerald-600 hover:!tw-bg-emerald-50/50 active:tw-scale-95 tw-transition-transform" style="border: 0; background: transparent; height: 36px;" title="@lang('lang_v1.receive_payment')"><i class="fas fa-hand-holding-usd fa-lg"></i></button>
 					@endcan
-				</div>
+				</span>
 			</div>
 			<small class="text-danger hide contact_due_text tw-text-[11px] tw-font-bold tw-mt-1 tw-block"><strong>@lang('account.customer_due'):</strong> <span></span></small>
 		</div>
 	</div>
 	<div class="col-md-8">
 		<div class="form-group tw-mb-3">
-			<div class="input-group tw-flex tw-items-center tw-w-full tw-border tw-border-slate-200 tw-rounded-xl tw-overflow-hidden tw-shadow-sm tw-transition-all focus-within:tw-border-indigo-400 focus-within:tw-ring-1 focus-within:tw-ring-indigo-400/20" style="width: 100%;">
-				<button type="button" class="btn btn-default bg-white btn-flat !tw-border-0 !tw-h-9 !tw-text-slate-400 hover:!tw-bg-slate-50 tw-flex-shrink-0" style="border: 0; height: 36px; padding: 0 12px;" data-toggle="modal" data-target="#configure_search_modal" title="{{__('lang_v1.configure_product_search')}}"><i class="fas fa-search-plus"></i></button>
+			<div class="input-group tw-border tw-border-slate-200 tw-rounded-xl tw-overflow-hidden tw-shadow-sm tw-transition-all focus-within:tw-border-indigo-400 focus-within:tw-ring-1 focus-within:tw-ring-indigo-400/20" style="display: table; width: 100% !important;">
+				<span class="input-group-btn" style="border: 0; vertical-align: middle;">
+					<button type="button" class="btn btn-default bg-white btn-flat !tw-border-0 !tw-h-9 !tw-text-slate-400 hover:!tw-bg-slate-50" style="border: 0; background: transparent; height: 36px;" data-toggle="modal" data-target="#configure_search_modal" title="{{__('lang_v1.configure_product_search')}}"><i class="fas fa-search-plus"></i></button>
+				</span>
                 {{-- Removed mousetrap class as it was causing issue with barcode scanning --}}
-				{!! Form::text('search_product', null, ['class' => 'form-control !tw-border-0 !tw-shadow-none !tw-h-9 !tw-text-xs !tw-bg-transparent focus:tw-outline-none tw-flex-grow', 'id' => 'search_product', 'placeholder' => __('lang_v1.search_product_placeholder'),
+				{!! Form::text('search_product', null, ['class' => 'form-control !tw-border-0 !tw-shadow-none !tw-h-9 !tw-text-xs !tw-bg-transparent focus:tw-outline-none', 'id' => 'search_product', 'placeholder' => __('lang_v1.search_product_placeholder'),
 				'disabled' => is_null($default_location)? true : false,
 				'autofocus' => is_null($default_location)? false : true,
-				'style' => 'height: 36px; border: 0; box-shadow: none; width: 100%;'
+				'style' => 'height: 36px; border: 0; box-shadow: none;'
 				]); !!}
-				<div class="tw-flex tw-items-center tw-flex-shrink-0 tw-pr-1.5">
+				<span class="input-group-btn" style="border: 0; vertical-align: middle;">
 					<!-- Show button for weighing scale modal -->
 					@if(isset($pos_settings['enable_weighing_scale']) && $pos_settings['enable_weighing_scale'] == 1)
-						<button type="button" class="btn btn-default bg-white btn-flat !tw-border-0 !tw-h-9 !tw-text-indigo-600 hover:!tw-bg-indigo-50/50 active:tw-scale-95 tw-transition-transform" style="border: 0; height: 36px; padding: 0 10px;" id="weighing_scale_btn" data-toggle="modal" data-target="#weighing_scale_modal"
+						<button type="button" class="btn btn-default bg-white btn-flat !tw-border-0 !tw-h-9 !tw-text-indigo-600 hover:!tw-bg-indigo-50/50 active:tw-scale-95 tw-transition-transform" style="border: 0; background: transparent; height: 36px;" id="weighing_scale_btn" data-toggle="modal" data-target="#weighing_scale_modal"
 						title="@lang('lang_v1.weighing_scale')"><i class="fa fa-digital-tachograph fa-lg"></i></button>
 					@endif
 					
-					<button type="button" class="btn btn-default bg-white btn-flat pos_add_quick_product !tw-border-0 !tw-h-9 !tw-text-indigo-600 hover:!tw-bg-indigo-50/50 active:tw-scale-95 tw-transition-transform" style="border: 0; height: 36px; padding: 0 10px;" data-href="{{action([\App\Http\Controllers\ProductController::class, 'quickAdd'])}}" data-container=".quick_add_product_modal"><i class="fa fa-plus-circle fa-lg"></i></button>
-				</div>
+					<button type="button" class="btn btn-default bg-white btn-flat pos_add_quick_product !tw-border-0 !tw-h-9 !tw-text-indigo-600 hover:!tw-bg-indigo-50/50 active:tw-scale-95 tw-transition-transform" style="border: 0; background: transparent; height: 36px;" data-href="{{action([\App\Http\Controllers\ProductController::class, 'quickAdd'])}}" data-container=".quick_add_product_modal"><i class="fa fa-plus-circle fa-lg"></i></button>
+				</span>
 			</div>
 		</div>
 	</div>
