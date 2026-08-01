@@ -13,11 +13,11 @@
 	@endif
 @endforeach
 
-<tr class="product_row" data-row_index="{{$row_count}}" @if(!empty($so_line)) data-so_id="{{$so_line->transaction_id}}" @endif>
+<tr class="product_row tw-border-b tw-border-slate-100 hover:tw-bg-slate-50/50 tw-transition-colors" data-row_index="{{$row_count}}" @if(!empty($so_line)) data-so_id="{{$so_line->transaction_id}}" @endif>
 	@if(!empty($is_serial_no))
-		<td class="serial_no" ></td>
+		<td class="serial_no !tw-border-0 !tw-px-3 !tw-py-2.5 !tw-align-middle" ></td>
 	@endif
-	<td>
+	<td class="!tw-border-0 !tw-px-3 !tw-py-2.5 !tw-align-middle">
 		@if(!empty($so_line))
 			<input type="hidden" 
 			name="products[{{$row_count}}][so_line_id]" 
@@ -29,25 +29,25 @@
 			if(!empty($product->brand)){ $product_sku_brand .= ' · ' . e($product->brand); }
 		@endphp
 
-		<div style="display:flex;align-items:flex-start;gap:6px;">
+		<div class="tw-flex tw-items-start tw-gap-3">
 			<img src="@if(count($product->media) > 0)
 							{{$product->media->first()->display_url}}
 						@elseif(!empty($product->product_image))
 							{{asset('/uploads/img/' . rawurlencode($product->product_image))}}
 						@else
 							{{asset('/img/default.png')}}
-						@endif" alt="product-img" loading="lazy" style="width:36px;height:36px;flex-shrink:0;border-radius:4px;object-fit:cover;align-self:flex-start;margin-top:1px;" onerror="this.style.display='none'">
-			<div style="min-width:0;flex:1;">
+						@endif" alt="product-img" loading="lazy" class="tw-w-10 tw-h-10 tw-rounded-lg tw-object-cover tw-border tw-border-slate-100 tw-flex-shrink-0 tw-mt-0.5" onerror="this.style.display='none'">
+			<div class="tw-min-w-0 tw-flex-1">
 				@if( ($edit_price || $edit_discount) && empty($is_direct_sell) )
 				<div title="@lang('lang_v1.pos_edit_product_price_help')">
-				<span class="text-link text-info tw-cursor-pointer tw-font-semibold tw-text-[13px] tw-leading-snug tw-block tw-truncate md:tw-truncate" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;" data-toggle="modal" data-target="#row_edit_product_price_modal_{{$row_count}}">
-					{!! $product_name !!} &nbsp;<i class="fa fa-info-circle"></i>
+				<span class="text-link text-info tw-cursor-pointer tw-font-semibold tw-text-[13px] tw-leading-tight tw-block tw-truncate hover:tw-underline" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;" data-toggle="modal" data-target="#row_edit_product_price_modal_{{$row_count}}">
+					{!! $product_name !!} &nbsp;<i class="fa fa-info-circle tw-text-blue-500 tw-text-xs"></i>
 				</span>
 				</div>
 				@else
-					<span class="tw-font-semibold tw-text-[13px] tw-leading-snug tw-block" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{!! $product_name !!}</span>
+					<span class="tw-font-semibold tw-text-[13px] tw-leading-tight tw-block" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{!! $product_name !!}</span>
 				@endif
-				<div class="tw-text-[11px] tw-text-slate-400 tw-leading-[1.3] tw-truncate">{{ $product_sku_brand }}@if($product->enable_stock) &nbsp;·&nbsp; {{ @num_format($product->qty_available) }} {{$product->unit}}@endif</div>
+				<div class="tw-text-[11px] tw-text-slate-400 tw-leading-[1.3] tw-truncate tw-mt-0.5">{{ $product_sku_brand }}@if($product->enable_stock) &nbsp;·&nbsp; {{ @num_format($product->qty_available) }} {{$product->unit}}@endif</div>
 			</div>
 		</div>
 
@@ -159,7 +159,7 @@
 			}
 		@endphp
 		@if(!empty($product->lot_numbers) && empty($is_sales_order))
-			<select class="form-control lot_number input-sm" name="products[{{$row_count}}][lot_no_line_id]" @if(!empty($product->transaction_sell_lines_id)) disabled @endif>
+			<select class="form-control lot_number input-sm tw-mt-1.5 tw-rounded-md tw-border-slate-200" name="products[{{$row_count}}][lot_no_line_id]" @if(!empty($product->transaction_sell_lines_id)) disabled @endif>
 				<option value="">@lang('lang_v1.lot_n_expiry')</option>
 				@foreach($product->lot_numbers as $lot_number)
 					@php
@@ -193,12 +193,12 @@
 	@endif
 	@if(!empty($is_direct_sell))
   		<br>
-  		<textarea class="form-control" name="products[{{$row_count}}][sell_line_note]" rows="2">{{$sell_line_note}}</textarea>
+		<textarea class="form-control tw-rounded-md tw-border-slate-200" name="products[{{$row_count}}][sell_line_note]" rows="2">{{$sell_line_note}}</textarea>
   		<p class="help-block"><small>@lang('lang_v1.sell_line_description_help')</small></p>
 	@endif
 	</td>
 
-	<td class="v-center">
+	<td class="v-center !tw-border-0 !tw-px-3 !tw-py-2.5 !tw-align-middle">
 		{{-- If edit then transaction sell lines will be present --}}
 		@if(!empty($product->transaction_sell_lines_id))
 			<input type="hidden" name="products[{{$row_count}}][transaction_sell_lines_id]" class="form-control" value="{{$product->transaction_sell_lines_id}}">
@@ -241,10 +241,12 @@
         		@endphp
         	@endif
         @endforeach
-		<div class="input-group input-number">
-			<span class="input-group-btn !tw-hidden md:!tw-table-cell"><button type="button" class="btn quantity-down !tw-text-red-600 active:tw-scale-95 tw-transition-transform !tw-border-slate-300 !tw-px-3 tw-inline-flex tw-items-center tw-justify-center tw-leading-none"><i class="fa fa-minus"></i></button></span>
+		<div class="input-group input-number tw-flex tw-items-center">
+			<span class="input-group-btn !tw-hidden md:!tw-table-cell">
+				<button type="button" class="btn quantity-down !tw-text-red-500 hover:tw-bg-red-50 active:tw-scale-95 tw-transition-all !tw-border-slate-200 !tw-px-3 tw-inline-flex tw-items-center tw-justify-center tw-leading-none tw-h-9 tw-w-9 tw-rounded-l-lg"><i class="fa fa-minus"></i></button>
+			</span>
 			<input type="text" data-min="1"
-				class="form-control pos_quantity input_number mousetrap input_quantity tw-text-center tw-font-bold !tw-w-full md:!tw-w-auto"
+				class="form-control pos_quantity input_number mousetrap input_quantity tw-text-center tw-font-bold !tw-w-full md:!tw-w-14 tw-h-9 tw-border-slate-200"
 				value="{{@format_quantity($product->quantity_ordered)}}" name="products[{{$row_count}}][quantity]" data-allow-overselling="@if(empty($pos_settings['allow_overselling'])){{'false'}}@else{{'true'}}@endif"
 				@if($allow_decimal)
 					data-decimal=1
@@ -260,12 +262,14 @@
 					data-msg_max_default="@lang('validation.custom-messages.quantity_not_available', ['qty'=> $product->formatted_qty_available, 'unit' => $product->unit  ])"
 				@endif
 			>
-			<span class="input-group-btn !tw-hidden md:!tw-table-cell"><button type="button" class="btn quantity-up !tw-text-emerald-600 active:tw-scale-95 tw-transition-transform !tw-border-slate-300 !tw-px-3 tw-inline-flex tw-items-center tw-justify-center tw-leading-none"><i class="fa fa-plus"></i></button></span>
+			<span class="input-group-btn !tw-hidden md:!tw-table-cell">
+				<button type="button" class="btn quantity-up !tw-text-emerald-500 hover:tw-bg-emerald-50 active:tw-scale-95 tw-transition-all !tw-border-slate-200 !tw-px-3 tw-inline-flex tw-items-center tw-justify-center tw-leading-none tw-h-9 tw-w-9 tw-rounded-r-lg"><i class="fa fa-plus"></i></button>
+			</span>
 		</div>
 		
 		<input type="hidden" name="products[{{$row_count}}][product_unit_id]" value="{{$product->unit_id}}">
 		@if(count($sub_units) > 1)
-			<select name="products[{{$row_count}}][sub_unit_id]" class="form-control input-sm sub_unit">
+			<select name="products[{{$row_count}}][sub_unit_id]" class="form-control input-sm sub_unit tw-mt-1 tw-rounded-md tw-border-slate-200">
                 @foreach($sub_units as $key => $value)
                     <option value="{{$key}}" data-multiplier="{{$value['multiplier']}}" data-unit_name="{{$value['name']}}" data-allow_decimal="{{$value['allow_decimal']}}" @if(!empty($product->sub_unit_id) && $product->sub_unit_id == $key) selected @endif>
                         {{$value['name']}}
@@ -275,9 +279,9 @@
 		@elseif(count($sub_units) == 1)
 			@php $_su_key = array_key_first($sub_units); $_su = $sub_units[$_su_key]; @endphp
 			<input type="hidden" name="products[{{$row_count}}][sub_unit_id]" value="{{$_su_key}}">
-			<span class="pos-unit-label tw-inline-block tw-text-[11px] tw-font-medium tw-text-[#64748b] tw-mt-0.5 tw-leading-[1.2] tw-whitespace-nowrap">{{$_su['name']}}</span>
+			<span class="pos-unit-label tw-inline-block tw-text-[11px] tw-font-medium tw-text-slate-400 tw-mt-1.5 tw-leading-[1.2] tw-whitespace-nowrap">{{$_su['name']}}</span>
 		@else
-			<span class="pos-unit-label tw-inline-block tw-text-[11px] tw-font-medium tw-text-[#64748b] tw-mt-0.5 tw-leading-[1.2] tw-whitespace-nowrap">{{$product->unit}}</span>
+			<span class="pos-unit-label tw-inline-block tw-text-[11px] tw-font-medium tw-text-slate-400 tw-mt-1.5 tw-leading-[1.2] tw-whitespace-nowrap">{{$product->unit}}</span>
 		@endif
 
 		@if(!empty($product->second_unit))
@@ -287,7 +291,7 @@
             <input type="text" 
             name="products[{{$row_count}}][secondary_unit_quantity]" 
             value="{{@format_quantity($product->secondary_unit_quantity)}}"
-            class="form-control input-sm input_number"
+            class="form-control input-sm input_number tw-rounded-md tw-border-slate-200"
             required>
         @endif
 
@@ -337,9 +341,9 @@
 	</td>
 	@if(!empty($is_direct_sell))
 		@if(!empty($pos_settings['inline_service_staff']))
-			<td>
-				<div class="form-group">
-					<div class="input-group">
+			<td class="!tw-border-0 !tw-px-3 !tw-py-2.5 !tw-align-middle">
+				<div class="form-group tw-m-0">
+					<div class="input-group tw-w-full">
 						{!! Form::select("products[" . $row_count . "][res_service_staff_id]", $waiters, !empty($product->res_service_staff_id) ? $product->res_service_staff_id : null, ['class' => 'form-control select2 order_line_service_staff', 'placeholder' => __('restaurant.select_service_staff'), 'required' => (!empty($pos_settings['is_service_staff_required']) && $pos_settings['is_service_staff_required'] == 1) ? true : false ]); !!}
 					</div>
 				</div>
@@ -352,17 +356,17 @@
 				$pos_unit_price = $so_line->unit_price_before_discount;
 			}
 		@endphp
-		<td class="@if(!auth()->user()->can('edit_product_price_from_sale_screen')) hide @endif">
-			<input type="text" name="products[{{$row_count}}][unit_price]" class="form-control pos_unit_price input_number mousetrap" value="{{@num_format($pos_unit_price)}}" @if(!empty($pos_settings['enable_msp'])) data-rule-min-value="{{$pos_unit_price}}" data-msg-min-value="{{__('lang_v1.minimum_selling_price_error_msg', ['price' => @num_format($pos_unit_price)])}}" @endif> 
+		<td class="@if(!auth()->user()->can('edit_product_price_from_sale_screen')) hide @endif !tw-border-0 !tw-px-3 !tw-py-2.5 !tw-align-middle">
+			<input type="text" name="products[{{$row_count}}][unit_price]" class="form-control pos_unit_price input_number mousetrap tw-rounded-md tw-border-slate-200" value="{{@num_format($pos_unit_price)}}" @if(!empty($pos_settings['enable_msp'])) data-rule-min-value="{{$pos_unit_price}}" data-msg-min-value="{{__('lang_v1.minimum_selling_price_error_msg', ['price' => @num_format($pos_unit_price)])}}" @endif>
 
 			@if(!empty($last_sell_line))
 				<br>
 				<small class="text-muted">@lang('lang_v1.prev_unit_price'): @format_currency($last_sell_line->unit_price_before_discount)</small>
 			@endif
 		</td>
-		<td @if(!$edit_discount) class="hide" @endif>
-			{!! Form::text("products[$row_count][line_discount_amount]", @num_format($discount_amount), ['class' => 'form-control input_number row_discount_amount']); !!}<br>
-			{!! Form::select("products[$row_count][line_discount_type]", ['fixed' => __('lang_v1.fixed'), 'percentage' => __('lang_v1.percentage')], $discount_type , ['class' => 'form-control row_discount_type']); !!}
+		<td @if(!$edit_discount) class="hide" @endif class="!tw-border-0 !tw-px-3 !tw-py-2.5 !tw-align-middle">
+			{!! Form::text("products[$row_count][line_discount_amount]", @num_format($discount_amount), ['class' => 'form-control input_number row_discount_amount tw-rounded-md tw-border-slate-200']); !!}<br>
+			{!! Form::select("products[$row_count][line_discount_type]", ['fixed' => __('lang_v1.fixed'), 'percentage' => __('lang_v1.percentage')], $discount_type , ['class' => 'form-control row_discount_type tw-rounded-md tw-border-slate-200']); !!}
 			@if(!empty($discount))
 				<p class="help-block">{!! __('lang_v1.applied_discount_text', ['discount_name' => $discount->name, 'starts_at' => $discount->formated_starts_at, 'ends_at' => $discount->formated_ends_at]) !!}</p>
 			@endif
@@ -379,42 +383,42 @@
 				</small>
 			@endif
 		</td>
-		<td class="text-center {{$hide_tax}}">
+		<td class="text-center {{$hide_tax}} !tw-border-0 !tw-px-3 !tw-py-2.5 !tw-align-middle">
 			{!! Form::hidden("products[$row_count][item_tax]", @num_format($item_tax), ['class' => 'item_tax']); !!}
 		
-			{!! Form::select("products[$row_count][tax_id]", $tax_dropdown['tax_rates'], $tax_id, ['placeholder' => 'Select', 'class' => 'form-control tax_id'], $tax_dropdown['attributes']); !!}
+			{!! Form::select("products[$row_count][tax_id]", $tax_dropdown['tax_rates'], $tax_id, ['placeholder' => 'Select', 'class' => 'form-control tax_id tw-rounded-md tw-border-slate-200'], $tax_dropdown['attributes']); !!}
 		</td>
 
 	@else
 		@if(!empty($pos_settings['inline_service_staff']))
-			<td>
-				<div class="form-group">
-					<div class="input-group">
+			<td class="!tw-border-0 !tw-px-3 !tw-py-2.5 !tw-align-middle">
+				<div class="form-group tw-m-0">
+					<div class="input-group tw-w-full">
 						{!! Form::select("products[" . $row_count . "][res_service_staff_id]", $waiters, !empty($product->res_service_staff_id) ? $product->res_service_staff_id : null, ['class' => 'form-control select2 order_line_service_staff', 'placeholder' => __('restaurant.select_service_staff'), 'required' => (!empty($pos_settings['is_service_staff_required']) && $pos_settings['is_service_staff_required'] == 1) ? true : false ]); !!}
 					</div>
 				</div>
 			</td>
 		@endif
 	@endif
-	<td class="{{$hide_tax}}">
-		<input type="text" style="width: auto" name="products[{{$row_count}}][unit_price_inc_tax]" class="form-control pos_unit_price_inc_tax input_number" value="{{@num_format($unit_price_inc_tax)}}" @if(!$edit_price) readonly @endif @if(!empty($pos_settings['enable_msp'])) data-rule-min-value="{{$unit_price_inc_tax}}" data-msg-min-value="{{__('lang_v1.minimum_selling_price_error_msg', ['price' => @num_format($unit_price_inc_tax)])}}" @endif>
+	<td class="{{$hide_tax}} !tw-border-0 !tw-px-3 !tw-py-2.5 !tw-align-middle text-right">
+		<input type="text" style="width: auto" name="products[{{$row_count}}][unit_price_inc_tax]" class="form-control pos_unit_price_inc_tax input_number tw-text-right tw-rounded-md tw-border-slate-200" value="{{@num_format($unit_price_inc_tax)}}" @if(!$edit_price) readonly @endif @if(!empty($pos_settings['enable_msp'])) data-rule-min-value="{{$unit_price_inc_tax}}" data-msg-min-value="{{__('lang_v1.minimum_selling_price_error_msg', ['price' => @num_format($unit_price_inc_tax)])}}" @endif>
 	</td>
 	@if(!empty($common_settings['enable_product_warranty']) && !empty($is_direct_sell))
-		<td>
-			{!! Form::select("products[$row_count][warranty_id]", $warranties, $warranty_id, ['placeholder' => __('messages.please_select'), 'class' => 'form-control']); !!}
+		<td class="!tw-border-0 !tw-px-3 !tw-py-2.5 !tw-align-middle">
+			{!! Form::select("products[$row_count][warranty_id]", $warranties, $warranty_id, ['placeholder' => __('messages.please_select'), 'class' => 'form-control tw-rounded-md tw-border-slate-200']); !!}
 		</td>
 	@endif
-	<td class="text-center">
+	<td class="text-right v-center !tw-border-0 !tw-px-3 !tw-py-2.5 !tw-align-middle">
 		@php
 			$subtotal_type = !empty($pos_settings['is_pos_subtotal_editable']) ? 'text' : 'hidden';
 
 		@endphp
-		<input style="width: auto" type="{{$subtotal_type}}" class="form-control pos_line_total @if(!empty($pos_settings['is_pos_subtotal_editable'])) input_number @endif" value="{{@num_format($product->quantity_ordered*$unit_price_inc_tax )}}">
-		<span class="display_currency pos_line_total_text @if(!empty($pos_settings['is_pos_subtotal_editable'])) hide @endif" data-currency_symbol="true">{{$product->quantity_ordered*$unit_price_inc_tax}}</span>
+		<input style="width: auto" type="{{$subtotal_type}}" class="form-control pos_line_total @if(!empty($pos_settings['is_pos_subtotal_editable'])) input_number @endif tw-text-right tw-rounded-md tw-border-slate-200" value="{{@num_format($product->quantity_ordered*$unit_price_inc_tax )}}">
+		<span class="display_currency pos_line_total_text @if(!empty($pos_settings['is_pos_subtotal_editable'])) hide @endif tw-font-bold tw-text-slate-800" data-currency_symbol="true">{{$product->quantity_ordered*$unit_price_inc_tax}}</span>
 	</td>
-	<td class="text-center v-center">
-		<button type="button" class="pos_remove_row tw-w-9 tw-h-9 tw-rounded-full tw-bg-red-100 tw-text-red-600 hover:tw-bg-red-200 active:tw-scale-95 tw-transition-transform tw-inline-flex tw-items-center tw-justify-center tw-border-0 tw-cursor-pointer tw-mx-auto" aria-label="Remove item">
-			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7l16 0"/><path d="M10 11l0 6"/><path d="M14 11l0 6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/></svg>
+	<td class="text-center v-center !tw-border-0 !tw-pl-0 !tw-pr-3 !tw-py-2.5 !tw-align-middle">
+		<button type="button" class="pos_remove_row tw-w-8 tw-h-8 tw-rounded-full tw-bg-red-50 hover:tw-bg-red-100 active:tw-scale-95 tw-transition-all tw-inline-flex tw-items-center tw-justify-center tw-border-0 tw-cursor-pointer tw-text-red-500 hover:tw-text-red-600" aria-label="Remove item">
+			<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7l16 0"/><path d="M10 11l0 6"/><path d="M14 11l0 6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/></svg>
 		</button>
 	</td>
 </tr>
