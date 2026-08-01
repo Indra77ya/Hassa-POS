@@ -785,7 +785,11 @@ class BusinessController extends BaseController
                 if (\Illuminate\Support\Facades\Schema::hasTable('repair_job_sheets')) {
                     DB::table('repair_job_sheets')->where('business_id', $business_id)->delete();
                 }
-                DB::table('contacts')->where('business_id', $business_id)->delete();
+                // Do not delete default/Walk-In Customer (is_default = 1)
+                DB::table('contacts')
+                    ->where('business_id', $business_id)
+                    ->where('is_default', '!=', 1)
+                    ->delete();
             }
 
             // Sub-category: categories

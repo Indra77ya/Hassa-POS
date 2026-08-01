@@ -123,6 +123,8 @@ class ResetBusinessFinanceTest extends TestCase
         Schema::create('contacts', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('business_id');
+            $table->string('name')->nullable();
+            $table->boolean('is_default')->default(0);
         });
 
         Schema::create('categories', function (Blueprint $table) {
@@ -289,9 +291,16 @@ class ResetBusinessFinanceTest extends TestCase
 
         $this->actingAs($user);
 
-        // Call postResetData
+        // Let's seed contacts (some default and some non-default) for business 1
+        DB::table('contacts')->insert([
+            ['id' => 1000, 'business_id' => 1, 'name' => 'Walk-In Customer', 'is_default' => 1],
+            ['id' => 1001, 'business_id' => 1, 'name' => 'Regular Customer', 'is_default' => 0]
+        ]);
+
+        // Call postResetData with both finance reset AND contacts master data reset
         $response = $this->post('/superadmin/business/1/reset-data', [
-            'reset_transactions' => ['finance']
+            'reset_transactions' => ['finance'],
+            'reset_master' => ['contacts']
         ], [
             'X-Requested-With' => 'XMLHttpRequest',
             'Accept' => 'application/json'
@@ -300,7 +309,13 @@ class ResetBusinessFinanceTest extends TestCase
         $response->assertStatus(200);
         $response->assertJson(['success' => true]);
 
-        // 3. Assertions: Business 1 finance data should be deleted
+        // 3. Assertions: Walk-In Customer (is_default = 1) must still exist, regular customer deleted
+        $remainingContacts = DB::table('contacts')->where('business_id', 1)->get();
+        $this->assertCount(1, $remainingContacts);
+        $this->assertEquals(1000, $remainingContacts->first()->id);
+        $this->assertEquals(1, $remainingContacts->first()->is_default);
+
+        // Assertions: Business 1 finance data should be deleted
         $this->assertEmpty(DB::table('accounts')->where('business_id', 1)->get());
         $this->assertEmpty(DB::table('account_transactions')->whereIn('account_id', [10, 11])->get());
         $this->assertEmpty(DB::table('account_types')->where('business_id', 1)->get());
