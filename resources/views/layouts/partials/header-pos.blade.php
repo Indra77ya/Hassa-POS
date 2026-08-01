@@ -206,7 +206,7 @@
                 @can('sell.create')
                     <a href="{{ action([\App\Http\Controllers\SellPosController::class, 'create']) }}"
                         title="@lang('sale.pos_sale')"
-                        class="tw-shadow-sm tw-bg-emerald-50 hover:tw-bg-emerald-100 tw-border tw-border-emerald-100 tw-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-9 tw-px-3.5 tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95">
+                        class="tw-shadow-sm tw-bg-emerald-50 hover:tw-bg-emerald-100 tw-border tw-border-emerald-100 tw-flex tw-items-center tw-justify-center tw-rounded-md tw-h-9 tw-px-3.5 tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95">
                         <strong class="tw-text-xs tw-text-emerald-700 tw-font-bold"><i class="fa fa-th-large !tw-text-sm"></i> &nbsp;
                             @lang('sale.pos_sale')</strong>
                     </a>
@@ -214,7 +214,7 @@
             @endif
             @can('expense.add')
                 <button type="button" title="{{ __('expense.add_expense') }}" data-placement="bottom"
-                    class="tw-shadow-sm tw-bg-rose-50 hover:tw-bg-rose-100 tw-border tw-border-rose-100 tw-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-9 tw-px-3.5 btn-modal tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95"
+                    class="tw-shadow-sm tw-bg-rose-50 hover:tw-bg-rose-100 tw-border tw-border-rose-100 tw-flex tw-items-center tw-justify-center tw-rounded-md tw-h-9 tw-px-3.5 btn-modal tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95"
                     id="add_expense">
                     <strong class="tw-text-xs tw-text-rose-700 tw-font-bold"><i class="fa fas fa-minus-circle"></i> &nbsp;@lang('expense.add_expense')</strong>
                 </button>
