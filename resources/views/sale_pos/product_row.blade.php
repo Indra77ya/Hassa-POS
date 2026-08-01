@@ -413,7 +413,7 @@
 		<span class="display_currency pos_line_total_text @if(!empty($pos_settings['is_pos_subtotal_editable'])) hide @endif" data-currency_symbol="true">{{$product->quantity_ordered*$unit_price_inc_tax}}</span>
 	</td>
 	<td class="text-center v-center">
-		<button type="button" class="pos_remove_row tw-w-9 tw-h-9 tw-rounded-full tw-bg-red-100 tw-text-red-600 hover:tw-bg-red-200 active:tw-scale-95 tw-transition-transform tw-inline-flex tw-items-center tw-justify-center tw-border-0 tw-cursor-pointer tw-mx-auto" aria-label="Remove item">
+		<button type="button" class="pos_remove_row tw-w-9 tw-h-9 tw-rounded-xl tw-bg-red-100 tw-text-red-600 hover:tw-bg-red-200 active:tw-scale-95 tw-transition-transform tw-inline-flex tw-items-center tw-justify-center tw-border-0 tw-cursor-pointer tw-mx-auto" aria-label="Remove item">
 			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7l16 0"/><path d="M10 11l0 6"/><path d="M14 11l0 6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/></svg>
 		</button>
 	</td>

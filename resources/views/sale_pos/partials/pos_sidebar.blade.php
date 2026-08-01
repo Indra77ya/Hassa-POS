@@ -7,7 +7,7 @@
                 <div class="tw-dw-drawer-content">
                     <!-- Page content here -->
                     <label for="my-drawer-4{{ $drawer_id_suffix ?? '' }}"
-                        class="tw-dw-btn tw-dw-btn-sm tw-group tw-w-full tw-h-9 tw-min-h-[2.25rem] tw-rounded-full tw-flex tw-flex-row tw-items-center tw-flex-nowrap tw-gap-1.5 tw-px-3 tw-text-sm tw-font-semibold tw-normal-case tw-bg-white tw-border-slate-200 tw-text-slate-700 tw-shadow-sm tw-transition-all tw-duration-200 hover:tw-bg-indigo-50 hover:tw-border-indigo-300 hover:tw-text-slate-900 hover:tw-shadow-md hover:tw-shadow-indigo-500/15 hover:-tw-translate-y-0.5 focus:tw-ring-2 focus:tw-ring-indigo-400 focus:tw-ring-offset-1">
+                        class="tw-dw-btn tw-dw-btn-sm tw-group tw-w-full tw-h-9 tw-min-h-[2.25rem] tw-rounded-xl tw-flex tw-flex-row tw-items-center tw-flex-nowrap tw-gap-1.5 tw-px-3 tw-text-sm tw-font-semibold tw-normal-case tw-bg-white tw-border-slate-200 tw-text-slate-700 tw-shadow-sm tw-transition-all tw-duration-200 hover:tw-bg-indigo-50 hover:tw-border-indigo-300 hover:tw-text-slate-900 hover:tw-shadow-md hover:tw-shadow-indigo-500/15 hover:-tw-translate-y-0.5 focus:tw-ring-2 focus:tw-ring-indigo-400 focus:tw-ring-offset-1">
                         <svg xmlns="http://www.w3.org/2000/svg"
                             class="tw-w-4 md:tw-w-5 tw-flex-shrink-0 tw-text-indigo-600 tw-transition-transform tw-duration-200 group-hover:tw-scale-110 icon icon-tabler icon-tabler-category-plus" width="44" height="44"
                             viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" fill="none"
@@ -96,7 +96,7 @@
                 <div class="tw-dw-drawer-content">
                     <!-- Page content here -->
                     <label for="my-drawer-brand{{ $drawer_id_suffix ?? '' }}"
-                        class="tw-dw-btn tw-dw-btn-sm tw-group tw-w-full tw-h-9 tw-min-h-[2.25rem] tw-rounded-full tw-flex tw-flex-row tw-items-center tw-flex-nowrap tw-gap-1.5 tw-px-3 tw-text-sm tw-font-semibold tw-normal-case tw-bg-white tw-border-slate-200 tw-text-slate-700 tw-shadow-sm tw-transition-all tw-duration-200 hover:tw-bg-violet-50 hover:tw-border-violet-300 hover:tw-text-slate-900 hover:tw-shadow-md hover:tw-shadow-violet-500/15 hover:-tw-translate-y-0.5 focus:tw-ring-2 focus:tw-ring-violet-400 focus:tw-ring-offset-1">
+                        class="tw-dw-btn tw-dw-btn-sm tw-group tw-w-full tw-h-9 tw-min-h-[2.25rem] tw-rounded-xl tw-flex tw-flex-row tw-items-center tw-flex-nowrap tw-gap-1.5 tw-px-3 tw-text-sm tw-font-semibold tw-normal-case tw-bg-white tw-border-slate-200 tw-text-slate-700 tw-shadow-sm tw-transition-all tw-duration-200 hover:tw-bg-violet-50 hover:tw-border-violet-300 hover:tw-text-slate-900 hover:tw-shadow-md hover:tw-shadow-violet-500/15 hover:-tw-translate-y-0.5 focus:tw-ring-2 focus:tw-ring-violet-400 focus:tw-ring-offset-1">
                         <svg xmlns="http://www.w3.org/2000/svg" class="tw-w-4 md:tw-w-5 tw-flex-shrink-0 tw-text-violet-600 tw-transition-transform tw-duration-200 group-hover:tw-scale-110 icon icon-tabler icon-tabler-brand-beats"
                             width="44" height="44" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor"
                             fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -163,7 +163,7 @@
 
     <div class="tw-flex-1 tw-min-w-[140px]" id="feature_product_div">
         <button type="button" id="show_featured_products"
-            class="tw-dw-btn tw-dw-btn-sm tw-group tw-w-full tw-h-9 tw-min-h-[2.25rem] tw-rounded-full tw-flex-nowrap tw-gap-2 tw-px-3 tw-text-sm tw-font-semibold tw-normal-case tw-bg-white tw-border-slate-200 tw-text-slate-700 tw-shadow-sm tw-transition-all tw-duration-200 hover:tw-bg-amber-50 hover:tw-border-amber-300 hover:tw-text-slate-900 hover:tw-shadow-md hover:tw-shadow-amber-500/15 hover:-tw-translate-y-0.5 focus:tw-ring-2 focus:tw-ring-amber-400 focus:tw-ring-offset-1">
+            class="tw-dw-btn tw-dw-btn-sm tw-group tw-w-full tw-h-9 tw-min-h-[2.25rem] tw-rounded-xl tw-flex-nowrap tw-gap-2 tw-px-3 tw-text-sm tw-font-semibold tw-normal-case tw-bg-white tw-border-slate-200 tw-text-slate-700 tw-shadow-sm tw-transition-all tw-duration-200 hover:tw-bg-amber-50 hover:tw-border-amber-300 hover:tw-text-slate-900 hover:tw-shadow-md hover:tw-shadow-amber-500/15 hover:-tw-translate-y-0.5 focus:tw-ring-2 focus:tw-ring-amber-400 focus:tw-ring-offset-1">
             <svg xmlns="http://www.w3.org/2000/svg"
                 class="tw-w-4 md:tw-w-5 tw-flex-shrink-0 tw-text-amber-500 tw-transition-transform tw-duration-200 group-hover:tw-scale-110 group-hover:tw-rotate-12 icon icon-tabler icon-tabler-star" width="44" height="44"
                 viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" fill="none"
