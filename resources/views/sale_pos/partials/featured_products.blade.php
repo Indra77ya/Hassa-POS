@@ -12,7 +12,7 @@
 		<div class="image-container tw-h-[58px] tw-mx-auto tw-w-full tw-mb-[3px]"
 			style="background-image: url('{{ count($variation->media) > 0 ? $variation->media->first()->display_url : (!empty($variation->product->image_url) ? $variation->product->image_url : asset('/img/default.png')) }}');
 			background-repeat: no-repeat; background-position: center;
-			background-size: contain;">
+			background-size: contain; height: 58px;">
 
 		</div>
 
