@@ -260,6 +260,45 @@
 			#pos_table.pos-has-rows .pos-empty-state-row { display: none !important; }
 			#add_pos_sell_form:not(.pos-has-rows) .pos_form_totals,
 			#edit_pos_sell_form:not(.pos-has-rows) .pos_form_totals { display: none !important; }
+
+			#pos_table:not(.pos-has-rows) {
+				height: 100% !important;
+				display: flex !important;
+				align-items: center !important;
+				justify-content: center !important;
+				width: 100% !important;
+			}
+			#pos_table:not(.pos-has-rows) tbody {
+				height: 100% !important;
+				display: flex !important;
+				align-items: center !important;
+				justify-content: center !important;
+				width: 100% !important;
+				border: 0 !important;
+			}
+			#pos_table:not(.pos-has-rows) .pos-empty-state-row {
+				height: 100% !important;
+				display: flex !important;
+				align-items: center !important;
+				justify-content: center !important;
+				width: 100% !important;
+				background: transparent !important;
+			}
+			#pos_table:not(.pos-has-rows) .pos-empty-state-row td {
+				width: 100% !important;
+				height: 100% !important;
+				display: flex !important;
+				align-items: center !important;
+				justify-content: center !important;
+				background: transparent !important;
+				border: 0 !important;
+			}
+			#pos_table .pos-empty-state-row:hover,
+			#pos_table .pos-empty-state-row td:hover,
+			#pos_table .pos-empty-state-row:hover td {
+				background-color: transparent !important;
+				background: transparent !important;
+			}
 		</style>
 	</div>
 </div>
