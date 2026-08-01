@@ -162,20 +162,24 @@
     </div>
 
     <div class="tw-flex-1 tw-w-0" id="feature_product_div">
-        <button type="button" id="show_featured_products"
-            class="tw-dw-btn tw-dw-btn-sm tw-group tw-w-full tw-h-9 tw-min-h-[2.25rem] tw-rounded-xl tw-flex tw-flex-row tw-items-center tw-flex-nowrap tw-gap-1.5 tw-px-3 tw-text-xs tw-font-bold tw-normal-case tw-bg-slate-50 tw-border tw-border-slate-100 tw-text-slate-600 tw-shadow-none tw-transition-all tw-duration-200 hover:tw-bg-amber-50 hover:tw-border-amber-200 hover:tw-text-amber-700 hover:tw-shadow-sm focus:tw-ring-2 focus:tw-ring-amber-400 focus:tw-ring-offset-1">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                class="tw-w-4 tw-flex-shrink-0 tw-text-amber-500 tw-transition-transform tw-duration-200 group-hover:tw-scale-110 group-hover:tw-rotate-12 icon icon-tabler icon-tabler-star" width="24" height="24"
-                viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M12 17.75l-6.172 3.245 1.179 -6.873 -5 -4.867 6.9 -1 3.086 -6.253 3.086 6.253 6.9 1 -5 4.867 1.179 6.873z" />
-            </svg>
-            <span class="tw-truncate tw-flex-1 tw-text-left">@lang('lang_v1.featured_products')</span>
-            @if (!empty($featured_products) && count($featured_products) > 0)
-                <span class="tw-dw-badge tw-dw-badge-sm tw-bg-white tw-border tw-border-slate-200 tw-text-slate-400 tw-font-bold tw-text-[10px] group-hover:tw-bg-amber-100 group-hover:tw-border-amber-200 group-hover:tw-text-amber-700 tw-transition-colors tw-rounded-lg">{{ count($featured_products) }}</span>
-            @endif
-        </button>
+        <div class="tw-dw-drawer">
+            <div class="tw-dw-drawer-content">
+                <label id="show_featured_products"
+                    class="tw-dw-btn tw-dw-btn-sm tw-group tw-w-full tw-h-9 tw-min-h-[2.25rem] tw-rounded-xl tw-flex tw-flex-row tw-items-center tw-flex-nowrap tw-gap-1.5 tw-px-3 tw-text-xs tw-font-bold tw-normal-case tw-bg-slate-50 tw-border tw-border-slate-100 tw-text-slate-600 tw-shadow-none tw-transition-all tw-duration-200 hover:tw-bg-amber-50 hover:tw-border-amber-200 hover:tw-text-amber-700 hover:tw-shadow-sm focus:tw-ring-2 focus:tw-ring-amber-400 focus:tw-ring-offset-1 tw-cursor-pointer" style="margin: 0;">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        class="tw-w-4 tw-flex-shrink-0 tw-text-amber-500 tw-transition-transform tw-duration-200 group-hover:tw-scale-110 group-hover:tw-rotate-12 icon icon-tabler icon-tabler-star" width="24" height="24"
+                        viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M12 17.75l-6.172 3.245 1.179 -6.873 -5 -4.867 6.9 -1 3.086 -6.253 3.086 6.253 6.9 1 -5 4.867 1.179 6.873z" />
+                    </svg>
+                    <span class="tw-truncate tw-flex-1 tw-text-left">@lang('lang_v1.featured_products')</span>
+                    @if (!empty($featured_products) && count($featured_products) > 0)
+                        <span class="tw-dw-badge tw-dw-badge-sm tw-bg-white tw-border tw-border-slate-200 tw-text-slate-400 tw-font-bold tw-text-[10px] group-hover:tw-bg-amber-100 group-hover:tw-border-amber-200 group-hover:tw-text-amber-700 tw-transition-colors tw-rounded-lg">{{ count($featured_products) }}</span>
+                    @endif
+                </label>
+            </div>
+        </div>
     </div>
 </div>
 <div class="row" style="margin: 0;">
