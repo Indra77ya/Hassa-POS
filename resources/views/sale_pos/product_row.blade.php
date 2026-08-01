@@ -30,13 +30,7 @@
 		@endphp
 
 		<div class="tw-flex tw-items-center tw-gap-3">
-			<img src="@if(count($product->media) > 0)
-							{{$product->media->first()->display_url}}
-						@elseif(!empty($product->product_image))
-							{{asset('/uploads/img/' . rawurlencode($product->product_image))}}
-						@else
-							{{asset('/img/default.png')}}
-						@endif" alt="product-img" loading="lazy" class="tw-w-10 tw-h-10 tw-rounded-xl tw-object-cover tw-bg-slate-50 tw-border tw-border-slate-100" onerror="this.style.display='none'">
+			<img src="{{ count($product->media) > 0 ? $product->media->first()->display_url : (!empty($product->product_image) ? asset('/uploads/img/' . rawurlencode($product->product_image)) : asset('/img/default.png')) }}" alt="product-img" loading="lazy" class="tw-w-10 tw-h-10 tw-rounded-xl tw-object-cover tw-bg-slate-50 tw-border tw-border-slate-100" onerror="this.style.display='none'">
 			<div style="min-width:0;flex:1;">
 				@if( ($edit_price || $edit_discount) && empty($is_direct_sell) )
 				<div title="@lang('lang_v1.pos_edit_product_price_help')">

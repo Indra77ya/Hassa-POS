@@ -7,7 +7,7 @@
                 <div class="tw-dw-drawer-content">
                     <!-- Page content here -->
                     <label for="my-drawer-4{{ $drawer_id_suffix ?? '' }}"
-                        class="tw-dw-btn tw-dw-btn-sm tw-group tw-w-full tw-h-9 tw-min-h-[2.25rem] tw-rounded-xl tw-flex tw-flex-row tw-items-center tw-flex-nowrap tw-gap-1.5 tw-px-3 tw-text-xs tw-font-bold tw-normal-case tw-bg-slate-50 tw-border tw-border-slate-100 tw-text-slate-600 tw-shadow-none tw-transition-all tw-duration-200 hover:tw-bg-indigo-50 hover:tw-border-indigo-200 hover:tw-text-indigo-700 hover:tw-shadow-sm focus:tw-ring-2 focus:tw-ring-indigo-400 focus:tw-ring-offset-1">
+                        class="tw-dw-btn tw-dw-btn-sm tw-group tw-w-full tw-h-9 tw-min-h-[2.25rem] tw-rounded-xl tw-flex tw-flex-row tw-items-center tw-flex-nowrap tw-gap-1.5 tw-px-3 tw-text-xs tw-font-bold tw-normal-case tw-bg-slate-50 tw-border tw-border-slate-100 tw-text-slate-600 tw-shadow-none tw-transition-all tw-duration-200 hover:tw-bg-indigo-50 hover:tw-border-indigo-200 hover:tw-text-indigo-700 hover:tw-shadow-sm focus:tw-ring-2 focus:tw-ring-indigo-400 focus:tw-ring-offset-1" style="margin: 0;">
                         <svg xmlns="http://www.w3.org/2000/svg"
                             class="tw-w-4 tw-flex-shrink-0 tw-text-indigo-500 tw-transition-transform tw-duration-200 group-hover:tw-scale-110 icon icon-tabler icon-tabler-category-plus" width="24" height="24"
                             viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
@@ -96,7 +96,7 @@
                 <div class="tw-dw-drawer-content">
                     <!-- Page content here -->
                     <label for="my-drawer-brand{{ $drawer_id_suffix ?? '' }}"
-                        class="tw-dw-btn tw-dw-btn-sm tw-group tw-w-full tw-h-9 tw-min-h-[2.25rem] tw-rounded-xl tw-flex tw-flex-row tw-items-center tw-flex-nowrap tw-gap-1.5 tw-px-3 tw-text-xs tw-font-bold tw-normal-case tw-bg-slate-50 tw-border tw-border-slate-100 tw-text-slate-600 tw-shadow-none tw-transition-all tw-duration-200 hover:tw-bg-violet-50 hover:tw-border-violet-200 hover:tw-text-violet-700 hover:tw-shadow-sm focus:tw-ring-2 focus:tw-ring-violet-400 focus:tw-ring-offset-1">
+                        class="tw-dw-btn tw-dw-btn-sm tw-group tw-w-full tw-h-9 tw-min-h-[2.25rem] tw-rounded-xl tw-flex tw-flex-row tw-items-center tw-flex-nowrap tw-gap-1.5 tw-px-3 tw-text-xs tw-font-bold tw-normal-case tw-bg-slate-50 tw-border tw-border-slate-100 tw-text-slate-600 tw-shadow-none tw-transition-all tw-duration-200 hover:tw-bg-violet-50 hover:tw-border-violet-200 hover:tw-text-violet-700 hover:tw-shadow-sm focus:tw-ring-2 focus:tw-ring-violet-400 focus:tw-ring-offset-1" style="margin: 0;">
                         <svg xmlns="http://www.w3.org/2000/svg" class="tw-w-4 tw-flex-shrink-0 tw-text-violet-500 tw-transition-transform tw-duration-200 group-hover:tw-scale-110 icon icon-tabler icon-tabler-brand-beats"
                             width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
                             fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -162,24 +162,20 @@
     </div>
 
     <div class="tw-flex-1 tw-w-0" id="feature_product_div">
-        <div class="tw-dw-drawer">
-            <div class="tw-dw-drawer-content">
-                <label id="show_featured_products"
-                    class="tw-dw-btn tw-dw-btn-sm tw-group tw-w-full tw-h-9 tw-min-h-[2.25rem] tw-rounded-xl tw-flex tw-flex-row tw-items-center tw-flex-nowrap tw-gap-1.5 tw-px-3 tw-text-xs tw-font-bold tw-normal-case tw-bg-slate-50 tw-border tw-border-slate-100 tw-text-slate-600 tw-shadow-none tw-transition-all tw-duration-200 hover:tw-bg-amber-50 hover:tw-border-amber-200 hover:tw-text-amber-700 hover:tw-shadow-sm focus:tw-ring-2 focus:tw-ring-amber-400 focus:tw-ring-offset-1 tw-cursor-pointer" style="margin: 0;">
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                        class="tw-w-4 tw-flex-shrink-0 tw-text-amber-500 tw-transition-transform tw-duration-200 group-hover:tw-scale-110 group-hover:tw-rotate-12 icon icon-tabler icon-tabler-star" width="24" height="24"
-                        viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                        <path d="M12 17.75l-6.172 3.245 1.179 -6.873 -5 -4.867 6.9 -1 3.086 -6.253 3.086 6.253 6.9 1 -5 4.867 1.179 6.873z" />
-                    </svg>
-                    <span class="tw-truncate tw-flex-1 tw-text-left">@lang('lang_v1.featured_products')</span>
-                    @if (!empty($featured_products) && count($featured_products) > 0)
-                        <span class="tw-dw-badge tw-dw-badge-sm tw-bg-white tw-border tw-border-slate-200 tw-text-slate-400 tw-font-bold tw-text-[10px] group-hover:tw-bg-amber-100 group-hover:tw-border-amber-200 group-hover:tw-text-amber-700 tw-transition-colors tw-rounded-lg">{{ count($featured_products) }}</span>
-                    @endif
-                </label>
-            </div>
-        </div>
+        <label id="show_featured_products"
+            class="tw-dw-btn tw-dw-btn-sm tw-group tw-w-full tw-h-9 tw-min-h-[2.25rem] tw-rounded-xl tw-flex tw-flex-row tw-items-center tw-flex-nowrap tw-gap-1.5 tw-px-3 tw-text-xs tw-font-bold tw-normal-case tw-bg-slate-50 tw-border tw-border-slate-100 tw-text-slate-600 tw-shadow-none tw-transition-all tw-duration-200 hover:tw-bg-amber-50 hover:tw-border-amber-200 hover:tw-text-amber-700 hover:tw-shadow-sm focus:tw-ring-2 focus:tw-ring-amber-400 focus:tw-ring-offset-1 tw-cursor-pointer" style="margin: 0;">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                class="tw-w-4 tw-flex-shrink-0 tw-text-amber-500 tw-transition-transform tw-duration-200 group-hover:tw-scale-110 group-hover:tw-rotate-12 icon icon-tabler icon-tabler-star" width="24" height="24"
+                viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M12 17.75l-6.172 3.245 1.179 -6.873 -5 -4.867 6.9 -1 3.086 -6.253 3.086 6.253 6.9 1 -5 4.867 1.179 6.873z" />
+            </svg>
+            <span class="tw-truncate tw-flex-1 tw-text-left">@lang('lang_v1.featured_products')</span>
+            @if (!empty($featured_products) && count($featured_products) > 0)
+                <span class="tw-dw-badge tw-dw-badge-sm tw-bg-white tw-border tw-border-slate-200 tw-text-slate-400 tw-font-bold tw-text-[10px] group-hover:tw-bg-amber-100 group-hover:tw-border-amber-200 group-hover:tw-text-amber-700 tw-transition-colors tw-rounded-lg">{{ count($featured_products) }}</span>
+            @endif
+        </label>
     </div>
 </div>
 <div class="row" style="margin: 0;">
@@ -200,16 +196,20 @@
                         <path d="M12 8h.01" />
                         <path d="M11 12h1v4h1" />
                     </svg>
-                    <span>@lang('lang_v1.featured_products_empty_msg')</span>
-                    <a href="{{ url('business-location') }}" target="_blank" class="tw-inline-flex tw-items-center tw-gap-1 tw-font-semibold tw-text-amber-900 tw-underline tw-decoration-amber-400 tw-underline-offset-2 hover:tw-text-amber-950 hover:tw-decoration-amber-700 tw-transition-colors">
-                        @lang('business.business_location')
-                        <svg xmlns="http://www.w3.org/2000/svg" class="tw-w-3 md:tw-w-4 tw-flex-shrink-0" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
-                            <path d="M11 13l9 -9" />
-                            <path d="M15 4h5v5" />
-                        </svg>
-                    </a>
+                    @if(auth()->user()->can('business_settings.access'))
+                        <span>@lang('lang_v1.featured_products_empty_msg')</span>
+                        <a href="{{ url('business-location') }}" target="_blank" class="tw-inline-flex tw-items-center tw-gap-1 tw-font-semibold tw-text-amber-900 tw-underline tw-decoration-amber-400 tw-underline-offset-2 hover:tw-text-amber-950 hover:tw-decoration-amber-700 tw-transition-colors">
+                            @lang('business.business_location')
+                            <svg xmlns="http://www.w3.org/2000/svg" class="tw-w-3 md:tw-w-4 tw-flex-shrink-0" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
+                                <path d="M11 13l9 -9" />
+                                <path d="M15 4h5v5" />
+                            </svg>
+                        </a>
+                    @else
+                        <span>@lang('lang_v1.no_products_to_display')</span>
+                    @endif
                 </div>
             </div>
             <div id="product_list_items" class="tw-w-full"></div>
