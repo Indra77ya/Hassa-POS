@@ -10,15 +10,7 @@
 		<div class="product_box tw-w-full tw-mb-1 tw-text-center tw-cursor-pointer tw-font-semibold tw-bg-white tw-rounded-lg tw-p-1 tw-border tw-border-[#fde68a] tw-shadow-[0_1px_3px_rgba(0,0,0,0.06)] tw-transition-all tw-duration-150 hover:-tw-translate-y-px hover:tw-shadow-[0_4px_12px_rgba(0,0,0,0.1)] active:tw-scale-[0.97] @if($enable_stock && $variation->qty_available <= 0) product_out_of_stock !tw-bg-[#f3f4f6] tw-opacity-60 @endif" data-toggle="tooltip" data-placement="bottom" data-variation_id="{{$variation->id}}" title="{{$variation->full_name}}">
 
 		<div class="image-container tw-h-[58px] tw-mx-auto tw-w-full tw-mb-[3px]"
-			style="background-image: url(
-					@if(count($variation->media) > 0)
-						{{$variation->media->first()->display_url}}
-					@elseif(!empty($variation->product->image_url))
-						{{$variation->product->image_url}}
-					@else
-						{{asset('/img/default.png')}}
-					@endif
-				);
+			style="background-image: url('{{ count($variation->media) > 0 ? $variation->media->first()->display_url : (!empty($variation->product->image_url) ? $variation->product->image_url : asset('/img/default.png')) }}');
 			background-repeat: no-repeat; background-position: center;
 			background-size: contain;">
 

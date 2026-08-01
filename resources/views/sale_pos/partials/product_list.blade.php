@@ -3,15 +3,7 @@
 		<div class="product_box tw-w-full tw-text-center tw-cursor-pointer tw-bg-white tw-rounded-xl tw-p-2 tw-border tw-border-slate-100 tw-shadow-[0_2px_8px_rgba(0,0,0,0.02)] tw-transition-all tw-duration-200 hover:-tw-translate-y-0.5 hover:tw-shadow-[0_6px_20px_rgba(99,102,241,0.08)] active:tw-scale-[0.97] @if($product->enable_stock && $product->qty_available <= 0) product_out_of_stock !tw-bg-slate-50 tw-opacity-65 @endif" data-variation_id="{{$product->id}}" title="{{$product->name}} @if($product->type == 'variable')- {{$product->variation}} @endif {{ '(' . $product->sub_sku . ')'}} @if(!empty($show_prices)) @lang('lang_v1.default') - @format_currency($product->selling_price) @foreach($product->group_prices as $group_price) @if(array_key_exists($group_price->price_group_id, $allowed_group_prices)) {{$allowed_group_prices[$group_price->price_group_id]}} - @format_currency($group_price->price_inc_tax) @endif @endforeach @endif">
 
 			<div class="image-container tw-h-[64px] tw-mx-auto tw-w-full tw-mb-2 tw-rounded-lg tw-overflow-hidden tw-bg-slate-50 tw-border tw-border-slate-100/50"
-				style="background-image: url(
-						@if(count($product->media) > 0)
-							{{$product->media->first()->display_url}}
-						@elseif(!empty($product->product_image))
-							{{asset('/uploads/img/' . rawurlencode($product->product_image))}}
-						@else
-							{{asset('/img/default.png')}}
-						@endif
-					);
+				style="background-image: url('{{ count($product->media) > 0 ? $product->media->first()->display_url : (!empty($product->product_image) ? asset('/uploads/img/' . rawurlencode($product->product_image)) : asset('/img/default.png')) }}');
 				background-repeat: no-repeat; background-position: center;
 				background-size: cover;">
 			</div>
