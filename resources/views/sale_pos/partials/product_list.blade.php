@@ -23,14 +23,14 @@
 				<div class="tw-mb-1.5">
 					@if($product->enable_stock)
 						@if($product->qty_available <= 0)
-							<span style="font-size: 8px;" class="tw-inline-block tw-font-semibold tw-text-rose-500 tw-bg-rose-50 tw-px-1.5 tw-py-0.5 tw-rounded-md">@lang('lang_v1.out_of_stock')</span>
+							<span style="font-size: 10px;" class="tw-inline-block tw-font-semibold tw-text-rose-500 tw-bg-rose-50 tw-px-1.5 tw-py-0.5 tw-rounded-md">@lang('lang_v1.out_of_stock')</span>
 						@elseif($product->qty_available <= 5)
-							<span style="font-size: 8px;" class="tw-inline-block tw-font-semibold tw-text-amber-500 tw-bg-amber-50 tw-px-1.5 tw-py-0.5 tw-rounded-md">{{ @num_format($product->qty_available) }} {{$product->unit}}</span>
+							<span style="font-size: 10px;" class="tw-inline-block tw-font-semibold tw-text-amber-500 tw-bg-amber-50 tw-px-1.5 tw-py-0.5 tw-rounded-md">{{ @num_format($product->qty_available) }} {{$product->unit}}</span>
 						@else
-							<span style="font-size: 8px;" class="tw-inline-block tw-font-semibold tw-text-indigo-500 tw-bg-indigo-50/70 tw-px-1.5 tw-py-0.5 tw-rounded-md">{{ @num_format($product->qty_available) }} {{$product->unit}}</span>
+							<span style="font-size: 10px;" class="tw-inline-block tw-font-semibold tw-text-indigo-500 tw-bg-indigo-50/70 tw-px-1.5 tw-py-0.5 tw-rounded-md">{{ @num_format($product->qty_available) }} {{$product->unit}}</span>
 						@endif
 					@else
-						<span style="font-size: 8px;" class="tw-inline-block tw-font-semibold tw-text-slate-400 tw-bg-slate-50 tw-px-1.5 tw-py-0.5 tw-rounded-md">Unlimited</span>
+						<span style="font-size: 10px;" class="tw-inline-block tw-font-semibold tw-text-slate-400 tw-bg-slate-50 tw-px-1.5 tw-py-0.5 tw-rounded-md">Unlimited</span>
 					@endif
 				</div>
 
