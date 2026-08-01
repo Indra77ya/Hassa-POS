@@ -1,10 +1,10 @@
 @if($__is_repair_enabled)
 	@can("repair.create")
 		<a 
-		class="tw-shadow-[rgba(17,_17,_26,_0.1)_0px_0px_16px] tw-bg-white hover:tw-bg-white/60 tw-cursor-pointer tw-border-2 tw-w-auto tw-h-auto tw-py-1 tw-px-4 tw-rounded-md"
-		href="{{ action([\App\Http\Controllers\SellPosController::class, 'create']). '?sub_type=repair'}}" title="{{ __('repair::lang.add_repair') }}" data-toggle="tooltip" data-placement="bottom" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-primary m-6 btn-xs m-5 pull-right">
-			<i class="fa fa-wrench fa-lg !tw-text-sm"></i>
-			<strong>@lang('repair::lang.repair')</strong>
+		class="tw-shadow-sm tw-bg-white hover:tw-bg-slate-50 tw-cursor-pointer tw-border tw-border-slate-200 tw-flex tw-items-center tw-justify-center tw-rounded-xl tw-h-9 tw-px-3.5 tw-text-xs tw-font-bold tw-text-slate-600 active:tw-scale-[0.97] tw-transition-all"
+		href="{{ action([\App\Http\Controllers\SellPosController::class, 'create']). '?sub_type=repair'}}" title="{{ __('repair::lang.add_repair') }}">
+			<i class="fa fa-wrench tw-text-slate-400 tw-text-xs tw-mr-1"></i>
+			@lang('repair::lang.repair')
 		</a>
 	@endcan
 @endif
