@@ -196,16 +196,20 @@
                         <path d="M12 8h.01" />
                         <path d="M11 12h1v4h1" />
                     </svg>
-                    <span>@lang('lang_v1.featured_products_empty_msg')</span>
-                    <a href="{{ url('business-location') }}" target="_blank" class="tw-inline-flex tw-items-center tw-gap-1 tw-font-semibold tw-text-amber-900 tw-underline tw-decoration-amber-400 tw-underline-offset-2 hover:tw-text-amber-950 hover:tw-decoration-amber-700 tw-transition-colors">
-                        @lang('business.business_location')
-                        <svg xmlns="http://www.w3.org/2000/svg" class="tw-w-3 md:tw-w-4 tw-flex-shrink-0" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
-                            <path d="M11 13l9 -9" />
-                            <path d="M15 4h5v5" />
-                        </svg>
-                    </a>
+                    @if(auth()->user()->can('business_settings.access'))
+                        <span>@lang('lang_v1.featured_products_empty_msg')</span>
+                        <a href="{{ url('business-location') }}" target="_blank" class="tw-inline-flex tw-items-center tw-gap-1 tw-font-semibold tw-text-amber-900 tw-underline tw-decoration-amber-400 tw-underline-offset-2 hover:tw-text-amber-950 hover:tw-decoration-amber-700 tw-transition-colors">
+                            @lang('business.business_location')
+                            <svg xmlns="http://www.w3.org/2000/svg" class="tw-w-3 md:tw-w-4 tw-flex-shrink-0" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
+                                <path d="M11 13l9 -9" />
+                                <path d="M15 4h5v5" />
+                            </svg>
+                        </a>
+                    @else
+                        <span>@lang('lang_v1.no_products_to_display')</span>
+                    @endif
                 </div>
             </div>
             <div id="product_list_items" class="tw-w-full"></div>
