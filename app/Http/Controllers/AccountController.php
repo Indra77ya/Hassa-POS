@@ -499,8 +499,8 @@ class AccountController extends Controller
                                                           });
                                                 })
                                                 ->select(
-                                                    DB::raw("SUM(IF(type='debit', amount, 0)) as total_debit"),
-                                                    DB::raw("SUM(IF(type='credit', amount, 0)) as total_credit")
+                                        DB::raw("SUM(CASE WHEN type='debit' THEN amount ELSE 0 END) as total_debit"),
+                                        DB::raw("SUM(CASE WHEN type='credit' THEN amount ELSE 0 END) as total_credit")
                                                 )
                                                 ->first();
 
@@ -981,6 +981,7 @@ class AccountController extends Controller
                 ->leftJoin('accounts as transfer_acc', 'transfer_trans.account_id', '=', 'transfer_acc.id')
                 ->leftJoin('account_types as transfer_aty', 'transfer_acc.account_type_id', '=', 'transfer_aty.id')
                 ->where('A.business_id', $business_id)
+                ->where('ATY.fixed_key', 'kas_dan_bank')
                 ->with(['transaction', 'transaction.contact', 'transfer_transaction', 'transaction.transaction_for'])
                 ->select(['account_transactions.type', 'account_transactions.amount', 'account_transactions.operation_date',
                     'account_transactions.sub_type', 'account_transactions.transfer_transaction_id',
@@ -1011,7 +1012,7 @@ class AccountController extends Controller
                     'c.type as payment_for_type',
                     'c.supplier_business_name as payment_for_business_name',
                     DB::raw('SUM(child_payments.amount) total_recovered'),
-                    DB::raw("GROUP_CONCAT(child_sells.invoice_no SEPARATOR ', ') as child_sells"),
+                    DB::raw("GROUP_CONCAT(child_sells.invoice_no) as child_sells"),
                 ])
                  ->groupBy('account_transactions.id')
                  ->orderBy('account_transactions.operation_date', 'asc')
@@ -1086,73 +1087,77 @@ class AccountController extends Controller
 
             $payment_types = $this->commonUtil->payment_types(null, true, $business_id);
 
-            return DataTables::of($accounts)
-                ->addColumn('activity', function ($row) {
-                    $fixed_key = $row->fixed_key;
+            try {
+                return DataTables::of($accounts)
+                    ->addColumn('activity', function ($row) {
+                        $fixed_key = $row->fixed_key;
 
-                    // For fund transfers/deposits, check the "other" account
-                    if (in_array($row->sub_type, ['fund_transfer', 'deposit']) && !empty($row->transfer_fixed_key)) {
-                        $other_fixed_key = $row->transfer_fixed_key;
-                        if (in_array($other_fixed_key, ['aktiva_tetap', 'akumulasi_penyusutan', 'aktiva_lainnya'])) {
-                            return __('account.investing');
-                        } elseif (in_array($other_fixed_key, ['hutang_jangka_panjang', 'ekuitas'])) {
-                            return __('account.financing');
+                        // For fund transfers/deposits, check the "other" account
+                        if (in_array($row->sub_type, ['fund_transfer', 'deposit']) && !empty($row->transfer_fixed_key)) {
+                            $other_fixed_key = $row->transfer_fixed_key;
+                            if (in_array($other_fixed_key, ['aktiva_tetap', 'akumulasi_penyusutan', 'aktiva_lainnya'])) {
+                                return __('account.investing');
+                            } elseif (in_array($other_fixed_key, ['hutang_jangka_panjang', 'ekuitas'])) {
+                                return __('account.financing');
+                            }
                         }
-                    }
 
-                    if (in_array($fixed_key, ['aktiva_tetap', 'akumulasi_penyusutan', 'aktiva_lainnya'])) {
-                        return __('account.investing');
-                    } elseif (in_array($fixed_key, ['hutang_jangka_panjang', 'ekuitas'])) {
-                        return __('account.financing');
-                    } else {
-                        return __('account.operating');
-                    }
-                })
-                ->addColumn('debit', '@if($type == "debit")<span class="debit" data-orig-value="{{$amount}}">@format_currency($amount)</span>@endif')
-                ->addColumn('credit', '@if($type == "credit")<span class="credit" data-orig-value="{{$amount}}">@format_currency($amount)</span>@endif')
-                ->addColumn('balance', function ($row) {
-                    $is_debit_normal = Account::getBalanceTypeStatic($row->normal_balance, $row->fixed_key) == 'debit';
+                        if (in_array($fixed_key, ['aktiva_tetap', 'akumulasi_penyusutan', 'aktiva_lainnya'])) {
+                            return __('account.investing');
+                        } elseif (in_array($fixed_key, ['hutang_jangka_panjang', 'ekuitas'])) {
+                            return __('account.financing');
+                        } else {
+                            return __('account.operating');
+                        }
+                    })
+                    ->addColumn('debit', '@if($type == "debit")<span class="debit" data-orig-value="{{$amount}}">@format_currency($amount)</span>@endif')
+                    ->addColumn('credit', '@if($type == "credit")<span class="credit" data-orig-value="{{$amount}}">@format_currency($amount)</span>@endif')
+                    ->addColumn('balance', function ($row) {
+                        $is_debit_normal = Account::getBalanceTypeStatic($row->normal_balance, $row->fixed_key) == 'debit';
 
-                    $row_priority = ($row->sub_type == 'opening_balance') ? 0 : 1;
+                        $row_priority = ($row->sub_type == 'opening_balance') ? 0 : 1;
 
-                    $details = AccountTransaction::where('account_id', $row->account_id)
-                                    ->whereNull('deleted_at')
-                                    ->where(function($query) use ($row, $row_priority) {
-                                        $query->where('operation_date', '<', $row->operation_date)
-                                              ->orWhere(function($q) use ($row, $row_priority) {
-                                                  $q->where('operation_date', '=', $row->operation_date)
-                                                    ->where(function($sub_q) use ($row, $row_priority) {
-                                                        $sub_q->whereRaw("CASE WHEN sub_type = 'opening_balance' THEN 0 ELSE 1 END < ?", [$row_priority])
-                                                              ->orWhere(function($inner_q) use ($row, $row_priority) {
-                                                                  $inner_q->whereRaw("CASE WHEN sub_type = 'opening_balance' THEN 0 ELSE 1 END = ?", [$row_priority])
-                                                                          ->where('id', '<=', $row->id);
-                                                              });
-                                                    });
-                                              });
-                                    })
-                                    ->select(
-                                        DB::raw("SUM(IF(type='debit', amount, 0)) as total_debit"),
-                                        DB::raw("SUM(IF(type='credit', amount, 0)) as total_credit")
-                                    )
-                                    ->first();
+                        $details = AccountTransaction::where('account_id', $row->account_id)
+                                        ->whereNull('deleted_at')
+                                        ->where(function($query) use ($row, $row_priority) {
+                                            $query->where('operation_date', '<', $row->operation_date)
+                                                  ->orWhere(function($q) use ($row, $row_priority) {
+                                                      $q->where('operation_date', '=', $row->operation_date)
+                                                        ->where(function($sub_q) use ($row, $row_priority) {
+                                                            $sub_q->whereRaw("CASE WHEN sub_type = 'opening_balance' THEN 0 ELSE 1 END < ?", [$row_priority])
+                                                                  ->orWhere(function($inner_q) use ($row, $row_priority) {
+                                                                      $inner_q->whereRaw("CASE WHEN sub_type = 'opening_balance' THEN 0 ELSE 1 END = ?", [$row_priority])
+                                                                              ->where('id', '<=', $row->id);
+                                                                  });
+                                                        });
+                                                  });
+                                        })
+                                        ->select(
+                                            DB::raw("SUM(CASE WHEN type='debit' THEN amount ELSE 0 END) as total_debit"),
+                                            DB::raw("SUM(CASE WHEN type='credit' THEN amount ELSE 0 END) as total_credit")
+                                        )
+                                        ->first();
 
-                    if ($is_debit_normal) {
-                        $balance = ($details->total_debit ?? 0) - ($details->total_credit ?? 0);
-                    } else {
-                        $balance = ($details->total_credit ?? 0) - ($details->total_debit ?? 0);
-                    }
+                        if ($is_debit_normal) {
+                            $balance = ($details->total_debit ?? 0) - ($details->total_credit ?? 0);
+                        } else {
+                            $balance = ($details->total_credit ?? 0) - ($details->total_debit ?? 0);
+                        }
 
-                    return '<span class="balance" data-orig-value="'.$balance.'">'.$this->commonUtil->num_f($balance, true).'</span>';
-                })
-                ->editColumn('operation_date', function ($row) {
-                    return $this->commonUtil->format_date($row->operation_date, true);
-                })
-                ->editColumn('sub_type', function ($row) {
-                    return $this->__getPaymentDetails($row);
-                })
-                ->removeColumn('id')
-                ->rawColumns(['credit', 'debit', 'balance', 'sub_type', 'activity'])
-                ->make(true);
+                        return '<span class="balance" data-orig-value="'.$balance.'">'.$this->commonUtil->num_f($balance, true).'</span>';
+                    })
+                    ->editColumn('operation_date', function ($row) {
+                        return $this->commonUtil->format_date($row->operation_date, true);
+                    })
+                    ->editColumn('sub_type', function ($row) {
+                        return $this->__getPaymentDetails($row);
+                    })
+                    ->removeColumn('id')
+                    ->rawColumns(['credit', 'debit', 'balance', 'sub_type', 'activity'])
+                    ->make(true);
+            } catch (\Exception $e) {
+                dd($e->getMessage(), $e->getTraceAsString());
+            }
         }
         $accounts = Account::forDropdown($business_id, false);
 
@@ -1176,15 +1181,15 @@ class AccountController extends Controller
                 }
             }
         } else {
-            if (! empty($row->transaction->type)) {
+            if (! empty($row->transaction) && ! empty($row->transaction->type)) {
                 if ($row->transaction->type == 'purchase') {
-                    $details = __('lang_v1.purchase').'<br><b>'.__('purchase.supplier').':</b> '.$row->transaction->contact->full_name_with_business.'<br><b>'.
+                    $details = __('lang_v1.purchase').'<br><b>'.__('purchase.supplier').':</b> '.($row->transaction->contact->full_name_with_business ?? '').'<br><b>'.
                     __('purchase.ref_no').':</b> <a href="#" data-href="'.action([\App\Http\Controllers\PurchaseController::class, 'show'], [$row->transaction->id]).'" class="btn-modal" data-container=".view_modal">'.$row->transaction->ref_no.'</a>';
                 } elseif ($row->transaction->type == 'expense') {
                     $details = __('lang_v1.expense').'<br><b>'.__('purchase.ref_no').':</b>'.$row->transaction->ref_no;
                 } elseif ($row->transaction->type == 'sell') {
                     $is_return = $row->is_return == 1 ? ' ('.__('lang_v1.change_return').')' : '';
-                    $details = __('sale.sale').$is_return.'<br><b>'.__('contact.customer').':</b> '.$row->transaction->contact->full_name_with_business.'<br><b>'.
+                    $details = __('sale.sale').$is_return.'<br><b>'.__('contact.customer').':</b> '.($row->transaction->contact->full_name_with_business ?? '').'<br><b>'.
                     __('sale.invoice_no').':</b> <a href="#" data-href="'.action([\App\Http\Controllers\SellController::class, 'show'], [$row->transaction->id]).'" class="btn-modal" data-container=".view_modal">'.$row->transaction->invoice_no.'</a>';
                 }
             } else {
@@ -1215,7 +1220,7 @@ class AccountController extends Controller
 
             $details .= '<b>'.__('lang_v1.pay_reference_no').':</b> '.$row->payment_ref_no;
         }
-        if (! empty($row->transaction->contact) && $row->transaction->type == 'expense') {
+        if (! empty($row->transaction) && ! empty($row->transaction->contact) && $row->transaction->type == 'expense') {
             if (! empty($details)) {
                 $details .= '<br/>';
             }
@@ -1225,7 +1230,7 @@ class AccountController extends Controller
             $details .= ':</b> '.$row->transaction->contact->full_name_with_business;
         }
 
-        if (! empty($row->transaction->transaction_for)) {
+        if (! empty($row->transaction) && ! empty($row->transaction->transaction_for)) {
             if (! empty($details)) {
                 $details .= '<br/>';
             }

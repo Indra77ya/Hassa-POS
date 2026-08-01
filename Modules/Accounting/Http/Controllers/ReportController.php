@@ -315,10 +315,10 @@ class ReportController extends Controller
                     ->get();
 
         // Calculate Net Profit of the current period up to $end_date to balance the Balance Sheet dynamically
-        // Profit = Income - Expenses for the period.
+        // Profit = Income - Expenses for the period (cumulative up to end_date).
         $total_income = AccountingAccount::join('accounting_accounts_transactions as AAT',
                                 'AAT.accounting_account_id', '=', 'accounting_accounts.id')
-                    ->whereBetween('AAT.operation_date', [$start_date, $end_date])
+                    ->whereDate('AAT.operation_date', '<=', $end_date)
                     ->where('accounting_accounts.business_id', $business_id)
                     ->where('accounting_accounts.account_primary_type', 'income')
                     ->select(DB::raw($balance_formula))
@@ -326,7 +326,7 @@ class ReportController extends Controller
 
         $total_expenses = AccountingAccount::join('accounting_accounts_transactions as AAT',
                                 'AAT.accounting_account_id', '=', 'accounting_accounts.id')
-                    ->whereBetween('AAT.operation_date', [$start_date, $end_date])
+                    ->whereDate('AAT.operation_date', '<=', $end_date)
                     ->where('accounting_accounts.business_id', $business_id)
                     ->whereIn('accounting_accounts.account_primary_type', ['expense', 'expenses'])
                     ->select(DB::raw($balance_formula))
