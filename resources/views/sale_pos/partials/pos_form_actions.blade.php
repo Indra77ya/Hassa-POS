@@ -115,7 +115,7 @@
                 </div>
             </div>
 
-            <div class="tw-w-full md:tw-w-fit tw-flex tw-items-center tw-justify-end tw-hidden md:tw-flex tw-pr-4">
+            <div class="tw-w-full md:tw-w-fit tw-flex tw-items-center tw-justify-end tw-hidden md:tw-flex" style="padding-right: 36px !important;">
                 @if (!isset($pos_settings['hide_recent_trans']) || $pos_settings['hide_recent_trans'] == 0)
                     <button type="button"
                         class="tw-font-bold tw-bg-indigo-50 hover:tw-bg-indigo-100 tw-border tw-border-indigo-100 tw-text-indigo-600 tw-rounded-xl tw-w-full md:tw-w-fit tw-px-4 tw-h-9 tw-cursor-pointer tw-text-xs md:tw-text-sm tw-inline-flex tw-items-center tw-justify-center tw-gap-1.5 tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95"
