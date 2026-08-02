@@ -76,14 +76,30 @@ class TaxonomyController extends Controller
 
             return Datatables::of($category)
                 ->addColumn('action', function ($row) use ($can_edit, $can_delete, $category_type) {
-                    $html = '';
+                    $html = '<div class="btn-group">
+                        <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info tw-w-max dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' .
+                            __('messages.actions') .
+                            ' <span class="caret"></span><span class="sr-only">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-left" role="menu">';
+
                     if ($can_edit) {
-                        $html .= '<button data-href="' . action([\App\Http\Controllers\TaxonomyController::class, 'edit'], [$row->id]) . '?type=' . $category_type . '" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-primary edit_category_button"><i class="glyphicon glyphicon-edit"></i> ' . __('messages.edit') . '</button>';
+                        $html .= '<li>
+                            <button type="button" data-href="' . action([\App\Http\Controllers\TaxonomyController::class, 'edit'], [$row->id]) . '?type=' . $category_type . '" class="tw-block tw-w-full tw-text-left tw-px-4 tw-py-2 tw-text-sm tw-text-gray-700 hover:tw-bg-gray-100 hover:tw-text-gray-900 tw-bg-transparent tw-border-none tw-outline-none edit_category_button">
+                                <i class="glyphicon glyphicon-edit"></i> ' . __('messages.edit') . '
+                            </button>
+                        </li>';
                     }
 
                     if ($can_delete) {
-                        $html .= '&nbsp;<button data-href="' . action([\App\Http\Controllers\TaxonomyController::class, 'destroy'], [$row->id]) . '" class="tw-dw-btn tw-dw-btn-outline tw-dw-btn-xs tw-dw-btn-error delete_category_button"><i class="glyphicon glyphicon-trash"></i> ' . __('messages.delete') . '</button>';
+                        $html .= '<li>
+                            <button type="button" data-href="' . action([\App\Http\Controllers\TaxonomyController::class, 'destroy'], [$row->id]) . '" class="tw-block tw-w-full tw-text-left tw-px-4 tw-py-2 tw-text-sm tw-text-gray-700 hover:tw-bg-gray-100 hover:tw-text-gray-900 tw-bg-transparent tw-border-none tw-outline-none delete_category_button">
+                                <i class="glyphicon glyphicon-trash"></i> ' . __('messages.delete') . '
+                            </button>
+                        </li>';
                     }
+
+                    $html .= '</ul></div>';
 
                     return $html;
                 })
