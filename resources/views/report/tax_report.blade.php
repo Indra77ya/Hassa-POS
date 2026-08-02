@@ -3,6 +3,9 @@
 
 @section('css')
 <style>
+    .print_section {
+        display: none;
+    }
     @media print {
         .print_section {
             display: block !important;
@@ -43,6 +46,7 @@
     <div class="print_section text-center" style="margin-bottom: 20px;">
         <h2 style="font-weight: bold; margin-bottom: 5px;">{{ session()->get('business.name') }}</h2>
         <h3 style="margin-top: 5px; margin-bottom: 5px;">@lang('report.tax_report')</h3>
+        <h4 style="margin-top: 5px; margin-bottom: 5px; font-weight: bold;" id="print_active_tab_text"></h4>
         <p style="font-size: 1.1em; color: #333; margin-top: 5px;">
             <span id="print_location_text"></span>
             <span id="print_contact_text"></span>
@@ -293,6 +297,41 @@
 @section('javascript')
 <script type="text/javascript">
     $(document).ready(function() {
+        function updatePrintHeader() {
+            var location_text = $('#tax_report_location_id option:selected').text();
+            var contact_text = $('#tax_report_contact_id option:selected').text();
+            var date_range = $('#tax_report_date_range').val();
+            var active_tab_text = $('ul.nav-tabs li.active a').text().trim();
+
+            $('#print_active_tab_text').text(active_tab_text);
+
+            if (location_text) {
+                $('#print_location_text').text('{{ __("purchase.business_location") }}: ' + location_text);
+            } else {
+                $('#print_location_text').text('');
+            }
+
+            if (contact_text && $('#tax_report_contact_id').val()) {
+                $('#print_contact_text').text(' | {{ __("report.contact") }}: ' + contact_text);
+            } else {
+                $('#print_contact_text').text('');
+            }
+
+            if (date_range) {
+                $('#print_date_text').text('{{ __("report.date_range") }}: ' + date_range);
+            } else {
+                $('#print_date_text').text('');
+            }
+        }
+
+        // Update print header on load
+        updatePrintHeader();
+
+        // Update print header on tab switch
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            updatePrintHeader();
+        });
+
         $('#tax_report_date_range').daterangepicker(
             dateRangeSettings, 
             function(start, end) {
@@ -455,34 +494,9 @@
              // remove class from data table button
              $('.btn-default').removeClass('btn-default');
             $('.tw-dw-btn-outline').removeClass('btn');
+            updatePrintHeader();
         });
         
-        function updatePrintHeader() {
-            var location_text = $('#tax_report_location_id option:selected').text();
-            var contact_text = $('#tax_report_contact_id option:selected').text();
-            var date_range = $('#tax_report_date_range').val();
-
-            if (location_text) {
-                $('#print_location_text').text('{{ __("purchase.business_location") }}: ' + location_text);
-            } else {
-                $('#print_location_text').text('');
-            }
-
-            if (contact_text && $('#tax_report_contact_id').val()) {
-                $('#print_contact_text').text(' | {{ __("report.contact") }}: ' + contact_text);
-            } else {
-                $('#print_contact_text').text('');
-            }
-
-            if (date_range) {
-                $('#print_date_text').text('{{ __("report.date_range") }}: ' + date_range);
-            } else {
-                $('#print_date_text').text('');
-            }
-        }
-
-        updatePrintHeader();
-
         $('#tax_report_date_range, #tax_report_location_id, #tax_report_contact_id').change( function(){
             updatePrintHeader();
             if ($("#input_tax_tab").hasClass('active')) {
