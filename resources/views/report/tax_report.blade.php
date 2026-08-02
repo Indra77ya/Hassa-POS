@@ -1,6 +1,34 @@
 @extends('layouts.app')
 @section('title', __( 'report.tax_report' ))
 
+@section('css')
+<style>
+    @media print {
+        .print_section {
+            display: block !important;
+        }
+        .dataTables_length,
+        .dataTables_filter,
+        .dt-buttons,
+        .dataTables_paginate,
+        .dataTables_info {
+            display: none !important;
+        }
+        table.dataTable {
+            width: 100% !important;
+            border-collapse: collapse !important;
+        }
+        table.dataTable th, table.dataTable td {
+            border: 1px solid #ddd !important;
+            padding: 8px !important;
+        }
+        .nav-tabs-custom > .tab-content {
+            padding: 0 !important;
+        }
+    }
+</style>
+@endsection
+
 @section('content')
 
 <!-- Content Header (Page header) -->
@@ -12,7 +40,18 @@
 
 <!-- Main content -->
 <section class="content">
-    <div class="row">
+    <div class="print_section text-center" style="margin-bottom: 20px;">
+        <h2 style="font-weight: bold; margin-bottom: 5px;">{{ session()->get('business.name') }}</h2>
+        <h3 style="margin-top: 5px; margin-bottom: 5px;">@lang('report.tax_report')</h3>
+        <p style="font-size: 1.1em; color: #333; margin-top: 5px;">
+            <span id="print_location_text"></span>
+            <span id="print_contact_text"></span>
+        </p>
+        <p style="font-size: 1.1em; color: #333; margin-top: 5px; font-weight: bold;">
+            <span id="print_date_text"></span>
+        </p>
+    </div>
+    <div class="row no-print">
         <div class="col-md-12">
             @component('components.filters', ['title' => __('report.filters')])
                 <div class="col-md-3">
@@ -71,7 +110,7 @@
         </div>
     </div>--}}
 
-    <div class="row">
+    <div class="row no-print">
         <div class="col-xs-12">
             @component('components.widget')
                 @slot('title')
@@ -105,7 +144,7 @@
         <div class="col-md-12">
            <!-- Custom Tabs -->
             <div class="nav-tabs-custom">
-                <ul class="nav nav-tabs">
+                <ul class="nav nav-tabs no-print">
                     <li class="active">
                         <a href="#input_tax_tab" data-toggle="tab" aria-expanded="true"><i class="fa fas fa-arrow-circle-down" aria-hidden="true"></i> @lang('report.input_tax') ( @lang('lang_v1.purchase') )</a>
                     </li>
@@ -259,7 +298,7 @@
             function(start, end) {
                 $('#tax_report_date_range').val(
                     start.format(moment_date_format) + ' ~ ' + end.format(moment_date_format)
-                );
+                ).change();
             }
         );
 
@@ -418,7 +457,34 @@
             $('.tw-dw-btn-outline').removeClass('btn');
         });
         
+        function updatePrintHeader() {
+            var location_text = $('#tax_report_location_id option:selected').text();
+            var contact_text = $('#tax_report_contact_id option:selected').text();
+            var date_range = $('#tax_report_date_range').val();
+
+            if (location_text) {
+                $('#print_location_text').text('{{ __("purchase.business_location") }}: ' + location_text);
+            } else {
+                $('#print_location_text').text('');
+            }
+
+            if (contact_text && $('#tax_report_contact_id').val()) {
+                $('#print_contact_text').text(' | {{ __("report.contact") }}: ' + contact_text);
+            } else {
+                $('#print_contact_text').text('');
+            }
+
+            if (date_range) {
+                $('#print_date_text').text('{{ __("report.date_range") }}: ' + date_range);
+            } else {
+                $('#print_date_text').text('');
+            }
+        }
+
+        updatePrintHeader();
+
         $('#tax_report_date_range, #tax_report_location_id, #tax_report_contact_id').change( function(){
+            updatePrintHeader();
             if ($("#input_tax_tab").hasClass('active')) {
                 input_tax_table.ajax.reload();
             }
