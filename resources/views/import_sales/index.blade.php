@@ -33,19 +33,21 @@
                         <div class="col-sm-8">
                             <div class="form-group">
                                 {!! Form::label('name', __( 'product.file_to_import' ) . ':') !!}
-                                {!! Form::file('sales', ['required' => 'required']); !!}
+                                {!! Form::file('sales', ['accept' => '.xls, .xlsx, .csv', 'required' => 'required']); !!}
                               </div>
                         </div>
                         <div class="col-sm-4">
                         <br>
-                            <button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white">@lang('lang_v1.upload_and_review')</button>
+                            <button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-rounded-xl">@lang('lang_v1.upload_and_review')</button>
                         </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-sm-12">
                             <br>
-                            <a href="{{ asset('files/import_sales_template.xlsx') }}" class="tw-dw-btn tw-dw-btn-success tw-text-white" download><i class="fa fa-download"></i> @lang('lang_v1.download_template_file')</a>
+                            <a href="{{ asset('files/import_sales_template.csv') }}" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-rounded-xl" download><i class="fa fa-download"></i> @lang('lang_v1.download_template_file') (CSV)</a>
+                            &nbsp;
+                            <a href="{{ asset('files/import_sales_template.xls') }}" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-rounded-xl" download><i class="fa fa-download"></i> @lang('lang_v1.download_template_file') (Excel)</a>
                         </div>
                     </div>
 
