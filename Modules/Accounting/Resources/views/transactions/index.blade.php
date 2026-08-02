@@ -15,44 +15,58 @@
     <section class="content">
         <div class="row">
             <div class="col-xs-12">
-                {{-- <div class="col-xs-12 pos-tab-container"> --}}
-                @component('components.widget', ['class' => 'pos-tab-container'])
-                    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 pos-tab-menu tw-rounded-lg">
-                        <div class="list-group">
-                            <a href="#"
-                                class="list-group-item text-center tw-font-bold tw-text-sm md:tw-text-base active">@lang('sale.sale')</a>
-                            <a href="#"
-                                class="list-group-item text-center tw-font-bold tw-text-sm md:tw-text-base">@lang('accounting::lang.sales_payments')</a>
-                            <a href="#"
-                                class="list-group-item text-center tw-font-bold tw-text-sm md:tw-text-base">@lang('purchase.purchases')</a>
-                            <a href="#"
-                                class="list-group-item text-center tw-font-bold tw-text-sm md:tw-text-base">@lang('accounting::lang.purchase_payments')</a>
-                            <a href="#"
-                                class="list-group-item text-center tw-font-bold tw-text-sm md:tw-text-base">@lang('accounting::lang.expenses')</a>
+                <div class="nav-tabs-custom" style="border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);">
+                    <ul class="nav nav-tabs nav-justified" style="border-radius: 12px 12px 0 0; border-bottom: 1px solid #e5e7eb;">
+                        <li class="active">
+                            <a href="#sales_tab" data-toggle="tab" aria-expanded="true" class="tw-font-bold tw-text-sm md:tw-text-base">
+                                <i class="fas fa-shopping-cart text-primary"></i> @lang('sale.sale')
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#sales_payments_tab" data-toggle="tab" aria-expanded="true" class="tw-font-bold tw-text-sm md:tw-text-base">
+                                <i class="fas fa-money-bill-alt text-success"></i> @lang('accounting::lang.sales_payments')
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#purchases_tab" data-toggle="tab" aria-expanded="true" class="tw-font-bold tw-text-sm md:tw-text-base">
+                                <i class="fas fa-shopping-bag text-warning"></i> @lang('purchase.purchases')
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#purchase_payments_tab" data-toggle="tab" aria-expanded="true" class="tw-font-bold tw-text-sm md:tw-text-base">
+                                <i class="fas fa-credit-card text-info"></i> @lang('accounting::lang.purchase_payments')
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#expenses_tab" data-toggle="tab" aria-expanded="true" class="tw-font-bold tw-text-sm md:tw-text-base">
+                                <i class="fas fa-minus-circle text-danger"></i> @lang('accounting::lang.expenses')
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" style="border-radius: 0 0 12px 12px; padding: 20px;">
+                        <div class="tab-pane active" id="sales_tab">
+                            @include('accounting::transactions.partials.sales')
+                        </div>
+                        <div class="tab-pane" id="sales_payments_tab">
+                            @include('accounting::transactions.partials.payments', [
+                                'id' => 'sell_payment_table',
+                            ])
+                        </div>
+                        <div class="tab-pane" id="purchases_tab">
+                            @include('accounting::transactions.partials.purchases')
+                        </div>
+                        <div class="tab-pane" id="purchase_payments_tab">
+                            @include('accounting::transactions.partials.payments', [
+                                'id' => 'purchase_payment_table',
+                            ])
+                        </div>
+                        <div class="tab-pane" id="expenses_tab">
+                            @include('accounting::transactions.partials.expenses')
                         </div>
                     </div>
-                    <div class="col-lg-10 col-md-10 col-sm-10 col-xs-10 pos-tab">
-                        @include('accounting::transactions.partials.sales')
-                    </div>
-                    <div class="col-lg-10 col-md-10 col-sm-10 col-xs-10 pos-tab">
-                        @include('accounting::transactions.partials.payments', [
-                            'id' => 'sell_payment_table',
-                        ])
-                    </div>
-                    <div class="col-lg-10 col-md-10 col-sm-10 col-xs-10 pos-tab">
-                        @include('accounting::transactions.partials.purchases')
-                    </div>
-                    <div class="col-lg-10 col-md-10 col-sm-10 col-xs-10 pos-tab">
-                        @include('accounting::transactions.partials.payments', [
-                            'id' => 'purchase_payment_table',
-                        ])
-                    </div>
-                    <div class="col-lg-10 col-md-10 col-sm-10 col-xs-10 pos-tab">
-                        @include('accounting::transactions.partials.expenses')
-                    </div>
                 </div>
-            @endcomponent
-        </div>
+            </div>
         </div>
 
     </section>
@@ -492,14 +506,12 @@
                 }
             });
 
-            $('div.pos-tab-menu>div.list-group>a').click(function (e) {
-                setTimeout(function() {
-                    if (typeof sell_table !== 'undefined') { sell_table.columns.adjust(); }
-                    if (typeof sell_payment_table !== 'undefined') { sell_payment_table.columns.adjust(); }
-                    if (typeof purchase_table !== 'undefined') { purchase_table.columns.adjust(); }
-                    if (typeof purchase_payment_table !== 'undefined') { purchase_payment_table.columns.adjust(); }
-                    if (typeof transaction_expense_table !== 'undefined') { transaction_expense_table.columns.adjust(); }
-                }, 150);
+            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                if (typeof sell_table !== 'undefined') { sell_table.columns.adjust(); }
+                if (typeof sell_payment_table !== 'undefined') { sell_payment_table.columns.adjust(); }
+                if (typeof purchase_table !== 'undefined') { purchase_table.columns.adjust(); }
+                if (typeof purchase_payment_table !== 'undefined') { purchase_payment_table.columns.adjust(); }
+                if (typeof transaction_expense_table !== 'undefined') { transaction_expense_table.columns.adjust(); }
             });
         });
     </script>
