@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'crm' => 'Crm',
+    'crm' => 'CRM',
     'add_login' => 'Tambah Login',
     'edit_login' => 'Edit Login',
     'schedules' => 'Jadwal',
@@ -32,7 +32,7 @@ return [
     'edit_schedule_log' => 'Edit Log Tindak Lanjut',
     'schedule_notification' => ':created_by mengundang Anda untuk tindak lanjut :title dimulai pada :startdatetime',
     'no_log_found' => 'Tidak Ditemukan Log!',
-    'crm_module' => 'Modul Crm',
+    'crm_module' => 'Modul CRM',
     'todays_schedule' => 'Tindak Lanjut Hari Ini',
     'no_schedule_for_today' => 'Tidak ada tindak lanjut yang ditemukan untuk hari ini',
     'sources' => 'Sumber',

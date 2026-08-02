@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'crm' => 'Crm',
+    'crm' => 'CRM',
     'add_login' => 'ເພີ່ມເຂົ້າລະບົບ',
     'edit_login' => 'ແກ້ໄຂການເຂົ້າສູ່ລະບົບ',
     'schedules' => 'ຕາຕະລາງ',
@@ -32,7 +32,7 @@ return [
     'edit_schedule_log' => 'ແກ້ໄຂບັນທຶກການຕິດຕາມການ ນຳ ໃຊ້',
     'schedule_notification' => ':created_by ເຊື້ອເຊີນທ່ານໃຫ້ຕິດຕາມ :title :startdatetime',
     'no_log_found' => 'ບໍ່ພົບບັນທຶກ!',
-    'crm_module' => 'ໂມດູນ Crm',
+    'crm_module' => 'ໂມດູນ CRM',
     'todays_schedule' => 'ມື້ນີ້ Follow Ups',
     'no_schedule_for_today' => 'ບໍ່ມີການຕິດຕາມ ສຳ ລັບມື້ນີ້',
     'sources' => 'ແຫຼ່ງຂໍ້ມູນ',

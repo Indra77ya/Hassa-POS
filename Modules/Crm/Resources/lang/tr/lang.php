@@ -32,7 +32,7 @@ return [
     'edit_schedule_log' => 'Takip Günlüğünü Düzenle',
     'schedule_notification' => ':created_by sizi takip için davet etti :title başlangıç tarihi :startdatetime',
     'no_log_found' => 'Kayıt Bulunamadı!',
-    'crm_module' => 'Crm Modülü',
+    'crm_module' => 'CRM Modülü',
     'todays_schedule' => 'Bugünün Takipleri',
     'no_schedule_for_today' => 'Bugün için takip bulunamadı',
     'sources' => 'Kaynakları',

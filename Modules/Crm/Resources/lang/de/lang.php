@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'crm' => 'Crm',
+    'crm' => 'CRM',
     'add_login' => 'Login hinzufügen',
     'edit_login' => 'Login bearbeiten',
     'schedules' => 'Zeitpläne',
@@ -32,7 +32,7 @@ return [
     'edit_schedule_log' => 'Bearbeitungsprotokoll bearbeiten',
     'schedule_notification' => ':created_by hat Sie zum Follow-up eingeladen :title beginnt um :startdatetime',
     'no_log_found' => 'Kein Protokoll gefunden!',
-    'crm_module' => 'Crm Module',
+    'crm_module' => 'CRM Module',
     'todays_schedule' => 'Heutige Follow-Ups',
     'no_schedule_for_today' => 'Für heute kein Follow-up gefunden',
     'sources' => 'Quellen',

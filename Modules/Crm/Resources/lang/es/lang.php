@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'crm' => 'Crm',
+    'crm' => 'CRM',
     'add_login' => 'Agregar inicio de sesión',
     'edit_login' => 'Editar inicio de sesión',
     'schedules' => 'Horarios',
@@ -32,7 +32,7 @@ return [
     'edit_schedule_log' => 'Editar registro de seguimiento',
     'schedule_notification' => ':created_by te invitó para el seguimiento :title comienza en :startdatetime',
     'no_log_found' => 'No se encontró registro',
-    'crm_module' => 'Módulo Crm',
+    'crm_module' => 'Módulo CRM',
     'todays_schedule' => 'Seguimiento de hoy',
     'no_schedule_for_today' => 'No se encontró seguimiento para hoy',
     'sources' => 'Fuentes',

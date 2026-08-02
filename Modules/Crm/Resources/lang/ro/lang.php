@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'crm' => 'Crm',
+    'crm' => 'CRM',
     'add_login' => 'Adăugare autentificare',
     'edit_login' => 'Modificați autentificarea',
     'schedules' => 'Orarele',
@@ -32,7 +32,7 @@ return [
     'edit_schedule_log' => 'Editați jurnalul de urmărire',
     'schedule_notification' => ':created_by te-a invitat pentru follow-up :title începe la :startdatetime',
     'no_log_found' => 'Nu a fost găsit niciun jurnal!',
-    'crm_module' => 'Modul Crm',
+    'crm_module' => 'Modul CRM',
     'todays_schedule' => 'Urmăriți de azi',
     'no_schedule_for_today' => 'Nu s-a găsit nici o urmărire pentru astăzi',
     'sources' => 'Surse',

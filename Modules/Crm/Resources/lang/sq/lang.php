@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'crm' => 'Crm',
+    'crm' => 'CRM',
     'add_login' => 'Shto hyrjen',
     'edit_login' => 'Ndrysho hyrjen',
     'schedules' => 'Oraret',
@@ -32,7 +32,7 @@ return [
     'edit_schedule_log' => 'Redakto regjistrin e ndjekjes',
     'schedule_notification' => ':created_by ju ftoi për ndjekjen :title fillon në :startdatetime',
     'no_log_found' => 'Nuk u gjet asnjë regjistër!',
-    'crm_module' => 'Modeli Crm',
+    'crm_module' => 'Modeli CRM',
     'todays_schedule' => 'Ndiq Upsin e Sotëm',
     'no_schedule_for_today' => 'Nuk u gjet asnjë ndjekje për sot',
     'sources' => 'Burimet',
