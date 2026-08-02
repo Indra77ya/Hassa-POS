@@ -42,14 +42,27 @@ class CustomerGroupController extends Controller
             return Datatables::of($customer_group)
                     ->addColumn(
                         'action',
-                        '@can("customer.update")
-                            <button data-href="{{action(\'App\Http\Controllers\CustomerGroupController@edit\', [$id])}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-primary tw-m-0.5 edit_customer_group_button"><i class="glyphicon glyphicon-edit"></i> @lang("messages.edit")</button>
-                        &nbsp;
-                        @endcan
-
-                        @can("customer.delete")
-                            <button data-href="{{action(\'App\Http\Controllers\CustomerGroupController@destroy\', [$id])}}" class="tw-dw-btn tw-dw-btn-outline tw-dw-btn-xs tw-dw-btn-error tw-m-0.5 delete_customer_group_button"><i class="glyphicon glyphicon-trash"></i> @lang("messages.delete")</button>
-                        @endcan'
+                        '<div class="btn-group">
+                            <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info tw-w-max dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                @lang("messages.actions") <span class="caret"></span><span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-left" role="menu">
+                                @can("customer.update")
+                                    <li>
+                                        <button type="button" data-href="{{action(\'App\Http\Controllers\CustomerGroupController@edit\', [$id])}}" class="tw-block tw-w-full tw-text-left tw-px-4 tw-py-2 tw-text-sm tw-text-gray-700 hover:tw-bg-gray-100 hover:tw-text-gray-900 tw-bg-transparent tw-border-none tw-outline-none edit_customer_group_button">
+                                            <i class="glyphicon glyphicon-edit"></i> @lang("messages.edit")
+                                        </button>
+                                    </li>
+                                @endcan
+                                @can("customer.delete")
+                                    <li>
+                                        <button type="button" data-href="{{action(\'App\Http\Controllers\CustomerGroupController@destroy\', [$id])}}" class="tw-block tw-w-full tw-text-left tw-px-4 tw-py-2 tw-text-sm tw-text-gray-700 hover:tw-bg-gray-100 hover:tw-text-gray-900 tw-bg-transparent tw-border-none tw-outline-none delete_customer_group_button">
+                                            <i class="glyphicon glyphicon-trash"></i> @lang("messages.delete")
+                                        </button>
+                                    </li>
+                                @endcan
+                            </ul>
+                        </div>'
                     )
                     ->editColumn('selling_price_group', '@if($price_calculation_type=="selling_price_group") {{$selling_price_group}} @else -- @endif ')
                     ->editColumn('amount', '@if($price_calculation_type=="percentage") {{$amount}} @else -- @endif ')
