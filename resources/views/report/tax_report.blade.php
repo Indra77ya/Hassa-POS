@@ -25,6 +25,21 @@
             border: 1px solid #ddd !important;
             padding: 8px !important;
         }
+        table.dataTable th.sorting:after,
+        table.dataTable th.sorting_asc:after,
+        table.dataTable th.sorting_desc:after,
+        table.dataTable th.sorting:before,
+        table.dataTable th.sorting_asc:before,
+        table.dataTable th.sorting_desc:before {
+            display: none !important;
+            content: "" !important;
+        }
+        table.dataTable th.sorting,
+        table.dataTable th.sorting_asc,
+        table.dataTable th.sorting_desc {
+            background-image: none !important;
+            padding-right: 8px !important;
+        }
         .nav-tabs-custom > .tab-content {
             padding: 0 !important;
         }
