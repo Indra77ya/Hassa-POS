@@ -32,7 +32,7 @@ return [
     'edit_schedule_log' => 'Edit Log Tindak Lanjut',
     'schedule_notification' => ':created_by mengundang Anda untuk tindak lanjut :title dimulai pada :startdatetime',
     'no_log_found' => 'Tidak Ditemukan Log!',
-    'crm_module' => 'Modul CRM',
+    'crm_module' => 'Modul CRM untuk mengelola hubungan pelanggan, melacak prospek, kampanye, proposal, dan jadwal tindak lanjut.',
     'todays_schedule' => 'Tindak Lanjut Hari Ini',
     'no_schedule_for_today' => 'Tidak ada tindak lanjut yang ditemukan untuk hari ini',
     'sources' => 'Sumber',

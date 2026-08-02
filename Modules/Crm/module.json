@@ -1,7 +1,7 @@
 {
     "name": "Crm",
     "alias": "crm",
-    "description": "CRM Module",
+    "description": "CRM Module for managing customer relationships, tracking leads, campaigns, proposals, and schedules.",
     "keywords": [],
     "active": 1,
     "order": 0,
