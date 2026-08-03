@@ -33,7 +33,7 @@
                 </button>
             </div>
         @endslot
-        <div class="table-responsive">
+        <div class="table-responsive" style="min-height: 350px;">
             <table class="table table-bordered table-striped" id="business_location_table" style="width: 100%;">
                 <thead>
                     <tr>
