@@ -73,6 +73,83 @@
     #side-bar .theme-sidebar-child-active {
         color: var(--theme-700);
     }
+    /* Global DataTables buttons styling (Foto 1 design) */
+    div.dt-buttons {
+        gap: 8px;
+        display: inline-flex !important;
+        flex-wrap: wrap;
+    }
+    div.dt-buttons .dt-button,
+    div.dt-buttons button.dt-button,
+    div.dt-buttons a.dt-button,
+    .dt-buttons.btn-group a.btn {
+        border-radius: 9999px !important;
+        border: 1.5px solid #1e293b !important;
+        background-color: #ffffff !important;
+        background-image: none !important;
+        color: #1e293b !important;
+        padding: 5px 16px !important;
+        font-weight: 500 !important;
+        font-size: 13px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        transition: all 0.15s ease-in-out !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+        height: 32px !important;
+        margin: 0 !important;
+    }
+    div.dt-buttons .dt-button:hover,
+    div.dt-buttons button.dt-button:hover,
+    div.dt-buttons a.dt-button:hover,
+    .dt-buttons.btn-group a.btn:hover {
+        background-color: #f1f5f9 !important;
+        border-color: #1e293b !important;
+        color: #1e293b !important;
+        text-decoration: none !important;
+    }
+    div.dt-buttons .dt-button:focus,
+    div.dt-buttons button.dt-button:focus,
+    div.dt-buttons a.dt-button:focus,
+    .dt-buttons.btn-group a.btn:focus {
+        outline: none !important;
+        background-color: #f1f5f9 !important;
+    }
+
+    /* Style for dropdown collection (Column visibility and Export PDF dropdown list) */
+    div.dt-button-collection,
+    ul.dt-button-collection.dropdown-menu {
+        background-color: #ffffff !important;
+        border: 1.5px solid #1e293b !important;
+        border-radius: 12px !important;
+        padding: 8px 4px !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+        margin-top: 6px !important;
+        z-index: 2050 !important;
+    }
+    div.dt-button-collection .dt-button,
+    ul.dt-button-collection.dropdown-menu li,
+    ul.dt-button-collection.dropdown-menu li a {
+        border-radius: 6px !important;
+        border: none !important;
+        background: transparent !important;
+        color: #334155 !important;
+        padding: 6px 16px !important;
+        text-align: left !important;
+        width: 100% !important;
+        font-size: 13px !important;
+        transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out !important;
+    }
+    div.dt-button-collection .dt-button:hover,
+    ul.dt-button-collection.dropdown-menu li:hover,
+    ul.dt-button-collection.dropdown-menu li a:hover,
+    ul.dt-button-collection.dropdown-menu li.active a,
+    ul.dt-button-collection.dropdown-menu li.active {
+        background-color: #f1f5f9 !important;
+        color: #0f172a !important;
+    }
 </style>
 
 <link rel="stylesheet" href="{{ asset('css/vendor.css?v='.$asset_v) }}">
