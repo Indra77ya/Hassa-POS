@@ -266,6 +266,7 @@ class TransactionMappingTest extends TestCase
             ['id' => 13, 'name' => 'Harga Pokok Penjualan', 'business_id' => 1, 'account_primary_type' => 'expenses', 'account_sub_type_id' => 13],
             ['id' => 14, 'name' => 'Persediaan Barang', 'business_id' => 1, 'account_primary_type' => 'asset', 'account_sub_type_id' => 2],
             ['id' => 15, 'name' => 'Beban Air', 'business_id' => 1, 'account_primary_type' => 'expense', 'account_sub_type_id' => 14],
+            ['id' => 21, 'name' => 'Hutang Usaha', 'business_id' => 1, 'account_primary_type' => 'liability', 'account_sub_type_id' => 4],
         ]);
 
         DB::table('business_locations')->insert([
@@ -281,8 +282,11 @@ class TransactionMappingTest extends TestCase
                     'deposit_to' => 10,      // Kas
                 ],
                 'purchases' => [
-                    'payment_account' => 21,
+                    'payment_account' => 21, // Hutang Usaha
                     'deposit_to' => 14,      // Persediaan Barang
+                ],
+                'purchase_payment' => [
+                    'payment_account' => 10, // Kas
                 ],
                 'expense' => [
                     'payment_account' => 10, // Kas
@@ -738,5 +742,57 @@ class TransactionMappingTest extends TestCase
 
         $data = json_decode($response->getContent(), true);
         $this->assertIsArray($data);
+    }
+
+    /**
+     * Test that deleting/cancelling a payment updates the mapping and balance immediately,
+     * even for recently created transactions.
+     */
+    public function testPaymentDeletionUpdatesMappingImmediately()
+    {
+        // 1. Create a purchase transaction
+        $transaction = Transaction::create([
+            'business_id' => 1,
+            'location_id' => 1,
+            'type' => 'purchase',
+            'payment_status' => 'paid',
+            'ref_no' => 'PO-NEW-1111',
+            'final_total' => 5000000,
+            'created_at' => now(), // created just now (within 30 seconds)
+        ]);
+
+        // 2. Add payment record to database
+        $payment = TransactionPayment::create([
+            'transaction_id' => $transaction->id,
+            'business_id' => 1,
+            'amount' => 5000000,
+            'is_return' => 0,
+            'method' => 'cash',
+        ]);
+
+        // 3. Trigger initial mapping listener
+        $eventAdded = new \App\Events\PurchaseCreatedOrModified($transaction);
+        $listenerPurchase = new \Modules\Accounting\Listeners\MapPurchaseTransaction();
+        $listenerPurchase->handle($eventAdded);
+
+        // Verify Cash (10) has a Credit entry of 5,000,000 (which reduced Cash)
+        $txsBefore = AccountingAccountsTransaction::where('transaction_id', $transaction->id)->get();
+        $cashBefore = $txsBefore->where('accounting_account_id', 10)->first();
+        $this->assertNotNull($cashBefore);
+        $this->assertEquals('credit', $cashBefore->type);
+        $this->assertEquals(5000000, $cashBefore->amount);
+
+        // 4. Now, delete the payment and fire TransactionPaymentDeleted
+        $payment->delete();
+        $eventDeleted = new \App\Events\TransactionPaymentDeleted($payment);
+        $listenerPayment = new \Modules\Accounting\Listeners\MapPaymentTransaction();
+        $listenerPayment->handle($eventDeleted);
+
+        // 5. Verify Cash Credit entry is gone or updated, and the cash balance is restored
+        $txsAfter = AccountingAccountsTransaction::where('transaction_id', $transaction->id)->get();
+        $cashAfter = $txsAfter->where('accounting_account_id', 10)->first();
+
+        // Since payment was deleted, net_paid is 0. So no Cash Credit entry should exist for this transaction anymore.
+        $this->assertNull($cashAfter, 'Cash Credit entry must be deleted when the payment is deleted');
     }
 }

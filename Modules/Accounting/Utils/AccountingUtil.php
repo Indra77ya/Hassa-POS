@@ -191,7 +191,7 @@ class AccountingUtil extends Util
                 'created_by' => $user_id,
                 'operation_date' => \Carbon::now(),
             ];
-        } elseif (in_array($type, ['purchase_payment', 'sell_payment'])) {
+        } elseif (in_array($type, ['purchase_payment', 'sell_payment', 'expense_payment'])) {
             $transaction_payment = TransactionPayment::where('id', $id)->where('business_id', $business_id)
                             ->firstorFail();
 
