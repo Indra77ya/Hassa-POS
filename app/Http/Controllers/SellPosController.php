@@ -1684,6 +1684,21 @@ class SellPosController extends Controller
     }
 
     /**
+     * Returns accounts dropdown list as JSON for POS update.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function getAccountsDropdown()
+    {
+        $business_id = request()->session()->get('user.business_id');
+        $accounts = [];
+        if ($this->moduleUtil->isModuleEnabled('account')) {
+            $accounts = Account::forDropdown($business_id, true, false, true);
+        }
+        return response()->json($accounts);
+    }
+
+    /**
      * Returns recent transactions
      *
      * @param  \Illuminate\Http\Request  $request

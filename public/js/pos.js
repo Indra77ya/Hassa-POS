@@ -2516,7 +2516,36 @@ function reset_pos_form(){
             null
         );
         get_featured_products();
+        reload_payment_accounts();
     }
+}
+
+function reload_payment_accounts() {
+    $.ajax({
+        method: 'GET',
+        url: '/sells/pos/get-accounts-dropdown',
+        dataType: 'json',
+        success: function(accounts) {
+            var dropdowns = $('select.account-dropdown, select#change_return_account, select[name*="[account_id]"]');
+            dropdowns.each(function() {
+                var $select = $(this);
+                var selected_val = $select.val();
+                $select.empty();
+                $.each(accounts, function(key, val) {
+                    $select.append($('<option>', {
+                        value: key,
+                        text: val
+                    }));
+                });
+                $select.val(selected_val);
+                if ($select.hasClass('select2')) {
+                    $select.trigger('change.select2');
+                } else {
+                    $select.trigger('change');
+                }
+            });
+        }
+    });
 }
 
 function set_default_customer() {
