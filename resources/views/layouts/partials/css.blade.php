@@ -147,6 +147,137 @@
 	  transform: rotate(315deg);
 	}
 </style>
+
+<style type="text/css">
+    /* DataTables Export & Visibility Buttons styling (Screenshot 2026-08-03 112305.png) */
+    div.dt-buttons, .dt-buttons {
+        display: inline-flex !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+        float: none !important;
+        margin-top: 5px !important;
+        margin-bottom: 5px !important;
+    }
+
+    /* Reset btn-group layout overrides so buttons are standalone and have gaps */
+    div.dt-buttons.btn-group, .dt-buttons.btn-group {
+        display: inline-flex !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+        float: none !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: transparent !important;
+    }
+
+    div.dt-buttons.btn-group > .dt-button,
+    div.dt-buttons.btn-group > a.dt-button,
+    div.dt-buttons.btn-group > button.dt-button,
+    .dt-buttons.btn-group > .dt-button {
+        border-radius: 9999px !important;
+        float: none !important;
+        margin: 0 !important;
+    }
+
+    /* Style the buttons */
+    div.dt-buttons .dt-button,
+    div.dt-buttons a.dt-button,
+    div.dt-buttons button.dt-button,
+    .dt-buttons .dt-button,
+    .dt-buttons a.dt-button,
+    .dt-buttons button.dt-button {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background-color: #ffffff !important;
+        background-image: none !important;
+        color: #1e293b !important;
+        border: 1.5px solid #1e293b !important;
+        border-radius: 9999px !important;
+        padding: 5px 16px !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        height: auto !important;
+        min-height: 30px !important;
+        line-height: normal !important;
+        transition: all 0.2s ease-in-out !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+        text-decoration: none !important;
+        cursor: pointer !important;
+        outline: none !important;
+    }
+
+    /* Hover effect */
+    div.dt-buttons .dt-button:hover,
+    div.dt-buttons a.dt-button:hover,
+    div.dt-buttons button.dt-button:hover,
+    .dt-buttons .dt-button:hover,
+    .dt-buttons a.dt-button:hover,
+    .dt-buttons button.dt-button:hover {
+        background-color: #1e293b !important;
+        color: #ffffff !important;
+        border-color: #1e293b !important;
+        text-decoration: none !important;
+    }
+
+    /* Icons inside buttons */
+    div.dt-buttons .dt-button i,
+    .dt-buttons .dt-button i {
+        margin-right: 6px !important;
+        color: inherit !important;
+        font-size: 13px !important;
+    }
+
+    /* Dropdown collections (e.g., PDF Portrait/Landscape, Column visibility) */
+    div.dt-button-collection,
+    ul.dt-button-collection.dropdown-menu {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 4px !important;
+        padding: 8px !important;
+        background-color: #ffffff !important;
+        background-image: none !important;
+        border: 1px solid rgba(0,0,0,0.15) !important;
+        border-radius: 0.5rem !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+        min-width: 180px !important;
+        z-index: 2005 !important;
+    }
+
+    /* Column visibility list item buttons inside collection */
+    div.dt-button-collection .dt-button,
+    div.dt-button-collection a.dt-button,
+    div.dt-button-collection button.dt-button,
+    .dt-button-collection .dt-button {
+        background-color: #ffffff !important;
+        color: #1e293b !important;
+        border: 1px solid transparent !important;
+        border-radius: 6px !important;
+        padding: 6px 12px !important;
+        font-size: 12px !important;
+        font-weight: 500 !important;
+        justify-content: flex-start !important;
+        width: 100% !important;
+        min-height: auto !important;
+        text-align: left !important;
+    }
+
+    /* Hover / Active inside column visibility dropdown */
+    div.dt-button-collection .dt-button:hover,
+    div.dt-button-collection .dt-button.active,
+    div.dt-button-collection a.dt-button:hover,
+    div.dt-button-collection a.dt-button.active,
+    div.dt-button-collection button.dt-button:hover,
+    div.dt-button-collection button.dt-button.active,
+    .dt-button-collection .dt-button:hover,
+    .dt-button-collection .dt-button.active {
+        background-color: #1e293b !important;
+        color: #ffffff !important;
+        border-color: #1e293b !important;
+    }
+</style>
+
 @if(!empty($__system_settings['additional_css']))
     {!! $__system_settings['additional_css'] !!}
 @endif
