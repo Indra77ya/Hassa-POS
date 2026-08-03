@@ -202,6 +202,7 @@ return [
     'email_ins' => 'Email id of the user',
     'clock_in_time_ins' => 'Clock in time in "Y-m-d H:i:s" format',
     'clock_out_time_ins' => 'Clock out time in "Y-m-d H:i:s" format',
+    'shift_ins' => 'Name of the shift. If left blank, no shift will be assigned.',
     'add_latest_attendance' => 'Add latest attendance',
     'select_employee' => 'Select employee',
     'shift_type' => 'Shift Type',

@@ -201,6 +201,7 @@ return[
     'email_ins' => 'Id email pengguna',
     'clock_in_time_ins' => "Jam dalam waktu dalam format 'Y-m-d H:i:s'",
     'clock_out_time_ins' => "Waktu habis dalam format 'Y-m-d H:i:s",
+    'shift_ins' => 'Nama shift. Jika dikosongkan, tidak ada shift yang akan ditetapkan.',
     'add_latest_attendance' => 'Tambahkan kehadiran terbaru',
     'select_employee' => 'Pilih karyawan',
     'shift_type' => 'Jenis Pergeseran',

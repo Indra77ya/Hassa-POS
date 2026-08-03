@@ -6,7 +6,7 @@
                 <div class="col-sm-8">
                     <div class="form-group">
                         {!! Form::label('name', __( 'product.file_to_import' ) . ':') !!}
-                        {!! Form::file('attendance', ['accept'=> '.xls', 'required' => 'required']); !!}
+                        {!! Form::file('attendance', ['accept'=> '.xls, .xlsx', 'required' => 'required']); !!}
                       </div>
                 </div>
                 <div class="col-sm-4">
@@ -49,16 +49,21 @@
                     </tr>
                     <tr>
                         <td>4</td>
+                        <td>@lang('essentials::lang.shift') <small class="text-muted">(@lang('lang_v1.optional'))</small></td>
+                        <td>{!! __('essentials::lang.shift_ins') !!}</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
                         <td>@lang('essentials::lang.clock_in_note') <small class="text-muted">(@lang('lang_v1.optional'))</small></td>
                         <td>&nbsp;</td>
                     </tr>
                     <tr>
-                        <td>5</td>
+                        <td>6</td>
                         <td>@lang('essentials::lang.clock_out_note') <small class="text-muted">(@lang('lang_v1.optional'))</small></td>
                         <td>&nbsp;</td>
                     </tr>
                     <tr>
-                        <td>6</td>
+                        <td>7</td>
                         <td>@lang('essentials::lang.ip_address') <small class="text-muted">(@lang('lang_v1.optional'))</small></td>
                         <td>&nbsp;</td>
                     </tr>
