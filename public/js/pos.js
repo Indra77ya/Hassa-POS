@@ -2504,6 +2504,19 @@ function reset_pos_form(){
     // Set global_is_clear_local_storage to true to clear local storage
     global_is_clear_local_storage = true;
     saveFormDataToLocalStorage();
+
+    // Reload product suggestions and featured products to reflect updated stocks in POS
+    var location_id = $('input#location_id').val();
+    if (location_id) {
+        $('input#suggestion_page').val(1);
+        get_product_suggestion_list(
+            global_p_category_id,
+            global_brand_id,
+            location_id,
+            null
+        );
+        get_featured_products();
+    }
 }
 
 function set_default_customer() {
