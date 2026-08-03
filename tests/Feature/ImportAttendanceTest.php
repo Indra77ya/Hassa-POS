@@ -198,4 +198,74 @@ class ImportAttendanceTest extends TestCase
             'ip_address' => '192.168.1.1'
         ]);
     }
+
+    public function testImportAttendanceWithCsvFile()
+    {
+        // 1. Create a mock user
+        $user = User::create([
+            'business_id' => 1,
+            'email' => 'employee_csv@example.com',
+            'first_name' => 'Employee CSV',
+            'username' => 'employee_csv'
+        ]);
+
+        // 2. Create a shift
+        $shift = Shift::create([
+            'business_id' => 1,
+            'name' => 'Night Shift'
+        ]);
+
+        // 3. Create a CSV file content with 7 columns including the Shift name
+        $csvContent = "Email,Clock-in Time,Clock-out Time,Shift,Clock-in note,Clock-out note,IP address\n" .
+                      "employee_csv@example.com,2026-08-03 22:00:00,2026-08-04 06:00:00,Night Shift,In CSV,Out CSV,192.168.1.200\n";
+
+        $uploadedCsv = UploadedFile::fake()->createWithContent('attendance_import.csv', $csvContent);
+
+        // Create a real admin user
+        $admin = User::create([
+            'business_id' => 1,
+            'email' => 'admin_csv@example.com',
+            'first_name' => 'Admin CSV',
+            'username' => 'admin_csv'
+        ]);
+
+        $this->actingAs($admin);
+
+        // Disable AdminSidebarMenu middleware to avoid roles relation queries
+        $this->withoutMiddleware([\App\Http\Middleware\AdminSidebarMenu::class]);
+
+        // Mock ModuleUtil to bypass complex database checks like is_admin roles query
+        $moduleUtil = \Mockery::mock(\App\Utils\ModuleUtil::class)->makePartial();
+        $moduleUtil->shouldReceive('is_admin')->andReturn(true);
+        $moduleUtil->shouldReceive('hasThePermissionInSubscription')->andReturn(true);
+        $moduleUtil->shouldReceive('notAllowedInDemo')->andReturn(null);
+        $moduleUtil->shouldReceive('getUserIpAddr')->andReturn('192.168.1.200');
+        $this->app->instance(\App\Utils\ModuleUtil::class, $moduleUtil);
+
+        // Put necessary session variables
+        session([
+            'user' => ['business_id' => 1],
+            'business' => ['time_zone' => 'UTC']
+        ]);
+
+        // Request import
+        $response = $this->post('/hrm/import-attendance', [
+            'attendance' => $uploadedCsv
+        ]);
+
+        // Assert response redirects back (or status 302)
+        $response->assertStatus(302);
+
+        // Check that the database contains the imported attendance record
+        $this->assertDatabaseHas('essentials_attendances', [
+            'user_id' => $user->id,
+            'business_id' => 1,
+            'clock_in_time' => '2026-08-03 22:00:00',
+            'clock_out_time' => '2026-08-04 06:00:00',
+            'essentials_shift_id' => $shift->id,
+            'clock_in_note' => 'In CSV',
+            'clock_out_note' => 'Out CSV',
+            'ip_address' => '192.168.1.200'
+        ]);
+    }
 }

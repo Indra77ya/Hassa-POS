@@ -6,7 +6,7 @@
                 <div class="col-sm-8">
                     <div class="form-group">
                         {!! Form::label('name', __( 'product.file_to_import' ) . ':') !!}
-                        {!! Form::file('attendance', ['accept'=> '.xls, .xlsx', 'required' => 'required']); !!}
+                        {!! Form::file('attendance', ['accept'=> '.xls, .xlsx, .csv', 'required' => 'required']); !!}
                       </div>
                 </div>
                 <div class="col-sm-4">
@@ -19,8 +19,10 @@
         {!! Form::close() !!}
         <br><br>
         <div class="row">
-            <div class="col-sm-4">
-                <a href="{{ asset('modules/essentials/files/import_attendance_template.xls') }}" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-sm" download><i class="fa fa-download"></i> @lang('lang_v1.download_template_file')</a>
+            <div class="col-sm-12">
+                <a href="{{ asset('modules/essentials/files/import_attendance_template.csv') }}" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-sm" download><i class="fa fa-download"></i> @lang('lang_v1.download_template_file') (CSV)</a>
+                &nbsp;
+                <a href="{{ asset('modules/essentials/files/import_attendance_template.xls') }}" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-sm" download><i class="fa fa-download"></i> @lang('lang_v1.download_template_file') (Excel)</a>
             </div>
         </div>
 
