@@ -70,6 +70,7 @@ return [
     'Uncategorised' => 'Tidak dikategorikan',
     'no_products_to_display' => 'Tidak ada produk untuk ditampilkan',
     'item_out_of_stock' => 'Produk kehabisan stok',
+    'out_of_stock' => 'Kehabisan stok',
     'go_back' => 'Kembali',
     'disable_pay_checkout' => 'Nonaktifkan bayar & checkout',
     'disable_draft' => 'Nonaktifkan Konsep',

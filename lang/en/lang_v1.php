@@ -70,6 +70,7 @@ return [
     'Uncategorised' => 'Uncategorised',
     'no_products_to_display' => 'No Products to display',
     'item_out_of_stock' => 'Product out of stock',
+    'out_of_stock' => 'Out of stock',
     'go_back' => 'Go Back',
     'disable_pay_checkout' => 'Disable Multiple Pay',
     'disable_draft' => 'Disable Draft',

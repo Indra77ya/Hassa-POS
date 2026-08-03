@@ -46,6 +46,7 @@ class TransactionMappingTest extends TestCase
             $table->increments('id');
             $table->string('name');
             $table->string('fixed_key')->nullable();
+            $table->integer('parent_account_type_id')->nullable();
             $table->timestamps();
         });
 
@@ -58,6 +59,8 @@ class TransactionMappingTest extends TestCase
             $table->integer('account_type_id')->nullable();
             $table->string('account_number')->nullable();
             $table->string('normal_balance')->nullable();
+            $table->integer('is_closed')->default(0);
+            $table->softDeletes();
             $table->timestamps();
         });
 
@@ -198,6 +201,28 @@ class TransactionMappingTest extends TestCase
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
             $table->timestamps();
+        });
+
+        // Spatie Role/Permission Tables for SQLite test environment
+        Schema::dropIfExists('permissions');
+        Schema::create('permissions', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->string('guard_name');
+            $table->timestamps();
+        });
+        Schema::dropIfExists('roles');
+        Schema::create('roles', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->string('guard_name');
+            $table->timestamps();
+        });
+        Schema::dropIfExists('model_has_roles');
+        Schema::create('model_has_roles', function (Blueprint $table) {
+            $table->integer('role_id');
+            $table->integer('model_id');
+            $table->string('model_type');
         });
 
         // Create contacts table
@@ -669,5 +694,49 @@ class TransactionMappingTest extends TestCase
         // Verify that mappings are fully deleted
         $txs = AccountingAccountsTransaction::where('transaction_id', $transaction->id)->get();
         $this->assertCount(0, $txs, 'Deleting the sale must cleanly remove all its accounting mappings');
+    }
+
+    public function testAccountsDropdownEndpoint()
+    {
+        $user = \App\User::create([
+            'surname' => 'Mr',
+            'first_name' => 'Admin',
+            'username' => 'admin',
+            'email' => 'admin@test.com',
+            'password' => bcrypt('password'),
+            'business_id' => 1,
+        ]);
+
+        $this->actingAs($user);
+
+        // Set up session for business_id and enabled modules
+        session([
+            'user.business_id' => 1,
+            'business' => ['enabled_modules' => ['account']]
+        ]);
+
+        // Create an account
+        Account::create([
+            'business_id' => 1,
+            'name' => 'Kas Test POS',
+            'account_number' => '10101',
+            'is_closed' => 0
+        ]);
+
+        $controller = new \App\Http\Controllers\SellPosController(
+            $this->app->make(\App\Utils\ContactUtil::class),
+            $this->app->make(\App\Utils\ProductUtil::class),
+            $this->app->make(\App\Utils\BusinessUtil::class),
+            $this->app->make(\App\Utils\TransactionUtil::class),
+            $this->app->make(\App\Utils\CashRegisterUtil::class),
+            $this->app->make(\App\Utils\ModuleUtil::class),
+            $this->app->make(\App\Utils\NotificationUtil::class)
+        );
+
+        $response = $controller->getAccountsDropdown();
+        $this->assertEquals(200, $response->getStatusCode());
+
+        $data = json_decode($response->getContent(), true);
+        $this->assertIsArray($data);
     }
 }

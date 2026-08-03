@@ -190,8 +190,8 @@ class Account extends Model
                     'ats.fixed_key',
                     'ats.name as account_type_name',
                     'pat.name as parent_account_type_name',
-                    DB::raw("(SELECT SUM(IF(type='debit', amount, 0)) FROM account_transactions WHERE account_id = accounts.id AND deleted_at IS NULL) as total_debit"),
-                    DB::raw("(SELECT SUM(IF(type='credit', amount, 0)) FROM account_transactions WHERE account_id = accounts.id AND deleted_at IS NULL) as total_credit"),
+                    DB::raw("(SELECT SUM(CASE WHEN type='debit' THEN amount ELSE 0 END) FROM account_transactions WHERE account_id = accounts.id AND deleted_at IS NULL) as total_debit"),
+                    DB::raw("(SELECT SUM(CASE WHEN type='credit' THEN amount ELSE 0 END) FROM account_transactions WHERE account_id = accounts.id AND deleted_at IS NULL) as total_credit"),
                 ]);
         }
 

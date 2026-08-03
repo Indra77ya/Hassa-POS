@@ -2504,6 +2504,48 @@ function reset_pos_form(){
     // Set global_is_clear_local_storage to true to clear local storage
     global_is_clear_local_storage = true;
     saveFormDataToLocalStorage();
+
+    // Reload product suggestions and featured products to reflect updated stocks in POS
+    var location_id = $('input#location_id').val();
+    if (location_id) {
+        $('input#suggestion_page').val(1);
+        get_product_suggestion_list(
+            global_p_category_id,
+            global_brand_id,
+            location_id,
+            null
+        );
+        get_featured_products();
+        reload_payment_accounts();
+    }
+}
+
+function reload_payment_accounts() {
+    $.ajax({
+        method: 'GET',
+        url: '/sells/pos/get-accounts-dropdown',
+        dataType: 'json',
+        success: function(accounts) {
+            var dropdowns = $('select.account-dropdown, select#change_return_account, select[name*="[account_id]"]');
+            dropdowns.each(function() {
+                var $select = $(this);
+                var selected_val = $select.val();
+                $select.empty();
+                $.each(accounts, function(key, val) {
+                    $select.append($('<option>', {
+                        value: key,
+                        text: val
+                    }));
+                });
+                $select.val(selected_val);
+                if ($select.hasClass('select2')) {
+                    $select.trigger('change.select2');
+                } else {
+                    $select.trigger('change');
+                }
+            });
+        }
+    });
 }
 
 function set_default_customer() {
