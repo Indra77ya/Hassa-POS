@@ -1022,7 +1022,7 @@ return [
     'profile_updated_successfully' => 'Profil actualizat cu succes',
     'password_updated_successfully' => 'Parola a fost actualizată cu succes',
     'u_have_entered_wrong_password' => 'Ați introdus o parolă greșită',
-    'business_dont_have_crm_subscription' => 'Afacerile nu au abonament Crm',
+    'business_dont_have_crm_subscription' => 'Afacerile nu au abonament CRM',
     'source' => 'Sursă',
     'life_stage' => 'Perioada din viata',
     'assigned_to' => 'Atribuit',

@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'crm' => 'Crm',
+    'crm' => 'CRM',
     'add_login' => 'إضافة تسجيل دخول',
     'edit_login' => 'تحرير تسجيل الدخول',
     'schedules' => 'جداول',

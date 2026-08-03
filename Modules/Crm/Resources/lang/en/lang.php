@@ -32,7 +32,7 @@ return [
     'edit_schedule_log' => 'Edit Follow Up Log',
     'schedule_notification' => ':created_by invited you for the follow up :title starts at :startdatetime',
     'no_log_found' => 'No Log Found!',
-    'crm_module' => 'Crm Module',
+    'crm_module' => 'CRM Module for managing customer relationships, tracking leads, campaigns, proposals, and schedules.',
     'todays_schedule' => "Today's Follow Ups",
     'no_schedule_for_today' => 'No follow up found for today',
     'sources' => 'Sources',

@@ -1027,7 +1027,7 @@ return [
     'profile_updated_successfully' => 'Profile updated successfully',
     'password_updated_successfully' => 'Password updated successfully',
     'u_have_entered_wrong_password' => 'You have entered wrong password',
-    'business_dont_have_crm_subscription' => "Business doesn't have Crm subscription",
+    'business_dont_have_crm_subscription' => "Business doesn't have CRM subscription",
     'source' => 'Source',
     'life_stage' => 'Life Stage',
     'assigned_to' => 'Assigned to',

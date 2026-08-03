@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'crm' => 'Crm',
+    'crm' => 'CRM',
     'add_login' => 'Thêm đăng nhập',
     'edit_login' => 'Chỉnh sửa đăng nhập',
     'schedules' => 'Lịch trình',
@@ -32,7 +32,7 @@ return [
     'edit_schedule_log' => 'Chỉnh sửa nhật ký theo dõi',
     'schedule_notification' => ':created_by đã mời bạn theo dõi :title đề bắt đầu lúc :startdatetime',
     'no_log_found' => 'Không tìm thấy nhật ký!',
-    'crm_module' => 'Mô-đun Crm',
+    'crm_module' => 'Mô-đun CRM',
     'todays_schedule' => 'Lượt theo dõi hôm nay',
     'no_schedule_for_today' => 'Không tìm thấy thông tin theo dõi nào cho ngày hôm nay',
     'sources' => 'Nguồn',

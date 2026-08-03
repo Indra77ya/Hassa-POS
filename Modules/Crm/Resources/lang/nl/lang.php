@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'crm' => 'Crm',
+    'crm' => 'CRM',
     'add_login' => 'Login toevoegen',
     'edit_login' => 'Bewerk login',
     'schedules' => "Schema's",
@@ -32,7 +32,7 @@ return [
     'edit_schedule_log' => 'Follow-uplogboek bewerken',
     'schedule_notification' => ':created_by heeft je uitgenodigd voor de follow-up :title begint om :startdatetime',
     'no_log_found' => 'Geen log gevonden!',
-    'crm_module' => 'Crm Module',
+    'crm_module' => 'CRM Module',
     'todays_schedule' => 'Follow-ups van vandaag',
     'no_schedule_for_today' => 'Geen vervolg gevonden voor vandaag',
     'sources' => 'Bronnen',

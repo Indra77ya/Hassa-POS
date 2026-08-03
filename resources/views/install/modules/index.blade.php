@@ -70,7 +70,7 @@
                         {{$loop->iteration}}
                     </td>
                     <td>
-                        <strong>{{$module['name']}}</strong> <br/>
+                        <strong>{{$module['name'] == 'Crm' ? 'CRM' : $module['name']}}</strong> <br/>
 
                         @if($module['is_enabled'])
                             @if(!$module['is_installed'])

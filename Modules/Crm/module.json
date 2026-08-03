@@ -1,7 +1,7 @@
 {
     "name": "Crm",
     "alias": "crm",
-    "description": "Crm Module",
+    "description": "CRM Module for managing customer relationships, tracking leads, campaigns, proposals, and schedules.",
     "keywords": [],
     "active": 1,
     "order": 0,
@@ -9,8 +9,6 @@
         "Modules\\Crm\\Providers\\CrmServiceProvider"
     ],
     "aliases": {},
-    "files": [
-        
-    ],
+    "files": [],
     "requires": []
 }

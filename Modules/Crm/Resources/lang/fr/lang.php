@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'crm' => 'Crm',
+    'crm' => 'CRM',
     'add_login' => 'Ajouter une connexion',
     'edit_login' => 'Modifier la connexion',
     'schedules' => 'Des horaires',
@@ -32,7 +32,7 @@ return [
     'edit_schedule_log' => 'Modifier le journal de suivi',
     'schedule_notification' => ':created_by vous a invité pour le suivi :title commence à :startdatetime',
     'no_log_found' => 'Aucun journal trouvé!',
-    'crm_module' => 'Module Crm',
+    'crm_module' => 'Module CRM',
     'todays_schedule' => "Les suivis d'aujourd'hui",
     'no_schedule_for_today' => "Aucune suite trouvée pour aujourd'hui",
     'sources' => 'Sources',
