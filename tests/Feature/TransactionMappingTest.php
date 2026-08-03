@@ -795,4 +795,49 @@ class TransactionMappingTest extends TestCase
         // Since payment was deleted, net_paid is 0. So no Cash Credit entry should exist for this transaction anymore.
         $this->assertNull($cashAfter, 'Cash Credit entry must be deleted when the payment is deleted');
     }
+
+    /**
+     * Test that deleting a past purchase payment (which was mapped at the payment level
+     * with transaction_payment_id) correctly hard-deletes the mapping in accounting_accounts_transactions.
+     */
+    public function testPastTransactionPaymentDeletionClearsPaymentMapping()
+    {
+        // 1. Create a purchase transaction
+        $transaction = Transaction::create([
+            'business_id' => 1,
+            'location_id' => 1,
+            'type' => 'purchase',
+            'payment_status' => 'due',
+            'ref_no' => 'PO-NEW-2222',
+            'final_total' => 5000000,
+            'created_at' => now()->subMinutes(5), // past transaction
+        ]);
+
+        // 2. Create payment record
+        $payment = TransactionPayment::create([
+            'transaction_id' => $transaction->id,
+            'business_id' => 1,
+            'amount' => 5000000,
+            'is_return' => 0,
+            'method' => 'cash',
+        ]);
+
+        // 3. Map the payment at the payment level using saveMap
+        $accountingUtil = new \Modules\Accounting\Utils\AccountingUtil();
+        $accountingUtil->saveMap('purchase_payment', $payment->id, 1, 1, 21, 10);
+
+        // Verify the payment-level mapping was created successfully
+        $txsBefore = AccountingAccountsTransaction::where('transaction_payment_id', $payment->id)->get();
+        $this->assertCount(2, $txsBefore); // Debit and Credit
+
+        // 4. Now, delete the payment record and trigger TransactionPaymentDeleted
+        $payment->delete();
+        $eventDeleted = new \App\Events\TransactionPaymentDeleted($payment);
+        $listenerPayment = new \Modules\Accounting\Listeners\MapPaymentTransaction();
+        $listenerPayment->handle($eventDeleted);
+
+        // 5. Verify that the payment-level mapping in accounting_accounts_transactions is completely gone
+        $txsAfter = AccountingAccountsTransaction::where('transaction_payment_id', $payment->id)->get();
+        $this->assertCount(0, $txsAfter, 'The payment-level accounting mapping must be physically deleted');
+    }
 }

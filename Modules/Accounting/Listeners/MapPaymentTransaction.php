@@ -29,6 +29,12 @@ class MapPaymentTransaction
     {
         $payment = $event->transactionPayment;
         
+        // If payment is being deleted, always hard delete any accounting mapping for this specific payment ID
+        $is_deleted = ($event instanceof \App\Events\TransactionPaymentDeleted) || (isset($event->isDeleted) && $event->isDeleted);
+        if ($is_deleted && !empty($payment->id)) {
+            \Modules\Accounting\Entities\AccountingAccountsTransaction::where('transaction_payment_id', $payment->id)->delete();
+        }
+
         if (empty($payment->transaction_id)) {
             return;
         }
