@@ -177,6 +177,26 @@
     .tw-dw-btn.tw-dw-btn-xs.tw-dw-btn-outline {
         width: max-content;
         margin: 2px;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .tw-dw-btn.tw-dw-btn-xs.tw-dw-btn-outline > span,
+    .dt-button.tw-dw-btn > span {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.375rem !important;
+        line-height: 1 !important;
+    }
+
+    .tw-dw-btn.tw-dw-btn-xs.tw-dw-btn-outline > span i,
+    .dt-button.tw-dw-btn > span i {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin: 0 !important;
     }
 
     #scrollable-container{
