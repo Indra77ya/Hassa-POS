@@ -199,32 +199,46 @@
                               @if($accounts_enabled)
                                 <td>{{$payment->payment_account->name ?? ''}}</td>
                               @endif
-                              <td class="no-print" style="display: flex;">
-                              @if((in_array($transaction->type, ['gym_subscription']) && auth()->user()->can('gym.edit_gym_subscription_payment')) || (in_array($transaction->type, ['hms_booking']) && auth()->user()->can('hms.edit_booking_payment')) || (auth()->user()->can('edit_purchase_payment') && (in_array($transaction->type, ['purchase', 'purchase_return']))) || (auth()->user()->can('edit_sell_payment') && (in_array($transaction->type, ['sell', 'sell_return']))) || ((auth()->user()->can('all_expense.access') || auth()->user()->can('view_own_expense')) && $transaction->type == 'expense') )
-                                    @if($payment->method != 'advance')
-                                        <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-info edit_payment" 
-                                    data-href="{{action([\App\Http\Controllers\TransactionPaymentController::class, 'edit'], [$payment->id]) }}"><i class="glyphicon glyphicon-edit"></i></button>
-                                    @endif
-                                @endif
+                              <td class="no-print">
+                                <div class="btn-group">
+                                    <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                        @lang("messages.actions") <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                        <li>
+                                            <button type="button" class="tw-block tw-w-full tw-text-left tw-px-4 tw-py-2 tw-text-sm tw-text-gray-700 hover:tw-bg-gray-100 hover:tw-text-gray-900 tw-bg-transparent tw-border-none tw-outline-none view_payment" data-href="{{ action([\App\Http\Controllers\TransactionPaymentController::class, 'viewPayment'], [$payment->id]) }}">
+                                                <i class="fa fa-eye" aria-hidden="true"></i> @lang("messages.view")
+                                            </button>
+                                        </li>
+                                        @if((in_array($transaction->type, ['gym_subscription']) && auth()->user()->can('gym.edit_gym_subscription_payment')) || (in_array($transaction->type, ['hms_booking']) && auth()->user()->can('hms.edit_booking_payment')) || (auth()->user()->can('edit_purchase_payment') && (in_array($transaction->type, ['purchase', 'purchase_return']))) || (auth()->user()->can('edit_sell_payment') && (in_array($transaction->type, ['sell', 'sell_return']))) || ((auth()->user()->can('all_expense.access') || auth()->user()->can('view_own_expense')) && $transaction->type == 'expense') )
+                                            @if($payment->method != 'advance')
+                                                <li>
+                                                    <button type="button" class="tw-block tw-w-full tw-text-left tw-px-4 tw-py-2 tw-text-sm tw-text-gray-700 hover:tw-bg-gray-100 hover:tw-text-gray-900 tw-bg-transparent tw-border-none tw-outline-none edit_payment"
+                                                    data-href="{{action([\App\Http\Controllers\TransactionPaymentController::class, 'edit'], [$payment->id]) }}"><i class="glyphicon glyphicon-edit"></i> @lang("messages.edit")</button>
+                                                </li>
+                                            @endif
+                                        @endif
 
-                                @if((in_array($transaction->type, ['gym_subscription']) && auth()->user()->can('gym.delete_gym_subscription_payment')) ||(in_array($transaction->type, ['hms_booking']) && auth()->user()->can('hms.delete_booking_payment')) || (auth()->user()->can('delete_purchase_payment') && (in_array($transaction->type, ['purchase', 'purchase_return']))) || (auth()->user()->can('delete_sell_payment') && (in_array($transaction->type, ['sell', 'sell_return']))) || ((auth()->user()->can('all_expense.access') || auth()->user()->can('view_own_expense')) && $transaction->type == 'expense') )
-                                    &nbsp; <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-error delete_payment" 
-                                    data-href="{{ action([\App\Http\Controllers\TransactionPaymentController::class, 'destroy'], [$payment->id]) }}"
-                                    ><i class="fa fa-trash" aria-hidden="true"></i></button>
-                                @endif
-                              &nbsp;
-                                <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary view_payment" data-href="{{ action([\App\Http\Controllers\TransactionPaymentController::class, 'viewPayment'], [$payment->id]) }}">
-                                  <i class="fa fa-eye" aria-hidden="true"></i>
-                                </button>
-                              @if(!empty($payment->document_path))
-                                &nbsp;
-                                <a href="{{$payment->document_path}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent" download="{{$payment->document_name}}"><i class="fa fa-download" data-toggle="tooltip" title="{{__('purchase.download_document')}}"></i></a>
-                                @if(isFileImage($payment->document_name))
-                                &nbsp;
-                                  <button data-href="{{$payment->document_path}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-info view_uploaded_document" data-toggle="tooltip" title="{{__('lang_v1.view_document')}}"><i class="fa fa-picture-o"></i></button>
-                                @endif
+                                        @if((in_array($transaction->type, ['gym_subscription']) && auth()->user()->can('gym.delete_gym_subscription_payment')) ||(in_array($transaction->type, ['hms_booking']) && auth()->user()->can('hms.delete_booking_payment')) || (auth()->user()->can('delete_purchase_payment') && (in_array($transaction->type, ['purchase', 'purchase_return']))) || (auth()->user()->can('delete_sell_payment') && (in_array($transaction->type, ['sell', 'sell_return']))) || ((auth()->user()->can('all_expense.access') || auth()->user()->can('view_own_expense')) && $transaction->type == 'expense') )
+                                            <li>
+                                                <button type="button" class="tw-block tw-w-full tw-text-left tw-px-4 tw-py-2 tw-text-sm tw-text-gray-700 hover:tw-bg-gray-100 hover:tw-text-gray-900 tw-bg-transparent tw-border-none tw-outline-none delete_payment"
+                                                data-href="{{ action([\App\Http\Controllers\TransactionPaymentController::class, 'destroy'], [$payment->id]) }}"
+                                                ><i class="fa fa-trash" aria-hidden="true"></i> @lang("messages.delete")</button>
+                                            </li>
+                                        @endif
 
-                              @endif
+                                        @if(!empty($payment->document_path))
+                                            <li>
+                                                <a href="{{$payment->document_path}}" class="tw-block tw-w-full tw-text-left tw-px-4 tw-py-2 tw-text-sm tw-text-gray-700 hover:tw-bg-gray-100 hover:tw-text-gray-900" download="{{$payment->document_name}}"><i class="fa fa-download"></i> @lang("purchase.download_document")</a>
+                                            </li>
+                                            @if(isFileImage($payment->document_name))
+                                                <li>
+                                                    <button type="button" data-href="{{$payment->document_path}}" class="tw-block tw-w-full tw-text-left tw-px-4 tw-py-2 tw-text-sm tw-text-gray-700 hover:tw-bg-gray-100 hover:tw-text-gray-900 tw-bg-transparent tw-border-none tw-outline-none view_uploaded_document" data-toggle="tooltip" title="{{__('lang_v1.view_document')}}"><i class="fa fa-picture-o"></i> @lang("lang_v1.view_document")</button>
+                                                </li>
+                                            @endif
+                                        @endif
+                                    </ul>
+                                </div>
                               </td>
                             </tr>
                         @empty
