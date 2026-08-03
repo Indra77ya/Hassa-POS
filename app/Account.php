@@ -184,14 +184,21 @@ class Account extends Model
         if ($can_access_account && $show_balance) {
             $query->leftjoin('account_types as ats', 'accounts.account_type_id', '=', 'ats.id')
                 ->leftjoin('account_types as pat', 'ats.parent_account_type_id', '=', 'pat.id')
+                ->leftjoin('accounting_accounts as aa', 'accounts.id', '=', 'aa.account_id')
                 ->select(['accounts.name',
                     'accounts.id',
                     'accounts.normal_balance',
                     'ats.fixed_key',
                     'ats.name as account_type_name',
                     'pat.name as parent_account_type_name',
-                    DB::raw("(SELECT SUM(CASE WHEN type='debit' THEN amount ELSE 0 END) FROM account_transactions WHERE account_id = accounts.id AND deleted_at IS NULL) as total_debit"),
-                    DB::raw("(SELECT SUM(CASE WHEN type='credit' THEN amount ELSE 0 END) FROM account_transactions WHERE account_id = accounts.id AND deleted_at IS NULL) as total_credit"),
+                    DB::raw("COALESCE(
+                        (SELECT SUM(amount) FROM accounting_accounts_transactions WHERE accounting_account_id = aa.id AND type='debit'),
+                        (SELECT SUM(CASE WHEN type='debit' THEN amount ELSE 0 END) FROM account_transactions WHERE account_id = accounts.id AND deleted_at IS NULL)
+                    ) as total_debit"),
+                    DB::raw("COALESCE(
+                        (SELECT SUM(amount) FROM accounting_accounts_transactions WHERE accounting_account_id = aa.id AND type='credit'),
+                        (SELECT SUM(CASE WHEN type='credit' THEN amount ELSE 0 END) FROM account_transactions WHERE account_id = accounts.id AND deleted_at IS NULL)
+                    ) as total_credit"),
                 ]);
         }
 

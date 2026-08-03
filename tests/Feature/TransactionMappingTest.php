@@ -172,6 +172,8 @@ class TransactionMappingTest extends TestCase
             $table->integer('business_id');
             $table->string('account_primary_type')->nullable();
             $table->integer('account_sub_type_id')->nullable();
+            $table->unsignedBigInteger('account_id')->nullable();
+            $table->unsignedBigInteger('detail_type_id')->nullable();
             $table->string('status')->default('active');
             $table->timestamps();
         });
@@ -839,5 +841,43 @@ class TransactionMappingTest extends TestCase
         // 5. Verify that the payment-level mapping in accounting_accounts_transactions is completely gone
         $txsAfter = AccountingAccountsTransaction::where('transaction_payment_id', $payment->id)->get();
         $this->assertCount(0, $txsAfter, 'The payment-level accounting mapping must be physically deleted');
+    }
+
+    /**
+     * Test that Account::forDropdown pulls the account balances directly from the
+     * accounting_accounts_transactions table (Single Source of Truth) when the
+     * accounting module is enabled.
+     */
+    public function testAccountForDropdownPullsBalanceFromAccounting()
+    {
+        // 1. Create a POS account with normal_balance = 'debit'
+        $account = Account::create([
+            'name' => 'Kas Toko Utama',
+            'business_id' => 1,
+            'normal_balance' => 'debit',
+            'is_closed' => 0,
+        ]);
+
+        // 2. Fetch the corresponding accounting account ID
+        $accounting_account_id = $account->accounting_account_id;
+        $this->assertNotNull($accounting_account_id);
+
+        // 3. Insert real-time transaction in accounting_accounts_transactions (Debit 6,000,000)
+        DB::table('accounting_accounts_transactions')->insert([
+            'accounting_account_id' => $accounting_account_id,
+            'amount' => 6000000,
+            'type' => 'debit',
+            'operation_date' => now(),
+            'created_by' => 1,
+        ]);
+
+        // 4. Retrieve dropdown list with show_balance = true
+        // Set user permissions to can access account
+        $dropdown = Account::forDropdown(1, false, false, true);
+
+        // 5. Assert that the balance shown is Rp 6.000.000 and formatted nicely
+        $expectedKey = $account->id;
+        $this->assertArrayHasKey($expectedKey, $dropdown);
+        $this->assertStringContainsString('6.000.000', $dropdown[$expectedKey]);
     }
 }
