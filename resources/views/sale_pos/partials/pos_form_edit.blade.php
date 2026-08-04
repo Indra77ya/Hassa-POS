@@ -93,7 +93,7 @@
 			</div>
 		</div>
 	@endif
-	@if(!empty($price_groups) && count($price_groups) > 1)
+	@if(!empty($price_groups) && is_array($price_groups) && count($price_groups) > 1)
 		<div class="col-md-4 col-sm-6">
 			<div class="form-group tw-mb-3">
 				<div class="input-group">
@@ -114,9 +114,13 @@
 		</div>
 	@else
 		@php
-			reset($price_groups);
+			$price_group_key = '';
+			if (is_array($price_groups) && !empty($price_groups)) {
+				reset($price_groups);
+				$price_group_key = key($price_groups);
+			}
 		@endphp
-		{!! Form::hidden('price_group', key($price_groups), ['id' => 'price_group']) !!}
+		{!! Form::hidden('price_group', $price_group_key, ['id' => 'price_group']) !!}
 	@endif
 	@if(!empty($default_price_group_id))
 		{!! Form::hidden('default_price_group', $default_price_group_id, ['id' => 'default_price_group']) !!}

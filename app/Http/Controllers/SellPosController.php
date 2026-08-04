@@ -1071,6 +1071,11 @@ class SellPosController extends Controller
             $accounts = Account::forDropdown($business_id, true, false, true);
         }
 
+        //Selling Price Group Dropdown
+        $price_groups = SellingPriceGroup::forDropdown($business_id);
+
+        $default_price_group_id = !empty($business_location->selling_price_group_id) && array_key_exists($business_location->selling_price_group_id, $price_groups) ? $business_location->selling_price_group_id : null;
+
         $waiters = [];
         if ($this->productUtil->isModuleEnabled('service_staff') && !empty($pos_settings['inline_service_staff'])) {
             $waiters_enabled = true;
@@ -1119,7 +1124,7 @@ class SellPosController extends Controller
                 'brands', 'accounts', 'waiters', 'redeem_details', 'edit_price', 'edit_discount',
                 'shipping_statuses', 'warranties', 'sub_type', 'pos_module_data', 'invoice_schemes',
                 'default_invoice_schemes', 'invoice_layouts', 'featured_products', 'customer_due',
-                'users', 'only_payment'));
+                'users', 'only_payment', 'price_groups', 'default_price_group_id'));
     }
 
     /**
