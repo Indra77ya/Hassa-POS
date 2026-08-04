@@ -98,13 +98,45 @@
 @section('javascript')
     @php
         $custom_labels = json_decode(session('business.custom_labels'), true);
+
+        $is_cf1_active = false;
+        if (!empty($custom_labels['product']['custom_field_1'])) {
+            $val = trim($custom_labels['product']['custom_field_1']);
+            if ($val !== '' && $val !== 'Custom Field1' && $val !== 'Custom Field 1' && $val !== 'Opsional 1' && $val !== __('lang_v1.product_custom_field1')) {
+                $is_cf1_active = true;
+            }
+        }
+
+        $is_cf2_active = false;
+        if (!empty($custom_labels['product']['custom_field_2'])) {
+            $val = trim($custom_labels['product']['custom_field_2']);
+            if ($val !== '' && $val !== 'Custom Field2' && $val !== 'Custom Field 2' && $val !== 'Opsional 2' && $val !== __('lang_v1.product_custom_field2')) {
+                $is_cf2_active = true;
+            }
+        }
+
+        $is_cf3_active = false;
+        if (!empty($custom_labels['product']['custom_field_3'])) {
+            $val = trim($custom_labels['product']['custom_field_3']);
+            if ($val !== '' && $val !== 'Custom Field3' && $val !== 'Custom Field 3' && $val !== 'Opsional 3' && $val !== __('lang_v1.product_custom_field3')) {
+                $is_cf3_active = true;
+            }
+        }
+
+        $is_cf4_active = false;
+        if (!empty($custom_labels['product']['custom_field_4'])) {
+            $val = trim($custom_labels['product']['custom_field_4']);
+            if ($val !== '' && $val !== 'Custom Field4' && $val !== 'Custom Field 4' && $val !== 'Opsional 4' && $val !== __('lang_v1.product_custom_field4')) {
+                $is_cf4_active = true;
+            }
+        }
     @endphp
     <script type="text/javascript">
         window.product_custom_labels = {
-            custom_field_1: "{{ !empty($custom_labels['product']['custom_field_1']) ? 1 : 0 }}",
-            custom_field_2: "{{ !empty($custom_labels['product']['custom_field_2']) ? 1 : 0 }}",
-            custom_field_3: "{{ !empty($custom_labels['product']['custom_field_3']) ? 1 : 0 }}",
-            custom_field_4: "{{ !empty($custom_labels['product']['custom_field_4']) ? 1 : 0 }}"
+            custom_field_1: "{{ $is_cf1_active ? 1 : 0 }}",
+            custom_field_2: "{{ $is_cf2_active ? 1 : 0 }}",
+            custom_field_3: "{{ $is_cf3_active ? 1 : 0 }}",
+            custom_field_4: "{{ $is_cf4_active ? 1 : 0 }}"
         };
     </script>
     <script src="{{ asset('js/report.js?v=' . $asset_v) }}"></script>
