@@ -206,63 +206,6 @@ Seringkali di lingkungan hosting, perintah `php` atau `composer` secara default 
    /usr/local/bin/php artisan package:discover
    ```
 
-## Fitur Margin Nominal (Fixed Margin)
-
-Fitur ini memungkinkan pengguna untuk menentukan keuntungan produk menggunakan nominal Rupiah tetap (Fixed) selain menggunakan persentase (%).
-
-### Cara Pengaturan Default (Tingkat Bisnis)
-
-Jika Anda ingin semua produk baru secara otomatis menggunakan tipe margin tertentu (misal: selalu Rp 5.000), Anda bisa mengaturnya di:
-1.  Buka menu **Pengaturan > Pengaturan Bisnis**.
-2.  Pilih tab **Bisnis**.
-3.  Pada kolom **Margin keuntungan default**, Anda sekarang bisa memilih antara **%** atau **Rp** melalui dropdown di samping kotak input.
-4.  Klik **Perbarui Pengaturan**.
-
-### Cara Penggunaan di Halaman Produk
-
-1.  Buka menu **Produk > Tambah Produk** atau **Edit Produk**.
-2.  Pada bagian **Harga Jual**, Anda akan melihat dropdown baru di samping label "Margin".
-3.  Pilih jenis margin:
-    *   **%**: Menggunakan perhitungan persentase (Harga Jual = Harga Beli + % Margin).
-    *   **Fixed (Rp)**: Menggunakan nominal Rupiah tetap (Harga Jual = Harga Beli + Nominal Margin).
-4.  Jika Anda menggunakan **Fixed (Rp)**, saat harga beli produk berubah, sistem akan secara otomatis menyesuaikan harga jual agar nominal keuntungan Anda tetap sama.
-
-### Fitur Bulk Edit
-
-Fitur ini juga tersedia pada menu **Bulk Edit Produk** (Daftar Produk > centang produk > Edit yang Dipilih). Anda bisa mengubah tipe margin untuk banyak produk sekaligus dan melihat perubahan harga jual secara real-time sebelum disimpan.
-
-### Fitur Import Produk via Excel
-
-Untuk menentukan tipe margin saat melakukan import produk massal:
-
-1.  Gunakan template Excel terbaru yang dapat diunduh di halaman **Import Produk**.
-2.  Tambahkan kolom ke-38 (kolom setelah 'Product Locations') dengan judul **Margin Type**.
-3.  Isi kolom tersebut dengan salah satu nilai berikut:
-    *   `percentage` (untuk persentase)
-    *   `fixed` (untuk nominal Rupiah tetap)
-4.  Jika dikosongkan, sistem akan menganggap tipe margin sebagai `percentage`.
-
-### Informasi Teknis
-*   Data tipe margin disimpan di tabel `variations` pada kolom `profit_margin_type`.
-*   Tipe margin ini bersifat per-variasi, sehingga produk variable bisa memiliki tipe margin yang berbeda-beda untuk setiap variasinya.
-
-## Login dan Setup Awal
-
-Setelah instalasi selesai (baik lokal maupun server), Anda dapat login ke aplikasi:
-
-1. Buka aplikasi di browser (lokal: `http://localhost:8000` atau domain Anda untuk server)
-2. Login dengan kredensial administrator Anda.
-3. **PENTING**: Segera ubah password default setelah login pertama kali demi keamanan.
-
-### Membuat User Tambahan
-
-Setelah login sebagai admin, Anda dapat membuat user tambahan dengan langkah berikut:
-1. Pergi ke menu **User Management** atau **Manajemen User**
-2. Klik tombol **Create User** atau **Tambah User**
-3. Isi data user baru (nama, username, email, password)
-4. Assign roles dan permissions sesuai kebutuhan
-5. Simpan user baru
-
 ## Troubleshooting
 
 ### Masalah Umum:
