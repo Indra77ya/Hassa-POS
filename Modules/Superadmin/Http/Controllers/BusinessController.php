@@ -978,6 +978,7 @@ class BusinessController extends BaseController
                     DB::table('repair_job_sheets')->where('business_id', $business_id)->update(['device_id' => null]);
                 }
                 DB::table('categories')->where('business_id', $business_id)->delete();
+                DB::table('expense_categories')->where('business_id', $business_id)->delete();
             }
 
             // Sub-category: brands

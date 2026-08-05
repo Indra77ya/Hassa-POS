@@ -171,6 +171,25 @@ class ResetBusinessDataTest extends TestCase
             $table->timestamps();
         });
 
+        // Categories
+        Schema::dropIfExists('categories');
+        Schema::create('categories', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('business_id');
+            $table->string('name');
+            $table->timestamps();
+        });
+
+        // Expense categories
+        Schema::dropIfExists('expense_categories');
+        Schema::create('expense_categories', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('business_id');
+            $table->string('name');
+            $table->softDeletes();
+            $table->timestamps();
+        });
+
         // Accounting accounts
         Schema::dropIfExists('accounting_accounts');
         Schema::create('accounting_accounts', function (Blueprint $table) {
@@ -395,5 +414,46 @@ class ResetBusinessDataTest extends TestCase
 
         // Assert customer advance payment is deleted
         $this->assertNull(TransactionPayment::find($cust_payment->id));
+    }
+
+    /**
+     * Test that resetting master categories deletes both product categories and expense categories.
+     */
+    public function testResetCategoriesDeletesProductAndExpenseCategories()
+    {
+        // Create a product category
+        $prod_cat = DB::table('categories')->insertGetId([
+            'business_id' => 1,
+            'name' => 'Prod Cat A'
+        ]);
+
+        // Create an expense category
+        $exp_cat = DB::table('expense_categories')->insertGetId([
+            'business_id' => 1,
+            'name' => 'Exp Cat B'
+        ]);
+
+        // Mock login
+        $user = \Mockery::mock(\App\User::class)->makePartial();
+        $user->shouldReceive('can')->with('superadmin')->andReturn(true);
+        $user->id = 1;
+        $user->business_id = 1;
+        $this->actingAs($user);
+
+        // Call postResetData for categories master data
+        $controller = new BusinessController(app(BusinessUtil::class), app(ModuleUtil::class));
+        $request = new Request();
+        $request->merge([
+            'reset_master' => ['categories']
+        ]);
+
+        $response = $controller->postResetData($request, 1);
+        $result = $response->getData(true);
+
+        $this->assertTrue($result['success']);
+
+        // Assert both categories are deleted
+        $this->assertNull(DB::table('categories')->find($prod_cat));
+        $this->assertNull(DB::table('expense_categories')->find($exp_cat));
     }
 }
