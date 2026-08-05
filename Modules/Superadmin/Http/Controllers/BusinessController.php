@@ -664,6 +664,30 @@ class BusinessController extends BaseController
                     DB::table('transactions')->whereIn('id', $sales_ids)->delete();
                 }
 
+                // Delete customer advance payments
+                $customer_advance_payment_ids = DB::table('transaction_payments')
+                    ->join('contacts', 'transaction_payments.payment_for', '=', 'contacts.id')
+                    ->where('transaction_payments.business_id', $business_id)
+                    ->where('transaction_payments.is_advance', 1)
+                    ->whereIn('contacts.type', ['customer', 'both'])
+                    ->select('transaction_payments.id as id')
+                    ->pluck('id')
+                    ->toArray();
+
+                if (!empty($customer_advance_payment_ids)) {
+                    if (\Illuminate\Support\Facades\Schema::hasTable('accounting_accounts_transactions')) {
+                        DB::table('accounting_accounts_transactions')
+                            ->whereIn('transaction_payment_id', $customer_advance_payment_ids)
+                            ->delete();
+                    }
+                    DB::table('account_transactions')
+                        ->whereIn('transaction_payment_id', $customer_advance_payment_ids)
+                        ->delete();
+                    DB::table('transaction_payments')
+                        ->whereIn('id', $customer_advance_payment_ids)
+                        ->delete();
+                }
+
                 // Also delete bookings if sales reset is requested
                 DB::table('bookings')->where('business_id', $business_id)->delete();
             }
@@ -687,6 +711,30 @@ class BusinessController extends BaseController
 
                     DB::table('account_transactions')->whereIn('transaction_id', $purchase_ids)->delete();
                     DB::table('transactions')->whereIn('id', $purchase_ids)->delete();
+                }
+
+                // Delete supplier advance payments
+                $supplier_advance_payment_ids = DB::table('transaction_payments')
+                    ->join('contacts', 'transaction_payments.payment_for', '=', 'contacts.id')
+                    ->where('transaction_payments.business_id', $business_id)
+                    ->where('transaction_payments.is_advance', 1)
+                    ->whereIn('contacts.type', ['supplier', 'both'])
+                    ->select('transaction_payments.id as id')
+                    ->pluck('id')
+                    ->toArray();
+
+                if (!empty($supplier_advance_payment_ids)) {
+                    if (\Illuminate\Support\Facades\Schema::hasTable('accounting_accounts_transactions')) {
+                        DB::table('accounting_accounts_transactions')
+                            ->whereIn('transaction_payment_id', $supplier_advance_payment_ids)
+                            ->delete();
+                    }
+                    DB::table('account_transactions')
+                        ->whereIn('transaction_payment_id', $supplier_advance_payment_ids)
+                        ->delete();
+                    DB::table('transaction_payments')
+                        ->whereIn('id', $supplier_advance_payment_ids)
+                        ->delete();
                 }
             }
 
@@ -756,6 +804,27 @@ class BusinessController extends BaseController
                 DB::table('accounting_accounts')->where('business_id', $business_id)->delete();
                 DB::table('accounting_account_types')->where('business_id', $business_id)->delete();
 
+                // Delete all advance payments when resetting finance
+                $advance_payment_ids = DB::table('transaction_payments')
+                    ->where('business_id', $business_id)
+                    ->where('is_advance', 1)
+                    ->pluck('id')
+                    ->toArray();
+
+                if (!empty($advance_payment_ids)) {
+                    if (\Illuminate\Support\Facades\Schema::hasTable('accounting_accounts_transactions')) {
+                        DB::table('accounting_accounts_transactions')
+                            ->whereIn('transaction_payment_id', $advance_payment_ids)
+                            ->delete();
+                    }
+                    DB::table('account_transactions')
+                        ->whereIn('transaction_payment_id', $advance_payment_ids)
+                        ->delete();
+                    DB::table('transaction_payments')
+                        ->whereIn('id', $advance_payment_ids)
+                        ->delete();
+                }
+
                 // Set accounting_default_map in business_locations to null
                 DB::table('business_locations')->where('business_id', $business_id)->update(['accounting_default_map' => null]);
             }
@@ -811,6 +880,27 @@ class BusinessController extends BaseController
                     DB::table('transactions')->whereIn('id', $stock_tx_ids)->delete();
                 }
 
+                // Delete all advance payments when resetting stock
+                $advance_payment_ids = DB::table('transaction_payments')
+                    ->where('business_id', $business_id)
+                    ->where('is_advance', 1)
+                    ->pluck('id')
+                    ->toArray();
+
+                if (!empty($advance_payment_ids)) {
+                    if (\Illuminate\Support\Facades\Schema::hasTable('accounting_accounts_transactions')) {
+                        DB::table('accounting_accounts_transactions')
+                            ->whereIn('transaction_payment_id', $advance_payment_ids)
+                            ->delete();
+                    }
+                    DB::table('account_transactions')
+                        ->whereIn('transaction_payment_id', $advance_payment_ids)
+                        ->delete();
+                    DB::table('transaction_payments')
+                        ->whereIn('id', $advance_payment_ids)
+                        ->delete();
+                }
+
                 DB::table('bookings')->where('business_id', $business_id)->delete();
                 if (\Illuminate\Support\Facades\Schema::hasTable('repair_job_sheets')) {
                     DB::table('repair_job_sheets')->where('business_id', $business_id)->delete();
@@ -852,6 +942,27 @@ class BusinessController extends BaseController
                     ->where('business_id', $business_id)
                     ->where('is_default', '!=', 1)
                     ->delete();
+
+                // Delete all advance payments when resetting contacts
+                $advance_payment_ids = DB::table('transaction_payments')
+                    ->where('business_id', $business_id)
+                    ->where('is_advance', 1)
+                    ->pluck('id')
+                    ->toArray();
+
+                if (!empty($advance_payment_ids)) {
+                    if (\Illuminate\Support\Facades\Schema::hasTable('accounting_accounts_transactions')) {
+                        DB::table('accounting_accounts_transactions')
+                            ->whereIn('transaction_payment_id', $advance_payment_ids)
+                            ->delete();
+                    }
+                    DB::table('account_transactions')
+                        ->whereIn('transaction_payment_id', $advance_payment_ids)
+                        ->delete();
+                    DB::table('transaction_payments')
+                        ->whereIn('id', $advance_payment_ids)
+                        ->delete();
+                }
 
                 // Automatically ensure Walk-In Customer exists / is re-created
                 $contactUtil = new \App\Utils\ContactUtil();
