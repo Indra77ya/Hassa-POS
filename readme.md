@@ -4,7 +4,7 @@ HassaPOS adalah aplikasi Point of Sales (Kasir) & Inventaris berbasis web yang m
 
 ---
 
-## 📋 Persyaratan Sistem
+## Persyaratan Sistem
 
 Sebelum memulai instalasi, pastikan lingkungan (lokal atau server) memenuhi spesifikasi berikut:
 *   **PHP**: Versi `8.1` atau `8.2` (Sangat disarankan **PHP 8.2**)
@@ -15,13 +15,13 @@ Sebelum memulai instalasi, pastikan lingkungan (lokal atau server) memenuhi spes
 
 ---
 
-## 💻 1. Instalasi di Komputer Lokal (localhost)
+## 1. Instalasi di Komputer Lokal (localhost)
 
 Ada dua software web server lokal terpopuler yang sangat disarankan untuk orang awam di Windows, yaitu **Laragon** (Sangat Direkomendasikan) atau **XAMPP**.
 
 Pilih salah satu panduan di bawah ini yang sesuai dengan software yang Anda gunakan:
 
-### 🅰️ Pilihan A: Menggunakan Laragon (Sangat Direkomendasikan)
+### Pilihan A: Menggunakan Laragon (Sangat Direkomendasikan)
 Laragon sangat praktis karena mengelola database, composer, dan pembuatan domain lokal secara otomatis.
 
 1.  **Unduh & Jalankan Laragon**:
@@ -86,7 +86,7 @@ Laragon sangat praktis karena mengelola database, composer, dan pembuatan domain
 
 ---
 
-### 🅱️ Pilihan B: Menggunakan XAMPP
+### Pilihan B: Menggunakan XAMPP
 XAMPP adalah alternatif klasik yang sangat populer digunakan oleh pengembang web di Windows.
 
 1.  **Jalankan XAMPP Control Panel**:
@@ -156,7 +156,7 @@ XAMPP adalah alternatif klasik yang sangat populer digunakan oleh pengembang web
 
 ---
 
-## ☁️ 2. Instalasi di VPS Unmanaged (Ubuntu LTS - LAMP/LEMP)
+## 2. Instalasi di VPS Unmanaged (Ubuntu LTS - LAMP/LEMP)
 
 Panduan ini menggunakan sistem operasi **Ubuntu 22.04 LTS** dengan **Nginx** (LEMP) atau **Apache** (LAMP).
 
@@ -336,7 +336,7 @@ sudo systemctl restart nginx
 
 ---
 
-## 🛠️ 3. Instalasi di VPS Managed / Control Panel (aaPanel, cPanel, CyberPanel, RunCloud)
+## 3. Instalasi di VPS Managed / Control Panel (aaPanel, cPanel, CyberPanel, RunCloud)
 
 Jika Anda menggunakan control panel, proses instalasi menjadi jauh lebih mudah melalui antarmuka grafis (GUI).
 
