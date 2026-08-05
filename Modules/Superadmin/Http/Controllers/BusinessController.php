@@ -760,6 +760,68 @@ class BusinessController extends BaseController
                 DB::table('business_locations')->where('business_id', $business_id)->update(['accounting_default_map' => null]);
             }
 
+            // Sub-category: reset_stock
+            if ($reset_all_tx || in_array('reset_stock', $reset_transactions)) {
+                $stock_tx_types = [
+                    'sell', 'sell_return', 'sales_order',
+                    'purchase', 'purchase_return', 'purchase_order',
+                    'stock_adjustment', 'sell_transfer', 'purchase_transfer',
+                    'opening_stock'
+                ];
+
+                $stock_tx_ids = DB::table('transactions')
+                    ->where('business_id', $business_id)
+                    ->whereIn('type', $stock_tx_types)
+                    ->pluck('id')
+                    ->toArray();
+
+                if (!empty($stock_tx_ids)) {
+                    $payment_ids = DB::table('transaction_payments')
+                        ->whereIn('transaction_id', $stock_tx_ids)
+                        ->pluck('id')
+                        ->toArray();
+
+                    if (\Illuminate\Support\Facades\Schema::hasTable('accounting_accounts_transactions')) {
+                        if (!empty($payment_ids)) {
+                            DB::table('accounting_accounts_transactions')
+                                ->whereIn('transaction_payment_id', $payment_ids)
+                                ->delete();
+                        }
+                        DB::table('accounting_accounts_transactions')
+                            ->whereIn('transaction_id', $stock_tx_ids)
+                            ->delete();
+                    }
+
+                    DB::table('transaction_payments')->whereIn('transaction_id', $stock_tx_ids)->delete();
+
+                    $sell_line_ids = DB::table('transaction_sell_lines')->whereIn('transaction_id', $stock_tx_ids)->pluck('id')->toArray();
+                    if (!empty($sell_line_ids)) {
+                        DB::table('transaction_sell_lines_purchase_lines')->whereIn('sell_line_id', $sell_line_ids)->delete();
+                        DB::table('transaction_sell_lines')->whereIn('id', $sell_line_ids)->delete();
+                    }
+
+                    $purchase_line_ids = DB::table('purchase_lines')->whereIn('transaction_id', $stock_tx_ids)->pluck('id')->toArray();
+                    if (!empty($purchase_line_ids)) {
+                        DB::table('transaction_sell_lines_purchase_lines')->whereIn('purchase_line_id', $purchase_line_ids)->delete();
+                        DB::table('purchase_lines')->whereIn('id', $purchase_line_ids)->delete();
+                    }
+
+                    DB::table('stock_adjustment_lines')->whereIn('transaction_id', $stock_tx_ids)->delete();
+                    DB::table('account_transactions')->whereIn('transaction_id', $stock_tx_ids)->delete();
+                    DB::table('transactions')->whereIn('id', $stock_tx_ids)->delete();
+                }
+
+                DB::table('bookings')->where('business_id', $business_id)->delete();
+                if (\Illuminate\Support\Facades\Schema::hasTable('repair_job_sheets')) {
+                    DB::table('repair_job_sheets')->where('business_id', $business_id)->delete();
+                }
+
+                $product_ids = DB::table('products')->where('business_id', $business_id)->pluck('id')->toArray();
+                if (!empty($product_ids)) {
+                    DB::table('variation_location_details')->whereIn('product_id', $product_ids)->update(['qty_available' => 0]);
+                }
+            }
+
 
             // 2. DATA MASTER
             $select_all_master = $request->input('select_all_master');

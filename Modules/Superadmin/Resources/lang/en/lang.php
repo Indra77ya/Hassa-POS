@@ -284,6 +284,7 @@ return [
     'reset_registers' => 'Cash Register',
     'reset_stock_adjustments' => 'Stock Adjustments & Transfers',
     'reset_finance' => 'Finance',
+    'reset_stock' => 'Reset Stock (Set quantity to 0 & delete stock-related transactions)',
     'reset_products' => 'Products',
     'reset_contacts' => 'Contacts',
     'reset_categories' => 'Categories',
