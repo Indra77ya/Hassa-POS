@@ -73,6 +73,36 @@
     #side-bar .theme-sidebar-child-active {
         color: var(--theme-700);
     }
+
+    /* Toastr & Alert non-transparent notification overrides */
+    #toast-container > div,
+    .toast,
+    .toast-success,
+    .toast-error,
+    .toast-warning,
+    .toast-info,
+    .alert {
+        opacity: 1 !important;
+        filter: alpha(opacity=100) !important;
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)" !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+    }
+    #toast-container > div:hover,
+    .toast:hover,
+    .toast-success:hover,
+    .toast-error:hover,
+    .toast-warning:hover,
+    .toast-info:hover {
+        opacity: 1 !important;
+        filter: alpha(opacity=100) !important;
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)" !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+    }
+    .toast-progress {
+        opacity: 1 !important;
+        filter: alpha(opacity=100) !important;
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)" !important;
+    }
 </style>
 
 <link rel="stylesheet" href="{{ asset('css/vendor.css?v='.$asset_v) }}">
