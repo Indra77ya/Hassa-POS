@@ -33,6 +33,40 @@ class ContactUtil extends Util
 
             return $output;
         } else {
+            $user_id = auth()->check() ? auth()->user()->id : 1;
+
+            $ref_count = $this->setAndGetReferenceCount('contacts', $business_id);
+            $contact_id = $this->generateReferenceNumber('contacts', $ref_count, $business_id);
+
+            $customer_data = [
+                'business_id' => $business_id,
+                'type' => 'customer',
+                'name' => 'Walk-In Customer',
+                'created_by' => $user_id,
+                'is_default' => 1,
+                'contact_id' => $contact_id,
+                'credit_limit' => 0,
+            ];
+
+            $contact = Contact::create($customer_data);
+
+            $contact = Contact::whereIn('type', ['customer', 'both'])
+                        ->where('contacts.business_id', $business_id)
+                        ->where('contacts.is_default', 1)
+                        ->leftjoin('customer_groups as cg', 'cg.id', '=', 'contacts.customer_group_id')
+                        ->select('contacts.*',
+                            'cg.amount as discount_percent',
+                            'cg.price_calculation_type',
+                            'cg.selling_price_group_id'
+                        )
+                        ->first();
+
+            if (! empty($contact)) {
+                $contact->contact_address = $contact->contact_address;
+                $output = $array ? $contact->toArray() : $contact;
+
+                return $output;
+            }
             return null;
         }
     }

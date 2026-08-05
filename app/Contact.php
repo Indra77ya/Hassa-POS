@@ -28,6 +28,17 @@ class Contact extends Authenticatable
         'shipping_custom_field_details' => 'array',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($contact) {
+            if ($contact->is_default == 1) {
+                return false;
+            }
+        });
+    }
+
     /**
      * Get the business that owns the user.
      */

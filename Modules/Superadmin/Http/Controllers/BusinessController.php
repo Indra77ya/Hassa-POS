@@ -852,6 +852,10 @@ class BusinessController extends BaseController
                     ->where('business_id', $business_id)
                     ->where('is_default', '!=', 1)
                     ->delete();
+
+                // Automatically ensure Walk-In Customer exists / is re-created
+                $contactUtil = new \App\Utils\ContactUtil();
+                $contactUtil->getWalkInCustomer($business_id);
             }
 
             // Sub-category: categories

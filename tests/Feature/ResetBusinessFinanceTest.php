@@ -25,7 +25,7 @@ class ResetBusinessFinanceTest extends TestCase
             'categories', 'brands', 'tax_rates', 'group_sub_taxes', 'accounts', 'account_transactions',
             'account_types', 'accounting_accounts', 'accounting_accounts_transactions', 'accounting_budgets',
             'accounting_acc_trans_mappings', 'accounting_account_types', 'business_locations', 'business',
-            'currencies'
+            'currencies', 'customer_groups', 'reference_counts'
         ];
 
         foreach ($tables as $table) {
@@ -124,8 +124,35 @@ class ResetBusinessFinanceTest extends TestCase
         Schema::create('contacts', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('business_id');
+            $table->string('type')->nullable();
             $table->string('name')->nullable();
             $table->boolean('is_default')->default(0);
+            $table->string('contact_id')->nullable();
+            $table->integer('created_by')->nullable();
+            $table->decimal('credit_limit', 22, 4)->default(0);
+            $table->integer('customer_group_id')->nullable();
+            $table->softDeletes();
+            $table->string('contact_status')->default('active');
+            $table->timestamps();
+        });
+
+        Schema::create('customer_groups', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('business_id')->unsigned();
+            $table->string('name');
+            $table->float('amount', 5, 2)->default(0);
+            $table->string('price_calculation_type')->default('percentage')->nullable();
+            $table->integer('selling_price_group_id')->nullable();
+            $table->integer('created_by')->unsigned()->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('reference_counts', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('ref_type');
+            $table->integer('ref_count');
+            $table->integer('business_id');
+            $table->timestamps();
         });
 
         Schema::create('categories', function (Blueprint $table) {
@@ -301,8 +328,8 @@ class ResetBusinessFinanceTest extends TestCase
 
         // Let's seed contacts (some default and some non-default) for business 1
         DB::table('contacts')->insert([
-            ['id' => 1000, 'business_id' => 1, 'name' => 'Walk-In Customer', 'is_default' => 1],
-            ['id' => 1001, 'business_id' => 1, 'name' => 'Regular Customer', 'is_default' => 0]
+            ['id' => 1000, 'business_id' => 1, 'name' => 'Walk-In Customer', 'is_default' => 1, 'type' => 'customer'],
+            ['id' => 1001, 'business_id' => 1, 'name' => 'Regular Customer', 'is_default' => 0, 'type' => 'customer']
         ]);
 
         // Call postResetData with both finance reset AND contacts master data reset
@@ -444,5 +471,51 @@ class ResetBusinessFinanceTest extends TestCase
         // Accounting transaction logs for deleted transactions/payments should be deleted
         $this->assertNull(DB::table('accounting_accounts_transactions')->where('id', 800)->first());
         $this->assertNotNull(DB::table('accounting_accounts_transactions')->where('id', 801)->first());
+    }
+
+    public function testWalkInCustomerCannotBeDeletedAndIsAutoRegenerated()
+    {
+        // 1. Create a Walk-In Customer for business 1
+        $contact = \App\Contact::create([
+            'business_id' => 1,
+            'type' => 'customer',
+            'name' => 'Walk-In Customer',
+            'is_default' => 1,
+            'contact_id' => 'WI-0001',
+            'credit_limit' => 0
+        ]);
+
+        $this->assertEquals(1, $contact->is_default);
+
+        // 2. Try to delete it via Eloquent. It should return false or not be deleted.
+        $deleted = $contact->delete();
+        $this->assertFalse($deleted);
+
+        // Check it still exists in the database
+        $this->assertDatabaseHas('contacts', [
+            'id' => $contact->id,
+            'is_default' => 1
+        ]);
+
+        // 3. To test the automatic regeneration/restoration:
+        // We force-delete it at the DB level (bypassing Eloquent events) to simulate it somehow being completely gone.
+        DB::table('contacts')->where('id', $contact->id)->delete();
+        $this->assertDatabaseMissing('contacts', [
+            'id' => $contact->id
+        ]);
+
+        // Now call the ContactUtil helper to retrieve it. It should dynamically re-create it on the fly!
+        $contactUtil = new \App\Utils\ContactUtil();
+        $walkIn = $contactUtil->getWalkInCustomer(1, false);
+
+        $this->assertNotNull($walkIn);
+        $this->assertEquals('Walk-In Customer', $walkIn->name);
+        $this->assertEquals(1, $walkIn->is_default);
+
+        $this->assertDatabaseHas('contacts', [
+            'business_id' => 1,
+            'name' => 'Walk-In Customer',
+            'is_default' => 1
+        ]);
     }
 }
