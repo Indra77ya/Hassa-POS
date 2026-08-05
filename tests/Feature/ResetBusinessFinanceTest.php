@@ -102,6 +102,7 @@ class ResetBusinessFinanceTest extends TestCase
 
         Schema::create('variation_location_details', function (Blueprint $table) {
             $table->integer('product_id');
+            $table->decimal('qty_available', 22, 4)->default(0.0000);
         });
 
         Schema::create('product_locations', function (Blueprint $table) {
@@ -176,6 +177,13 @@ class ResetBusinessFinanceTest extends TestCase
         Schema::create('accounting_accounts_transactions', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('accounting_account_id');
+            $table->integer('transaction_id')->nullable();
+            $table->integer('transaction_payment_id')->nullable();
+            $table->decimal('amount', 22, 4)->default(0.0000);
+            $table->string('type', 100)->nullable();
+            $table->string('sub_type', 100)->nullable();
+            $table->integer('created_by')->nullable();
+            $table->dateTime('operation_date')->nullable();
         });
 
         Schema::create('accounting_budgets', function (Blueprint $table) {
@@ -338,5 +346,103 @@ class ResetBusinessFinanceTest extends TestCase
         $this->assertNotEmpty(DB::table('account_transactions')->where('account_id', 12)->get());
         $this->assertNotEmpty(DB::table('accounting_accounts')->where('business_id', 2)->get());
         $this->assertNotEmpty(DB::table('accounting_accounts_transactions')->where('accounting_account_id', 22)->get());
+    }
+
+    public function testResetBusinessStock()
+    {
+        // 1. Prepare products and stock levels
+        DB::table('products')->insert([
+            ['id' => 100, 'business_id' => 1],
+            ['id' => 101, 'business_id' => 2] // Other business product
+        ]);
+
+        DB::table('variation_location_details')->insert([
+            ['product_id' => 100, 'qty_available' => 25],
+            ['product_id' => 101, 'qty_available' => 50]
+        ]);
+
+        // 2. Prepare stock-affecting transactions
+        DB::table('transactions')->insert([
+            ['id' => 500, 'business_id' => 1, 'type' => 'purchase'],
+            ['id' => 501, 'business_id' => 1, 'type' => 'opening_stock'],
+            ['id' => 502, 'business_id' => 1, 'type' => 'expense'], // Expense should not be deleted by reset_stock
+            ['id' => 503, 'business_id' => 2, 'type' => 'purchase'] // Other business purchase
+        ]);
+
+        DB::table('transaction_payments')->insert([
+            ['id' => 600, 'transaction_id' => 500],
+            ['id' => 601, 'transaction_id' => 502],
+            ['id' => 602, 'transaction_id' => 503]
+        ]);
+
+        DB::table('purchase_lines')->insert([
+            ['id' => 700, 'transaction_id' => 500],
+            ['id' => 701, 'transaction_id' => 501],
+            ['id' => 702, 'transaction_id' => 503]
+        ]);
+
+        DB::table('accounting_accounts')->insert([
+            ['id' => 30, 'business_id' => 1, 'name' => 'Stock Account']
+        ]);
+
+        DB::table('accounting_accounts_transactions')->insert([
+            ['id' => 800, 'accounting_account_id' => 30, 'transaction_id' => 500, 'transaction_payment_id' => 600, 'amount' => 100, 'type' => 'debit', 'sub_type' => 'journal', 'created_by' => 1, 'operation_date' => '2023-01-01 10:00:00'],
+            ['id' => 801, 'accounting_account_id' => 30, 'transaction_id' => 502, 'transaction_payment_id' => 601, 'amount' => 50, 'type' => 'credit', 'sub_type' => 'journal', 'created_by' => 1, 'operation_date' => '2023-01-01 10:00:00']
+        ]);
+
+        // Mock login as superadmin
+        $user = \Mockery::mock(\App\User::class)->makePartial();
+        $user->shouldReceive('can')->with('superadmin')->andReturn(true);
+        $user->id = 1;
+        $user->business_id = 1;
+        $user->surname = 'Mr';
+        $user->first_name = 'Admin';
+        $user->last_name = 'Super';
+        $user->email = 'admin@example.com';
+        $user->language = 'en';
+        $user->user_type = 'superadmin';
+        $user->allow_login = 1;
+
+        $this->actingAs($user);
+
+        // Call postResetData with reset_stock
+        $response = $this->post('/superadmin/business/1/reset-data', [
+            'reset_transactions' => ['reset_stock']
+        ], [
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Accept' => 'application/json'
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson(['success' => true]);
+
+        // 3. Assertions
+        // Stock of business 1 product should be set to 0
+        $this->assertEquals(0, DB::table('variation_location_details')->where('product_id', 100)->value('qty_available'));
+
+        // Stock of other business should remain intact
+        $this->assertEquals(50, DB::table('variation_location_details')->where('product_id', 101)->value('qty_available'));
+
+        // Stock-affecting transactions of business 1 should be deleted
+        $this->assertNull(DB::table('transactions')->where('id', 500)->first());
+        $this->assertNull(DB::table('transactions')->where('id', 501)->first());
+
+        // Expense transaction should remain
+        $this->assertNotNull(DB::table('transactions')->where('id', 502)->first());
+
+        // Other business transaction should remain
+        $this->assertNotNull(DB::table('transactions')->where('id', 503)->first());
+
+        // Purchase lines and payments of deleted transactions should be deleted
+        $this->assertNull(DB::table('purchase_lines')->where('id', 700)->first());
+        $this->assertNull(DB::table('purchase_lines')->where('id', 701)->first());
+        $this->assertNotNull(DB::table('purchase_lines')->where('id', 702)->first());
+
+        $this->assertNull(DB::table('transaction_payments')->where('id', 600)->first());
+        $this->assertNotNull(DB::table('transaction_payments')->where('id', 601)->first());
+
+        // Accounting transaction logs for deleted transactions/payments should be deleted
+        $this->assertNull(DB::table('accounting_accounts_transactions')->where('id', 800)->first());
+        $this->assertNotNull(DB::table('accounting_accounts_transactions')->where('id', 801)->first());
     }
 }
