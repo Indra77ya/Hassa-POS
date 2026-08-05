@@ -454,7 +454,7 @@ Jika Anda menggunakan control panel, proses instalasi menjadi jauh lebih mudah m
     *   Pada pengaturan Web Application Anda di RunCloud, masuk ke menu **Web Application Settings**.
     *   Ubah kolom **Public Directory** dari `/` menjadi **`/public`**, lalu klik **Update**.
 3.  **Upload & Install**:
-    *   Gunakan Git Deployment bawaan RunCloud atau upload file Anda via SFTP ke folder `/home/runcloud/webapps/nama_app`.
+    *   Gunakan Git Deployment bawaan RunCloud or upload file Anda via SFTP ke folder `/home/runcloud/webapps/nama_app`.
     *   Masuk ke terminal SSH server, lalu arahkan ke folder web application Anda:
         ```bash
         cd /home/runcloud/webapps/nama_app
@@ -515,10 +515,14 @@ Agar fitur-fitur terjadwal seperti otomatisasi backup, notifikasi jatuh tempo, d
 
 ### 1. Error 500 (Halaman Putih atau Internal Server Error)
 *   **Penyebab 1**: Izin akses (*permissions*) folder storage tidak tepat.
-    *   *Solusi*: Jalankan perintah berikut di terminal server:
+    *   *Solusi*: Jalankan perintah berikut di terminal server (gunakan absolute path folder aplikasi Anda):
         ```bash
-        chmod -R 775 storage bootstrap/cache
+        chmod -R 775 /var/www/hassapos/storage
         ```
+        ```bash
+        chmod -R 775 /var/www/hassapos/bootstrap/cache
+        ```
+        *(Ganti `/var/www/hassapos` dengan path folder aplikasi Anda yang sebenarnya)*
 *   **Penyebab 2**: File `.env` belum dibuat atau konfigurasinya salah.
     *   *Solusi*: Pastikan `.env` sudah ada dan konfigurasi database Anda valid.
 
