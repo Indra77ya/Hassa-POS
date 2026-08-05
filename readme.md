@@ -18,7 +18,7 @@ Ada dua software web server lokal terpopuler yang sangat disarankan untuk orang 
 Pilih salah satu panduan di bawah ini yang sesuai dengan software yang Anda gunakan:
 
 ### Pilihan A: Menggunakan Laragon (Sangat Direkomendasikan)
-Laragon sangat praktis karena mengelola database, composer, dan pembuatan domain lokal secara otomatis.
+Laragon sangat praktis karena mengelola database, composer, dan pembuatan domain lokal secara otomatis. Anda tidak perlu menjalankan perintah php artisan serve jika menggunakan Laragon.
 
 1.  **Unduh & Jalankan Laragon**:
     *   Unduh dan install Laragon dari situs resminya (pilih versi yang menyertakan **PHP 8.1** atau **PHP 8.2**).
@@ -76,9 +76,9 @@ Laragon sangat praktis karena mengelola database, composer, dan pembuatan domain
         ```bash
         php artisan migrate --seed
         ```
-8.  **Buka Aplikasi**:
-    *   Karena Anda menggunakan Laragon, Laragon secara otomatis membuat domain lokal yang cantik untuk Anda.
-    *   Buka browser Anda, dan langsung ketik alamat: **`http://hassapos.test`** (Atau klik kanan pada jendela Laragon > klik **Web** > pilih **HassaPOS**).
+8.  **Buka Aplikasi (Tanpa php artisan serve)**:
+    *   Laragon secara otomatis membuat domain lokal yang cantik dan siap diakses tanpa perlu menjalankan perintah php artisan serve di terminal.
+    *   Cukup buka browser Anda, dan langsung ketik alamat: **`http://hassapos.test`** (Atau klik kanan pada jendela Laragon, klik **Web**, lalu pilih **HassaPOS**).
 
 ### Pilihan B: Menggunakan XAMPP
 XAMPP adalah alternatif klasik yang sangat populer digunakan oleh pengembang web di Windows.
@@ -142,7 +142,7 @@ XAMPP adalah alternatif klasik yang sangat populer digunakan oleh pengembang web
         php artisan migrate --seed
         ```
 8.  **Jalankan Server Lokal**:
-    *   Jalankan server pengembangan PHP dengan perintah berikut:
+    *   Karena Anda menggunakan XAMPP, Anda wajib menjalankan server pengembangan PHP secara manual agar web bisa diakses. Jalankan perintah berikut di terminal:
         ```bash
         php artisan serve
         ```
@@ -405,7 +405,7 @@ Jika Anda menggunakan control panel, proses instalasi menjadi jauh lebih mudah m
 
 ### C. Panduan CyberPanel
 1.  **Buat Website**:
-    *   Masuk ke dashboard CyberPanel > **Websites** > **Create Website**.
+    *   Masuk di dashboard CyberPanel > **Websites** > **Create Website**.
     *   Pilih Paket, Pemilik, isi Domain, pilih **PHP 8.2**, lalu klik **Create Website**.
 2.  **Upload File & Extract**:
     *   Buka **Websites** > **List Websites** > klik **Manage** pada domain Anda > buka **File Manager**.
@@ -467,7 +467,7 @@ Jika Anda menggunakan control panel, proses instalasi menjadi jauh lebih mudah m
         ```bash
         cp .env.example .env
         ```
-    *   Edit file `.env` (gunakan perintah `nano .env` atau edit via dashboard RunCloud), lalu isi konfigurasi database dan `APP_URL`.
+    *   Edit file `.env` (gunakan perintah `nano .env` or edit via dashboard RunCloud), lalu isi konfigurasi database dan `APP_URL`.
     *   Generate kunci enkripsi:
         ```bash
         php artisan key:generate
