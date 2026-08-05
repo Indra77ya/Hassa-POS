@@ -17,69 +17,142 @@ Sebelum memulai instalasi, pastikan lingkungan (lokal atau server) memenuhi spes
 
 ## 💻 1. Instalasi di Komputer Lokal (localhost)
 
-Ikuti 6 langkah mudah berikut untuk menjalankan HassaPOS di komputer Anda (menggunakan XAMPP/Laragon):
+Ada dua software web server lokal terpopuler yang sangat disarankan untuk orang awam di Windows, yaitu **Laragon** (Sangat Direkomendasikan) atau **XAMPP**.
 
-### Langkah 1: Unduh Kode Sumber (Source Code)
-Buka Terminal (macOS/Linux) atau Git Bash / Command Prompt (Windows), lalu jalankan perintah cloning:
-```bash
-git clone https://github.com/Indra77ya/HassaPOS.git
-```
-Setelah proses cloning selesai, masuk ke dalam folder proyek tersebut:
-```bash
-cd HassaPOS
-```
+Pilih salah satu panduan di bawah ini yang sesuai dengan software yang Anda gunakan:
 
-### Langkah 2: Pasang Dependensi PHP (Composer)
-Jalankan perintah ini di dalam folder proyek Anda:
-```bash
-composer install
-```
-> **Tips PHP 8.3**: Jika komputer Anda menggunakan PHP 8.3, jalankan perintah ini:
-> ```bash
-> composer install --ignore-platform-reqs
-> ```
+### 🅰️ Pilihan A: Menggunakan Laragon (Sangat Direkomendasikan)
+Laragon sangat praktis karena mengelola database, composer, dan pembuatan domain lokal secara otomatis.
 
-### Langkah 3: Konfigurasi Database & Environment
-1.  Buka browser Anda dan masuk ke `http://localhost/phpmyadmin`.
-2.  Buat database baru, misalnya dengan nama: `hassapos_db`.
-3.  Kembali ke folder proyek, salin file `.env.example` dan ubah namanya menjadi `.env`.
-4.  Buka file `.env` menggunakan teks editor (Notepad/VSCode), lalu sesuaikan konfigurasi berikut:
-    ```env
-    APP_ENV=local
-    APP_DEBUG=true
-    APP_URL=http://localhost:8000
+1.  **Unduh & Jalankan Laragon**:
+    *   Unduh dan install Laragon dari situs resminya (pilih versi yang menyertakan **PHP 8.1** atau **PHP 8.2**).
+    *   Buka aplikasi Laragon, lalu klik tombol **Start All**.
+2.  **Masuk ke Folder Root**:
+    *   Buka folder instalasi Laragon di komputer Anda, biasanya terletak di:
+        ```text
+        C:\laragon\www
+        ```
+    *   Klik kanan di area kosong di dalam folder `www` tersebut, lalu pilih **Git Bash Here** atau buka Terminal/Command Prompt di lokasi tersebut.
+3.  **Unduh Source Code (Clone)**:
+    *   Jalankan perintah clone berikut:
+        ```bash
+        git clone https://github.com/Indra77ya/HassaPOS.git
+        ```
+    *   Masuk ke folder proyek yang baru diunduh:
+        ```bash
+        cd HassaPOS
+        ```
+4.  **Pasang Dependensi**:
+    *   Jalankan perintah Composer untuk memasang seluruh paket pendukung Laravel:
+        ```bash
+        composer install
+        ```
+5.  **Setup Database via Database Tool**:
+    *   Pada aplikasi Laragon, klik tombol **Database** (membuka HeidiSQL atau phpMyAdmin).
+    *   Klik kanan di daftar database sebelah kiri, pilih **Create new** > **Database**.
+    *   Beri nama database baru tersebut, misalnya: `hassapos_db`, lalu klik **OK** / simpan.
+6.  **Konfigurasi File `.env`**:
+    *   Salin file template `.env.example` dan ubah namanya menjadi `.env`.
+    *   Buka file `.env` menggunakan notepad atau VS Code, lalu sesuaikan bagian koneksi database:
+        ```env
+        APP_ENV=local
+        APP_DEBUG=true
+        APP_URL=http://hassapos.test
 
-    DB_CONNECTION=mysql
-    DB_HOST=127.0.0.1
-    DB_PORT=3306
-    DB_DATABASE=hassapos_db
-    DB_USERNAME=root
-    DB_PASSWORD=
-    ```
-    *(Kosongkan `DB_PASSWORD` jika Anda menggunakan XAMPP default bawaan Windows)*
+        DB_CONNECTION=mysql
+        DB_HOST=127.0.0.1
+        DB_PORT=3306
+        DB_DATABASE=hassapos_db
+        DB_USERNAME=root
+        DB_PASSWORD=
+        ```
+        *(Di Laragon, password mysql bawaannya adalah kosong/blank)*
+7.  **Generate Key, Storage Link, & Migrasi**:
+    *   Kembali ke terminal, jalankan perintah pembuatan kunci aplikasi:
+        ```bash
+        php artisan key:generate
+        ```
+    *   Hubungkan folder penyimpanan file:
+        ```bash
+        php artisan storage:link
+        ```
+    *   Buat struktur tabel database dan isi data awal otomatis:
+        ```bash
+        php artisan migrate --seed
+        ```
+8.  **Buka Aplikasi**:
+    *   Karena Anda menggunakan Laragon, Laragon secara otomatis membuat domain lokal yang cantik untuk Anda.
+    *   Buka browser Anda, dan langsung ketik alamat: **`http://hassapos.test`** (Atau klik kanan pada jendela Laragon > klik **Web** > pilih **HassaPOS**).
 
-### Langkah 4: Generate Kunci Aplikasi & Hubungkan Penyimpanan
-Jalankan perintah untuk membuat kunci enkripsi aplikasi:
-```bash
-php artisan key:generate
-```
-Lalu jalankan perintah untuk menghubungkan penyimpanan agar file/gambar yang diunggah dapat diakses:
-```bash
-php artisan storage:link
-```
+---
 
-### Langkah 5: Migrasi Database (Migrate & Seed)
-Untuk membuat tabel-tabel database beserta data awal bawaan sistem, jalankan perintah berikut:
-```bash
-php artisan migrate --seed
-```
+### 🅱️ Pilihan B: Menggunakan XAMPP
+XAMPP adalah alternatif klasik yang sangat populer digunakan oleh pengembang web di Windows.
 
-### Langkah 6: Jalankan Aplikasi
-Jalankan server lokal dengan perintah:
-```bash
-php artisan serve
-```
-Buka browser Anda dan akses alamat: **`http://localhost:8000`**
+1.  **Jalankan XAMPP Control Panel**:
+    *   Buka aplikasi **XAMPP Control Panel** di komputer Anda.
+    *   Klik tombol **Start** pada baris **Apache** dan **MySQL** hingga indikatornya berwarna hijau.
+2.  **Masuk ke Folder Root (htdocs)**:
+    *   Buka folder instalasi XAMPP Anda, biasanya di:
+        ```text
+        C:\xampp\htdocs
+        ```
+    *   Buka Terminal, Git Bash, atau Command Prompt di lokasi folder `htdocs` tersebut.
+3.  **Unduh Source Code (Clone)**:
+    *   Jalankan perintah clone berikut:
+        ```bash
+        git clone https://github.com/Indra77ya/HassaPOS.git
+        ```
+    *   Masuk ke folder proyek yang baru diunduh:
+        ```bash
+        cd HassaPOS
+        ```
+4.  **Pasang Dependensi**:
+    *   Pastikan Anda sudah mengunduh dan menginstal **Composer** secara global di Windows Anda.
+    *   Jalankan perintah Composer di terminal:
+        ```bash
+        composer install
+        ```
+        *(Jika komputer Anda sudah menggunakan PHP 8.3, jalankan: `composer install --ignore-platform-reqs`)*
+5.  **Buat Database via phpMyAdmin**:
+    *   Buka browser Anda, lalu ketik alamat: **`http://localhost/phpmyadmin`**
+    *   Klik menu **Baru** (New) di panel sebelah kiri.
+    *   Tulis nama database baru: `hassapos_db`, lalu klik tombol **Buat** (Create).
+6.  **Konfigurasi File `.env`**:
+    *   Salin file template `.env.example` dan ubah namanya menjadi `.env`.
+    *   Buka file `.env` menggunakan notepad atau VS Code, lalu masukkan detail konfigurasi database berikut:
+        ```env
+        APP_ENV=local
+        APP_DEBUG=true
+        APP_URL=http://localhost:8000
+
+        DB_CONNECTION=mysql
+        DB_HOST=127.0.0.1
+        DB_PORT=3306
+        DB_DATABASE=hassapos_db
+        DB_USERNAME=root
+        DB_PASSWORD=
+        ```
+        *(Di XAMPP, username default database adalah `root` dan password-nya kosong/blank)*
+7.  **Generate Key, Storage Link, & Migrasi**:
+    *   Jalankan perintah pembuatan kunci aplikasi:
+        ```bash
+        php artisan key:generate
+        ```
+    *   Hubungkan folder penyimpanan file:
+        ```bash
+        php artisan storage:link
+        ```
+    *   Buat struktur tabel database dan isi data awal otomatis:
+        ```bash
+        php artisan migrate --seed
+        ```
+8.  **Jalankan Server Lokal**:
+    *   Jalankan server pengembangan PHP dengan perintah berikut:
+        ```bash
+        php artisan serve
+        ```
+    *   Buka browser Anda dan akses alamat: **`http://localhost:8000`**
 
 ---
 
