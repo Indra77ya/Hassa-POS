@@ -481,7 +481,7 @@ Jika Anda menggunakan control panel, proses instalasi menjadi jauh lebih mudah m
         php artisan migrate --seed
         ```
 
-## 🔑 4. Mengonfigurasi Akun Administrator Utama
+## 4. Mengonfigurasi Akun Administrator Utama
 
 HassaPOS memiliki fitur keamanan di mana pengguna dengan status Administrator Utama (Superadmin) didefinisikan secara eksplisit melalui file konfigurasi `.env`.
 
@@ -497,7 +497,7 @@ Berikut adalah langkah-langkah untuk mendaftarkan dan menjadikan akun Anda sebag
     ```
 6.  Simpan file `.env`. Akun tersebut kini telah resmi menjadi Administrator Utama dengan akses kontrol penuh ke seluruh fitur sistem.
 
-## 🕒 5. Konfigurasi Cron Job (Wajib di VPS)
+## 5. Konfigurasi Cron Job (Wajib di VPS)
 
 Agar fitur-fitur terjadwal seperti otomatisasi backup, notifikasi jatuh tempo, dan kalkulasi periodik berjalan otomatis, tambahkan satu baris cron job di VPS Anda.
 
@@ -511,7 +511,7 @@ Agar fitur-fitur terjadwal seperti otomatisasi backup, notifikasi jatuh tempo, d
     ```
     *(Sesuaikan `/path/to/your/hassapos` dengan lokasi asli folder proyek Anda, misalnya `/var/www/hassapos`)*
 
-## ❓ Troubleshooting & Solusi Masalah Umum
+## Troubleshooting & Solusi Masalah Umum
 
 ### 1. Error 500 (Halaman Putih atau Internal Server Error)
 *   **Penyebab 1**: Izin akses (*permissions*) folder storage tidak tepat.
@@ -538,7 +538,7 @@ Agar fitur-fitur terjadwal seperti otomatisasi backup, notifikasi jatuh tempo, d
         *(Sesuaikan `/usr/local/bin/php82` dengan path php8.2 asli pada hosting Anda)*
 
 ### 4. Menghapus Cache Jika Melakukan Perubahan Konfigurasi
-Setiap kali Anda mengedit file `.env` atau file konfigurasi lainnya di lingkungan produksi (*production*), jalankan perintah-perintah ini satu per satu agar perubahan segera diterapkan oleh server:
+Setiap kali Anda mengedit file `.env` or file konfigurasi lainnya di lingkungan produksi (*production*), jalankan perintah-perintah ini satu per satu agar perubahan segera diterapkan oleh server:
 ```bash
 php artisan config:clear
 ```
