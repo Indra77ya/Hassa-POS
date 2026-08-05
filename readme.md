@@ -20,9 +20,12 @@ Sebelum memulai instalasi, pastikan lingkungan (lokal atau server) memenuhi spes
 Ikuti 6 langkah mudah berikut untuk menjalankan HassaPOS di komputer Anda (menggunakan XAMPP/Laragon):
 
 ### Langkah 1: Unduh Kode Sumber (Source Code)
-Buka Terminal (macOS/Linux) atau Git Bash / Command Prompt (Windows), lalu jalankan:
+Buka Terminal (macOS/Linux) atau Git Bash / Command Prompt (Windows), lalu jalankan perintah cloning:
 ```bash
 git clone https://github.com/Indra77ya/HassaPOS.git
+```
+Setelah proses cloning selesai, masuk ke dalam folder proyek tersebut:
+```bash
 cd HassaPOS
 ```
 
@@ -31,7 +34,10 @@ Jalankan perintah ini di dalam folder proyek Anda:
 ```bash
 composer install
 ```
-> **Tips PHP 8.3**: Jika komputer Anda menggunakan PHP 8.3, jalankan: `composer install --ignore-platform-reqs`
+> **Tips PHP 8.3**: Jika komputer Anda menggunakan PHP 8.3, jalankan perintah ini:
+> ```bash
+> composer install --ignore-platform-reqs
+> ```
 
 ### Langkah 3: Konfigurasi Database & Environment
 1.  Buka browser Anda dan masuk ke `http://localhost/phpmyadmin`.
@@ -53,14 +59,17 @@ composer install
     *(Kosongkan `DB_PASSWORD` jika Anda menggunakan XAMPP default bawaan Windows)*
 
 ### Langkah 4: Generate Kunci Aplikasi & Hubungkan Penyimpanan
-Jalankan perintah berikut satu per satu:
+Jalankan perintah untuk membuat kunci enkripsi aplikasi:
 ```bash
 php artisan key:generate
+```
+Lalu jalankan perintah untuk menghubungkan penyimpanan agar file/gambar yang diunggah dapat diakses:
+```bash
 php artisan storage:link
 ```
 
 ### Langkah 5: Migrasi Database (Migrate & Seed)
-Untuk membuat tabel-tabel database beserta data awal bawaan sistem, jalankan:
+Untuk membuat tabel-tabel database beserta data awal bawaan sistem, jalankan perintah berikut:
 ```bash
 php artisan migrate --seed
 ```
@@ -70,7 +79,7 @@ Jalankan server lokal dengan perintah:
 ```bash
 php artisan serve
 ```
-Buka browser Anda dan akses: **`http://localhost:8000`**
+Buka browser Anda dan akses alamat: **`http://localhost:8000`**
 
 ---
 
@@ -79,15 +88,29 @@ Buka browser Anda dan akses: **`http://localhost:8000`**
 Panduan ini menggunakan sistem operasi **Ubuntu 22.04 LTS** dengan **Nginx** (LEMP) atau **Apache** (LAMP).
 
 ### Langkah 1: Persiapan Server (Pasang PHP & MySQL)
-Hubungkan ke VPS Anda via SSH (`ssh root@ip_vps_anda`), lalu update sistem dan pasang paket yang diperlukan:
+Hubungkan ke VPS Anda via SSH (`ssh root@ip_vps_anda`).
+
+Langkah pertama, update sistem Anda:
 ```bash
 sudo apt update && sudo apt upgrade -y
+```
+Pasang paket Git, Curl, Unzip, Nginx, dan MySQL Server:
+```bash
 sudo apt install git curl unzip nginx mysql-server -y
-
-# Tambahkan repositori PHP & Pasang PHP 8.2 beserta ekstensinya
+```
+Tambahkan repositori PHP agar mendapatkan versi PHP terbaru:
+```bash
 sudo apt install software-properties-common -y
+```
+```bash
 sudo add-apt-repository ppa:ondrej/php -y
+```
+Update kembali list repositori server Anda:
+```bash
 sudo apt update
+```
+Pasang PHP 8.2 beserta ekstensinya yang dibutuhkan:
+```bash
 sudo apt install php8.2-fpm php8.2-cli php8.2-mysql php8.2-curl php8.2-gd php8.2-mbstring php8.2-xml php8.2-zip php8.2-bcmath php8.2-intl -y
 ```
 
@@ -96,33 +119,56 @@ Masuk ke terminal MySQL:
 ```bash
 sudo mysql
 ```
-Jalankan kueri berikut untuk membuat database dan pengguna baru (ganti `PasswordKuatAnda` dengan password yang aman):
+Jalankan kueri berikut satu per satu untuk membuat database dan pengguna baru (ganti `PasswordKuatAnda` dengan password yang aman):
 ```sql
 CREATE DATABASE hassapos_db;
+```
+```sql
 CREATE USER 'hassapos_user'@'localhost' IDENTIFIED BY 'PasswordKuatAnda';
+```
+```sql
 GRANT ALL PRIVILEGES ON hassapos_db.* TO 'hassapos_user'@'localhost';
+```
+```sql
 FLUSH PRIVILEGES;
+```
+```sql
 EXIT;
 ```
 
 ### Langkah 3: Clone Proyek & Pasang Composer
+Unduh Composer installer:
 ```bash
-# Pasang Composer Secara Global
 curl -sS https://getcomposer.org/installer | php
+```
+Pindahkan Composer agar dapat digunakan secara global di server:
+```bash
 sudo mv composer.phar /usr/local/bin/composer
-
-# Masuk ke direktori web dan clone kode
+```
+Masuk ke direktori web server:
+```bash
 cd /var/www
+```
+Unduh kode sumber HassaPOS menggunakan Git:
+```bash
 sudo git clone https://github.com/Indra77ya/HassaPOS.git hassapos
+```
+Masuk ke dalam direktori proyek tersebut:
+```bash
 cd hassapos
-
-# Install dependensi
+```
+Pasang dependensi PHP proyek dengan Composer:
+```bash
 sudo composer install --no-dev --optimize-autoloader
 ```
 
 ### Langkah 4: Konfigurasi File `.env`
+Salin template konfigurasi:
 ```bash
 sudo cp .env.example .env
+```
+Buka file `.env` menggunakan nano editor untuk melakukan penyesuaian:
+```bash
 sudo nano .env
 ```
 Ubah nilai-nilai berikut di dalam nano editor (tekan `Ctrl+O` lalu `Enter` untuk menyimpan, dan `Ctrl+X` untuk keluar):
@@ -140,9 +186,16 @@ DB_PASSWORD=PasswordKuatAnda
 ```
 
 ### Langkah 5: Set Kunci Aplikasi, Link Storage & Jalankan Migrasi
+Jalankan perintah generate key:
 ```bash
 sudo php artisan key:generate
+```
+Hubungkan folder penyimpanan publik:
+```bash
 sudo php artisan storage:link
+```
+Jalankan migrasi database serta pengisian data awal (seeding):
+```bash
 sudo php artisan migrate --seed
 ```
 
@@ -150,7 +203,11 @@ sudo php artisan migrate --seed
 Web server membutuhkan hak akses khusus pada folder `storage` dan `bootstrap/cache`:
 ```bash
 sudo chown -R www-data:www-data /var/www/hassapos
+```
+```bash
 sudo chmod -R 775 /var/www/hassapos/storage
+```
+```bash
 sudo chmod -R 775 /var/www/hassapos/bootstrap/cache
 ```
 
@@ -191,10 +248,16 @@ server {
     }
 }
 ```
-Aktifkan konfigurasi dan restart Nginx:
+Hubungkan konfigurasi tersebut agar aktif di Nginx:
 ```bash
 sudo ln -s /etc/nginx/sites-available/hassapos /etc/nginx/sites-enabled/
+```
+Uji apakah konfigurasi Nginx sudah benar dan tidak ada error:
+```bash
 sudo nginx -t
+```
+Restart layanan Nginx untuk menerapkan perubahan:
+```bash
 sudo systemctl restart nginx
 ```
 
@@ -216,15 +279,30 @@ Jika Anda menggunakan control panel, proses instalasi menjadi jauh lebih mudah m
     *   Pilih tab **Site directory**, ubah bagian **Running directory** dari `/` menjadi **`/public`**, lalu klik **Save**.
 4.  **Konfigurasi `.env` & Terminal**:
     *   Buka menu **Files** > temukan file `.env.example`, rename menjadi `.env`, buka dan edit detail koneksi database serta `APP_URL`.
-    *   Masuk ke menu **Terminal** di aaPanel (atau SSH ke VPS), lalu arahkan ke folder web (`cd /www/wwwroot/domain_anda`).
-    *   Jalankan perintah-perintah ini berurutan:
+    *   Masuk ke menu **Terminal** di aaPanel (atau SSH ke VPS), lalu arahkan ke folder web Anda:
+        ```bash
+        cd /www/wwwroot/domain_anda
+        ```
+    *   Pasang dependensi dengan Composer:
         ```bash
         composer install --no-dev --optimize-autoloader
+        ```
+    *   Generate kunci aplikasi:
+        ```bash
         php artisan key:generate
+        ```
+    *   Hubungkan folder storage:
+        ```bash
         php artisan storage:link
+        ```
+    *   Jalankan migrasi database:
+        ```bash
         php artisan migrate --seed
         ```
-    *   Pastikan hak akses folder aman dengan menekan tombol **Fix Permission** di menu Files atau jalankan: `chown -R www:www /www/wwwroot/domain_anda`.
+    *   Perbaiki hak akses folder website dengan menekan tombol **Fix Permission** di menu Files aaPanel, atau jalankan perintah:
+        ```bash
+        chown -R www:www /www/wwwroot/domain_anda
+        ```
 
 ### B. Panduan cPanel (Hosting Tradisional)
 1.  **Upload & Ekstrak**:
@@ -243,14 +321,24 @@ Jika Anda menggunakan control panel, proses instalasi menjadi jauh lebih mudah m
     *   Masuk ke cPanel > **Domains** atau **Subdomains**.
     *   Ubah bagian *Document Root* agar mengarah ke `public_html/public` (bukan hanya `public_html`).
 6.  **Jalankan Perintah Artisan via Terminal / Cron**:
-    *   Jika cPanel Anda memiliki fitur **Terminal**, buka terminal dan jalankan:
+    *   Jika cPanel Anda memiliki fitur **Terminal**, buka terminal, arahkan ke folder proyek, lalu jalankan satu per satu:
         ```bash
         composer install --no-dev --optimize-autoloader
+        ```
+        ```bash
         php artisan key:generate
+        ```
+        ```bash
         php artisan storage:link
+        ```
+        ```bash
         php artisan migrate --seed
         ```
-    *   *Jika tidak memiliki akses Terminal*: Anda dapat menggunakan fitur **Cron Jobs** di cPanel untuk menjalankan migrasi sekali saja, contoh command cron: `/usr/local/bin/php /home/username_cpanel/public_html/artisan migrate --seed`. Setelah berhasil dijalankan, hapus kembali cron tersebut.
+    *   *Jika tidak memiliki akses Terminal*: Anda dapat menggunakan fitur **Cron Jobs** di cPanel untuk menjalankan migrasi sekali saja, contoh command cron:
+        ```bash
+        /usr/local/bin/php /home/username_cpanel/public_html/artisan migrate --seed
+        ```
+        *(Setelah berhasil dijalankan, hapus kembali cron tersebut)*.
 
 ### C. Panduan CyberPanel
 1.  **Buat Website**:
@@ -270,14 +358,29 @@ Jika Anda menggunakan control panel, proses instalasi menjadi jauh lebih mudah m
     *   Masuk ke CyberPanel > **Databases** > **Create Database**. Catat nama DB, User, dan Password.
     *   Di File Manager, ubah nama `.env.example` menjadi `.env`, lalu masukkan detail database dan URL domain Anda.
 5.  **Jalankan Migrasi**:
-    *   Buka SSH VPS Anda, masuk ke folder `/home/domainanda.com/public_html`.
-    *   Jalankan:
+    *   Buka SSH VPS Anda, masuk ke folder aplikasi:
+        ```bash
+        cd /home/domainanda.com/public_html
+        ```
+    *   Pasang dependensi dengan Composer:
         ```bash
         composer install --no-dev --optimize-autoloader
+        ```
+    *   Generate kunci aplikasi:
+        ```bash
         php artisan key:generate
+        ```
+    *   Hubungkan folder storage:
+        ```bash
         php artisan storage:link
+        ```
+    *   Jalankan migrasi database:
+        ```bash
         php artisan migrate --seed
-        chown -r lsadm:lsadm /home/domainanda.com/public_html
+        ```
+    *   Perbaiki kepemilikan file agar dapat dibaca server OpenLiteSpeed:
+        ```bash
+        chown -R lsadm:lsadm /home/domainanda.com/public_html
         ```
 
 ### D. Panduan RunCloud
@@ -289,14 +392,29 @@ Jika Anda menggunakan control panel, proses instalasi menjadi jauh lebih mudah m
     *   Ubah kolom **Public Directory** dari `/` menjadi **`/public`**, lalu klik **Update**.
 3.  **Upload & Install**:
     *   Gunakan Git Deployment bawaan RunCloud atau upload file Anda via SFTP ke folder `/home/runcloud/webapps/nama_app`.
-    *   Hubungi terminal SSH server, jalankan perintah:
+    *   Masuk ke terminal SSH server, lalu arahkan ke folder web application Anda:
         ```bash
         cd /home/runcloud/webapps/nama_app
+        ```
+    *   Pasang dependensi:
+        ```bash
         composer install --no-dev --optimize-autoloader
+        ```
+    *   Salin konfigurasi `.env`:
+        ```bash
         cp .env.example .env
-        nano .env  # Masukkan konfigurasi database & APP_URL Anda
+        ```
+    *   Edit file `.env` (gunakan perintah `nano .env` atau edit via dashboard RunCloud), lalu isi konfigurasi database dan `APP_URL`.
+    *   Generate kunci enkripsi:
+        ```bash
         php artisan key:generate
+        ```
+    *   Hubungkan link storage:
+        ```bash
         php artisan storage:link
+        ```
+    *   Migrasi database dan seeding:
+        ```bash
         php artisan migrate --seed
         ```
 
@@ -324,11 +442,11 @@ Berikut adalah langkah-langkah untuk mendaftarkan dan menjadikan akun Anda sebag
 
 Agar fitur-fitur terjadwal seperti otomatisasi backup, notifikasi jatuh tempo, dan kalkulasi periodik berjalan otomatis, tambahkan satu baris cron job di VPS Anda.
 
-1.  Di VPS, jalankan perintah:
+1.  Di VPS, jalankan perintah editor cron:
     ```bash
     crontab -e
     ```
-2.  Tambahkan baris berikut di bagian paling bawah file:
+2.  Tambahkan satu baris berikut di bagian paling bawah file:
     ```cron
     * * * * * cd /path/to/your/hassapos && php artisan schedule:run >> /dev/null 2>&1
     ```
@@ -340,27 +458,37 @@ Agar fitur-fitur terjadwal seperti otomatisasi backup, notifikasi jatuh tempo, d
 
 ### 1. Error 500 (Halaman Putih atau Internal Server Error)
 *   **Penyebab 1**: Izin akses (*permissions*) folder storage tidak tepat.
-    *   *Solusi*: Jalankan perintah `chmod -R 775 storage bootstrap/cache` di terminal server.
+    *   *Solusi*: Jalankan perintah berikut di terminal server:
+        ```bash
+        chmod -R 775 storage bootstrap/cache
+        ```
 *   **Penyebab 2**: File `.env` belum dibuat atau konfigurasinya salah.
     *   *Solusi*: Pastikan `.env` sudah ada dan konfigurasi database Anda valid.
 
 ### 2. Error Database Connection (Gagal Konek Database)
 *   **Penyebab**: Detail host, username, atau password di `.env` salah.
-    *   *Solusi*: Periksa kembali nama database dan kredensial MySQL Anda. Pastikan database server aktif (`sudo systemctl status mysql`).
+    *   *Solusi*: Periksa kembali nama database dan kredensial MySQL Anda. Pastikan database server aktif dengan perintah:
+        ```bash
+        sudo systemctl status mysql
+        ```
 
 ### 3. Error Versi PHP pada Composer di Shared Hosting / cPanel
 *   **Penyebab**: Terminal hosting masih menggunakan versi PHP bawaan yang usang (misal PHP 7.4) sedangkan PHP website sudah diset ke 8.2.
-    *   *Solusi*: Jalankan composer dengan memanggil langsung binary PHP 8.2 di hosting Anda. Contoh:
+    *   *Solusi*: Jalankan composer dengan memanggil langsung binary PHP 8.2 di hosting Anda. Contoh perintah:
         ```bash
         /usr/local/bin/php82 $(which composer) install --ignore-platform-reqs
         ```
         *(Sesuaikan `/usr/local/bin/php82` dengan path php8.2 asli pada hosting Anda)*
 
 ### 4. Menghapus Cache Jika Melakukan Perubahan Konfigurasi
-Setiap kali Anda mengedit file `.env` atau file konfigurasi lainnya di lingkungan produksi (*production*), jalankan perintah ini agar perubahan segera diterapkan:
+Setiap kali Anda mengedit file `.env` atau file konfigurasi lainnya di lingkungan produksi (*production*), jalankan perintah-perintah ini satu per satu agar perubahan segera diterapkan oleh server:
 ```bash
 php artisan config:clear
+```
+```bash
 php artisan cache:clear
+```
+```bash
 php artisan view:clear
 ```
 
