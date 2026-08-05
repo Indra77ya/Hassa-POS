@@ -518,27 +518,52 @@ class AccountController extends Controller
                                 return $this->__getPaymentDetails($row);
                             })
                             ->editColumn('action', function ($row) {
-                                $action = '';
-                                if (auth()->user()->can('delete_account_transaction')) {
-                                    if ($row->sub_type == 'fund_transfer' || $row->sub_type == 'deposit') {
-                                        $action .= '<button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-error delete_account_transaction" data-href="'.action([\App\Http\Controllers\AccountController::class, 'destroyAccountTransaction'], [$row->id]).'"><i class="fa fa-trash"></i> '.__('messages.delete').'</button>';
-                                    }
-                                }
+                                $html = '';
+                                $has_action = false;
+
+                                $html .= '<div class="btn-group">
+                                            <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info tw-w-max dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                '.__("messages.actions").' <span class="caret"></span><span class="sr-only">Toggle Dropdown</span>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-right" role="menu">';
+
                                 if (auth()->user()->can('edit_account_transaction')) {
                                     if ($row->sub_type == 'fund_transfer' || $row->sub_type == 'deposit' || $row->sub_type == 'opening_balance') {
-                                        $action .= ' <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary btn-modal" data-container="#edit_account_transaction" data-href="'.action([\App\Http\Controllers\AccountController::class, 'editAccountTransaction'], [$row->id]).'"><i class="fa fa-edit"></i> '.__('messages.edit').'</button>';
+                                        $html .= '<li>
+                                                    <button type="button" class="tw-block tw-w-full tw-text-left tw-px-4 tw-py-2 tw-text-sm tw-text-gray-700 hover:tw-bg-gray-100 hover:tw-text-gray-900 tw-bg-transparent tw-border-none tw-outline-none btn-modal" data-container="#edit_account_transaction" data-href="'.action([\App\Http\Controllers\AccountController::class, 'editAccountTransaction'], [$row->id]).'">
+                                                        <i class="fa fa-edit"></i> '.__('messages.edit').'
+                                                    </button>
+                                                 </li>';
+                                        $has_action = true;
+                                    }
+                                }
+
+                                if (auth()->user()->can('delete_account_transaction')) {
+                                    if ($row->sub_type == 'fund_transfer' || $row->sub_type == 'deposit') {
+                                        $html .= '<li>
+                                                    <button type="button" class="tw-block tw-w-full tw-text-left tw-px-4 tw-py-2 tw-text-sm tw-text-gray-700 hover:tw-bg-gray-100 hover:tw-text-gray-900 tw-bg-transparent tw-border-none tw-outline-none delete_account_transaction" data-href="'.action([\App\Http\Controllers\AccountController::class, 'destroyAccountTransaction'], [$row->id]).'">
+                                                        <i class="fa fa-trash"></i> '.__('messages.delete').'
+                                                    </button>
+                                                 </li>';
+                                        $has_action = true;
                                     }
                                 }
 
                                 if (! empty($row->media->first()) || (! empty($row->transfer_transaction && ! empty($row->transfer_transaction->media->first())))) {
                                     $display_url = ! empty($row->media->first()) ? $row->media->first()->display_url : $row->transfer_transaction->media->first()->display_url;
-
                                     $display_name = ! empty($row->media->first()) ? $row->media->first()->display_name : $row->transfer_transaction->media->first()->display_name;
 
-                                    $action .= '&nbsp; <a class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent" href="'.$display_url.'" download="'.$display_name.'"><i class="fa fa-download"></i> '.__('purchase.download_document').'</a>';
+                                    $html .= '<li>
+                                                <a class="tw-block tw-w-full tw-text-left tw-px-4 tw-py-2 tw-text-sm tw-text-gray-700 hover:tw-bg-gray-100 hover:tw-text-gray-900 tw-bg-transparent tw-border-none tw-outline-none" href="'.$display_url.'" download="'.$display_name.'">
+                                                    <i class="fa fa-download"></i> '.__('purchase.download_document').'
+                                                </a>
+                                             </li>';
+                                    $has_action = true;
                                 }
 
-                                return $action;
+                                $html .= '</ul></div>';
+
+                                return $has_action ? $html : '';
                             })
                             ->filterColumn('added_by', function ($query, $keyword) {
                                 $query->whereRaw("CONCAT(COALESCE(u.surname, ''), ' ', COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) like ?", ["%{$keyword}%"]);
