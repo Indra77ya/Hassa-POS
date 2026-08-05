@@ -1,8 +1,6 @@
 # Panduan Instalasi HassaPOS
 
-HassaPOS adalah aplikasi Point of Sales (Kasir) & Inventaris berbasis web yang modern dan mudah digunakan. Panduan ini dirancang khusus agar mudah dipahami, singkat, padat, dan sangat detail—bahkan bagi Anda yang masih awam.
-
----
+HassaPOS adalah aplikasi Point of Sales (Kasir) & Inventaris berbasis web yang modern dan mudah digunakan. Panduan ini dirancang khusus agar mudah dipahami, singkat, padat, dan sangat detail, bahkan bagi Anda yang masih awam.
 
 ## Persyaratan Sistem
 
@@ -12,8 +10,6 @@ Sebelum memulai instalasi, pastikan lingkungan (lokal atau server) memenuhi spes
 *   **Database**: MySQL `5.7+` atau MariaDB `10.3+`
 *   **Composer**: Versi 2.x (untuk mengelola paket PHP)
 *   **Aset Frontend**: Sudah siap pakai (pre-compiled) di dalam folder `public/` (Tidak perlu Node.js/NPM)
-
----
 
 ## 1. Instalasi di Komputer Lokal (localhost)
 
@@ -84,8 +80,6 @@ Laragon sangat praktis karena mengelola database, composer, dan pembuatan domain
     *   Karena Anda menggunakan Laragon, Laragon secara otomatis membuat domain lokal yang cantik untuk Anda.
     *   Buka browser Anda, dan langsung ketik alamat: **`http://hassapos.test`** (Atau klik kanan pada jendela Laragon > klik **Web** > pilih **HassaPOS**).
 
----
-
 ### Pilihan B: Menggunakan XAMPP
 XAMPP adalah alternatif klasik yang sangat populer digunakan oleh pengembang web di Windows.
 
@@ -153,8 +147,6 @@ XAMPP adalah alternatif klasik yang sangat populer digunakan oleh pengembang web
         php artisan serve
         ```
     *   Buka browser Anda dan akses alamat: **`http://localhost:8000`**
-
----
 
 ## 2. Instalasi di VPS Unmanaged (Ubuntu LTS - LAMP/LEMP)
 
@@ -334,8 +326,6 @@ Restart layanan Nginx untuk menerapkan perubahan:
 sudo systemctl restart nginx
 ```
 
----
-
 ## 3. Instalasi di VPS Managed / Control Panel (aaPanel, cPanel, CyberPanel, RunCloud)
 
 Jika Anda menggunakan control panel, proses instalasi menjadi jauh lebih mudah melalui antarmuka grafis (GUI).
@@ -491,8 +481,6 @@ Jika Anda menggunakan control panel, proses instalasi menjadi jauh lebih mudah m
         php artisan migrate --seed
         ```
 
----
-
 ## 🔑 4. Mengonfigurasi Akun Administrator Utama
 
 HassaPOS memiliki fitur keamanan di mana pengguna dengan status Administrator Utama (Superadmin) didefinisikan secara eksplisit melalui file konfigurasi `.env`.
@@ -509,8 +497,6 @@ Berikut adalah langkah-langkah untuk mendaftarkan dan menjadikan akun Anda sebag
     ```
 6.  Simpan file `.env`. Akun tersebut kini telah resmi menjadi Administrator Utama dengan akses kontrol penuh ke seluruh fitur sistem.
 
----
-
 ## 🕒 5. Konfigurasi Cron Job (Wajib di VPS)
 
 Agar fitur-fitur terjadwal seperti otomatisasi backup, notifikasi jatuh tempo, dan kalkulasi periodik berjalan otomatis, tambahkan satu baris cron job di VPS Anda.
@@ -524,8 +510,6 @@ Agar fitur-fitur terjadwal seperti otomatisasi backup, notifikasi jatuh tempo, d
     * * * * * cd /path/to/your/hassapos && php artisan schedule:run >> /dev/null 2>&1
     ```
     *(Sesuaikan `/path/to/your/hassapos` dengan lokasi asli folder proyek Anda, misalnya `/var/www/hassapos`)*
-
----
 
 ## ❓ Troubleshooting & Solusi Masalah Umum
 
@@ -564,7 +548,5 @@ php artisan cache:clear
 ```bash
 php artisan view:clear
 ```
-
----
 
 Selamat menggunakan **HassaPOS**! Semoga bisnis Anda berjalan lancar dan semakin sukses dengan bantuan sistem kasir pintar ini. Jika ada pertanyaan, silakan hubungi tim pengembang atau buat issue di repository ini.
