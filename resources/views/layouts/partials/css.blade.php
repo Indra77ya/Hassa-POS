@@ -73,6 +73,15 @@
     #side-bar .theme-sidebar-child-active {
         color: var(--theme-700);
     }
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    #side-bar::-webkit-scrollbar {
+        display: none !important;
+    }
+    /* Hide scrollbar for IE, Edge and Firefox */
+    #side-bar {
+        -ms-overflow-style: none !important;  /* IE and Edge */
+        scrollbar-width: none !important;  /* Firefox */
+    }
 </style>
 
 <link rel="stylesheet" href="{{ asset('css/vendor.css?v='.$asset_v) }}">
