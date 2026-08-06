@@ -18,7 +18,7 @@ Ada dua software web server lokal terpopuler yang sangat disarankan untuk orang 
 Pilih salah satu panduan di bawah ini yang sesuai dengan software yang Anda gunakan:
 
 ### Pilihan A: Menggunakan Laragon (Sangat Direkomendasikan)
-Laragon sangat praktis karena mengelola database, composer, dan pembuatan domain lokal secara otomatis. Anda tidak perlu menjalankan perintah php artisan serve jika menggunakan Laragon.
+Laragon sangat praktis karena mengelola database, composer, dan pembuatan domain lokal secara otomatis. Umumnya, Anda tidak perlu menjalankan perintah `php artisan serve` jika menggunakan Laragon. Namun, dalam beberapa kasus (seperti virtual host yang tidak aktif, bentrok port, atau domain lokal tidak merespon), Laragon juga tetap bisa menggunakan perintah `php artisan serve`.
 
 1.  **Unduh & Jalankan Laragon**:
     *   Unduh dan install Laragon dari situs resminya (pilih versi yang menyertakan **PHP 8.1** atau **PHP 8.2**).
@@ -76,9 +76,13 @@ Laragon sangat praktis karena mengelola database, composer, dan pembuatan domain
         ```bash
         php artisan migrate --seed
         ```
-8.  **Buka Aplikasi (Tanpa php artisan serve)**:
-    *   Laragon secara otomatis membuat domain lokal yang cantik dan siap diakses tanpa perlu menjalankan perintah php artisan serve di terminal.
-    *   Cukup buka browser Anda, dan langsung ketik alamat: **`http://hassapos.test`** (Atau klik kanan pada jendela Laragon, klik **Web**, lalu pilih **HassaPOS**).
+8.  **Buka Aplikasi**:
+    *   **Metode Utama (Otomatis):** Laragon secara otomatis membuat domain lokal yang cantik dan siap diakses tanpa perlu menjalankan perintah `php artisan serve` di terminal. Cukup buka browser Anda, dan langsung ketik alamat: **`http://hassapos.test`** (Atau klik kanan pada jendela Laragon, klik **Web**, lalu pilih **HassaPOS**).
+    *   **Metode Alternatif (Jika terjadi kendala):** Jika domain `.test` tidak bisa diakses atau virtual host Laragon bermasalah, Anda tetap dapat menjalankan server pengembangan PHP secara manual. Jalankan perintah berikut di terminal/Git Bash di dalam folder proyek Anda:
+        ```bash
+        php artisan serve
+        ```
+        Lalu buka browser Anda dan akses alamat: **`http://localhost:8000`** atau **`http://127.0.0.1:8000`**.
 
 ### Pilihan B: Menggunakan XAMPP
 XAMPP adalah alternatif klasik yang sangat populer digunakan oleh pengembang web di Windows.
