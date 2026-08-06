@@ -2686,7 +2686,7 @@ html:has(.tw-dw-drawer-toggle:checked) {
 }
 
 .tw-w-px {
-    width: 1px
+    width: 0px
 }
 
 .tw-min-w-0 {
