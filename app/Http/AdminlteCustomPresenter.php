@@ -11,7 +11,7 @@ class AdminlteCustomPresenter extends Presenter
      */
     public function getOpenTagWrapper()
     {
-        return '<div class="tw-flex-1 tw-px-2 tw-pt-1.5 tw-pb-40 tw-space-y-1 tw-overflow-y-auto" style="padding-bottom: 200px;" id="side-bar">' . PHP_EOL;
+        return '<div class="tw-flex-1 tw-px-2 tw-pt-1.5 tw-pb-96 tw-space-y-1 tw-overflow-y-auto" style="padding-bottom: 450px;" id="side-bar">' . PHP_EOL;
     }
 
     /**
