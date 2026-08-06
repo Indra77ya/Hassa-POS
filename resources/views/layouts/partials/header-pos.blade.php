@@ -23,7 +23,7 @@
 @endif
 <input type="hidden" name="transaction_sub_type" id="transaction_sub_type" value="{{ $transaction_sub_type }}">
 @inject('request', 'Illuminate\Http\Request')
-<div class="col-md-12 no-print pos-header">
+<div class="col-md-12 no-print pos-header tw-sticky tw-top-0 tw-z-50 tw-bg-gray-100 !tw-py-2">
     <input type="hidden" id="pos_redirect_url" value="{{ $pos_redirect_url }}">
     <div
         class="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-between tw-shadow-[0_4px_20px_rgba(0,0,0,0.03)] tw-bg-white tw-border tw-border-slate-100 tw-rounded-2xl tw-mx-0 tw-mt-2 tw-mb-0 md:tw-mb-0 tw-p-3">

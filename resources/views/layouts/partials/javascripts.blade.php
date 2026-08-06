@@ -171,6 +171,15 @@
         $(document).on('hide.bs.dropdown', '.dropdown, .btn-group', function (e) {
             $(this).closest('.table-responsive, .dataTables_scrollBody').removeClass('dropdown-opened');
         });
+
+        // Auto scroll sidebar to the active menu item on page load
+        var sidebar = $('#side-bar');
+        var activeItem = sidebar.find('.theme-sidebar-active, .theme-sidebar-child-active').first();
+        if (sidebar.length > 0 && activeItem.length > 0) {
+            var containerHeight = sidebar.height();
+            var itemOffset = activeItem.offset().top - sidebar.offset().top + sidebar.scrollTop();
+            sidebar.scrollTop(itemOffset - (containerHeight / 2));
+        }
     });
 </script>
 
