@@ -3,11 +3,23 @@
 @php
     $api_key = env('GOOGLE_MAP_API_KEY');
 @endphp
-@if (!empty($api_key))
-    @section('css')
+
+@section('css')
+    @if (!empty($api_key))
         @include('contact.partials.google_map_styles')
-    @endsection
-@endif
+    @endif
+    <style type="text/css">
+        #contact_table th,
+        #contact_table td {
+            padding: 10px 12px !important;
+            vertical-align: middle !important;
+        }
+        #contact_table th {
+            font-weight: 600 !important;
+        }
+    </style>
+@endsection
+
 @section('content')
 @php
     $custom_labels = json_decode(session('business.custom_labels'), true);
@@ -161,71 +173,71 @@
                     <table class="table table-bordered table-striped" id="contact_table" style="width: 100%;">
                         <thead>
                             <tr>
-                                <th class="not-export" style="white-space: nowrap !important;">@lang('messages.action')</th>
-                                <th style="white-space: nowrap !important;">@lang('lang_v1.contact_id')</th>
+                                <th class="not-export" style="min-width: 100px; white-space: nowrap !important;">@lang('messages.action')</th>
+                                <th style="min-width: 100px; white-space: nowrap !important;">@lang('lang_v1.contact_id')</th>
                                 @if ($type == 'supplier')
-                                    <th style="white-space: nowrap !important;">@lang('business.business_name')</th>
-                                    <th style="white-space: nowrap !important;">@lang('contact.name')</th>
-                                    <th style="white-space: nowrap !important;">@lang('business.email')</th>
-                                    <th style="white-space: nowrap !important;">@lang('contact.tax_no')</th>
-                                    <th style="white-space: nowrap !important;">@lang('contact.pay_term')</th>
-                                    <th style="white-space: nowrap !important;">@lang('account.opening_balance')</th>
-                                    <th style="white-space: nowrap !important;">@lang('lang_v1.advance_balance')</th>
-                                    <th style="white-space: nowrap !important;">@lang('lang_v1.added_on')</th>
-                                    <th style="white-space: nowrap !important;">@lang('business.address')</th>
-                                    <th style="white-space: nowrap !important;">@lang('contact.mobile')</th>
-                                    <th style="white-space: nowrap !important;">@lang('contact.total_purchase_due')</th>
-                                    <th style="white-space: nowrap !important;">@lang('lang_v1.total_purchase_return_due')</th>
+                                    <th style="min-width: 180px; white-space: nowrap !important;">@lang('business.business_name')</th>
+                                    <th style="min-width: 150px; white-space: nowrap !important;">@lang('contact.name')</th>
+                                    <th style="min-width: 180px; white-space: nowrap !important;">@lang('business.email')</th>
+                                    <th style="min-width: 120px; white-space: nowrap !important;">@lang('contact.tax_no')</th>
+                                    <th style="min-width: 120px; white-space: nowrap !important;">@lang('contact.pay_term')</th>
+                                    <th style="min-width: 130px; white-space: nowrap !important;">@lang('account.opening_balance')</th>
+                                    <th style="min-width: 130px; white-space: nowrap !important;">@lang('lang_v1.advance_balance')</th>
+                                    <th style="min-width: 120px; white-space: nowrap !important;">@lang('lang_v1.added_on')</th>
+                                    <th style="min-width: 250px; white-space: normal !important;">@lang('business.address')</th>
+                                    <th style="min-width: 120px; white-space: nowrap !important;">@lang('contact.mobile')</th>
+                                    <th style="min-width: 150px; white-space: nowrap !important;">@lang('contact.total_purchase_due')</th>
+                                    <th style="min-width: 150px; white-space: nowrap !important;">@lang('lang_v1.total_purchase_return_due')</th>
                                 @elseif($type == 'customer')
-                                    <th style="white-space: nowrap !important;">@lang('business.business_name')</th>
-                                    <th style="white-space: nowrap !important;">@lang('user.name')</th>
-                                    <th style="white-space: nowrap !important;">@lang('business.email')</th>
-                                    <th style="white-space: nowrap !important;">@lang('contact.tax_no')</th>
-                                    <th style="white-space: nowrap !important;">@lang('lang_v1.credit_limit')</th>
-                                    <th style="white-space: nowrap !important;">@lang('contact.pay_term')</th>
-                                    <th style="white-space: nowrap !important;">@lang('account.opening_balance')</th>
-                                    <th style="white-space: nowrap !important;">@lang('lang_v1.advance_balance')</th>
-                                    <th style="white-space: nowrap !important;">@lang('lang_v1.added_on')</th>
+                                    <th style="min-width: 180px; white-space: nowrap !important;">@lang('business.business_name')</th>
+                                    <th style="min-width: 150px; white-space: nowrap !important;">@lang('user.name')</th>
+                                    <th style="min-width: 180px; white-space: nowrap !important;">@lang('business.email')</th>
+                                    <th style="min-width: 120px; white-space: nowrap !important;">@lang('contact.tax_no')</th>
+                                    <th style="min-width: 120px; white-space: nowrap !important;">@lang('lang_v1.credit_limit')</th>
+                                    <th style="min-width: 120px; white-space: nowrap !important;">@lang('contact.pay_term')</th>
+                                    <th style="min-width: 130px; white-space: nowrap !important;">@lang('account.opening_balance')</th>
+                                    <th style="min-width: 130px; white-space: nowrap !important;">@lang('lang_v1.advance_balance')</th>
+                                    <th style="min-width: 120px; white-space: nowrap !important;">@lang('lang_v1.added_on')</th>
                                     @if ($reward_enabled)
-                                        <th id="rp_col" style="white-space: nowrap !important;">{{ session('business.rp_name') }}</th>
+                                        <th id="rp_col" style="min-width: 120px; white-space: nowrap !important;">{{ session('business.rp_name') }}</th>
                                     @endif
-                                    <th style="white-space: nowrap !important;">@lang('lang_v1.customer_group')</th>
-                                    <th style="white-space: nowrap !important;">@lang('business.address')</th>
-                                    <th style="white-space: nowrap !important;">@lang('contact.mobile')</th>
-                                    <th style="white-space: nowrap !important;">@lang('contact.total_sale_due')</th>
-                                    <th style="white-space: nowrap !important;">@lang('lang_v1.total_sell_return_due')</th>
+                                    <th style="min-width: 150px; white-space: nowrap !important;">@lang('lang_v1.customer_group')</th>
+                                    <th style="min-width: 250px; white-space: normal !important;">@lang('business.address')</th>
+                                    <th style="min-width: 120px; white-space: nowrap !important;">@lang('contact.mobile')</th>
+                                    <th style="min-width: 150px; white-space: nowrap !important;">@lang('contact.total_sale_due')</th>
+                                    <th style="min-width: 150px; white-space: nowrap !important;">@lang('lang_v1.total_sell_return_due')</th>
                                 @endif
                                 @php
                                     $custom_labels = json_decode(session('business.custom_labels'), true);
                                 @endphp
-                                <th style="white-space: nowrap !important;">
+                                <th style="min-width: 150px; white-space: nowrap !important;">
                                     {{ $custom_labels['contact']['custom_field_1'] ?? __('lang_v1.contact_custom_field1') }}
                                 </th>
-                                <th style="white-space: nowrap !important;">
+                                <th style="min-width: 150px; white-space: nowrap !important;">
                                     {{ $custom_labels['contact']['custom_field_2'] ?? __('lang_v1.contact_custom_field2') }}
                                 </th>
-                                <th style="white-space: nowrap !important;">
+                                <th style="min-width: 150px; white-space: nowrap !important;">
                                     {{ $custom_labels['contact']['custom_field_3'] ?? __('lang_v1.contact_custom_field3') }}
                                 </th>
-                                <th style="white-space: nowrap !important;">
+                                <th style="min-width: 150px; white-space: nowrap !important;">
                                     {{ $custom_labels['contact']['custom_field_4'] ?? __('lang_v1.contact_custom_field4') }}
                                 </th>
-                                <th style="white-space: nowrap !important;">
+                                <th style="min-width: 150px; white-space: nowrap !important;">
                                     {{ $custom_labels['contact']['custom_field_5'] ?? __('lang_v1.custom_field', ['number' => 5]) }}
                                 </th>
-                                <th style="white-space: nowrap !important;">
+                                <th style="min-width: 150px; white-space: nowrap !important;">
                                     {{ $custom_labels['contact']['custom_field_6'] ?? __('lang_v1.custom_field', ['number' => 6]) }}
                                 </th>
-                                <th style="white-space: nowrap !important;">
+                                <th style="min-width: 150px; white-space: nowrap !important;">
                                     {{ $custom_labels['contact']['custom_field_7'] ?? __('lang_v1.custom_field', ['number' => 7]) }}
                                 </th>
-                                <th style="white-space: nowrap !important;">
+                                <th style="min-width: 150px; white-space: nowrap !important;">
                                     {{ $custom_labels['contact']['custom_field_8'] ?? __('lang_v1.custom_field', ['number' => 8]) }}
                                 </th>
-                                <th style="white-space: nowrap !important;">
+                                <th style="min-width: 150px; white-space: nowrap !important;">
                                     {{ $custom_labels['contact']['custom_field_9'] ?? __('lang_v1.custom_field', ['number' => 9]) }}
                                 </th>
-                                <th style="white-space: nowrap !important;">
+                                <th style="min-width: 150px; white-space: nowrap !important;">
                                     {{ $custom_labels['contact']['custom_field_10'] ?? __('lang_v1.custom_field', ['number' => 10]) }}
                                 </th>
                             </tr>
