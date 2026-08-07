@@ -3,11 +3,22 @@
 @php
     $api_key = env('GOOGLE_MAP_API_KEY');
 @endphp
-@if (!empty($api_key))
-    @section('css')
+@section('css')
+    @if (!empty($api_key))
         @include('contact.partials.google_map_styles')
-    @endsection
-@endif
+    @endif
+    <style>
+        #contact_table th, #contact_table td {
+            padding: 10px 12px !important;
+        }
+        .contact-address-col {
+            min-width: 250px !important;
+            font-size: 11px !important;
+            line-height: 1.3 !important;
+            white-space: normal !important;
+        }
+    </style>
+@endsection
 @section('content')
 @php
     $custom_labels = json_decode(session('business.custom_labels'), true);
