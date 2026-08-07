@@ -136,6 +136,56 @@ class MapStockAdjustment
 
                 $expense_account_id = $expense_account->id;
 
+                // Explicitly sync to POS accounts table (Payment accounts) to ensure 100% symmetry
+                if (class_exists(\App\Account::class)) {
+                    try {
+                        $pos_account = null;
+                        if (!empty($expense_account->account_id)) {
+                            $pos_account = \App\Account::find($expense_account->account_id);
+                        }
+
+                        if (!$pos_account) {
+                            $pos_account = \App\Account::where('accounting_account_id', $expense_account->id)->first();
+                        }
+
+                        if (!$pos_account) {
+                            $account_type_id = \App\Account::getPOSAccountTypeIdFromAccounting(
+                                $expense_account->account_primary_type,
+                                $expense_account->account_sub_type_id,
+                                $expense_account->business_id
+                            );
+
+                            $prev_is_syncing_accounting = AccountingAccount::$is_syncing;
+                            $prev_is_syncing_pos = \App\Account::$is_syncing;
+
+                            AccountingAccount::$is_syncing = true;
+                            \App\Account::$is_syncing = true;
+
+                            $pos_account = \App\Account::create([
+                                'name' => $expense_account->name,
+                                'business_id' => $expense_account->business_id,
+                                'created_by' => $expense_account->created_by ?? 1,
+                                'note' => $expense_account->description,
+                                'account_number' => $expense_account->gl_code,
+                                'is_closed' => $expense_account->status == 'active' ? 0 : 1,
+                                'accounting_account_id' => $expense_account->id,
+                                'account_type_id' => $account_type_id,
+                            ]);
+
+                            if ($pos_account) {
+                                $expense_account->account_id = $pos_account->id;
+                                $expense_account->save();
+                            }
+
+                            AccountingAccount::$is_syncing = $prev_is_syncing_accounting;
+                            \App\Account::$is_syncing = $prev_is_syncing_pos;
+                        }
+
+                    } catch (\Exception $e) {
+                        \Log::error('Error explicitly syncing auto-created Accounting Account to POS Account: ' . $e->getMessage());
+                    }
+                }
+
                 // Save this expense_account_id on the transaction for future reference
                 $transaction->expense_account_id = $expense_account_id;
                 $transaction->save();

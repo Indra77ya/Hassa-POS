@@ -57,6 +57,7 @@ class TransactionMappingTest extends TestCase
             $table->string('name');
             $table->integer('business_id');
             $table->integer('account_type_id')->nullable();
+            $table->unsignedBigInteger('accounting_account_id')->nullable();
             $table->string('account_number')->nullable();
             $table->string('normal_balance')->nullable();
             $table->integer('is_closed')->default(0);
@@ -174,6 +175,7 @@ class TransactionMappingTest extends TestCase
             $table->integer('business_id');
             $table->string('account_primary_type')->nullable();
             $table->integer('account_sub_type_id')->nullable();
+            $table->unsignedBigInteger('account_id')->nullable();
             $table->string('status')->default('active');
             $table->timestamps();
         });
@@ -783,6 +785,12 @@ class TransactionMappingTest extends TestCase
         $this->assertEquals('debit', $debit_tx->type);
         $this->assertEquals(100000, $debit_tx->amount);
 
+        // Verify Symmetrical payment account is explicitly synced and created in POS accounts table
+        $pos_account = Account::where('accounting_account_id', $expense_account->id)->first();
+        $this->assertNotNull($pos_account);
+        $this->assertEquals('Beban Kerusakan/Kehilangan', $pos_account->name);
+        $this->assertEquals($pos_account->id, $expense_account->account_id);
+
         // Verify that Accounts Payable or Kas was not touched
         $this->assertNull($txs->where('accounting_account_id', 10)->first()); // Kas (10)
     }
@@ -833,6 +841,12 @@ class TransactionMappingTest extends TestCase
         $this->assertNotNull($expense_tx);
         $this->assertEquals('debit', $expense_tx->type);
         $this->assertEquals(65000, $expense_tx->amount);
+
+        // Verify Symmetrical payment account is explicitly synced and created in POS accounts table
+        $pos_account = Account::where('accounting_account_id', $expense_account->id)->first();
+        $this->assertNotNull($pos_account);
+        $this->assertEquals('Beban Kerusakan/Kehilangan', $pos_account->name);
+        $this->assertEquals($pos_account->id, $expense_account->account_id);
     }
 
     /**
