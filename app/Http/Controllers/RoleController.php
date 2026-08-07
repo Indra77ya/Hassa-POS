@@ -47,14 +47,31 @@ class RoleController extends Controller
             return DataTables::of($roles)
                 ->addColumn('action', function ($row) {
                     if (! $row->is_default || $row->name == 'Cashier#'.$row->business_id) {
-                        $action = '';
+                        $action = '<div class="btn-group">
+                            <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info dropdown-toggle"
+                                data-toggle="dropdown" aria-expanded="false">'.
+                                __('messages.actions').
+                                '<span class="caret"></span>
+                                <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-left" role="menu">';
+
                         if (auth()->user()->can('roles.update')) {
-                            $action .= '<a href="'.action([\App\Http\Controllers\RoleController::class, 'edit'], [$row->id]).'" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-primary"><i class="glyphicon glyphicon-edit"></i> '.__('messages.edit').'</a>';
+                            $action .= '<li>
+                                <a href="'.action([\App\Http\Controllers\RoleController::class, 'edit'], [$row->id]).'">
+                                    <i class="glyphicon glyphicon-edit" aria-hidden="true"></i> '.__('messages.edit').'
+                                </a>
+                            </li>';
                         }
                         if (auth()->user()->can('roles.delete')) {
-                            $action .= '&nbsp
-                                <button data-href="'.action([\App\Http\Controllers\RoleController::class, 'destroy'], [$row->id]).'" class="tw-dw-btn tw-dw-btn-outline tw-dw-btn-xs tw-dw-btn-error delete_role_button"><i class="glyphicon glyphicon-trash"></i> '.__('messages.delete').'</button>';
+                            $action .= '<li>
+                                <button data-href="'.action([\App\Http\Controllers\RoleController::class, 'destroy'], [$row->id]).'" class="delete_role_button tw-block tw-w-full tw-text-left tw-px-4 tw-py-2 tw-text-sm tw-text-gray-700 hover:tw-bg-gray-100 hover:tw-text-gray-900 tw-bg-transparent tw-border-none tw-outline-none">
+                                    <i class="glyphicon glyphicon-trash" aria-hidden="true"></i> '.__('messages.delete').'
+                                </button>
+                            </li>';
                         }
+
+                        $action .= '</ul></div>';
 
                         return $action;
                     } else {
