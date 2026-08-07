@@ -8,6 +8,14 @@
         @include('contact.partials.google_map_styles')
     @endsection
 @endif
+@section('css')
+<style>
+    #contact_table th, #contact_table td {
+        padding: 10px 12px !important;
+    }
+</style>
+@endsection
+
 @section('content')
 @php
     $custom_labels = json_decode(session('business.custom_labels'), true);
@@ -172,7 +180,7 @@
                                     <th style="white-space: nowrap !important;">@lang('account.opening_balance')</th>
                                     <th style="white-space: nowrap !important;">@lang('lang_v1.advance_balance')</th>
                                     <th style="white-space: nowrap !important;">@lang('lang_v1.added_on')</th>
-                                    <th style="white-space: nowrap !important;">@lang('business.address')</th>
+                                    <th style="white-space: nowrap !important; min-width: 250px;">@lang('business.address')</th>
                                     <th style="white-space: nowrap !important;">@lang('contact.mobile')</th>
                                     <th style="white-space: nowrap !important;">@lang('contact.total_purchase_due')</th>
                                     <th style="white-space: nowrap !important;">@lang('lang_v1.total_purchase_return_due')</th>
@@ -190,7 +198,7 @@
                                         <th id="rp_col" style="white-space: nowrap !important;">{{ session('business.rp_name') }}</th>
                                     @endif
                                     <th style="white-space: nowrap !important;">@lang('lang_v1.customer_group')</th>
-                                    <th style="white-space: nowrap !important;">@lang('business.address')</th>
+                                    <th style="white-space: nowrap !important; min-width: 250px;">@lang('business.address')</th>
                                     <th style="white-space: nowrap !important;">@lang('contact.mobile')</th>
                                     <th style="white-space: nowrap !important;">@lang('contact.total_sale_due')</th>
                                     <th style="white-space: nowrap !important;">@lang('lang_v1.total_sell_return_due')</th>
