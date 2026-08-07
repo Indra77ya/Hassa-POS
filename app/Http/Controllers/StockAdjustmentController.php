@@ -162,8 +162,16 @@ class StockAdjustmentController extends Controller
 
         $business_locations = BusinessLocation::forDropdown($business_id);
 
+        $expense_accounts = [];
+        if (class_exists(\Modules\Accounting\Entities\AccountingAccount::class)) {
+            $expense_accounts = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                ->where('status', 'active')
+                ->whereIn('account_primary_type', ['expense', 'expenses'])
+                ->pluck('name', 'id');
+        }
+
         return view('stock_adjustment.create')
-                ->with(compact('business_locations'));
+                ->with(compact('business_locations', 'expense_accounts'));
     }
 
     /**
@@ -181,7 +189,7 @@ class StockAdjustmentController extends Controller
         try {
             DB::beginTransaction();
 
-            $input_data = $request->only(['location_id', 'transaction_date', 'adjustment_type', 'additional_notes', 'total_amount_recovered', 'final_total', 'ref_no']);
+            $input_data = $request->only(['location_id', 'transaction_date', 'adjustment_type', 'additional_notes', 'total_amount_recovered', 'final_total', 'ref_no', 'expense_account_id']);
             $business_id = $request->session()->get('user.business_id');
 
             //Check if subscribed or not
