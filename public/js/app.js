@@ -442,6 +442,7 @@ $(document).ready(function() {
         processing: true,
         serverSide: true,
         fixedHeader:false,
+        scrollX:        true,
         "ajax": {
             "url": "/contacts",
             "data": function ( d ) {
