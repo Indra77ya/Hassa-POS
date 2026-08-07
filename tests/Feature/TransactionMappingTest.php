@@ -47,6 +47,7 @@ class TransactionMappingTest extends TestCase
             $table->string('name');
             $table->string('fixed_key')->nullable();
             $table->integer('parent_account_type_id')->nullable();
+            $table->integer('business_id')->nullable();
             $table->timestamps();
         });
 
@@ -61,6 +62,7 @@ class TransactionMappingTest extends TestCase
             $table->string('account_number')->nullable();
             $table->string('normal_balance')->nullable();
             $table->integer('is_closed')->default(0);
+            $table->integer('created_by')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });
@@ -177,6 +179,18 @@ class TransactionMappingTest extends TestCase
             $table->integer('account_sub_type_id')->nullable();
             $table->unsignedBigInteger('account_id')->nullable();
             $table->string('status')->default('active');
+            $table->timestamps();
+        });
+
+        // Create accounting_account_types
+        Schema::dropIfExists('accounting_account_types');
+        Schema::create('accounting_account_types', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->string('name');
+            $table->string('account_primary_type');
+            $table->string('account_type');
+            $table->integer('parent_id')->nullable();
+            $table->integer('business_id')->nullable();
             $table->timestamps();
         });
 
@@ -878,5 +892,72 @@ class TransactionMappingTest extends TestCase
 
         // Verify deleted
         $this->assertEquals(0, AccountingAccountsTransaction::where('transaction_id', $transaction->id)->count());
+    }
+
+    /**
+     * Test seeding default POS and Accounting accounts, verifying that "Beban Kerusakan/Kehilangan"
+     * is seeded correctly, and that the seeding operations are row-by-row idempotent.
+     */
+    public function testDefaultAccountsAndCOASeedingWithIdempotency()
+    {
+        // Use a real User to avoid Mockery undefined relationship exceptions when checking permissions
+        $user = \App\User::create([
+            'surname' => 'Mr',
+            'first_name' => 'Admin',
+            'username' => 'admin_seed',
+            'email' => 'admin_seed@test.com',
+            'password' => bcrypt('password'),
+            'business_id' => 1,
+        ]);
+        $this->actingAs($user);
+
+        // 1. Create a dummy request to trigger POS seeding
+        $request = new \Illuminate\Http\Request();
+        $request->setMethod('POST');
+        $request->merge([]);
+        $request->setLaravelSession($this->app['session']->driver());
+
+        $controller = new \App\Http\Controllers\AccountTypeController();
+        $response = $controller->seedDefault($request);
+
+        // Verify "Beban Kerusakan/Kehilangan" is created in POS accounts table
+        $beban_kerusakan_pos = Account::where('business_id', 1)
+                                      ->where('name', 'Beban Kerusakan/Kehilangan')
+                                      ->first();
+        $this->assertNotNull($beban_kerusakan_pos);
+        $this->assertEquals('6104', $beban_kerusakan_pos->account_number);
+        $this->assertEquals('debit', $beban_kerusakan_pos->normal_balance);
+
+        // Record the initial counts before running accounting seeding
+        $initial_accounting_accounts_count = AccountingAccount::where('business_id', 1)->count();
+
+        // 2. Run Accounting default accounts seeding via CoaController
+        $coa_controller = new \Modules\Accounting\Http\Controllers\CoaController(
+            $this->app->make(\Modules\Accounting\Utils\AccountingUtil::class),
+            $this->app->make(\App\Utils\ModuleUtil::class)
+        );
+        $response_coa = $coa_controller->createDefaultAccounts();
+
+        // Verify "Beban Kerusakan/Kehilangan" exists in AccountingAccounts
+        $beban_kerusakan_acc = AccountingAccount::where('business_id', 1)
+                                                 ->where('name', 'Beban Kerusakan/Kehilangan')
+                                                 ->first();
+        $this->assertNotNull($beban_kerusakan_acc);
+        $this->assertEquals('expenses', $beban_kerusakan_acc->account_primary_type);
+        $this->assertEquals(14, $beban_kerusakan_acc->account_sub_type_id);
+
+        // 3. RE-RUN SEEDING: Run POS seeding again and verify NO duplicate accounts are created (Idempotency)
+        $controller->seedDefault($request);
+
+        // Verify "Beban Kerusakan/Kehilangan" is NOT duplicated in POS accounts
+        $this->assertEquals(1, Account::where('business_id', 1)->where('name', 'Beban Kerusakan/Kehilangan')->count());
+
+        // 4. RE-RUN SEEDING: Run Accounting seeding again and verify NO duplicate accounts are created (Idempotency)
+        $coa_controller->createDefaultAccounts();
+
+        // Verify "Beban Kerusakan/Kehilangan" is NOT duplicated in AccountingAccounts
+        $this->assertEquals(1, AccountingAccount::where('business_id', 1)->where('name', 'Beban Kerusakan/Kehilangan')->count());
+        // Verify "Beban Kerusakan/Kehilangan" is NOT duplicated in POS accounts
+        $this->assertEquals(1, Account::where('business_id', 1)->where('name', 'Beban Kerusakan/Kehilangan')->count());
     }
 }

@@ -153,6 +153,7 @@ class AccountTypeController extends Controller
                 ['name' => 'Beban Gaji', 'type' => 'beban_operasional', 'number' => '6101', 'balance' => 'debit'],
                 ['name' => 'Beban Sewa', 'type' => 'beban_operasional', 'number' => '6102', 'balance' => 'debit'],
                 ['name' => 'Beban Listrik & Air', 'type' => 'beban_operasional', 'number' => '6103', 'balance' => 'debit'],
+                ['name' => 'Beban Kerusakan/Kehilangan', 'type' => 'beban_operasional', 'number' => '6104', 'balance' => 'debit'],
             ];
 
             $user_id = $request->session()->get('user.id');
