@@ -467,6 +467,27 @@ class TransactionMappingTest extends TestCase
      */
     public function testCashFlowFilterToKasDanBank()
     {
+        // Mock login
+        $user = \Mockery::mock(\App\User::class)->makePartial();
+        $user->shouldReceive('can')->with('account.access')->andReturn(true);
+        $user->shouldReceive('permitted_locations')->andReturn('all');
+        $user->id = 1;
+        $user->business_id = 1;
+        $user->user_type = 'user';
+        $user->allow_login = 1;
+        $this->actingAs($user);
+
+        session([
+            'user.business_id' => 1,
+            'business.time_zone' => 'Asia/Jakarta',
+            'business.date_format' => 'Y-m-d',
+            'currency' => [
+                'symbol' => 'Rp',
+                'decimal_separator' => ',',
+                'thousand_separator' => '.',
+            ]
+        ]);
+
         // 1. Create account types
         $kasType = DB::table('account_types')->insertGetId([
             'name' => 'Kas dan Bank',
