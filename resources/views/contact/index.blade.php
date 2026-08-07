@@ -11,6 +11,9 @@
         #contact_table th, #contact_table td {
             padding: 10px 12px !important;
         }
+        #contact_table th {
+            padding-right: 30px !important;
+        }
         .contact-address-col {
             min-width: 250px !important;
             font-size: 11px !important;
