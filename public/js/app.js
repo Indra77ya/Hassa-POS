@@ -387,7 +387,7 @@ $(document).ready(function() {
             { data: 'opening_balance', name: 'opening_balance', searchable: false },
             { data: 'balance', name: 'balance', searchable: false },
             { data: 'created_at', name: 'contacts.created_at' },
-            { data: 'address', name: 'address', orderable: false },
+            { data: 'address', name: 'address', orderable: false, className: 'contact-address-col' },
             { data: 'mobile', name: 'mobile' },
             { data: 'due', searchable: false, orderable: false },
             { data: 'return_due', searchable: false, orderable: false },
@@ -421,7 +421,7 @@ $(document).ready(function() {
             columns.push({ data: 'total_rp', name: 'total_rp' });
         }
         Array.prototype.push.apply(columns, [{ data: 'customer_group', name: 'cg.name' },
-            { data: 'address', name: 'address', orderable: false },
+            { data: 'address', name: 'address', orderable: false, className: 'contact-address-col' },
             { data: 'mobile', name: 'mobile' },
             { data: 'due', searchable: false, orderable: false },
             { data: 'return_due', searchable: false, orderable: false },
@@ -442,9 +442,6 @@ $(document).ready(function() {
         processing: true,
         serverSide: true,
         fixedHeader:false,
-        scrollY:        "75vh",
-        scrollX:        true,
-        scrollCollapse: true,
         "ajax": {
             "url": "/contacts",
             "data": function ( d ) {
@@ -511,6 +508,8 @@ $(document).ready(function() {
             $('.footer_contact_return_due').html(__currency_trans_from_en(total_return_due));
         }
     });
+
+    $('#contact_table').wrap('<div class="table-responsive"></div>');
 
     $(document).on('ifChanged', '#has_sell_due, #has_sell_return, \
     #has_purchase_due, #has_purchase_return, #has_advance_balance, #has_opening_balance', function(){

@@ -60,17 +60,37 @@ class ManageUserController extends Controller
                 )
                 ->addColumn(
                     'action',
-                    '@can("user.update")
-                        <a href="{{action(\'App\Http\Controllers\ManageUserController@edit\', [$id])}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-primary"><i class="glyphicon glyphicon-edit"></i> @lang("messages.edit")</a>
-                        &nbsp;
-                    @endcan
-                    @can("user.view")
-                    <a href="{{action(\'App\Http\Controllers\ManageUserController@show\', [$id])}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-info"><i class="fa fa-eye"></i> @lang("messages.view")</a>
-                    &nbsp;
-                    @endcan
-                    @can("user.delete")
-                        <button data-href="{{action(\'App\Http\Controllers\ManageUserController@destroy\', [$id])}}" class="tw-dw-btn tw-dw-btn-outline tw-dw-btn-xs tw-dw-btn-error delete_user_button"><i class="glyphicon glyphicon-trash"></i> @lang("messages.delete")</button>
-                    @endcan'
+                    '<div class="btn-group">
+                        <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info dropdown-toggle"
+                            data-toggle="dropdown" aria-expanded="false">
+                            @lang("messages.actions")
+                            <span class="caret"></span>
+                            <span class="sr-only">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-left" role="menu">
+                            @can("user.view")
+                                <li>
+                                    <a href="{{action(\'App\Http\Controllers\ManageUserController@show\', [$id])}}">
+                                        <i class="fa fa-eye" aria-hidden="true"></i> @lang("messages.view")
+                                    </a>
+                                </li>
+                            @endcan
+                            @can("user.update")
+                                <li>
+                                    <a href="{{action(\'App\Http\Controllers\ManageUserController@edit\', [$id])}}">
+                                        <i class="glyphicon glyphicon-edit" aria-hidden="true"></i> @lang("messages.edit")
+                                    </a>
+                                </li>
+                            @endcan
+                            @can("user.delete")
+                                <li>
+                                    <button data-href="{{action(\'App\Http\Controllers\ManageUserController@destroy\', [$id])}}" class="delete_user_button tw-block tw-w-full tw-text-left tw-px-4 tw-py-2 tw-text-sm tw-text-gray-700 hover:tw-bg-gray-100 hover:tw-text-gray-900 tw-bg-transparent tw-border-none tw-outline-none">
+                                        <i class="glyphicon glyphicon-trash" aria-hidden="true"></i> @lang("messages.delete")
+                                    </button>
+                                </li>
+                            @endcan
+                        </ul>
+                    </div>'
                 )
                 ->filterColumn('full_name', function ($query, $keyword) {
                     $query->whereRaw("CONCAT(COALESCE(surname, ''), ' ', COALESCE(first_name, ''), ' ', COALESCE(last_name, '')) like ?", ["%{$keyword}%"]);

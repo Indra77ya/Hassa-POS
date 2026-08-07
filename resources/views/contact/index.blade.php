@@ -3,11 +3,36 @@
 @php
     $api_key = env('GOOGLE_MAP_API_KEY');
 @endphp
-@if (!empty($api_key))
-    @section('css')
+@section('css')
+    @if (!empty($api_key))
         @include('contact.partials.google_map_styles')
-    @endsection
-@endif
+    @endif
+    <style>
+        #contact_table th, #contact_table td {
+            padding: 10px 12px !important;
+        }
+        #contact_table th {
+            padding-right: 30px !important;
+        }
+        .contact-address-col {
+            min-width: 250px !important;
+            font-size: 11px !important;
+            line-height: 1.3 !important;
+            white-space: normal !important;
+        }
+        #contact_table th:first-child,
+        #contact_table td:first-child {
+            position: sticky;
+            left: 0;
+            background-color: #ffffff !important;
+            z-index: 5;
+            border-right: 1.5px solid #d2d6de !important;
+        }
+        #contact_table th:first-child {
+            z-index: 6;
+        }
+    </style>
+@endsection
 @section('content')
 @php
     $custom_labels = json_decode(session('business.custom_labels'), true);
@@ -157,9 +182,8 @@
                     auth()->user()->can('customer.view') ||
                     auth()->user()->can('supplier.view_own') ||
                     auth()->user()->can('customer.view_own'))
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped" id="contact_table" style="width: 100%;">
-                        <thead>
+                <table class="table table-bordered table-striped" id="contact_table" style="width: 100%;">
+                    <thead>
                             <tr>
                                 <th class="not-export" style="white-space: nowrap !important;">@lang('messages.action')</th>
                                 <th style="white-space: nowrap !important;">@lang('lang_v1.contact_id')</th>
@@ -264,7 +288,6 @@
                             </tr>
                         </tfoot>
                     </table>
-                </div>
             @endif
         @endcomponent
 
