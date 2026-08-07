@@ -27,4 +27,5 @@ return [
     'search_products' => 'Search Products',
     'delete_success' => 'Stock adjustment deleted successfully',
     'view_details' => 'View stock adjustment details',
+    'expense_account' => 'Expense Account',
 ];

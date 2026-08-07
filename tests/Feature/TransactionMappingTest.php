@@ -57,6 +57,7 @@ class TransactionMappingTest extends TestCase
             $table->string('name');
             $table->integer('business_id');
             $table->integer('account_type_id')->nullable();
+            $table->unsignedBigInteger('accounting_account_id')->nullable();
             $table->string('account_number')->nullable();
             $table->string('normal_balance')->nullable();
             $table->integer('is_closed')->default(0);
@@ -128,6 +129,8 @@ class TransactionMappingTest extends TestCase
             $table->bigIncrements('id');
             $table->integer('business_id');
             $table->integer('location_id')->nullable();
+            $table->unsignedBigInteger('expense_account_id')->nullable();
+            $table->decimal('total_amount_recovered', 22, 4)->default(0);
             $table->string('type')->nullable();
             $table->string('status')->nullable();
             $table->string('sub_status')->nullable();
@@ -172,6 +175,7 @@ class TransactionMappingTest extends TestCase
             $table->integer('business_id');
             $table->string('account_primary_type')->nullable();
             $table->integer('account_sub_type_id')->nullable();
+            $table->unsignedBigInteger('account_id')->nullable();
             $table->string('status')->default('active');
             $table->timestamps();
         });
@@ -738,5 +742,141 @@ class TransactionMappingTest extends TestCase
 
         $data = json_decode($response->getContent(), true);
         $this->assertIsArray($data);
+    }
+
+    /**
+     * Test stock adjustment mapping without any recovered amount (total loss).
+     */
+    public function testStockAdjustmentMappingWithoutRecoveredAmount()
+    {
+        // 1. Create a stock_adjustment transaction for 100,000
+        $transaction = Transaction::create([
+            'business_id' => 1,
+            'location_id' => 1,
+            'type' => 'stock_adjustment',
+            'status' => 'final',
+            'ref_no' => 'ADJ-0001',
+            'final_total' => 100000,
+            'total_amount_recovered' => 0,
+        ]);
+
+        // Trigger mapping listener
+        $event = new \App\Events\StockAdjustmentCreatedOrModified($transaction, 'added');
+        $listener = new \Modules\Accounting\Listeners\MapStockAdjustment();
+        $listener->handle($event);
+
+        // 2. Verify results
+        $txs = AccountingAccountsTransaction::where('transaction_id', $transaction->id)->get();
+
+        // Credit to Persediaan Barang (14) must be 100,000
+        $credit_tx = $txs->where('accounting_account_id', 14)->first();
+        $this->assertNotNull($credit_tx);
+        $this->assertEquals('credit', $credit_tx->type);
+        $this->assertEquals(100000, $credit_tx->amount);
+
+        // Debit to Beban Kerusakan/Kehilangan must be 100,000 (auto-created)
+        $expense_account = AccountingAccount::where('business_id', 1)
+            ->where('name', 'Beban Kerusakan/Kehilangan')
+            ->first();
+        $this->assertNotNull($expense_account);
+
+        $debit_tx = $txs->where('accounting_account_id', $expense_account->id)->first();
+        $this->assertNotNull($debit_tx);
+        $this->assertEquals('debit', $debit_tx->type);
+        $this->assertEquals(100000, $debit_tx->amount);
+
+        // Verify Symmetrical payment account is explicitly synced and created in POS accounts table
+        $pos_account = Account::where('accounting_account_id', $expense_account->id)->first();
+        $this->assertNotNull($pos_account);
+        $this->assertEquals('Beban Kerusakan/Kehilangan', $pos_account->name);
+        $this->assertEquals($pos_account->id, $expense_account->account_id);
+
+        // Verify that Accounts Payable or Kas was not touched
+        $this->assertNull($txs->where('accounting_account_id', 10)->first()); // Kas (10)
+    }
+
+    /**
+     * Test stock adjustment mapping with partially recovered amount.
+     */
+    public function testStockAdjustmentMappingWithRecoveredAmount()
+    {
+        // 1. Create a stock_adjustment transaction for 100,000 with 35,000 recovered
+        $transaction = Transaction::create([
+            'business_id' => 1,
+            'location_id' => 1,
+            'type' => 'stock_adjustment',
+            'status' => 'final',
+            'ref_no' => 'ADJ-0002',
+            'final_total' => 100000,
+            'total_amount_recovered' => 35000,
+        ]);
+
+        // Trigger mapping listener
+        $event = new \App\Events\StockAdjustmentCreatedOrModified($transaction, 'added');
+        $listener = new \Modules\Accounting\Listeners\MapStockAdjustment();
+        $listener->handle($event);
+
+        // 2. Verify results
+        $txs = AccountingAccountsTransaction::where('transaction_id', $transaction->id)->get();
+
+        // Credit to Persediaan Barang (14) must be 100,000
+        $credit_tx = $txs->where('accounting_account_id', 14)->first();
+        $this->assertNotNull($credit_tx);
+        $this->assertEquals('credit', $credit_tx->type);
+        $this->assertEquals(100000, $credit_tx->amount);
+
+        // Debit to Kas (10) must be 35,000
+        $cash_tx = $txs->where('accounting_account_id', 10)->first();
+        $this->assertNotNull($cash_tx);
+        $this->assertEquals('debit', $cash_tx->type);
+        $this->assertEquals(35000, $cash_tx->amount);
+
+        // Debit to Beban Kerusakan/Kehilangan must be remaining 65,000
+        $expense_account = AccountingAccount::where('business_id', 1)
+            ->where('name', 'Beban Kerusakan/Kehilangan')
+            ->first();
+        $this->assertNotNull($expense_account);
+
+        $expense_tx = $txs->where('accounting_account_id', $expense_account->id)->first();
+        $this->assertNotNull($expense_tx);
+        $this->assertEquals('debit', $expense_tx->type);
+        $this->assertEquals(65000, $expense_tx->amount);
+
+        // Verify Symmetrical payment account is explicitly synced and created in POS accounts table
+        $pos_account = Account::where('accounting_account_id', $expense_account->id)->first();
+        $this->assertNotNull($pos_account);
+        $this->assertEquals('Beban Kerusakan/Kehilangan', $pos_account->name);
+        $this->assertEquals($pos_account->id, $expense_account->account_id);
+    }
+
+    /**
+     * Test deleting a stock adjustment completely cleans up any accounting transactions.
+     */
+    public function testStockAdjustmentDeletionRemovesMapping()
+    {
+        // 1. Create a stock_adjustment transaction
+        $transaction = Transaction::create([
+            'business_id' => 1,
+            'location_id' => 1,
+            'type' => 'stock_adjustment',
+            'status' => 'final',
+            'ref_no' => 'ADJ-0003',
+            'final_total' => 50000,
+            'total_amount_recovered' => 0,
+        ]);
+
+        // Map it
+        $event = new \App\Events\StockAdjustmentCreatedOrModified($transaction, 'added');
+        $listener = new \Modules\Accounting\Listeners\MapStockAdjustment();
+        $listener->handle($event);
+
+        $this->assertGreaterThan(0, AccountingAccountsTransaction::where('transaction_id', $transaction->id)->count());
+
+        // 2. Delete it
+        $delete_event = new \App\Events\StockAdjustmentCreatedOrModified($transaction, 'deleted');
+        $listener->handle($delete_event);
+
+        // Verify deleted
+        $this->assertEquals(0, AccountingAccountsTransaction::where('transaction_id', $transaction->id)->count());
     }
 }

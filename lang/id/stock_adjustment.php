@@ -27,4 +27,5 @@ return [
     'search_products' => 'Cari produk',
     'delete_success' => 'Penyesuaian stok berhasil dihapus',
     'view_details' => 'Lihat rincian penyesuaian stok',
+    'expense_account' => 'Akun Beban / Kerugian',
 ];

@@ -152,7 +152,7 @@ class AccountingUtil extends Util
      */
     public function deleteMap($transaction_id, $transaction_payment_id){
         AccountingAccountsTransaction::where('transaction_id', $transaction_id)
-            ->whereIn('map_type', ['payment_account', 'deposit_to', 'cogs_debit', 'cogs_credit'])
+            ->whereIn('map_type', ['payment_account', 'deposit_to', 'cogs_debit', 'cogs_credit', 'recovered_deposit_to', 'loss_deposit_to'])
             ->where('transaction_payment_id', $transaction_payment_id)
             ->delete();
     }

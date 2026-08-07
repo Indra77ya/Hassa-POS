@@ -61,6 +61,18 @@
                         ) !!}
                     </div>
                 </div>
+                @if(!empty($expense_accounts))
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            {!! Form::label('expense_account_id', __('stock_adjustment.expense_account') . ':') !!}
+                            {!! Form::select('expense_account_id', $expense_accounts, null, [
+                                'class' => 'form-control select2',
+                                'placeholder' => __('messages.please_select'),
+                                'style' => 'width: 100%;',
+                            ]) !!}
+                        </div>
+                    </div>
+                @endif
             </div>
         @endcomponent
 
