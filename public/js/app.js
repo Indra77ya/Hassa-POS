@@ -509,6 +509,8 @@ $(document).ready(function() {
         }
     });
 
+    $('#contact_table').wrap('<div class="table-responsive"></div>');
+
     $(document).on('ifChanged', '#has_sell_due, #has_sell_return, \
     #has_purchase_due, #has_purchase_return, #has_advance_balance, #has_opening_balance', function(){
         contact_table.ajax.reload();
