@@ -1095,10 +1095,20 @@ class CoaController extends Controller
                 'created_at' => \Carbon::now(),
                 'updated_at' => \Carbon::now(),
             ],
+            87 => [
+                'name' => 'Inventory Loss/Damage',
+                'business_id' => $business_id,
+                'account_primary_type' => 'expenses',
+                'account_sub_type_id' => 14,
+                'detail_type_id' => 138,
+                'status' => 'active',
+                'created_by' => $user_id,
+                'created_at' => \Carbon::now(),
+                'updated_at' => \Carbon::now(),
+            ],
         ];
 
-        if (AccountingAccount::where('business_id', $business_id)->doesntExist()) {
-            // 1. Seed POS Account Types and Accounts
+        // 1. Seed POS Account Types and Accounts
             try {
                 $default_types = [
                     ['key' => 'kas_dan_bank', 'parent' => null],
@@ -1155,6 +1165,7 @@ class CoaController extends Controller
                     ['name' => 'Beban Gaji', 'type' => 'beban_operasional', 'number' => '6101', 'balance' => 'debit'],
                     ['name' => 'Beban Sewa', 'type' => 'beban_operasional', 'number' => '6102', 'balance' => 'debit'],
                     ['name' => 'Beban Listrik & Air', 'type' => 'beban_operasional', 'number' => '6103', 'balance' => 'debit'],
+                    ['name' => 'Beban Kerusakan/Kehilangan', 'type' => 'beban_operasional', 'number' => '6104', 'balance' => 'debit'],
                 ];
 
                 foreach ($default_pos_accounts as $da) {
@@ -1265,6 +1276,7 @@ class CoaController extends Controller
                 'Accrued liabilities' => 'Kewajiban Akrual',
                 'Accrued holiday payable' => 'Hutang Cuti Akrual',
                 'Accounts Receivable (A/R)' => 'Piutang Usaha (A/R)',
+                'Inventory Loss/Damage' => 'Beban Kerusakan/Kehilangan',
             ];
 
             $counters = [
@@ -1307,8 +1319,15 @@ class CoaController extends Controller
                 $default_accounts[$key]['gl_code'] = $gl_code;
             }
 
-            // 2. Bulk insert default Accounting Accounts
-            AccountingAccount::insert($default_accounts);
+            // 2. Create default Accounting Accounts row-by-row if they do not exist
+            foreach ($default_accounts as $account) {
+                $exists = AccountingAccount::where('business_id', $business_id)
+                                           ->where('name', $account['name'])
+                                           ->exists();
+                if (!$exists) {
+                    AccountingAccount::create($account);
+                }
+            }
 
             // 3. Run bidirectional sync to link and create any missing accounts between POS and Accounting
             try {
@@ -1316,7 +1335,6 @@ class CoaController extends Controller
             } catch (\Exception $e) {
                 \Log::error('Error running pos:sync-payment-accounting after creating default accounts: ' . $e->getMessage());
             }
-        }
 
         //redirect back
         $output = ['success' => 1,
