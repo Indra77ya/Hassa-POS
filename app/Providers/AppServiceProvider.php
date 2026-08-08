@@ -238,6 +238,8 @@ class AppServiceProvider extends ServiceProvider
             return isModuleEnabled($module);
         });
 
+        \App\ExpenseCategory::observe(\App\Observers\ExpenseCategoryObserver::class);
+
         $this->registerCommands();
     }
 
