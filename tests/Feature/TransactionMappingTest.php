@@ -313,17 +313,15 @@ class TransactionMappingTest extends TestCase
         $user = \Mockery::mock(\App\User::class)->makePartial();
         $user->shouldReceive('can')->with('account.access')->andReturn(true);
         $user->shouldReceive('permitted_locations')->andReturn('all');
+        $user->shouldReceive('hasRole')->andReturn(true);
         $user->id = 1;
         $user->business_id = 1;
         $user->user_type = 'user';
         $user->allow_login = 1;
         $this->actingAs($user);
 
-        $this->withoutMiddleware(\App\Http\Middleware\Authenticate::class);
-
         session([
             'user.business_id' => 1,
-            'user' => ['id' => 1, 'business_id' => 1],
             'business.time_zone' => 'Asia/Jakarta',
             'business.date_format' => 'Y-m-d',
             'currency' => [
@@ -526,10 +524,62 @@ class TransactionMappingTest extends TestCase
             ],
         ]);
 
+        // 4. Request the cash flow endpoint via ajax
+        $response = $this->get('/account/cash-flow', [
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Accept' => 'application/json'
+        ]);
+
+        $response->assertStatus(200);
+        $data = $response->json('data');
+
+        // We should ONLY see the transaction on Kas Bank Utama (1 transaction)
+        $this->assertCount(1, $data);
+        $this->assertEquals('Kas Bank Utama', $data[0]['account_name']);
+    }
+
+    /**
+     * Test Account Book Ajax endpoint correctly retrieves mapped accounting transactions.
+     */
+    public function testAccountBookForMappedAccount()
+    {
+        // 1. Create a mapped accounting account
+        $accounting_account_id = DB::table('accounting_accounts')->insertGetId([
+            'name' => 'Hutang Usaha',
+            'business_id' => 1,
+            'account_primary_type' => 'liability',
+        ]);
+
+        $account_id = DB::table('accounts')->insertGetId([
+            'name' => 'Hutang Usaha',
+            'business_id' => 1,
+            'accounting_account_id' => $accounting_account_id,
+            'normal_balance' => 'credit',
+        ]);
+
+        // 2. Insert transaction in accounting_accounts_transactions
+        DB::table('accounting_accounts_transactions')->insert([
+            [
+                'accounting_account_id' => $accounting_account_id,
+                'type' => 'credit',
+                'amount' => 340000,
+                'sub_type' => 'purchase',
+                'operation_date' => '2026-08-08 10:00:00',
+            ],
+            [
+                'accounting_account_id' => $accounting_account_id,
+                'type' => 'debit',
+                'amount' => 40000,
+                'sub_type' => 'purchase_payment',
+                'operation_date' => '2026-08-08 11:00:00',
+            ],
+        ]);
+
         // Mock login and session
         $user = \Mockery::mock(\App\User::class)->makePartial();
         $user->shouldReceive('can')->with('account.access')->andReturn(true);
         $user->shouldReceive('permitted_locations')->andReturn('all');
+        $user->shouldReceive('hasRole')->andReturn(true);
         $user->id = 1;
         $user->business_id = 1;
         $user->user_type = 'user';
@@ -550,18 +600,21 @@ class TransactionMappingTest extends TestCase
             ],
         ]);
 
-        // 4. Request the cash flow endpoint via ajax
-        $response = $this->get('/account/cash-flow', [
+        // 3. Request /account/account/{id} via ajax
+        $response = $this->get('/account/account/' . $account_id, [
             'X-Requested-With' => 'XMLHttpRequest',
             'Accept' => 'application/json'
         ]);
 
+        if ($response->status() !== 200) {
+            dd($response->exception);
+        }
+
         $response->assertStatus(200);
         $data = $response->json('data');
 
-        // We should ONLY see the transaction on Kas Bank Utama (1 transaction)
-        $this->assertCount(1, $data);
-        $this->assertEquals('Kas Bank Utama', $data[0]['account_name']);
+        // Verify the response data
+        $this->assertCount(2, $data);
     }
 
     /**

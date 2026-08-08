@@ -327,10 +327,12 @@ class AccountController extends Controller
             if (!empty($account->accounting_account_id)) {
                 $before_bal_query = \Modules\Accounting\Entities\AccountingAccountsTransaction::where('accounting_account_id', $account->accounting_account_id)
                         ->select([
-                            DB::raw('SUM(IF(type="debit", amount, 0)) as prev_debit'),
-                            DB::raw('SUM(IF(type="credit", amount, 0)) as prev_credit'),
-                        ])
-                        ->where('operation_date', '<', $start_date);
+                            DB::raw("SUM(CASE WHEN type='debit' THEN amount ELSE 0 END) as prev_debit"),
+                            DB::raw("SUM(CASE WHEN type='credit' THEN amount ELSE 0 END) as prev_credit"),
+                        ]);
+                if (!empty($start_date)) {
+                    $before_bal_query->where('operation_date', '<', $start_date);
+                }
             } else {
                 $before_bal_query = AccountTransaction::join(
                     'accounts as A',
@@ -344,8 +346,10 @@ class AccountController extends Controller
                             DB::raw('SUM(IF(account_transactions.type="debit", account_transactions.amount, 0)) as prev_debit'),
                             DB::raw('SUM(IF(account_transactions.type="credit", account_transactions.amount, 0)) as prev_credit'),
                         ])
-                        ->where('account_transactions.operation_date', '<', $start_date)
                         ->whereNull('account_transactions.deleted_at');
+                if (!empty($start_date)) {
+                    $before_bal_query->where('account_transactions.operation_date', '<', $start_date);
+                }
             }
 
             if (! empty(request()->input('type'))) {
@@ -655,9 +659,12 @@ class AccountController extends Controller
                                     }
                                 }
 
-                                if (! empty($row->media->first()) || (! empty($row->transfer_transaction && ! empty($row->transfer_transaction->media->first())))) {
-                                    $display_url = ! empty($row->media->first()) ? $row->media->first()->display_url : $row->transfer_transaction->media->first()->display_url;
-                                    $display_name = ! empty($row->media->first()) ? $row->media->first()->display_name : $row->transfer_transaction->media->first()->display_name;
+                                $has_media = ! empty($row->media) && ! empty($row->media->first());
+                                $has_transfer_media = ! empty($row->transfer_transaction) && ! empty($row->transfer_transaction->media) && ! empty($row->transfer_transaction->media->first());
+
+                                if ($has_media || $has_transfer_media) {
+                                    $display_url = $has_media ? $row->media->first()->display_url : $row->transfer_transaction->media->first()->display_url;
+                                    $display_name = $has_media ? $row->media->first()->display_name : $row->transfer_transaction->media->first()->display_name;
 
                                     $html .= '<li>
                                                 <a class="tw-block tw-w-full tw-text-left tw-px-4 tw-py-2 tw-text-sm tw-text-gray-700 hover:tw-bg-gray-100 hover:tw-text-gray-900 tw-bg-transparent tw-border-none tw-outline-none" href="'.$display_url.'" download="'.$display_name.'">
@@ -1052,8 +1059,8 @@ class AccountController extends Controller
                 ->where('accounts.business_id', $business_id)
                 ->where('accounts.id', $id)
                 ->select(['accounts.*', 'ats.fixed_key', 'ats.name as account_type_name', 'pat.name as parent_account_type_name',
-                    DB::raw("SUM(IF(AT.type='debit', AT.amount, 0)) as total_debit"),
-                    DB::raw("SUM(IF(AT.type='credit', AT.amount, 0)) as total_credit"),
+                    DB::raw("SUM(CASE WHEN AT.type='debit' THEN AT.amount ELSE 0 END) as total_debit"),
+                    DB::raw("SUM(CASE WHEN AT.type='credit' THEN AT.amount ELSE 0 END) as total_credit"),
                 ])
                 ->groupBy('accounts.id')
                 ->first();
@@ -1070,8 +1077,8 @@ class AccountController extends Controller
                 ->where('accounts.business_id', $business_id)
                 ->where('accounts.id', $id)
                 ->select(['accounts.*', 'ats.fixed_key', 'ats.name as account_type_name', 'pat.name as parent_account_type_name',
-                    DB::raw("SUM(IF(AT.type='debit', amount, 0)) as total_debit"),
-                    DB::raw("SUM(IF(AT.type='credit', amount, 0)) as total_credit"),
+                    DB::raw("SUM(CASE WHEN AT.type='debit' THEN amount ELSE 0 END) as total_debit"),
+                    DB::raw("SUM(CASE WHEN AT.type='credit' THEN amount ELSE 0 END) as total_credit"),
                 ])
                 ->groupBy('accounts.id')
                 ->first();
