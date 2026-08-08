@@ -58,10 +58,58 @@ class MapSellTransaction
             // Resolve accounts
             // Credit: Pendapatan Penjualan
             $revenue_account_id = isset($accounting_default_map['sale']['payment_account']) ? $accounting_default_map['sale']['payment_account'] : null;
+            if (is_null($revenue_account_id)) {
+                $revenue_account_id = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                    ->where('status', 'active')
+                    ->where('account_primary_type', 'income')
+                    ->where(function($q) {
+                        $q->where('name', 'like', '%Pendapatan%')
+                          ->orWhere('name', 'like', '%Sales%')
+                          ->orWhere('name', 'like', '%Revenue%')
+                          ->orWhere('account_sub_type_id', 11);
+                    })
+                    ->value('id');
+            }
+
             // Debit (Cash): Kas/Bank
             $cash_account_id = isset($accounting_default_map['sell_payment']['deposit_to']) ? $accounting_default_map['sell_payment']['deposit_to'] : null;
+            if (is_null($cash_account_id)) {
+                // Try to find the account_id from transaction_payments table for this transaction
+                $payment_account_id = \DB::table('transaction_payments')
+                    ->where('transaction_id', $id)
+                    ->whereNotNull('account_id')
+                    ->value('account_id');
+                if ($payment_account_id) {
+                    $cash_account_id = \Modules\Accounting\Entities\AccountingAccount::where('account_id', $payment_account_id)->value('id');
+                }
+
+                if (is_null($cash_account_id)) {
+                    $cash_account_id = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                        ->where('status', 'active')
+                        ->where('account_primary_type', 'asset')
+                        ->where(function($q) {
+                            $q->where('name', 'like', '%Kas%')
+                              ->orWhere('name', 'like', '%Cash%')
+                              ->orWhere('name', 'like', '%Bank%')
+                              ->orWhere('account_sub_type_id', 3);
+                        })
+                        ->value('id');
+                }
+            }
+
             // Debit (Credit): Piutang Usaha
             $receivable_account_id = isset($accounting_default_map['sale']['deposit_to']) ? $accounting_default_map['sale']['deposit_to'] : null;
+            if (is_null($receivable_account_id)) {
+                $receivable_account_id = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                    ->where('status', 'active')
+                    ->where('account_primary_type', 'asset')
+                    ->where(function($q) {
+                        $q->where('name', 'like', '%Piutang%')
+                          ->orWhere('name', 'like', '%Receivable%')
+                          ->orWhere('account_sub_type_id', 1);
+                    })
+                    ->value('id');
+            }
 
             if (is_null($revenue_account_id)) {
                 return;

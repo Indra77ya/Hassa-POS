@@ -52,10 +52,56 @@ class MapPurchaseTransaction
             // Resolve accounts
             // Debit: Persediaan Barang
             $inventory_account_id = isset($accounting_default_map['purchases']['deposit_to']) ? $accounting_default_map['purchases']['deposit_to'] : null;
+            if (is_null($inventory_account_id)) {
+                $inventory_account_id = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                    ->where('status', 'active')
+                    ->where(function($q) {
+                        $q->where('name', 'like', '%Persediaan%')
+                          ->orWhere('name', 'like', '%Inventory%')
+                          ->orWhere('account_sub_type_id', 2);
+                    })
+                    ->value('id');
+            }
+
             // Credit (Cash): Kas/Bank
             $cash_account_id = isset($accounting_default_map['purchase_payment']['payment_account']) ? $accounting_default_map['purchase_payment']['payment_account'] : null;
+            if (is_null($cash_account_id)) {
+                // Try to find the account_id from transaction_payments table for this transaction
+                $payment_account_id = \DB::table('transaction_payments')
+                    ->where('transaction_id', $id)
+                    ->whereNotNull('account_id')
+                    ->value('account_id');
+                if ($payment_account_id) {
+                    $cash_account_id = \Modules\Accounting\Entities\AccountingAccount::where('account_id', $payment_account_id)->value('id');
+                }
+
+                if (is_null($cash_account_id)) {
+                    $cash_account_id = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                        ->where('status', 'active')
+                        ->where('account_primary_type', 'asset')
+                        ->where(function($q) {
+                            $q->where('name', 'like', '%Kas%')
+                              ->orWhere('name', 'like', '%Cash%')
+                              ->orWhere('name', 'like', '%Bank%')
+                              ->orWhere('account_sub_type_id', 3);
+                        })
+                        ->value('id');
+                }
+            }
+
             // Credit (Tempo/Credit): Hutang Usaha
             $payable_account_id = isset($accounting_default_map['purchases']['payment_account']) ? $accounting_default_map['purchases']['payment_account'] : null;
+            if (is_null($payable_account_id)) {
+                $payable_account_id = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                    ->where('status', 'active')
+                    ->where('account_primary_type', 'liability')
+                    ->where(function($q) {
+                        $q->where('name', 'like', '%Hutang%')
+                          ->orWhere('name', 'like', '%Payable%')
+                          ->orWhere('account_sub_type_id', 6);
+                    })
+                    ->value('id');
+            }
 
             if (is_null($inventory_account_id)) {
                 return;
