@@ -147,7 +147,7 @@ class BusinessLocationController extends Controller
         //Accounts
         $accounts = [];
         if ($this->commonUtil->isModuleEnabled('account')) {
-            $accounts = Account::forDropdown($business_id, true, false);
+            $accounts = Account::forDropdown($business_id, true, false, false, true);
         }
 
         return view('business_location.create')
@@ -255,7 +255,7 @@ class BusinessLocationController extends Controller
         //Accounts
         $accounts = [];
         if ($this->commonUtil->isModuleEnabled('account')) {
-            $accounts = Account::forDropdown($business_id, true, false);
+            $accounts = Account::forDropdown($business_id, true, false, false, true);
         }
         $featured_products = $location->getFeaturedProducts(true, false);
 

@@ -151,9 +151,15 @@ class Account extends Model
         'account_details' => 'array',
     ];
 
-    public static function forDropdown($business_id, $prepend_none, $closed = false, $show_balance = false)
+    public static function forDropdown($business_id, $prepend_none, $closed = false, $show_balance = false, $only_cash_bank = false)
     {
         $query = Account::where('accounts.business_id', $business_id);
+
+        if ($only_cash_bank) {
+            $query->whereHas('account_type', function ($q) {
+                $q->where('fixed_key', 'kas_dan_bank');
+            });
+        }
 
         $permitted_locations = auth()->user()->permitted_locations();
         $account_ids = [];

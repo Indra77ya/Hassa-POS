@@ -984,7 +984,7 @@ class PayrollController extends Controller
         }
 
         $payment_types = $this->transactionUtil->payment_types();
-        $accounts = $this->moduleUtil->accountsDropdown($business_id, true, false, true);
+        $accounts = $this->moduleUtil->accountsDropdown($business_id, true, false, true, true);
 
         return view('essentials::payroll.pay_payroll_group')
             ->with(compact('payroll_group', 'month_name', 'year', 'payrolls', 'payment_types', 'accounts'));
