@@ -324,22 +324,32 @@ class AccountController extends Controller
             $account = Account::with('account_type')->find($id);
             $is_debit_normal = $account->getBalanceType() == 'debit';
 
-            $before_bal_query = AccountTransaction::join(
-                'accounts as A',
-                'account_transactions.account_id',
-                '=',
-                'A.id'
-            )
-                    ->where('A.business_id', $business_id)
-                    ->where('A.id', $id)
-                    ->select([
-                        DB::raw('SUM(IF(account_transactions.type="debit", account_transactions.amount, 0)) as prev_debit'),
-                        DB::raw('SUM(IF(account_transactions.type="credit", account_transactions.amount, 0)) as prev_credit'),
-                    ])
-                    ->where('account_transactions.operation_date', '<', $start_date)
-                    ->whereNull('account_transactions.deleted_at');
+            if (!empty($account->accounting_account_id)) {
+                $before_bal_query = \Modules\Accounting\Entities\AccountingAccountsTransaction::where('accounting_account_id', $account->accounting_account_id)
+                        ->select([
+                            DB::raw('SUM(IF(type="debit", amount, 0)) as prev_debit'),
+                            DB::raw('SUM(IF(type="credit", amount, 0)) as prev_credit'),
+                        ])
+                        ->where('operation_date', '<', $start_date);
+            } else {
+                $before_bal_query = AccountTransaction::join(
+                    'accounts as A',
+                    'account_transactions.account_id',
+                    '=',
+                    'A.id'
+                )
+                        ->where('A.business_id', $business_id)
+                        ->where('A.id', $id)
+                        ->select([
+                            DB::raw('SUM(IF(account_transactions.type="debit", account_transactions.amount, 0)) as prev_debit'),
+                            DB::raw('SUM(IF(account_transactions.type="credit", account_transactions.amount, 0)) as prev_credit'),
+                        ])
+                        ->where('account_transactions.operation_date', '<', $start_date)
+                        ->whereNull('account_transactions.deleted_at');
+            }
+
             if (! empty(request()->input('type'))) {
-                $before_bal_query->where('account_transactions.type', request()->input('type'));
+                $before_bal_query->where('type', request()->input('type'));
             }
             $prev_details = $before_bal_query->first();
             if ($is_debit_normal) {
@@ -348,72 +358,146 @@ class AccountController extends Controller
                 $bal_before_start_date = ($prev_details->prev_credit ?? 0) - ($prev_details->prev_debit ?? 0);
             }
 
-            $accounts = AccountTransaction::join(
-                'accounts as A',
-                'account_transactions.account_id',
-                '=',
-                'A.id'
-            )
-            ->leftjoin('account_types as ATY', 'A.account_type_id', '=', 'ATY.id')
-            ->leftJoin('transaction_payments AS tp', 'account_transactions.transaction_payment_id', '=', 'tp.id')
-            ->leftJoin('contacts AS c', 'tp.payment_for', '=', 'c.id')
-            ->leftJoin('users AS u', 'account_transactions.created_by', '=', 'u.id')
-            ->leftjoin(
-                    'transaction_payments as child_payments',
-                    'tp.id',
+            if (!empty($account->accounting_account_id)) {
+                $accounts = \Modules\Accounting\Entities\AccountingAccountsTransaction::join(
+                    'accounting_accounts as AA',
+                    'accounting_accounts_transactions.accounting_account_id',
                     '=',
-                    'child_payments.parent_id'
+                    'AA.id'
                 )
-            ->leftjoin(
-                'transactions as child_sells',
-                'child_sells.id',
-                '=',
-                'child_payments.transaction_id'
-            )
-            ->with(['transaction', 'transaction.contact', 'transfer_transaction', 'transaction.transaction_for'])
-                            ->where('A.business_id', $business_id)
-                            ->where('A.id', $id)
-                            ->with(['transaction', 'transaction.contact', 'transfer_transaction', 'media', 'transfer_transaction.media'])
-                            ->select(['account_transactions.type', 'account_transactions.amount', 'account_transactions.operation_date',
-                                'account_transactions.sub_type', 'account_transactions.transfer_transaction_id',
-                                'A.id as account_id',
-                                'A.normal_balance',
-                                'ATY.fixed_key',
-                                'account_transactions.transaction_id',
-                                'account_transactions.id',
-                                'account_transactions.note',
-                                'tp.is_advance',
-                                'tp.is_return',
-                                'tp.payment_ref_no',
-                                'tp.method',
-                                'tp.transaction_no',
-                                'tp.card_transaction_number',
-                                'tp.card_number',
-                                'tp.card_type',
-                                'tp.card_holder_name',
-                                'tp.card_month',
-                                'tp.card_year',
-                                'tp.card_security',
-                                'tp.cheque_number',
-                                'tp.bank_account_number',
-                                DB::raw("CONCAT(COALESCE(u.surname, ''),' ',COALESCE(u.first_name, ''),' ',COALESCE(u.last_name,'')) as added_by"),
-                                'c.name as payment_for_contact',
-                                'c.type as payment_for_type',
-                                'c.supplier_business_name as payment_for_business_name',
-                                DB::raw('SUM(child_payments.amount) total_recovered'),
-                                DB::raw('GROUP_CONCAT(child_sells.invoice_no) as child_sells'),
-                            ])
-                             ->groupBy('account_transactions.id')
-                             ->orderBy('account_transactions.operation_date', 'asc')
-                             ->orderByRaw("CASE WHEN account_transactions.sub_type = 'opening_balance' THEN 0 ELSE 1 END")
-                             ->orderBy('account_transactions.id', 'asc');
+                ->leftJoin('accounts as A', 'AA.id', '=', 'A.accounting_account_id')
+                ->leftjoin('account_types as ATY', 'A.account_type_id', '=', 'ATY.id')
+                ->leftJoin('transaction_payments AS tp', 'accounting_accounts_transactions.transaction_payment_id', '=', 'tp.id')
+                ->leftJoin('contacts AS c', 'tp.payment_for', '=', 'c.id')
+                ->leftJoin('users AS u', 'accounting_accounts_transactions.created_by', '=', 'u.id')
+                ->leftjoin(
+                        'transaction_payments as child_payments',
+                        'tp.id',
+                        '=',
+                        'child_payments.parent_id'
+                    )
+                ->leftjoin(
+                    'transactions as child_sells',
+                    'child_sells.id',
+                    '=',
+                    'child_payments.transaction_id'
+                )
+                ->with(['transaction', 'transaction.contact', 'transaction.transaction_for'])
+                ->where('AA.business_id', $business_id)
+                ->where('AA.id', $account->accounting_account_id)
+                ->select(['accounting_accounts_transactions.type', 'accounting_accounts_transactions.amount', 'accounting_accounts_transactions.operation_date',
+                    'accounting_accounts_transactions.sub_type',
+                    DB::raw('NULL as transfer_transaction_id'),
+                    'A.id as account_id',
+                    'A.normal_balance',
+                    'AA.id as accounting_account_id',
+                    'ATY.fixed_key',
+                    'accounting_accounts_transactions.transaction_id',
+                    'accounting_accounts_transactions.id',
+                    'accounting_accounts_transactions.note',
+                    'tp.is_advance',
+                    'tp.is_return',
+                    'tp.payment_ref_no',
+                    'tp.method',
+                    'tp.transaction_no',
+                    'tp.card_transaction_number',
+                    'tp.card_number',
+                    'tp.card_type',
+                    'tp.card_holder_name',
+                    'tp.card_month',
+                    'tp.card_year',
+                    'tp.card_security',
+                    'tp.cheque_number',
+                    'tp.bank_account_number',
+                    DB::raw("CONCAT(COALESCE(u.surname, ''),' ',COALESCE(u.first_name, ''),' ',COALESCE(u.last_name,'')) as added_by"),
+                    'c.name as payment_for_contact',
+                    'c.type as payment_for_type',
+                    'c.supplier_business_name as payment_for_business_name',
+                    DB::raw('SUM(child_payments.amount) total_recovered'),
+                    DB::raw('GROUP_CONCAT(child_sells.invoice_no) as child_sells'),
+                ])
+                ->groupBy('accounting_accounts_transactions.id')
+                ->orderBy('accounting_accounts_transactions.operation_date', 'asc')
+                ->orderByRaw("CASE WHEN accounting_accounts_transactions.sub_type = 'opening_balance' THEN 0 ELSE 1 END")
+                ->orderBy('accounting_accounts_transactions.id', 'asc');
+            } else {
+                $accounts = AccountTransaction::join(
+                    'accounts as A',
+                    'account_transactions.account_id',
+                    '=',
+                    'A.id'
+                )
+                ->leftjoin('account_types as ATY', 'A.account_type_id', '=', 'ATY.id')
+                ->leftJoin('transaction_payments AS tp', 'account_transactions.transaction_payment_id', '=', 'tp.id')
+                ->leftJoin('contacts AS c', 'tp.payment_for', '=', 'c.id')
+                ->leftJoin('users AS u', 'account_transactions.created_by', '=', 'u.id')
+                ->leftjoin(
+                        'transaction_payments as child_payments',
+                        'tp.id',
+                        '=',
+                        'child_payments.parent_id'
+                    )
+                ->leftjoin(
+                    'transactions as child_sells',
+                    'child_sells.id',
+                    '=',
+                    'child_payments.transaction_id'
+                )
+                ->with(['transaction', 'transaction.contact', 'transfer_transaction', 'transaction.transaction_for'])
+                                ->where('A.business_id', $business_id)
+                                ->where('A.id', $id)
+                                ->with(['transaction', 'transaction.contact', 'transfer_transaction', 'media', 'transfer_transaction.media'])
+                                ->select(['account_transactions.type', 'account_transactions.amount', 'account_transactions.operation_date',
+                                    'account_transactions.sub_type', 'account_transactions.transfer_transaction_id',
+                                    'A.id as account_id',
+                                    'A.normal_balance',
+                                    'ATY.fixed_key',
+                                    'account_transactions.transaction_id',
+                                    'account_transactions.id',
+                                    'account_transactions.note',
+                                    'tp.is_advance',
+                                    'tp.is_return',
+                                    'tp.payment_ref_no',
+                                    'tp.method',
+                                    'tp.transaction_no',
+                                    'tp.card_transaction_number',
+                                    'tp.card_number',
+                                    'tp.card_type',
+                                    'tp.card_holder_name',
+                                    'tp.card_month',
+                                    'tp.card_year',
+                                    'tp.card_security',
+                                    'tp.cheque_number',
+                                    'tp.bank_account_number',
+                                    DB::raw("CONCAT(COALESCE(u.surname, ''),' ',COALESCE(u.first_name, ''),' ',COALESCE(u.last_name,'')) as added_by"),
+                                    'c.name as payment_for_contact',
+                                    'c.type as payment_for_type',
+                                    'c.supplier_business_name as payment_for_business_name',
+                                    DB::raw('SUM(child_payments.amount) total_recovered'),
+                                    DB::raw('GROUP_CONCAT(child_sells.invoice_no) as child_sells'),
+                                ])
+                                 ->groupBy('account_transactions.id')
+                                 ->orderBy('account_transactions.operation_date', 'asc')
+                                 ->orderByRaw("CASE WHEN account_transactions.sub_type = 'opening_balance' THEN 0 ELSE 1 END")
+                                 ->orderBy('account_transactions.id', 'asc');
+            }
+
             if (! empty(request()->input('type'))) {
-                $accounts->where('account_transactions.type', request()->input('type'));
+                if (!empty($account->accounting_account_id)) {
+                    $accounts->where('accounting_accounts_transactions.type', request()->input('type'));
+                } else {
+                    $accounts->where('account_transactions.type', request()->input('type'));
+                }
             }
 
             if (! empty($start_date) && ! empty($end_date)) {
-                $accounts->whereDate('operation_date', '>=', $start_date)
-                        ->whereDate('operation_date', '<=', $end_date);
+                if (!empty($account->accounting_account_id)) {
+                    $accounts->whereDate('accounting_accounts_transactions.operation_date', '>=', $start_date)
+                            ->whereDate('accounting_accounts_transactions.operation_date', '<=', $end_date);
+                } else {
+                    $accounts->whereDate('operation_date', '>=', $start_date)
+                            ->whereDate('operation_date', '<=', $end_date);
+                }
             }
 
             $payment_types = $this->commonUtil->payment_types(null, true, $business_id);
@@ -482,26 +566,48 @@ class AccountController extends Controller
 
                                 $row_priority = ($row->sub_type == 'opening_balance') ? 0 : 1;
 
-                                $current_details = AccountTransaction::where('account_id', $row->account_id)
-                                                ->whereNull('deleted_at')
-                                                ->where(function($query) use ($row, $row_priority) {
-                                                    $query->where('operation_date', '<', $row->operation_date)
-                                                          ->orWhere(function($q) use ($row, $row_priority) {
-                                                              $q->where('operation_date', '=', $row->operation_date)
-                                                                ->where(function($sub_q) use ($row, $row_priority) {
-                                                                    $sub_q->whereRaw("CASE WHEN sub_type = 'opening_balance' THEN 0 ELSE 1 END < ?", [$row_priority])
-                                                                          ->orWhere(function($inner_q) use ($row, $row_priority) {
-                                                                              $inner_q->whereRaw("CASE WHEN sub_type = 'opening_balance' THEN 0 ELSE 1 END = ?", [$row_priority])
-                                                                                      ->where('id', '<=', $row->id);
-                                                                          });
-                                                                });
-                                                          });
-                                                })
-                                                ->select(
-                                        DB::raw("SUM(CASE WHEN type='debit' THEN amount ELSE 0 END) as total_debit"),
-                                        DB::raw("SUM(CASE WHEN type='credit' THEN amount ELSE 0 END) as total_credit")
-                                                )
-                                                ->first();
+                                if (!empty($row->accounting_account_id)) {
+                                    $current_details = \Modules\Accounting\Entities\AccountingAccountsTransaction::where('accounting_account_id', $row->accounting_account_id)
+                                                    ->where(function($query) use ($row, $row_priority) {
+                                                        $query->where('operation_date', '<', $row->operation_date)
+                                                              ->orWhere(function($q) use ($row, $row_priority) {
+                                                                  $q->where('operation_date', '=', $row->operation_date)
+                                                                    ->where(function($sub_q) use ($row, $row_priority) {
+                                                                        $sub_q->whereRaw("CASE WHEN sub_type = 'opening_balance' THEN 0 ELSE 1 END < ?", [$row_priority])
+                                                                              ->orWhere(function($inner_q) use ($row, $row_priority) {
+                                                                                  $inner_q->whereRaw("CASE WHEN sub_type = 'opening_balance' THEN 0 ELSE 1 END = ?", [$row_priority])
+                                                                                          ->where('id', '<=', $row->id);
+                                                                              });
+                                                                    });
+                                                              });
+                                                    })
+                                                    ->select(
+                                                        DB::raw("SUM(CASE WHEN type='debit' THEN amount ELSE 0 END) as total_debit"),
+                                                        DB::raw("SUM(CASE WHEN type='credit' THEN amount ELSE 0 END) as total_credit")
+                                                    )
+                                                    ->first();
+                                } else {
+                                    $current_details = AccountTransaction::where('account_id', $row->account_id)
+                                                    ->whereNull('deleted_at')
+                                                    ->where(function($query) use ($row, $row_priority) {
+                                                        $query->where('operation_date', '<', $row->operation_date)
+                                                              ->orWhere(function($q) use ($row, $row_priority) {
+                                                                  $q->where('operation_date', '=', $row->operation_date)
+                                                                    ->where(function($sub_q) use ($row, $row_priority) {
+                                                                        $sub_q->whereRaw("CASE WHEN sub_type = 'opening_balance' THEN 0 ELSE 1 END < ?", [$row_priority])
+                                                                              ->orWhere(function($inner_q) use ($row, $row_priority) {
+                                                                                  $inner_q->whereRaw("CASE WHEN sub_type = 'opening_balance' THEN 0 ELSE 1 END = ?", [$row_priority])
+                                                                                          ->where('id', '<=', $row->id);
+                                                                              });
+                                                                    });
+                                                              });
+                                                    })
+                                                    ->select(
+                                                        DB::raw("SUM(CASE WHEN type='debit' THEN amount ELSE 0 END) as total_debit"),
+                                                        DB::raw("SUM(CASE WHEN type='credit' THEN amount ELSE 0 END) as total_credit")
+                                                    )
+                                                    ->first();
+                                }
 
                                 if ($is_debit_normal) {
                                     $bal = ($current_details->total_debit ?? 0) - ($current_details->total_credit ?? 0);
@@ -931,23 +1037,45 @@ class AccountController extends Controller
         }
 
         $business_id = session()->get('user.business_id');
-        $account = Account::leftjoin(
-            'account_transactions as AT',
-            'AT.account_id',
-            '=',
-            'accounts.id'
-        )
-            ->leftjoin('account_types as ats', 'accounts.account_type_id', '=', 'ats.id')
-            ->leftjoin('account_types as pat', 'ats.parent_account_type_id', '=', 'pat.id')
-            ->whereNull('AT.deleted_at')
-            ->where('accounts.business_id', $business_id)
-            ->where('accounts.id', $id)
-            ->select(['accounts.*', 'ats.fixed_key', 'ats.name as account_type_name', 'pat.name as parent_account_type_name',
-                DB::raw("SUM(IF(AT.type='debit', amount, 0)) as total_debit"),
-                DB::raw("SUM(IF(AT.type='credit', amount, 0)) as total_credit"),
-            ])
-            ->groupBy('accounts.id')
-            ->first();
+
+        $account_instance = Account::where('business_id', $business_id)->findOrFail($id);
+
+        if (!empty($account_instance->accounting_account_id)) {
+            $account = Account::leftjoin(
+                'accounting_accounts_transactions as AT',
+                'AT.accounting_account_id',
+                '=',
+                'accounts.accounting_account_id'
+            )
+                ->leftjoin('account_types as ats', 'accounts.account_type_id', '=', 'ats.id')
+                ->leftjoin('account_types as pat', 'ats.parent_account_type_id', '=', 'pat.id')
+                ->where('accounts.business_id', $business_id)
+                ->where('accounts.id', $id)
+                ->select(['accounts.*', 'ats.fixed_key', 'ats.name as account_type_name', 'pat.name as parent_account_type_name',
+                    DB::raw("SUM(IF(AT.type='debit', AT.amount, 0)) as total_debit"),
+                    DB::raw("SUM(IF(AT.type='credit', AT.amount, 0)) as total_credit"),
+                ])
+                ->groupBy('accounts.id')
+                ->first();
+        } else {
+            $account = Account::leftjoin(
+                'account_transactions as AT',
+                'AT.account_id',
+                '=',
+                'accounts.id'
+            )
+                ->leftjoin('account_types as ats', 'accounts.account_type_id', '=', 'ats.id')
+                ->leftjoin('account_types as pat', 'ats.parent_account_type_id', '=', 'pat.id')
+                ->whereNull('AT.deleted_at')
+                ->where('accounts.business_id', $business_id)
+                ->where('accounts.id', $id)
+                ->select(['accounts.*', 'ats.fixed_key', 'ats.name as account_type_name', 'pat.name as parent_account_type_name',
+                    DB::raw("SUM(IF(AT.type='debit', amount, 0)) as total_debit"),
+                    DB::raw("SUM(IF(AT.type='credit', amount, 0)) as total_credit"),
+                ])
+                ->groupBy('accounts.id')
+                ->first();
+        }
 
         $is_debit_normal = Account::getBalanceTypeStatic($account->normal_balance, $account->fixed_key, $account->account_type_name, $account->parent_account_type_name) == 'debit';
 

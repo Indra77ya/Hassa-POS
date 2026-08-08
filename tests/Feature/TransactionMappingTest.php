@@ -319,8 +319,11 @@ class TransactionMappingTest extends TestCase
         $user->allow_login = 1;
         $this->actingAs($user);
 
+        $this->withoutMiddleware(\App\Http\Middleware\Authenticate::class);
+
         session([
             'user.business_id' => 1,
+            'user' => ['id' => 1, 'business_id' => 1],
             'business.time_zone' => 'Asia/Jakarta',
             'business.date_format' => 'Y-m-d',
             'currency' => [
@@ -520,6 +523,30 @@ class TransactionMappingTest extends TestCase
                 'type' => 'debit',
                 'amount' => 5000000,
                 'operation_date' => '2026-07-31 14:36:00',
+            ],
+        ]);
+
+        // Mock login and session
+        $user = \Mockery::mock(\App\User::class)->makePartial();
+        $user->shouldReceive('can')->with('account.access')->andReturn(true);
+        $user->shouldReceive('permitted_locations')->andReturn('all');
+        $user->id = 1;
+        $user->business_id = 1;
+        $user->user_type = 'user';
+        $user->allow_login = 1;
+        $this->actingAs($user);
+
+        $this->withoutMiddleware(\App\Http\Middleware\Authenticate::class);
+
+        session([
+            'user.business_id' => 1,
+            'user' => ['id' => 1, 'business_id' => 1],
+            'business.time_zone' => 'Asia/Jakarta',
+            'business.date_format' => 'Y-m-d',
+            'currency' => [
+                'symbol' => 'Rp',
+                'decimal_separator' => ',',
+                'thousand_separator' => '.',
             ],
         ]);
 
