@@ -149,6 +149,7 @@ class TransactionMappingTest extends TestCase
             $table->bigIncrements('id');
             $table->integer('transaction_id')->nullable();
             $table->integer('business_id')->nullable();
+            $table->unsignedBigInteger('account_id')->nullable();
             $table->decimal('amount', 22, 4)->default(0);
             $table->string('payment_ref_no')->nullable();
             $table->boolean('is_return')->default(0);
@@ -1039,5 +1040,81 @@ class TransactionMappingTest extends TestCase
         $this->assertEquals(1, AccountingAccount::where('business_id', 1)->where('name', 'Beban Kerusakan/Kehilangan')->count());
         // Verify "Beban Kerusakan/Kehilangan" is NOT duplicated in POS accounts
         $this->assertEquals(1, Account::where('business_id', 1)->where('name', 'Beban Kerusakan/Kehilangan')->count());
+    }
+
+    /**
+     * Test installment/partial payment mapping for a purchase.
+     */
+    public function testInstallmentPurchasePaymentMapping()
+    {
+        // Seed POS account and link it to AccountingAccount 10
+        DB::table('accounts')->insert([
+            'id' => 10,
+            'name' => 'Kas POS',
+            'business_id' => 1,
+            'accounting_account_id' => 10, // Linked to Kas
+        ]);
+
+        // Create the payable account in DB to ensure it matches the static map or name fallbacks
+        DB::table('accounting_accounts')->insert([
+            'id' => 21,
+            'name' => 'Hutang Usaha',
+            'business_id' => 1,
+            'account_primary_type' => 'liability',
+            'account_sub_type_id' => 6,
+            'status' => 'active'
+        ]);
+
+        // 1. Create a purchase transaction for 680,000
+        $transaction = Transaction::create([
+            'business_id' => 1,
+            'location_id' => 1,
+            'type' => 'purchase',
+            'payment_status' => 'partial',
+            'ref_no' => 'PO2026/0006',
+            'final_total' => 680000,
+        ]);
+
+        // 2. Add an installment payment (amount: 300,000) using POS Account (e.g. Kas ID 10 mapped to accounting 10)
+        DB::table('transaction_payments')->insert([
+            'transaction_id' => $transaction->id,
+            'business_id' => 1,
+            'amount' => 300000,
+            'account_id' => 10, // POS Kas Account
+            'is_return' => 0,
+            'created_at' => now(),
+        ]);
+
+        // 3. Trigger mapping listener
+        $event = new \App\Events\PurchaseCreatedOrModified($transaction);
+        $listener = new \Modules\Accounting\Listeners\MapPurchaseTransaction();
+        $listener->handle($event);
+
+        // 4. Verify results
+        $txs = AccountingAccountsTransaction::where('transaction_id', $transaction->id)->get();
+
+        // Debit to Inventory (Persediaan Barang: 14) must be 680,000
+        $inv_tx = $txs->where('accounting_account_id', 14)->first();
+        $this->assertNotNull($inv_tx);
+        $this->assertEquals('debit', $inv_tx->type);
+        $this->assertEquals(680000, $inv_tx->amount);
+
+        // Credit to Kas (10) must be 300,000 (installment paid amount)
+        $kas_tx = $txs->where('accounting_account_id', 10)->first();
+        $this->assertNotNull($kas_tx);
+        $this->assertEquals('credit', $kas_tx->type);
+        $this->assertEquals(300000, $kas_tx->amount);
+
+        // Credit to Hutang (21) must be 380,000
+        $payable_tx = $txs->where('accounting_account_id', 21)->first();
+        $this->assertNotNull($payable_tx);
+        $this->assertEquals('credit', $payable_tx->type);
+        $this->assertEquals(380000, $payable_tx->amount); // 680,000 - 300,000 = 380,000 unpaid
+
+        // Check total balance is verified
+        $debit_sum = $txs->where('type', 'debit')->sum('amount');
+        $credit_sum = $txs->where('type', 'credit')->sum('amount');
+        $this->assertEquals(680000, $debit_sum);
+        $this->assertEquals(680000, $credit_sum);
     }
 }

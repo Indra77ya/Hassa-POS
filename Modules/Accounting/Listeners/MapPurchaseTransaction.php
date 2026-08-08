@@ -52,17 +52,40 @@ class MapPurchaseTransaction
             // Resolve accounts
             // Debit: Persediaan Barang
             $inventory_account_id = isset($accounting_default_map['purchases']['deposit_to']) ? $accounting_default_map['purchases']['deposit_to'] : null;
-            // Credit (Cash): Kas/Bank
-            $cash_account_id = isset($accounting_default_map['purchase_payment']['payment_account']) ? $accounting_default_map['purchase_payment']['payment_account'] : null;
+            if (is_null($inventory_account_id)) {
+                $inventory_account_id = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                    ->where('status', 'active')
+                    ->where('account_primary_type', 'asset')
+                    ->where(function($q) {
+                        $q->where('name', 'like', '%Persediaan%')
+                          ->orWhere('name', 'like', '%Inventory%')
+                          ->orWhere('account_sub_type_id', 2);
+                    })
+                    ->value('id');
+            }
+
             // Credit (Tempo/Credit): Hutang Usaha
             $payable_account_id = isset($accounting_default_map['purchases']['payment_account']) ? $accounting_default_map['purchases']['payment_account'] : null;
+            if (is_null($payable_account_id)) {
+                $payable_account_id = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                    ->where('status', 'active')
+                    ->where('account_primary_type', 'liability')
+                    ->where(function($q) {
+                        $q->where('name', 'like', '%Hutang%')
+                          ->orWhere('name', 'like', '%Payable%')
+                          ->orWhere('account_sub_type_id', 6);
+                    })
+                    ->value('id');
+            }
 
             if (is_null($inventory_account_id)) {
                 return;
             }
 
             // 2. Delete existing mappings for this transaction
-            $accountingUtil->deleteMap($id, null);
+            AccountingAccountsTransaction::where('transaction_id', $id)
+                ->whereIn('map_type', ['payment_account', 'deposit_to', 'cogs_debit', 'cogs_credit', 'recovered_deposit_to', 'loss_deposit_to'])
+                ->delete();
 
             // 3. Calculate net paid amount (payments)
             $payments_sum = \DB::table('transaction_payments')
@@ -102,20 +125,100 @@ class MapPurchaseTransaction
             AccountingAccountsTransaction::updateOrCreateMapTransaction($inventory_data);
 
             // Credit Cash Leg (Kas/Bank)
-            if ($net_paid > 0 && !is_null($cash_account_id)) {
-                $cash_data = [
-                    'accounting_account_id' => $cash_account_id,
-                    'transaction_id' => $id,
-                    'transaction_payment_id' => null,
-                    'amount' => $net_paid,
-                    'type' => 'credit',
-                    'sub_type' => 'purchase',
-                    'note' => 'Bayar Pembelian - ' . $transaction->ref_no,
-                    'map_type' => 'payment_account',
-                    'created_by' => $user_id,
-                    'operation_date' => $transaction->transaction_date ?? \Carbon::now(),
-                ];
-                AccountingAccountsTransaction::updateOrCreateMapTransaction($cash_data);
+            if ($net_paid > 0) {
+                $payments = \DB::table('transaction_payments')
+                    ->where('transaction_id', $id)
+                    ->where('is_return', 0)
+                    ->get();
+
+                $scale_factor = 1.0;
+                if ($payments_sum > 0) {
+                    $scale_factor = $net_paid / $payments_sum;
+                }
+
+                $total_mapped_cash = 0;
+                foreach ($payments as $payment) {
+                    $p_amount = (float)$payment->amount * $scale_factor;
+                    if ($p_amount <= 0) {
+                        continue;
+                    }
+
+                    // Resolve cash account for this specific payment
+                    $p_cash_account_id = null;
+                    if (!empty($payment->account_id)) {
+                        $p_cash_account_id = \DB::table('accounts')
+                            ->where('id', $payment->account_id)
+                            ->value('accounting_account_id');
+                    }
+                    if (is_null($p_cash_account_id)) {
+                        $p_cash_account_id = isset($accounting_default_map['purchase_payment']['payment_account'])
+                            ? $accounting_default_map['purchase_payment']['payment_account']
+                            : null;
+                    }
+                    if (is_null($p_cash_account_id)) {
+                        $p_cash_account_id = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                            ->where('status', 'active')
+                            ->where('account_primary_type', 'asset')
+                            ->where(function($q) {
+                                $q->where('name', 'like', '%Kas%')
+                                  ->orWhere('name', 'like', '%Bank%')
+                                  ->orWhere('account_sub_type_id', 3);
+                            })
+                            ->value('id');
+                    }
+
+                    if (!is_null($p_cash_account_id)) {
+                        $cash_data = [
+                            'accounting_account_id' => $p_cash_account_id,
+                            'transaction_id' => $id,
+                            'transaction_payment_id' => $payment->id,
+                            'amount' => $p_amount,
+                            'type' => 'credit',
+                            'sub_type' => 'purchase',
+                            'note' => 'Bayar Pembelian - ' . $transaction->ref_no,
+                            'map_type' => 'payment_account',
+                            'created_by' => $user_id,
+                            'operation_date' => $payment->paid_on ?? $transaction->transaction_date ?? \Carbon::now(),
+                        ];
+                        AccountingAccountsTransaction::updateOrCreateMapTransaction($cash_data);
+                        $total_mapped_cash += $p_amount;
+                    }
+                }
+
+                // If some cash wasn't mapped through payment records or sum of payments < net_paid
+                $remaining_cash = $net_paid - $total_mapped_cash;
+                if ($remaining_cash > 0.01) {
+                    $fallback_cash_account_id = isset($accounting_default_map['purchase_payment']['payment_account'])
+                        ? $accounting_default_map['purchase_payment']['payment_account']
+                        : null;
+                    if (is_null($fallback_cash_account_id)) {
+                        $fallback_cash_account_id = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                            ->where('status', 'active')
+                            ->where('account_primary_type', 'asset')
+                            ->where(function($q) {
+                                $q->where('name', 'like', '%Kas%')
+                                  ->orWhere('name', 'like', '%Bank%')
+                                  ->orWhere('account_sub_type_id', 3);
+                            })
+                            ->value('id');
+                    }
+
+                    if (!is_null($fallback_cash_account_id)) {
+                        $cash_data = [
+                            'accounting_account_id' => $fallback_cash_account_id,
+                            'transaction_id' => $id,
+                            'transaction_payment_id' => null,
+                            'amount' => $remaining_cash,
+                            'type' => 'credit',
+                            'sub_type' => 'purchase',
+                            'note' => 'Bayar Pembelian - ' . $transaction->ref_no,
+                            'map_type' => 'payment_account',
+                            'created_by' => $user_id,
+                            'operation_date' => $transaction->transaction_date ?? \Carbon::now(),
+                        ];
+                        AccountingAccountsTransaction::updateOrCreateMapTransaction($cash_data);
+                    }
+                }
             }
 
             // Credit Payable Leg (Hutang Usaha)
