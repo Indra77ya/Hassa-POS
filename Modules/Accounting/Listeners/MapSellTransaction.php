@@ -58,17 +58,41 @@ class MapSellTransaction
             // Resolve accounts
             // Credit: Pendapatan Penjualan
             $revenue_account_id = isset($accounting_default_map['sale']['payment_account']) ? $accounting_default_map['sale']['payment_account'] : null;
-            // Debit (Cash): Kas/Bank
-            $cash_account_id = isset($accounting_default_map['sell_payment']['deposit_to']) ? $accounting_default_map['sell_payment']['deposit_to'] : null;
+            if (is_null($revenue_account_id)) {
+                $revenue_account_id = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                    ->where('status', 'active')
+                    ->where('account_primary_type', 'income')
+                    ->where(function($q) {
+                        $q->where('name', 'like', '%Pendapatan%')
+                          ->orWhere('name', 'like', '%Revenue%')
+                          ->orWhere('name', 'like', '%Sales%')
+                          ->orWhere('account_sub_type_id', 11);
+                    })
+                    ->value('id');
+            }
+
             // Debit (Credit): Piutang Usaha
             $receivable_account_id = isset($accounting_default_map['sale']['deposit_to']) ? $accounting_default_map['sale']['deposit_to'] : null;
+            if (is_null($receivable_account_id)) {
+                $receivable_account_id = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                    ->where('status', 'active')
+                    ->where('account_primary_type', 'asset')
+                    ->where(function($q) {
+                        $q->where('name', 'like', '%Piutang%')
+                          ->orWhere('name', 'like', '%Receivable%')
+                          ->orWhere('account_sub_type_id', 1);
+                    })
+                    ->value('id');
+            }
 
             if (is_null($revenue_account_id)) {
                 return;
             }
 
             // 2. Delete existing mappings for this transaction first to prevent duplicates or stale records
-            $accountingUtil->deleteMap($id, null);
+            AccountingAccountsTransaction::where('transaction_id', $id)
+                ->whereIn('map_type', ['payment_account', 'deposit_to', 'cogs_debit', 'cogs_credit', 'recovered_deposit_to', 'loss_deposit_to'])
+                ->delete();
 
             // 3. Calculate net paid amount (payments - change returns)
             $payments_sum = \DB::table('transaction_payments')
@@ -99,20 +123,100 @@ class MapSellTransaction
             $unpaid = $final_total - $net_paid;
 
             // Debit Cash Leg (Kas/Bank)
-            if ($net_paid > 0 && !is_null($cash_account_id)) {
-                $cash_data = [
-                    'accounting_account_id' => $cash_account_id,
-                    'transaction_id' => $id,
-                    'transaction_payment_id' => null,
-                    'amount' => $net_paid,
-                    'type' => 'debit',
-                    'sub_type' => 'sell',
-                    'note' => 'Penjualan - ' . $transaction->invoice_no,
-                    'map_type' => 'deposit_to',
-                    'created_by' => $user_id,
-                    'operation_date' => $transaction->transaction_date ?? \Carbon::now(),
-                ];
-                AccountingAccountsTransaction::updateOrCreateMapTransaction($cash_data);
+            if ($net_paid > 0) {
+                $payments = \DB::table('transaction_payments')
+                    ->where('transaction_id', $id)
+                    ->where('is_return', 0)
+                    ->get();
+
+                $scale_factor = 1.0;
+                if ($payments_sum > 0) {
+                    $scale_factor = $net_paid / $payments_sum;
+                }
+
+                $total_mapped_cash = 0;
+                foreach ($payments as $payment) {
+                    $p_amount = (float)$payment->amount * $scale_factor;
+                    if ($p_amount <= 0) {
+                        continue;
+                    }
+
+                    // Resolve cash account for this specific payment
+                    $p_cash_account_id = null;
+                    if (!empty($payment->account_id)) {
+                        $p_cash_account_id = \DB::table('accounts')
+                            ->where('id', $payment->account_id)
+                            ->value('accounting_account_id');
+                    }
+                    if (is_null($p_cash_account_id)) {
+                        $p_cash_account_id = isset($accounting_default_map['sell_payment']['deposit_to'])
+                            ? $accounting_default_map['sell_payment']['deposit_to']
+                            : null;
+                    }
+                    if (is_null($p_cash_account_id)) {
+                        $p_cash_account_id = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                            ->where('status', 'active')
+                            ->where('account_primary_type', 'asset')
+                            ->where(function($q) {
+                                $q->where('name', 'like', '%Kas%')
+                                  ->orWhere('name', 'like', '%Bank%')
+                                  ->orWhere('account_sub_type_id', 3);
+                            })
+                            ->value('id');
+                    }
+
+                    if (!is_null($p_cash_account_id)) {
+                        $cash_data = [
+                            'accounting_account_id' => $p_cash_account_id,
+                            'transaction_id' => $id,
+                            'transaction_payment_id' => $payment->id,
+                            'amount' => $p_amount,
+                            'type' => 'debit',
+                            'sub_type' => 'sell',
+                            'note' => 'Penjualan - ' . $transaction->invoice_no,
+                            'map_type' => 'deposit_to',
+                            'created_by' => $user_id,
+                            'operation_date' => $payment->paid_on ?? $transaction->transaction_date ?? \Carbon::now(),
+                        ];
+                        AccountingAccountsTransaction::updateOrCreateMapTransaction($cash_data);
+                        $total_mapped_cash += $p_amount;
+                    }
+                }
+
+                // If some cash wasn't mapped through payment records or sum of payments < net_paid
+                $remaining_cash = $net_paid - $total_mapped_cash;
+                if ($remaining_cash > 0.01) {
+                    $fallback_cash_account_id = isset($accounting_default_map['sell_payment']['deposit_to'])
+                        ? $accounting_default_map['sell_payment']['deposit_to']
+                        : null;
+                    if (is_null($fallback_cash_account_id)) {
+                        $fallback_cash_account_id = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                            ->where('status', 'active')
+                            ->where('account_primary_type', 'asset')
+                            ->where(function($q) {
+                                $q->where('name', 'like', '%Kas%')
+                                  ->orWhere('name', 'like', '%Bank%')
+                                  ->orWhere('account_sub_type_id', 3);
+                            })
+                            ->value('id');
+                    }
+
+                    if (!is_null($fallback_cash_account_id)) {
+                        $cash_data = [
+                            'accounting_account_id' => $fallback_cash_account_id,
+                            'transaction_id' => $id,
+                            'transaction_payment_id' => null,
+                            'amount' => $remaining_cash,
+                            'type' => 'debit',
+                            'sub_type' => 'sell',
+                            'note' => 'Penjualan - ' . $transaction->invoice_no,
+                            'map_type' => 'deposit_to',
+                            'created_by' => $user_id,
+                            'operation_date' => $transaction->transaction_date ?? \Carbon::now(),
+                        ];
+                        AccountingAccountsTransaction::updateOrCreateMapTransaction($cash_data);
+                    }
+                }
             }
 
             // Debit Receivable Leg (Piutang Usaha)
