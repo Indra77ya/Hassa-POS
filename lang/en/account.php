@@ -102,4 +102,14 @@ return [
     'beban_operasional' => 'Operating Expenses',
     'beban_lain_lain' => 'Other Expenses',
     'beban_pajak' => 'Tax Expense',
+
+    // Transaction sub-types
+    'sell' => 'Sale',
+    'purchase' => 'Purchase',
+    'expense' => 'Expense',
+    'sell_payment' => 'Sales Payment',
+    'purchase_payment' => 'Purchase Payment',
+    'expense_payment' => 'Expense Payment',
+    'journal_entry' => 'Journal Entry',
+    'stock_adjustment' => 'Stock Adjustment',
 ];

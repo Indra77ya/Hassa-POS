@@ -109,4 +109,14 @@ return [
     'shipping_income_account' => 'Pendapatan Pengiriman',
     'rounding_account' => 'Beban Pembulatan',
     'packing_charge_account' => 'Pendapatan Packing',
+
+    // Transaction sub-types
+    'sell' => 'Penjualan',
+    'purchase' => 'Pembelian',
+    'expense' => 'Beban/Biaya',
+    'sell_payment' => 'Pembayaran Penjualan',
+    'purchase_payment' => 'Pembayaran Pembelian',
+    'expense_payment' => 'Pembayaran Beban',
+    'journal_entry' => 'Entri Jurnal',
+    'stock_adjustment' => 'Penyesuaian Stok',
 ];

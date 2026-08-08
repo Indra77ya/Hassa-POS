@@ -147,6 +147,11 @@ class AccountingAccountsTransaction extends Model
         return $this->belongsTo('Modules\Accounting\Entities\AccountingAccount', 'accounting_account_id');
     }
 
+    public function transaction()
+    {
+        return $this->belongsTo(\App\Transaction::class, 'transaction_id');
+    }
+
     /**
      * Creates new account transaction
      *
