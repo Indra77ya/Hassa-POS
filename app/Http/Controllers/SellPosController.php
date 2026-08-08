@@ -228,7 +228,7 @@ class SellPosController extends Controller
         //Accounts
         $accounts = [];
         if ($this->moduleUtil->isModuleEnabled('account')) {
-            $accounts = Account::forDropdown($business_id, true, false, true);
+            $accounts = Account::forDropdown($business_id, true, false, true, true);
         }
 
         //Selling Price Group Dropdown
@@ -1068,7 +1068,7 @@ class SellPosController extends Controller
         //Accounts
         $accounts = [];
         if ($this->moduleUtil->isModuleEnabled('account')) {
-            $accounts = Account::forDropdown($business_id, true, false, true);
+            $accounts = Account::forDropdown($business_id, true, false, true, true);
         }
 
         //Selling Price Group Dropdown
@@ -1681,7 +1681,7 @@ class SellPosController extends Controller
         //Accounts
         $accounts = [];
         if ($this->moduleUtil->isModuleEnabled('account')) {
-            $accounts = Account::forDropdown($business_id, true, false, true);
+            $accounts = Account::forDropdown($business_id, true, false, true, true);
         }
 
         return view('sale_pos.partials.payment_row')
@@ -1698,7 +1698,7 @@ class SellPosController extends Controller
         $business_id = request()->session()->get('user.business_id');
         $accounts = [];
         if ($this->moduleUtil->isModuleEnabled('account')) {
-            $accounts = Account::forDropdown($business_id, true, false, true);
+            $accounts = Account::forDropdown($business_id, true, false, true, true);
         }
         return response()->json($accounts);
     }
