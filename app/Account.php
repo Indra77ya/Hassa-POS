@@ -190,8 +190,16 @@ class Account extends Model
                     'ats.fixed_key',
                     'ats.name as account_type_name',
                     'pat.name as parent_account_type_name',
-                    DB::raw("(SELECT SUM(CASE WHEN type='debit' THEN amount ELSE 0 END) FROM account_transactions WHERE account_id = accounts.id AND deleted_at IS NULL) as total_debit"),
-                    DB::raw("(SELECT SUM(CASE WHEN type='credit' THEN amount ELSE 0 END) FROM account_transactions WHERE account_id = accounts.id AND deleted_at IS NULL) as total_credit"),
+                    DB::raw("CASE WHEN accounts.accounting_account_id IS NOT NULL THEN
+                        COALESCE((SELECT SUM(CASE WHEN type='debit' THEN amount ELSE 0 END) FROM accounting_accounts_transactions WHERE accounting_account_id = accounts.accounting_account_id), 0)
+                    ELSE
+                        COALESCE((SELECT SUM(CASE WHEN type='debit' THEN amount ELSE 0 END) FROM account_transactions WHERE account_id = accounts.id AND deleted_at IS NULL), 0)
+                    END as total_debit"),
+                    DB::raw("CASE WHEN accounts.accounting_account_id IS NOT NULL THEN
+                        COALESCE((SELECT SUM(CASE WHEN type='credit' THEN amount ELSE 0 END) FROM accounting_accounts_transactions WHERE accounting_account_id = accounts.accounting_account_id), 0)
+                    ELSE
+                        COALESCE((SELECT SUM(CASE WHEN type='credit' THEN amount ELSE 0 END) FROM account_transactions WHERE account_id = accounts.id AND deleted_at IS NULL), 0)
+                    END as total_credit"),
                 ]);
         }
 
