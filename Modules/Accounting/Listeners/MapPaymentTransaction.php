@@ -63,8 +63,11 @@ class MapPaymentTransaction
         }
 
         if ($transaction->type == 'expense') {
-            $type = 'expense_payment';
-        } else {
+            // Re-run MapExpenseTransactions for this expense to dynamically update the payment account leg!
+            $mapExpense = new \Modules\Accounting\Listeners\MapExpenseTransactions();
+            $event_mock = new \stdClass();
+            $event_mock->expense = $transaction;
+            $mapExpense->handle($event_mock);
             return;
         }
 
