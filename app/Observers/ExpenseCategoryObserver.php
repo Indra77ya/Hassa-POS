@@ -21,10 +21,12 @@ class ExpenseCategoryObserver
             return;
         }
 
+        \DB::beginTransaction();
         try {
             $business_id = $expenseCategory->business_id;
+            $created_by = request()->session()->get('user.id') ?? 1;
 
-            // Create AccountingAccount
+            // 1. Create AccountingAccount
             $accountingAccount = AccountingAccount::create([
                 'name' => $expenseCategory->name,
                 'business_id' => $business_id,
@@ -32,8 +34,35 @@ class ExpenseCategoryObserver
                 'account_sub_type_id' => 14, // Beban Operasional
                 'detail_type_id' => 138, // Uncategorised Expense
                 'status' => 'active',
-                'created_by' => request()->session()->get('user.id') ?? 1
+                'created_by' => $created_by
             ]);
+
+            // 2. Double-check if the POS Account was successfully created via AccountingAccount's observer.
+            // If not, create it manually here to guarantee both exist.
+            $pos_account = null;
+            if (!empty($accountingAccount->account_id)) {
+                $pos_account = \App\Account::find($accountingAccount->account_id);
+            }
+
+            if (!$pos_account) {
+                $account_type_id = \App\Account::getPOSAccountTypeIdFromAccounting('expenses', 14, $business_id);
+
+                $pos_account = \App\Account::create([
+                    'name' => $expenseCategory->name,
+                    'business_id' => $business_id,
+                    'created_by' => $created_by,
+                    'note' => 'Uncategorised Expense',
+                    'is_closed' => 0,
+                    'accounting_account_id' => $accountingAccount->id,
+                    'account_type_id' => $account_type_id,
+                ]);
+
+                $accountingAccount->update(['account_id' => $pos_account->id]);
+            } else {
+                if (empty($pos_account->accounting_account_id)) {
+                    $pos_account->update(['accounting_account_id' => $accountingAccount->id]);
+                }
+            }
 
             // Find the primary active Cash Account (sub_type_id 3)
             $cash_account = AccountingAccount::where('business_id', $business_id)
@@ -55,8 +84,11 @@ class ExpenseCategoryObserver
                 $location->update(['accounting_default_map' => json_encode($map)]);
             }
 
+            \DB::commit();
         } catch (\Exception $e) {
+            \DB::rollBack();
             \Log::error('Error in ExpenseCategoryObserver@created: ' . $e->getMessage());
+            throw $e;
         }
     }
 
@@ -72,6 +104,7 @@ class ExpenseCategoryObserver
             return;
         }
 
+        \DB::beginTransaction();
         try {
             // Only synchronize if name has changed
             if ($expenseCategory->isDirty('name')) {
@@ -101,10 +134,20 @@ class ExpenseCategoryObserver
 
                 if ($account) {
                     $account->update(['name' => $expenseCategory->name]);
+
+                    if (!empty($account->account_id)) {
+                        $pos_acc = \App\Account::find($account->account_id);
+                        if ($pos_acc) {
+                            $pos_acc->update(['name' => $expenseCategory->name]);
+                        }
+                    }
                 }
             }
+            \DB::commit();
         } catch (\Exception $e) {
+            \DB::rollBack();
             \Log::error('Error in ExpenseCategoryObserver@updated: ' . $e->getMessage());
+            throw $e;
         }
     }
 
@@ -120,6 +163,7 @@ class ExpenseCategoryObserver
             return;
         }
 
+        \DB::beginTransaction();
         try {
             $business_id = $expenseCategory->business_id;
 
@@ -161,13 +205,30 @@ class ExpenseCategoryObserver
                 if ($has_accounting_tx || $has_pos_tx) {
                     // Deactivate instead of deleting
                     $account->update(['status' => 'inactive']);
+                    if (!empty($account->account_id)) {
+                        $pos_acc = \App\Account::find($account->account_id);
+                        if ($pos_acc) {
+                            $pos_acc->update(['is_closed' => 1]);
+                        }
+                    }
                 } else {
-                    // Safely delete the account
+                    // Safely delete
+                    $pos_account_id = $account->account_id;
                     $account->delete();
+
+                    if (!empty($pos_account_id)) {
+                        $pos_acc = \App\Account::find($pos_account_id);
+                        if ($pos_acc) {
+                            $pos_acc->delete();
+                        }
+                    }
                 }
             }
+            \DB::commit();
         } catch (\Exception $e) {
+            \DB::rollBack();
             \Log::error('Error in ExpenseCategoryObserver@deleted: ' . $e->getMessage());
+            throw $e;
         }
     }
 }

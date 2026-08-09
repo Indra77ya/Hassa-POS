@@ -93,6 +93,7 @@ class ExpenseCategoryController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
+        \DB::beginTransaction();
         try {
             $input = $request->only(['name', 'code']);
             $input['business_id'] = $request->session()->get('user.business_id');
@@ -102,10 +103,13 @@ class ExpenseCategoryController extends Controller
             }
 
             ExpenseCategory::create($input);
+
+            \DB::commit();
             $output = ['success' => true,
                 'msg' => __('expense.added_success'),
             ];
         } catch (\Exception $e) {
+            \DB::rollBack();
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
 
             $output = ['success' => false,
@@ -166,6 +170,7 @@ class ExpenseCategoryController extends Controller
         }
 
         if (request()->ajax()) {
+            \DB::beginTransaction();
             try {
                 $input = $request->only(['name', 'code']);
                 $business_id = $request->session()->get('user.business_id');
@@ -182,10 +187,12 @@ class ExpenseCategoryController extends Controller
 
                 $expense_category->save();
 
+                \DB::commit();
                 $output = ['success' => true,
                     'msg' => __('expense.updated_success'),
                 ];
             } catch (\Exception $e) {
+                \DB::rollBack();
                 \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
 
                 $output = ['success' => false,
@@ -210,6 +217,7 @@ class ExpenseCategoryController extends Controller
         }
 
         if (request()->ajax()) {
+            \DB::beginTransaction();
             try {
                 $business_id = request()->session()->get('user.business_id');
 
@@ -219,10 +227,12 @@ class ExpenseCategoryController extends Controller
                 //delete sub categories also
                 ExpenseCategory::where('business_id', $business_id)->where('parent_id', $id)->delete();
 
+                \DB::commit();
                 $output = ['success' => true,
                     'msg' => __('expense.deleted_success'),
                 ];
             } catch (\Exception $e) {
+                \DB::rollBack();
                 \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
 
                 $output = ['success' => false,

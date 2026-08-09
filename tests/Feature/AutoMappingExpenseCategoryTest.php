@@ -14,6 +14,8 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Gate;
 use DB;
 
+require_once __DIR__ . '/../../database/migrations/2026_08_01_000000_sync_existing_expense_categories.php';
+
 class AutoMappingExpenseCategoryTest extends TestCase
 {
     protected function setUp(): void
@@ -139,6 +141,8 @@ class AutoMappingExpenseCategoryTest extends TestCase
         Schema::create('users', function (Blueprint $table) {
             $table->increments('id');
             $table->string('username')->nullable();
+            $table->integer('business_id')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
 
@@ -335,5 +339,146 @@ class AutoMappingExpenseCategoryTest extends TestCase
         $location->refresh();
         $map = json_decode($location->accounting_default_map, true);
         $this->assertArrayNotHasKey('expense_' . $category->id, $map);
+    }
+
+    /**
+     * Test transaction atomicity rollback on failure.
+     */
+    public function testExpenseCategoryCreationFailureRollsBackAllTables()
+    {
+        $cash_account = AccountingAccount::create([
+            'name' => 'Kas Toko',
+            'business_id' => 1,
+            'account_primary_type' => 'asset',
+            'account_sub_type_id' => 3,
+            'status' => 'active',
+        ]);
+
+        $location = BusinessLocation::create([
+            'business_id' => 1,
+            'accounting_default_map' => json_encode([]),
+        ]);
+
+        // Set up active user
+        $user = \App\User::create([
+            'id' => 1,
+            'username' => 'admin',
+            'business_id' => 1
+        ]);
+        $this->actingAs($user);
+        session(['user' => ['id' => 1, 'business_id' => 1]]);
+
+        // We make the controller request throw an exception by forcing an error in DB
+        \DB::listen(function($query) {
+            if (str_contains($query->sql, 'insert into `accounts`')) {
+                throw new \RuntimeException("Forced Failure in Account Table Insertion");
+            }
+        });
+
+        // Try to store via controller
+        $response = $this->post('/expense-categories', [
+            'name' => 'Gagal Total',
+            'code' => 'GT01'
+        ]);
+
+        // Verify everything was rolled back completely
+        $category_count = ExpenseCategory::where('name', 'Gagal Total')->count();
+        $accounting_account_count = AccountingAccount::where('name', 'Gagal Total')->count();
+        $pos_account_count = Account::where('name', 'Gagal Total')->count();
+
+        $this->assertEquals(0, $category_count, "ExpenseCategory was not rolled back!");
+        $this->assertEquals(0, $accounting_account_count, "AccountingAccount was not rolled back!");
+        $this->assertEquals(0, $pos_account_count, "POS Account was not rolled back!");
+    }
+
+    /**
+     * Test hotfix migration retroactively synchronizes old expense categories.
+     */
+    public function testSyncExistingExpenseCategoriesMigration()
+    {
+        $business_id = 1;
+
+        // 1. Create cash account
+        $cash_account = AccountingAccount::create([
+            'name' => 'Kas Toko',
+            'business_id' => $business_id,
+            'account_primary_type' => 'asset',
+            'account_sub_type_id' => 3,
+            'status' => 'active',
+        ]);
+
+        $location = BusinessLocation::create([
+            'business_id' => $business_id,
+            'accounting_default_map' => json_encode([]),
+        ]);
+
+        // Insert records using raw SQL insert to simulate unsynced states
+        \DB::table('expense_categories')->insert([
+            'id' => 101,
+            'name' => 'Cek System',
+            'business_id' => $business_id,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        \DB::table('accounting_accounts')->insert([
+            'id' => 201,
+            'name' => 'Cek System',
+            'business_id' => $business_id,
+            'account_primary_type' => 'expenses',
+            'account_sub_type_id' => 14,
+            'detail_type_id' => 138,
+            'status' => 'active',
+            'created_by' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        \DB::table('expense_categories')->insert([
+            'id' => 102,
+            'name' => 'Ini Uji Coba',
+            'business_id' => $business_id,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Verify pre-conditions
+        $this->assertNull(Account::where('name', 'Cek System')->first());
+        $this->assertNull(AccountingAccount::where('name', 'Ini Uji Coba')->first());
+        $this->assertNull(Account::where('name', 'Ini Uji Coba')->first());
+
+        // 2. Run Migration
+        $migration = new \SyncExistingExpenseCategories();
+        $migration->up();
+
+        // 3. Verify 'Cek System' is now synchronized
+        $posAcc1 = Account::where('name', 'Cek System')->first();
+        $this->assertNotNull($posAcc1);
+        $this->assertEquals(201, $posAcc1->accounting_account_id);
+
+        $accountingAcc1 = AccountingAccount::find(201);
+        $this->assertEquals($posAcc1->id, $accountingAcc1->account_id);
+
+        // 4. Verify 'Ini Uji Coba' is now synchronized
+        $accountingAcc2 = AccountingAccount::where('name', 'Ini Uji Coba')->first();
+        $this->assertNotNull($accountingAcc2);
+
+        $posAcc2 = Account::where('name', 'Ini Uji Coba')->first();
+        $this->assertNotNull($posAcc2);
+
+        $this->assertEquals($accountingAcc2->id, $posAcc2->accounting_account_id);
+        $this->assertEquals($posAcc2->id, $accountingAcc2->account_id);
+
+        // 5. Verify mappings are created under Business Location
+        $location->refresh();
+        $map = json_decode($location->accounting_default_map, true);
+
+        $this->assertArrayHasKey('expense_101', $map);
+        $this->assertEquals(201, $map['expense_101']['deposit_to']);
+        $this->assertEquals($cash_account->id, $map['expense_101']['payment_account']);
+
+        $this->assertArrayHasKey('expense_102', $map);
+        $this->assertEquals($accountingAcc2->id, $map['expense_102']['deposit_to']);
+        $this->assertEquals($cash_account->id, $map['expense_102']['payment_account']);
     }
 }
