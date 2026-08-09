@@ -146,6 +146,31 @@ class AutoMappingExpenseCategoryTest extends TestCase
             $table->timestamps();
         });
 
+        // Create transaction table for expense records
+        Schema::dropIfExists('transactions');
+        Schema::create('transactions', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('business_id');
+            $table->integer('location_id');
+            $table->string('type');
+            $table->decimal('final_total', 22, 4)->default(0);
+            $table->integer('expense_category_id')->nullable();
+            $table->string('ref_no')->nullable();
+            $table->string('invoice_no')->nullable();
+            $table->timestamps();
+        });
+
+        // Create transaction_payments table
+        Schema::dropIfExists('transaction_payments');
+        Schema::create('transaction_payments', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('transaction_id');
+            $table->decimal('amount', 22, 4)->default(0);
+            $table->integer('account_id')->nullable();
+            $table->integer('is_return')->default(0);
+            $table->timestamps();
+        });
+
         // Reset sync states
         Account::$is_syncing = false;
         AccountingAccount::$is_syncing = false;
@@ -480,5 +505,85 @@ class AutoMappingExpenseCategoryTest extends TestCase
         $this->assertArrayHasKey('expense_102', $map);
         $this->assertEquals($accountingAcc2->id, $map['expense_102']['deposit_to']);
         $this->assertEquals($cash_account->id, $map['expense_102']['payment_account']);
+    }
+
+    /**
+     * Test dynamic payment account resolution for expenses from transaction_payments.
+     */
+    public function testExpenseCategoryDynamicPaymentAccountFromActualPayments()
+    {
+        $business_id = 1;
+
+        // 1. Create Kas and Bank accounts
+        $cash_account = AccountingAccount::create([
+            'id' => 301,
+            'name' => 'Kas Toko',
+            'business_id' => $business_id,
+            'account_primary_type' => 'asset',
+            'account_sub_type_id' => 3,
+            'status' => 'active',
+        ]);
+
+        $bank_pos_account = Account::create([
+            'name' => 'Bank Mandiri',
+            'business_id' => $business_id,
+            'account_number' => '1234',
+        ]);
+
+        $bank_accounting_account = AccountingAccount::find($bank_pos_account->accounting_account_id);
+        $this->assertNotNull($bank_accounting_account);
+
+        $location = BusinessLocation::create([
+            'business_id' => $business_id,
+            'accounting_default_map' => json_encode([]),
+        ]);
+
+        // 2. Create expense category AFTER location is created
+        $category = ExpenseCategory::create([
+            'name' => 'Gosend',
+            'business_id' => $business_id
+        ]);
+
+        $expense_accounting_account = AccountingAccount::where('name', 'Gosend')->first();
+        $this->assertNotNull($expense_accounting_account);
+
+        // 3. Create expense transaction using Model so it can be queried via standard Eloquent methods
+        $expense = \App\Transaction::create([
+            'business_id' => $business_id,
+            'location_id' => $location->id,
+            'type' => 'expense',
+            'final_total' => 25000,
+            'expense_category_id' => $category->id,
+        ]);
+
+        // 4. Create transaction payment selecting "Bank Mandiri" account
+        \DB::table('transaction_payments')->insert([
+            'id' => 901,
+            'transaction_id' => $expense->id,
+            'amount' => 25000,
+            'account_id' => $bank_pos_account->id, // Bank Mandiri
+            'is_return' => 0,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // 5. Trigger MapExpenseTransactions
+        $listener = new \Modules\Accounting\Listeners\MapExpenseTransactions();
+        $event = new \stdClass();
+        $event->expense = $expense;
+
+        $listener->handle($event);
+
+        // 6. Verify that the Double-Entry Accounting Credit leg points to Bank Mandiri (ID 401's accounting_account_id)
+        // instead of the default Kas Toko (ID 301) from mapping!
+        $journal_entries = AccountingAccountsTransaction::where('transaction_id', $expense->id)->get();
+        $this->assertCount(2, $journal_entries);
+
+        $debit_entry = $journal_entries->where('type', 'debit')->first();
+        $credit_entry = $journal_entries->where('type', 'credit')->first();
+
+        $this->assertEquals($expense_accounting_account->id, $debit_entry->accounting_account_id);
+        $this->assertEquals($bank_accounting_account->id, $credit_entry->accounting_account_id, "The credit leg should point to Bank Mandiri account!");
+        $this->assertEquals(25000, $credit_entry->amount);
     }
 }
