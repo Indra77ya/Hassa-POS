@@ -180,6 +180,43 @@
             var itemOffset = activeItem.offset().top - sidebar.offset().top + sidebar.scrollTop();
             sidebar.scrollTop(itemOffset - (containerHeight / 2));
         }
+
+        // Auto-select Cash Account when Cash Payment Method is selected
+        $(document).on('change', '.payment_types_dropdown', function() {
+            var payment_type = $(this).val();
+            if (payment_type === 'cash') {
+                var payment_row = $(this).closest('.payment_row');
+                var account_dropdown = payment_row.find('.account-dropdown, select#account_id');
+                if (account_dropdown.length) {
+                    var target_val = '';
+                    account_dropdown.find('option').each(function() {
+                        if ($(this).attr('data-is-cash') === 'true') {
+                            target_val = $(this).val();
+                            return false; // Break loop
+                        }
+                    });
+                    if (target_val !== '') {
+                        account_dropdown.val(target_val).trigger('change');
+                    }
+                }
+            }
+        });
+
+        // Trigger change logic on document ready for any default Cash payment types
+        $('.payment_types_dropdown').each(function() {
+            if ($(this).val() === 'cash') {
+                $(this).trigger('change');
+            }
+        });
+
+        // Trigger change logic on shown modal for any default Cash payment types
+        $(document).on('shown.bs.modal', function (e) {
+            $(e.target).find('.payment_types_dropdown').each(function() {
+                if ($(this).val() === 'cash') {
+                    $(this).trigger('change');
+                }
+            });
+        });
     });
 </script>
 

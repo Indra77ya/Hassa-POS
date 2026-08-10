@@ -122,7 +122,7 @@
 	@include('expense.recur_expense_form_part')
 	@component('components.widget', ['class' => 'box-solid', 'id' => "payment_rows_div", 'title' => __('purchase.add_payment')])
 	<div class="payment_row">
-		@include('sale_pos.partials.payment_row_form', ['row_index' => 0, 'show_date' => true])
+		@include('sale_pos.partials.payment_row_form', ['row_index' => 0, 'show_date' => true, 'payment_account_required' => true])
 		<hr>
 		<div class="row">
 			<div class="col-sm-12">

@@ -91,7 +91,7 @@
 
             <div class="payment_row">
                 <h4>@lang('purchase.add_payment'):</h4>
-                @include('sale_pos.partials.payment_row_form', ['row_index' => 0, 'show_date' => true])
+                @include('sale_pos.partials.payment_row_form', ['row_index' => 0, 'show_date' => true, 'payment_account_required' => true])
                 <hr>
                 <div class="row">
                     <div class="col-sm-12">

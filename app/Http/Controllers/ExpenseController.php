@@ -340,7 +340,7 @@ class ExpenseController extends Controller
         //Accounts
         $accounts = [];
         if ($this->moduleUtil->isModuleEnabled('account')) {
-            $accounts = Account::forDropdown($business_id, true, false, true, true);
+            $accounts = Account::forDropdown($business_id, false, false, true, true);
         }
 
         if (request()->ajax()) {
@@ -376,6 +376,26 @@ class ExpenseController extends Controller
             $request->validate([
                 'document' => 'file|max:'.(config('constants.document_size_limit') / 1000),
             ]);
+
+            // Validate Payment Account if Account module is enabled
+            if ($this->moduleUtil->isModuleEnabled('account')) {
+                $payments = $request->input('payment');
+                if (!empty($payments)) {
+                    foreach ($payments as $payment) {
+                        $amount = $this->transactionUtil->num_uf($payment['amount'] ?? 0);
+                        if ($amount > 0 && empty($payment['account_id'])) {
+                            $output = [
+                                'success' => 0,
+                                'msg' => __('messages.something_went_wrong') . ' / Payment Account is required.',
+                            ];
+                            if (request()->ajax()) {
+                                return $output;
+                            }
+                            return redirect('expenses')->with('status', $output);
+                        }
+                    }
+                }
+            }
 
             $user_id = $request->session()->get('user.id');
 

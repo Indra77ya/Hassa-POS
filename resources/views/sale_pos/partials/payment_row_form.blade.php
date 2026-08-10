@@ -120,14 +120,38 @@
             <div class="clearfix"></div>
         @endif
 	@if(!empty($accounts))
+		@php
+			$accounts_attributes = [];
+			if (!empty($accounts)) {
+				$cash_account_ids = [];
+				if (class_exists(\Modules\Accounting\Entities\AccountingAccount::class)) {
+					$cash_account_ids = \Modules\Accounting\Entities\AccountingAccount::where('account_sub_type_id', 3)
+						->pluck('id')
+						->toArray();
+				}
+				foreach ($accounts as $id => $name) {
+					if (empty($id)) continue;
+					$acc = \App\Account::find($id);
+					$is_cash = false;
+					if ($acc) {
+						if (!empty($acc->accounting_account_id) && in_array($acc->accounting_account_id, $cash_account_ids)) {
+							$is_cash = true;
+						} elseif ($acc->account_type && $acc->account_type->fixed_key === 'kas_dan_bank') {
+							$is_cash = true;
+						}
+					}
+					$accounts_attributes[$id] = ['data-is-cash' => $is_cash ? 'true' : 'false'];
+				}
+			}
+		@endphp
 		<div class="{{$col_class}}">
 			<div class="form-group @if($readonly) hide @endif">
-				{!! Form::label("account_$row_index" , __('lang_v1.payment_account') . ':') !!}
+				{!! Form::label("account_$row_index" , __('lang_v1.payment_account') . ':' . (!empty($payment_account_required) ? '*' : '')) !!}
 				<div class="input-group">
 					<span class="input-group-addon">
 						<i class="fas fa-money-bill-alt"></i>
 					</span>
-					{!! Form::select("payment[$row_index][account_id]", $accounts, !empty($payment_line['account_id']) ? $payment_line['account_id'] : '' , ['class' => 'form-control select2 account-dropdown', 'id' => !$readonly ? "account_$row_index" : "account_advance_$row_index", 'style' => 'width:100%;', 'disabled' => $readonly]); !!}
+					{!! Form::select("payment[$row_index][account_id]", $accounts, !empty($payment_line['account_id']) ? $payment_line['account_id'] : '' , ['class' => 'form-control select2 account-dropdown', 'id' => !$readonly ? "account_$row_index" : "account_advance_$row_index", 'style' => 'width:100%;', 'disabled' => $readonly] + (!empty($payment_account_required) ? ['required' => 'required'] : []), $accounts_attributes); !!}
 				</div>
 			</div>
 		</div>

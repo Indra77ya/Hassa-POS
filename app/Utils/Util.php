@@ -140,6 +140,10 @@ class Util
      */
     public function payment_types($location = null, $show_advance = false, $business_id = null)
     {
+        if (empty($business_id) && session()->has('user.business_id')) {
+            $business_id = session()->get('user.business_id');
+        }
+
         if (! empty($location)) {
             $location = is_object($location) ? $location : BusinessLocation::find($location);
 
@@ -157,13 +161,12 @@ class Util
 
         $payment_types = ['cash' => __('lang_v1.cash'), 'card' => __('lang_v1.card'), 'cheque' => __('lang_v1.cheque'), 'bank_transfer' => __('lang_v1.bank_transfer'), 'other' => __('lang_v1.other')];
 
-        $payment_types['custom_pay_1'] = ! empty($custom_labels['payments']['custom_pay_1']) ? $custom_labels['payments']['custom_pay_1'] : __('lang_v1.custom_payment', ['number' => 1]);
-        $payment_types['custom_pay_2'] = ! empty($custom_labels['payments']['custom_pay_2']) ? $custom_labels['payments']['custom_pay_2'] : __('lang_v1.custom_payment', ['number' => 2]);
-        $payment_types['custom_pay_3'] = ! empty($custom_labels['payments']['custom_pay_3']) ? $custom_labels['payments']['custom_pay_3'] : __('lang_v1.custom_payment', ['number' => 3]);
-        $payment_types['custom_pay_4'] = ! empty($custom_labels['payments']['custom_pay_4']) ? $custom_labels['payments']['custom_pay_4'] : __('lang_v1.custom_payment', ['number' => 4]);
-        $payment_types['custom_pay_5'] = ! empty($custom_labels['payments']['custom_pay_5']) ? $custom_labels['payments']['custom_pay_5'] : __('lang_v1.custom_payment', ['number' => 5]);
-        $payment_types['custom_pay_6'] = ! empty($custom_labels['payments']['custom_pay_6']) ? $custom_labels['payments']['custom_pay_6'] : __('lang_v1.custom_payment', ['number' => 6]);
-        $payment_types['custom_pay_7'] = ! empty($custom_labels['payments']['custom_pay_7']) ? $custom_labels['payments']['custom_pay_7'] : __('lang_v1.custom_payment', ['number' => 7]);
+        for ($i = 1; $i <= 7; $i++) {
+            $key = 'custom_pay_' . $i;
+            if (! empty($custom_labels['payments'][$key])) {
+                $payment_types[$key] = $custom_labels['payments'][$key];
+            }
+        }
 
         //Unset payment types if not enabled in business location
         if (! empty($location)) {

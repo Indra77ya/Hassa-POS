@@ -156,14 +156,38 @@
           </div>
         </div>
         @if(!empty($accounts))
+          @php
+            $accounts_attributes = [];
+            if (!empty($accounts)) {
+              $cash_account_ids = [];
+              if (class_exists(\Modules\Accounting\Entities\AccountingAccount::class)) {
+                $cash_account_ids = \Modules\Accounting\Entities\AccountingAccount::where('account_sub_type_id', 3)
+                  ->pluck('id')
+                  ->toArray();
+              }
+              foreach ($accounts as $id => $name) {
+                if (empty($id)) continue;
+                $acc = \App\Account::find($id);
+                $is_cash = false;
+                if ($acc) {
+                  if (!empty($acc->accounting_account_id) && in_array($acc->accounting_account_id, $cash_account_ids)) {
+                    $is_cash = true;
+                  } elseif ($acc->account_type && $acc->account_type->fixed_key === 'kas_dan_bank') {
+                    $is_cash = true;
+                  }
+                }
+                $accounts_attributes[$id] = ['data-is-cash' => $is_cash ? 'true' : 'false'];
+              }
+            }
+          @endphp
           <div class="col-md-6">
             <div class="form-group">
-              {!! Form::label("account_id" , __('lang_v1.payment_account') . ':') !!}
+              {!! Form::label("account_id" , __('lang_v1.payment_account') . ':' . (in_array($transaction->type, ['expense', 'expense_refund']) ? '*' : '')) !!}
               <div class="input-group">
                 <span class="input-group-addon">
                   <i class="fas fa-money-bill-alt"></i>
                 </span>
-                {!! Form::select("account_id", $accounts, !empty($payment_line->account_id) ? $payment_line->account_id : '' , ['class' => 'form-control select2', 'id' => "account_id", 'style' => 'width:100%;']); !!}
+                {!! Form::select("account_id", $accounts, !empty($payment_line->account_id) ? $payment_line->account_id : '' , ['class' => 'form-control select2', 'id' => "account_id", 'style' => 'width:100%;'] + (in_array($transaction->type, ['expense', 'expense_refund']) ? ['required' => 'required'] : []), $accounts_attributes); !!}
               </div>
             </div>
           </div>
