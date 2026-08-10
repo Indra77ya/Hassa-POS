@@ -93,6 +93,12 @@ class TransactionPaymentController extends Controller
                     $inputs['transaction_no'] = $request->input('transaction_no_3');
                 }
 
+                if (in_array($transaction->type, ['expense', 'expense_refund']) && $this->moduleUtil->isModuleEnabled('account')) {
+                    if ($inputs['amount'] > 0 && empty($request->input('account_id'))) {
+                        throw new \Exception('Payment account is required for Expense payments.');
+                    }
+                }
+
                 if (! empty($request->input('account_id')) && $inputs['method'] != 'advance') {
                     $inputs['account_id'] = $request->input('account_id');
                 }
@@ -219,7 +225,8 @@ class TransactionPaymentController extends Controller
             $payment_types = $this->transactionUtil->payment_types($transaction->location);
 
             //Accounts
-            $accounts = $this->moduleUtil->accountsDropdown($business_id, true, false, true, true);
+            $prepend_none = in_array($transaction->type, ['expense', 'expense_refund']) ? false : true;
+            $accounts = $this->moduleUtil->accountsDropdown($business_id, $prepend_none, false, true, true);
 
             return view('transaction_payment.edit_payment_row')
                         ->with(compact('transaction', 'payment_types', 'payment_line', 'accounts'));
@@ -256,11 +263,18 @@ class TransactionPaymentController extends Controller
                 $inputs['transaction_no'] = $request->input('transaction_no_3');
             }
 
+            $payment = TransactionPayment::where('method', '!=', 'advance')->findOrFail($id);
+            $transaction = Transaction::findOrFail($payment->transaction_id);
+
+            if (in_array($transaction->type, ['expense', 'expense_refund']) && $this->moduleUtil->isModuleEnabled('account')) {
+                if ($inputs['amount'] > 0 && empty($request->input('account_id'))) {
+                    throw new \Exception('Payment account is required for Expense payments.');
+                }
+            }
+
             if (! empty($request->input('account_id'))) {
                 $inputs['account_id'] = $request->input('account_id');
             }
-
-            $payment = TransactionPayment::where('method', '!=', 'advance')->findOrFail($id);
 
             if (! empty($request->input('denominations'))) {
                 $this->transactionUtil->updateCashDenominations($payment, $request->input('denominations'));
@@ -414,7 +428,8 @@ class TransactionPaymentController extends Controller
                 $payment_line->paid_on = \Carbon::now()->toDateTimeString();
 
                 //Accounts
-                $accounts = $this->moduleUtil->accountsDropdown($business_id, true, false, true, true);
+                $prepend_none = in_array($transaction->type, ['expense', 'expense_refund']) ? false : true;
+                $accounts = $this->moduleUtil->accountsDropdown($business_id, $prepend_none, false, true, true);
 
                 $view = view('transaction_payment.payment_row')
                 ->with(compact('transaction', 'payment_types', 'payment_line', 'amount_formated', 'accounts'))->render();
