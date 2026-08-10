@@ -1117,4 +1117,70 @@ class TransactionMappingTest extends TestCase
         $this->assertEquals(680000, $debit_sum);
         $this->assertEquals(680000, $credit_sum);
     }
+
+    /**
+     * Test autoMapSettings sets correct mappings but keeps the general expense mapping null.
+     */
+    public function testAutoMapSettingsKeepsExpenseNull()
+    {
+        // 1. Update/insert any specific accounts we need to map correctly.
+        // Let's ensure Pendapatan Penjualan has status active and correct name
+        DB::table('accounting_accounts')->where('id', 12)->update([
+            'status' => 'active'
+        ]);
+
+        DB::table('accounting_accounts')->insert([
+            'id' => 16,
+            'name' => 'Beban Listrik & Air',
+            'business_id' => 1,
+            'account_primary_type' => 'expense',
+            'account_sub_type_id' => 14,
+            'status' => 'active'
+        ]);
+
+        // Clear accounting_default_map first
+        DB::table('business_locations')->where('id', 1)->update([
+            'accounting_default_map' => json_encode([])
+        ]);
+
+        // Mock login and session
+        $user = \Mockery::mock(\App\User::class)->makePartial();
+        $user->shouldReceive('can')->with('superadmin')->andReturn(true);
+        $user->shouldReceive('permitted_locations')->andReturn('all');
+        $user->shouldReceive('hasRole')->andReturn(true);
+        $user->id = 1;
+        $user->business_id = 1;
+        $user->user_type = 'user';
+        $user->allow_login = 1;
+        $this->actingAs($user);
+
+        session([
+            'user.business_id' => 1,
+            'user' => ['id' => 1, 'business_id' => 1],
+            'business.time_zone' => 'Asia/Jakarta',
+            'business.date_format' => 'Y-m-d',
+        ]);
+
+        // Request the autoMapSettings endpoint
+        $response = $this->get('/accounting/auto-map-settings');
+
+        // Check it redirects back
+        $response->assertStatus(302);
+
+        // Retrieve modified business location default map
+        $location = BusinessLocation::find(1);
+        $this->assertNotNull($location);
+
+        $map = json_decode($location->accounting_default_map, true);
+        $this->assertIsArray($map);
+
+        // Other maps should be set correctly if accounts match
+        $this->assertEquals(12, $map['sale']['payment_account']); // Pendapatan Penjualan
+        $this->assertEquals(11, $map['sale']['deposit_to']);      // Piutang Usaha
+
+        // 'expense' map should have null values specifically
+        $this->assertArrayHasKey('expense', $map);
+        $this->assertNull($map['expense']['payment_account']);
+        $this->assertNull($map['expense']['deposit_to']);
+    }
 }
