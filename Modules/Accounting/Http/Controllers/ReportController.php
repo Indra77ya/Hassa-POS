@@ -292,6 +292,30 @@ class ReportController extends Controller
                     ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
                     ->get();
 
+        $current_assets = AccountingAccount::join('accounting_accounts_transactions as AAT',
+                                'AAT.accounting_account_id', '=', 'accounting_accounts.id')
+                    ->join('accounting_account_types as AATP',
+                                'AATP.id', '=', 'accounting_accounts.account_sub_type_id')
+                    ->whereDate('AAT.operation_date', '<=', $end_date)
+                    ->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
+                    ->where('accounting_accounts.business_id', $business_id)
+                    ->whereIn('accounting_accounts.account_primary_type', ['asset'])
+                    ->whereIn('accounting_accounts.account_sub_type_id', [1, 2, 3])
+                    ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
+                    ->get();
+
+        $non_current_assets = AccountingAccount::join('accounting_accounts_transactions as AAT',
+                                'AAT.accounting_account_id', '=', 'accounting_accounts.id')
+                    ->join('accounting_account_types as AATP',
+                                'AATP.id', '=', 'accounting_accounts.account_sub_type_id')
+                    ->whereDate('AAT.operation_date', '<=', $end_date)
+                    ->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
+                    ->where('accounting_accounts.business_id', $business_id)
+                    ->whereIn('accounting_accounts.account_primary_type', ['asset'])
+                    ->whereIn('accounting_accounts.account_sub_type_id', [4, 5])
+                    ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
+                    ->get();
+
         $liabilities = AccountingAccount::join('accounting_accounts_transactions as AAT',
                                 'AAT.accounting_account_id', '=', 'accounting_accounts.id')
                     ->join('accounting_account_types as AATP',
@@ -335,7 +359,7 @@ class ReportController extends Controller
         $current_period_net_profit = $total_income - $total_expenses;
 
         return view('accounting::report.balance_sheet')
-            ->with(compact('assets', 'liabilities', 'equities', 'current_period_net_profit', 'start_date', 'end_date'));
+            ->with(compact('assets', 'current_assets', 'non_current_assets', 'liabilities', 'equities', 'current_period_net_profit', 'start_date', 'end_date'));
     }
 
     public function accountReceivableAgeingReport()

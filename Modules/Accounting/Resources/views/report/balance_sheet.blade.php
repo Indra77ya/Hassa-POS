@@ -47,21 +47,55 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($assets as $asset)
+                                <!-- ASET LANCAR -->
+                                <tr style="background-color: #f9f9f9;">
+                                    <th colspan="2" style="padding-left: 10px; color: #444;"><strong>ASET LANCAR</strong></th>
+                                </tr>
+                                @php $total_current_assets = 0; @endphp
+                                @foreach($current_assets as $asset)
                                     @if($asset->balance != 0)
-                                        @php $total_assets += $asset->balance @endphp
+                                        @php $total_current_assets += $asset->balance; @endphp
                                         <tr>
-                                            <td style="padding-left: 20px;">{{$asset->name}}</td>
+                                            <td style="padding-left: 25px;">{{$asset->name}}</td>
                                             <td class="text-right" style="width: 35%;">@format_currency($asset->balance)</td>
                                         </tr>
                                     @endif
-                                    @endforeach
+                                @endforeach
+                                @if($total_current_assets == 0)
+                                    <tr>
+                                        <td colspan="2" class="text-center text-muted" style="padding-left: 25px;"><em>Tidak ada aset lancar tercatat</em></td>
+                                    </tr>
+                                @endif
+                                <tr style="background-color: #fafafa; border-top: 1px solid #ddd;">
+                                    <th style="padding-left: 15px;"><strong>Jumlah Aset Lancar</strong></th>
+                                    <th class="text-right"><strong>@format_currency($total_current_assets)</strong></th>
+                                </tr>
 
-                                    @if($total_assets == 0)
+                                <!-- ASET TIDAK LANCAR -->
+                                <tr style="background-color: #f9f9f9;">
+                                    <th colspan="2" style="padding-left: 10px; color: #444; border-top: 2px solid #ddd;"><strong>ASET TIDAK LANCAR</strong></th>
+                                </tr>
+                                @php $total_non_current_assets = 0; @endphp
+                                @foreach($non_current_assets as $asset)
+                                    @if($asset->balance != 0)
+                                        @php $total_non_current_assets += $asset->balance; @endphp
                                         <tr>
-                                            <td colspan="2" class="text-center text-muted"><em>Tidak ada aset tercatat</em></td>
+                                            <td style="padding-left: 25px;">{{$asset->name}}</td>
+                                            <td class="text-right" style="width: 35%;">@format_currency($asset->balance)</td>
                                         </tr>
                                     @endif
+                                @endforeach
+                                @if($total_non_current_assets == 0)
+                                    <tr>
+                                        <td colspan="2" class="text-center text-muted" style="padding-left: 25px;"><em>Tidak ada aset tidak lancar tercatat</em></td>
+                                    </tr>
+                                @endif
+                                <tr style="background-color: #fafafa; border-top: 1px solid #ddd;">
+                                    <th style="padding-left: 15px;"><strong>Jumlah Aset Tidak Lancar</strong></th>
+                                    <th class="text-right"><strong>@format_currency($total_non_current_assets)</strong></th>
+                                </tr>
+
+                                @php $total_assets = $total_current_assets + $total_non_current_assets; @endphp
                             </tbody>
                         </table>
                     </div>
