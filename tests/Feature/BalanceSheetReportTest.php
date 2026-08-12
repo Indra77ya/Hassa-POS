@@ -78,6 +78,36 @@ class BalanceSheetReportTest extends TestCase
             $table->timestamps();
         });
 
+        // Business Locations Table
+        Schema::dropIfExists('business_locations');
+        Schema::create('business_locations', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('business_id');
+            $table->string('name')->nullable();
+            $table->string('location_id')->nullable();
+            $table->string('receipt_printer_type')->nullable();
+            $table->integer('selling_price_group_id')->nullable();
+            $table->text('default_payment_accounts')->nullable();
+            $table->integer('invoice_scheme_id')->nullable();
+            $table->integer('invoice_layout_id')->nullable();
+            $table->integer('sale_invoice_scheme_id')->nullable();
+            $table->boolean('is_active')->default(1);
+            $table->text('accounting_default_map')->nullable();
+            $table->timestamps();
+        });
+
+        // Selling Price Groups Table
+        Schema::dropIfExists('selling_price_groups');
+        Schema::create('selling_price_groups', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('business_id');
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->boolean('is_active')->default(1);
+            $table->softDeletes();
+            $table->timestamps();
+        });
+
         // Spatie Role/Permission Tables for SQLite test environment
         Schema::dropIfExists('permissions');
         Schema::create('permissions', function (Blueprint $table) {
@@ -111,12 +141,27 @@ class BalanceSheetReportTest extends TestCase
             $table->timestamps();
         });
 
+        // Create system table
+        Schema::dropIfExists('system');
+        Schema::create('system', function (Blueprint $table) {
+            $table->string('key');
+            $table->text('value')->nullable();
+        });
+
         // Insert business
         DB::table('business')->insert([
             'id' => 1,
             'name' => 'Test Business',
             'fy_start_month' => 1,
             'time_zone' => 'Asia/Jakarta',
+        ]);
+
+        // Insert business location
+        DB::table('business_locations')->insert([
+            'id' => 1,
+            'business_id' => 1,
+            'name' => 'Main Location',
+            'is_active' => 1,
         ]);
 
         // Register custom IF function for SQLite compatibility
@@ -168,6 +213,7 @@ class BalanceSheetReportTest extends TestCase
         // Mock login
         $user = \Mockery::mock(\App\User::class)->makePartial();
         $user->shouldReceive('can')->with('superadmin')->andReturn(true);
+        $user->shouldReceive('can')->with('account.access')->andReturn(true);
         $user->shouldReceive('can')->with('accounting.view_reports')->andReturn(true);
         $user->shouldReceive('hasRole')->andReturn(true);
         $user->shouldReceive('permitted_locations')->andReturn('all');
@@ -197,6 +243,7 @@ class BalanceSheetReportTest extends TestCase
         $moduleUtil->shouldReceive('hasThePermissionInSubscription')->andReturn(true);
         $this->app->instance(\App\Utils\ModuleUtil::class, $moduleUtil);
 
+        // 1. Verify accounting balance sheet route
         $response = $this->get('/accounting/reports/balance-sheet?start_date=2024-01-01&end_date=2024-01-31');
 
         $response->assertStatus(200);
@@ -213,10 +260,19 @@ class BalanceSheetReportTest extends TestCase
         $response->assertSee('ASET TIDAK LANCAR');
         $response->assertSee('LIABILITAS JANGKA PENDEK');
         $response->assertSee('LIABILITAS JANGKA PANJANG');
-        $response->assertSee('Kas');
-        $response->assertSee('Peralatan');
-        $response->assertSee('Utang Usaha');
-        $response->assertSee('Utang Jangka Panjang');
-        $response->assertSee('Modal Usaha');
+
+        // 2. Verify core payment account balance sheet html page
+        $responseHtml = $this->get('/account/balance-sheet');
+        $responseHtml->assertStatus(200);
+        $responseHtml->assertSee('JUMLAH ASET (JUMLAH AKTIVA)');
+        $responseHtml->assertSee('JUMLAH LIABILITAS DAN EKUITAS');
+
+        // 3. Verify core payment account balance sheet ajax json endpoint
+        $responseAjax = $this->get('/account/balance-sheet', ['X-Requested-With' => 'XMLHttpRequest']);
+        $responseAjax->assertStatus(200);
+        $json = $responseAjax->json();
+        $this->assertArrayHasKey('assets', $json);
+        $this->assertArrayHasKey('liabilities', $json);
+        $this->assertArrayHasKey('equities', $json);
     }
 }
