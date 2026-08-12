@@ -32,8 +32,10 @@
             <div class="box-body">
                 
                 @php
-                    $total_assets = 0;
-                    $total_liabilities = 0;
+                    $sum_current_assets = 0;
+                    $sum_non_current_assets = 0;
+                    $sum_current_liabilities = 0;
+                    $sum_non_current_liabilities = 0;
                     $total_equities = 0;
                 @endphp
 
@@ -47,21 +49,53 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($assets as $asset)
+                                <!-- ASET LANCAR -->
+                                <tr style="background-color: #f9f9f9;">
+                                    <th colspan="2" style="padding-left: 10px; color: #333;"><strong>ASET LANCAR</strong></th>
+                                </tr>
+                                @foreach($current_assets as $asset)
                                     @if($asset->balance != 0)
-                                        @php $total_assets += $asset->balance @endphp
+                                        @php $sum_current_assets += $asset->balance @endphp
                                         <tr>
                                             <td style="padding-left: 20px;">{{$asset->name}}</td>
                                             <td class="text-right" style="width: 35%;">@format_currency($asset->balance)</td>
                                         </tr>
                                     @endif
-                                    @endforeach
+                                @endforeach
 
-                                    @if($total_assets == 0)
+                                @if($sum_current_assets == 0)
+                                    <tr>
+                                        <td colspan="2" class="text-center text-muted" style="font-style: italic;">Tidak ada aset lancar tercatat</td>
+                                    </tr>
+                                @endif
+                                <tr style="background-color: #fafafa; border-top: 1px solid #ddd;">
+                                    <th style="padding-left: 15px;"><strong>Jumlah Aset Lancar</strong></th>
+                                    <th class="text-right"><strong>@format_currency($sum_current_assets)</strong></th>
+                                </tr>
+
+                                <!-- ASET TIDAK LANCAR -->
+                                <tr style="background-color: #f9f9f9;">
+                                    <th colspan="2" style="padding-left: 10px; color: #333; border-top: 2px solid #ddd;"><strong>ASET TIDAK LANCAR</strong></th>
+                                </tr>
+                                @foreach($non_current_assets as $asset)
+                                    @if($asset->balance != 0)
+                                        @php $sum_non_current_assets += $asset->balance @endphp
                                         <tr>
-                                            <td colspan="2" class="text-center text-muted"><em>Tidak ada aset tercatat</em></td>
+                                            <td style="padding-left: 20px;">{{$asset->name}}</td>
+                                            <td class="text-right" style="width: 35%;">@format_currency($asset->balance)</td>
                                         </tr>
                                     @endif
+                                @endforeach
+
+                                @if($sum_non_current_assets == 0)
+                                    <tr>
+                                        <td colspan="2" class="text-center text-muted" style="font-style: italic;">Tidak ada aset tidak lancar tercatat</td>
+                                    </tr>
+                                @endif
+                                <tr style="background-color: #fafafa; border-top: 1px solid #ddd;">
+                                    <th style="padding-left: 15px;"><strong>Jumlah Aset Tidak Lancar</strong></th>
+                                    <th class="text-right"><strong>@format_currency($sum_non_current_assets)</strong></th>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -76,31 +110,65 @@
                             </thead>
                             <tbody>
                                 <!-- KEWAJIBAN / LIABILITAS -->
-                                <tr style="background-color: #f5f5f5;">
-                                    <th colspan="2" style="padding-left: 10px; color: #444;"><strong>LIABILITAS (KEWAJIBAN / HUTANG)</strong></th>
+                                <tr style="background-color: #f9f9f9;">
+                                    <th colspan="2" style="padding-left: 10px; color: #333;"><strong>LIABILITAS</strong></th>
                                 </tr>
-                                @foreach($liabilities as $liability)
+
+                                <!-- LIABILITAS JANGKA PENDEK -->
+                                <tr style="background-color: #fafafa;">
+                                    <th colspan="2" style="padding-left: 15px; font-weight: normal; color: #555;"><em>LIABILITAS JANGKA PENDEK</em></th>
+                                </tr>
+                                @foreach($current_liabilities as $liability)
                                     @if($liability->balance != 0)
-                                        @php $total_liabilities += $liability->balance @endphp
+                                        @php $sum_current_liabilities += $liability->balance @endphp
                                         <tr>
-                                            <td style="padding-left: 20px;">{{$liability->name}}</td>
+                                            <td style="padding-left: 25px;">{{$liability->name}}</td>
                                             <td class="text-right" style="width: 35%;">@format_currency($liability->balance)</td>
                                         </tr>
                                     @endif
                                 @endforeach
-                                @if($total_liabilities == 0)
+                                @if($sum_current_liabilities == 0)
                                     <tr>
-                                        <td colspan="2" class="text-center text-muted"><em>Tidak ada liabilitas tercatat</em></td>
+                                        <td colspan="2" class="text-center text-muted" style="font-style: italic; padding-left: 25px;">Tidak ada liabilitas jangka pendek tercatat</td>
                                     </tr>
                                 @endif
-                                <tr style="background-color: #fafafa; border-top: 1px solid #ddd;">
-                                    <th style="padding-left: 15px;"><strong>TOTAL LIABILITAS</strong></th>
+                                <tr style="border-top: 1px solid #ddd;">
+                                    <th style="padding-left: 20px; font-weight: normal; color: #666;">Jumlah Liabilitas Jangka Pendek</th>
+                                    <th class="text-right" style="font-weight: normal; color: #666;">@format_currency($sum_current_liabilities)</th>
+                                </tr>
+
+                                <!-- LIABILITAS JANGKA PANJANG -->
+                                <tr style="background-color: #fafafa; border-top: 1.5px solid #eee;">
+                                    <th colspan="2" style="padding-left: 15px; font-weight: normal; color: #555;"><em>LIABILITAS JANGKA PANJANG</em></th>
+                                </tr>
+                                @foreach($non_current_liabilities as $liability)
+                                    @if($liability->balance != 0)
+                                        @php $sum_non_current_liabilities += $liability->balance @endphp
+                                        <tr>
+                                            <td style="padding-left: 25px;">{{$liability->name}}</td>
+                                            <td class="text-right" style="width: 35%;">@format_currency($liability->balance)</td>
+                                        </tr>
+                                    @endif
+                                @endforeach
+                                @if($sum_non_current_liabilities == 0)
+                                    <tr>
+                                        <td colspan="2" class="text-center text-muted" style="font-style: italic; padding-left: 25px;">Tidak ada liabilitas jangka panjang tercatat</td>
+                                    </tr>
+                                @endif
+                                <tr style="border-top: 1px solid #ddd;">
+                                    <th style="padding-left: 20px; font-weight: normal; color: #666;">Jumlah Liabilitas Jangka Panjang</th>
+                                    <th class="text-right" style="font-weight: normal; color: #666;">@format_currency($sum_non_current_liabilities)</th>
+                                </tr>
+
+                                @php $total_liabilities = $sum_current_liabilities + $sum_non_current_liabilities; @endphp
+                                <tr style="background-color: #f5f5f5; border-top: 2px solid #ddd;">
+                                    <th style="padding-left: 15px;"><strong>Jumlah Liabilitas</strong></th>
                                     <th class="text-right"><strong>@format_currency($total_liabilities)</strong></th>
                                 </tr>
 
                                 <!-- EKUITAS / MODAL -->
-                                <tr style="background-color: #f5f5f5;">
-                                    <th colspan="2" style="padding-left: 10px; color: #444; border-top: 2px solid #ddd;"><strong>EKUITAS (MODAL)</strong></th>
+                                <tr style="background-color: #f9f9f9;">
+                                    <th colspan="2" style="padding-left: 10px; color: #333; border-top: 2px solid #ddd;"><strong>EKUITAS</strong></th>
                                 </tr>
                                 @foreach($equities as $equity)
                                     @if($equity->balance != 0)
@@ -115,12 +183,12 @@
                                 <!-- Laba Bersih Tahun Berjalan -->
                                 @php $total_equities += $current_period_net_profit; @endphp
                                 <tr>
-                                    <td style="padding-left: 20px;"><strong>Laba Bersih Tahun Berjalan</strong></td>
+                                    <td style="padding-left: 20px;">Laba Tahun Ini</td>
                                     <td class="text-right">@format_currency($current_period_net_profit)</td>
                                 </tr>
 
                                 <tr style="background-color: #fafafa; border-top: 1px solid #ddd;">
-                                    <th style="padding-left: 15px;"><strong>TOTAL EKUITAS</strong></th>
+                                    <th style="padding-left: 15px;"><strong>Jumlah Ekuitas</strong></th>
                                     <th class="text-right"><strong>@format_currency($total_equities)</strong></th>
                                 </tr>
                             </tbody>
@@ -133,8 +201,9 @@
                     <div class="col-md-6" style="border-right: 2px solid #ddd;">
                         <table class="table table-bordered">
                             <tbody>
+                                @php $total_assets = $sum_current_assets + $sum_non_current_assets; @endphp
                                 <tr class="success" style="font-size: 1.25em;">
-                                    <th><strong>TOTAL AKTIVA (ASET)</strong></th>
+                                    <th><strong>JUMLAH ASET (JUMLAH AKTIVA)</strong></th>
                                     <th class="text-right" style="width: 35%;"><strong>@format_currency($total_assets)</strong></th>
                                 </tr>
                             </tbody>
@@ -146,7 +215,7 @@
                             <tbody>
                                 @php $total_pasiva = $total_liabilities + $total_equities; @endphp
                                 <tr class="success" style="font-size: 1.25em;">
-                                    <th><strong>TOTAL PASIVA (LIABILITAS & EKUITAS)</strong></th>
+                                    <th><strong>JUMLAH LIABILITAS DAN EKUITAS</strong></th>
                                     <th class="text-right" style="width: 35%;"><strong>@format_currency($total_pasiva)</strong></th>
                                 </tr>
                             </tbody>
