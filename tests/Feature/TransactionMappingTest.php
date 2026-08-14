@@ -1183,4 +1183,49 @@ class TransactionMappingTest extends TestCase
         $this->assertNull($map['expense']['payment_account']);
         $this->assertNull($map['expense']['deposit_to']);
     }
+
+    public function testAccountingAccountsDropdown()
+    {
+        $user = \App\User::create([
+            'surname' => 'Mr',
+            'first_name' => 'Admin',
+            'username' => 'admin_test',
+            'email' => 'admin_test@test.com',
+            'password' => bcrypt('password'),
+            'business_id' => 1,
+        ]);
+
+        $this->actingAs($user);
+
+        // Seed some accounting accounts
+        DB::table('accounting_accounts')->insert([
+            ['id' => 100, 'name' => 'Peralatan', 'business_id' => 1, 'account_primary_type' => 'asset', 'account_sub_type_id' => 4, 'status' => 'active'],
+            ['id' => 101, 'name' => 'Kendaraan', 'business_id' => 1, 'account_primary_type' => 'asset', 'account_sub_type_id' => 4, 'status' => 'active'],
+        ]);
+
+        // Hit the accounting-dropdown endpoint with different parameters
+        // 1. No parameter (q or term)
+        $response = $this->get('/accounting/accounts-dropdown', [
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Accept' => 'application/json'
+        ]);
+        $response->assertStatus(200);
+        $this->assertCount(8, $response->json()); // 6 seeded in setUp + 2 here = 8
+
+        // 2. With 'q' search parameter
+        $responseQ = $this->get('/accounting/accounts-dropdown?q=Peralat', [
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Accept' => 'application/json'
+        ]);
+        $responseQ->assertStatus(200);
+        $this->assertCount(1, $responseQ->json());
+
+        // 3. With 'term' search parameter (which select2 sends)
+        $responseTerm = $this->get('/accounting/accounts-dropdown?term=Peralat', [
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Accept' => 'application/json'
+        ]);
+        $responseTerm->assertStatus(200);
+        $this->assertCount(1, $responseTerm->json());
+    }
 }
