@@ -3017,49 +3017,86 @@ $(document).on('click', '.service_modal_btn', function(e) {
 });
 
 $(document).on('change', '.payment_types_dropdown', function(e) {
-    var default_accounts = $('select#select_location_id').length ? 
-                $('select#select_location_id')
-                .find(':selected')
-                .data('default_payment_accounts') : $('#location_id').data('default_payment_accounts');
-    var payment_type = $(this).val();
-    var payment_row = $(this).closest('.payment_row');
-
-    //Validate max amount and disable account if advance 
-    var amount_element = payment_row.find('.payment-amount');
-    var account_dropdown = payment_row.find('.account-dropdown');
-    if (payment_type == 'advance') {
-        max_value = $('#advance_balance').val();
-        msg = $('#advance_balance').data('error-msg');
-        amount_element.rules('add', {
-            'max-value': max_value,
-            messages: {
-                'max-value': msg,
-            },
-        });
-        if (account_dropdown.length) {
-            account_dropdown.prop('disabled', true);
-            account_dropdown.trigger('change');
-            account_dropdown.closest('.form-group').addClass('hide');
-        }
-    } else {
-        amount_element.rules("remove", "max-value");
-        if (account_dropdown.length) {
-            account_dropdown.prop('disabled', false); 
-            account_dropdown.trigger('change');
-            account_dropdown.closest('.form-group').removeClass('hide');
-        }    
-    }
-
-    if (payment_type && payment_type != 'advance') {
-        var default_account = default_accounts && default_accounts[payment_type] && default_accounts[payment_type]['account'] ?
-            default_accounts[payment_type]['account'] : '';
+    try {
+        var default_accounts = $('select#select_location_id').length ?
+                    $('select#select_location_id')
+                    .find(':selected')
+                    .data('default_payment_accounts') : $('#location_id').data('default_payment_accounts');
+        var payment_type = $(this).val();
+        var payment_row = $(this).closest('.payment_row');
         var row_index = payment_row.find('.payment_row_index').val();
 
-        var select_account_dropdown = payment_row.find('select#account_' + row_index);
-        if (select_account_dropdown.length && default_accounts) {
-            select_account_dropdown.val(default_account);
-            select_account_dropdown.change();
+        //Validate max amount and disable account if advance
+        var amount_element = payment_row.find('.payment-amount');
+        var account_dropdown = payment_row.find('select#account_' + row_index);
+        if (!account_dropdown.length) {
+            account_dropdown = payment_row.find('.account-dropdown');
         }
+
+        if (payment_type == 'advance') {
+            max_value = $('#advance_balance').val();
+            msg = $('#advance_balance').data('error-msg');
+            if (amount_element.length && typeof amount_element.rules === 'function') {
+                amount_element.rules('add', {
+                    'max-value': max_value,
+                    messages: {
+                        'max-value': msg,
+                    },
+                });
+            }
+            if (account_dropdown.length) {
+                account_dropdown.prop('disabled', true);
+                if (account_dropdown.hasClass('select2') && typeof account_dropdown.select2 === 'function') {
+                    account_dropdown.select2({
+                        dropdownParent: $('#modal_payment'),
+                        width: '100%'
+                    });
+                }
+                account_dropdown.trigger('change');
+                var form_group = account_dropdown.closest('.form-group');
+                form_group.addClass('hide').hide();
+                form_group.find('.select2-container').hide();
+            }
+        } else {
+            if (amount_element.length && typeof amount_element.rules === 'function') {
+                amount_element.rules("remove", "max-value");
+            }
+            if (account_dropdown.length) {
+                account_dropdown.prop('disabled', false);
+                if (account_dropdown.hasClass('select2') && typeof account_dropdown.select2 === 'function') {
+                    account_dropdown.select2({
+                        dropdownParent: $('#modal_payment'),
+                        width: '100%'
+                    });
+                }
+                account_dropdown.trigger('change');
+                var form_group = account_dropdown.closest('.form-group');
+                form_group.removeClass('hide').show();
+                form_group.find('.select2-container').show();
+            }
+        }
+
+        if (payment_type && payment_type != 'advance') {
+            var default_account = default_accounts && default_accounts[payment_type] && default_accounts[payment_type]['account'] ?
+                default_accounts[payment_type]['account'] : '';
+
+            var select_account_dropdown = payment_row.find('select#account_' + row_index);
+            if (!select_account_dropdown.length) {
+                select_account_dropdown = payment_row.find('.account-dropdown');
+            }
+            if (select_account_dropdown.length && default_accounts) {
+                select_account_dropdown.val(default_account);
+                select_account_dropdown.change();
+                if (select_account_dropdown.hasClass('select2') && typeof select_account_dropdown.select2 === 'function') {
+                    select_account_dropdown.select2({
+                        dropdownParent: $('#modal_payment'),
+                        width: '100%'
+                    });
+                }
+            }
+        }
+    } catch (err) {
+        console.error("Error in payment_types_dropdown change handler:", err);
     }
 });
 
