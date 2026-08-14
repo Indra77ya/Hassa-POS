@@ -196,8 +196,7 @@ $(document).ready(function() {
                     }
                     account_dropdown.trigger('change');
                     var form_group = account_dropdown.closest('.form-group');
-                    form_group.addClass('hide').hide();
-                    form_group.find('.select2-container').hide();
+                    form_group.addClass('hide');
                 }
             } else {
                 if (account_dropdown.length) {
@@ -210,8 +209,7 @@ $(document).ready(function() {
                     }
                     account_dropdown.trigger('change');
                     var form_group = account_dropdown.closest('.form-group');
-                    form_group.removeClass('hide').show();
-                    form_group.find('.select2-container').show();
+                    form_group.removeClass('hide');
                 }
             }
         });

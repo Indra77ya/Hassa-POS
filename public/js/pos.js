@@ -3054,8 +3054,7 @@ $(document).on('change', '.payment_types_dropdown', function(e) {
                 }
                 account_dropdown.trigger('change');
                 var form_group = account_dropdown.closest('.form-group');
-                form_group.addClass('hide').hide();
-                form_group.find('.select2-container').hide();
+                form_group.addClass('hide');
             }
         } else {
             if (amount_element.length && typeof amount_element.rules === 'function') {
@@ -3071,8 +3070,7 @@ $(document).on('change', '.payment_types_dropdown', function(e) {
                 }
                 account_dropdown.trigger('change');
                 var form_group = account_dropdown.closest('.form-group');
-                form_group.removeClass('hide').show();
-                form_group.find('.select2-container').show();
+                form_group.removeClass('hide');
             }
         }
 
