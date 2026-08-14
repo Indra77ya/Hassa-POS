@@ -1166,6 +1166,10 @@ class CoaController extends Controller
                     ['name' => 'Beban Sewa', 'type' => 'beban_operasional', 'number' => '6102', 'balance' => 'debit'],
                     ['name' => 'Beban Listrik & Air', 'type' => 'beban_operasional', 'number' => '6103', 'balance' => 'debit'],
                     ['name' => 'Beban Kerusakan/Kehilangan', 'type' => 'beban_operasional', 'number' => '6104', 'balance' => 'debit'],
+                    ['name' => 'Peralatan', 'type' => 'aktiva_tetap', 'number' => '1401', 'balance' => 'debit'],
+                    ['name' => 'Kendaraan', 'type' => 'aktiva_tetap', 'number' => '1402', 'balance' => 'debit'],
+                    ['name' => 'Akumulasi Penyusutan', 'type' => 'akumulasi_penyusutan', 'number' => '1403', 'balance' => 'credit'],
+                    ['name' => 'Hutang Jangka Panjang', 'type' => 'hutang_jangka_panjang', 'number' => '2201', 'balance' => 'credit'],
                 ];
 
                 foreach ($default_pos_accounts as $da) {

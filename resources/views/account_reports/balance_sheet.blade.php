@@ -77,7 +77,7 @@
                     <table class="table table-bordered">
                         <tbody>
                             <tr class="success" style="font-size: 1.25em;">
-                                <th><strong>TOTAL AKTIVA (ASET)</strong></th>
+                                <th><strong>JUMLAH ASET (JUMLAH AKTIVA)</strong></th>
                                 <th class="text-right" style="width: 35%;" id="total_assets"><strong>Rp 0.00</strong></th>
                             </tr>
                         </tbody>
@@ -88,7 +88,7 @@
                     <table class="table table-bordered">
                         <tbody>
                             <tr class="success" style="font-size: 1.25em;">
-                                <th><strong>TOTAL PASIVA (LIABILITAS & EKUITAS)</strong></th>
+                                <th><strong>JUMLAH LIABILITAS DAN EKUITAS</strong></th>
                                 <th class="text-right" style="width: 35%;" id="total_pasiva"><strong>Rp 0.00</strong></th>
                             </tr>
                         </tbody>
@@ -149,80 +149,203 @@
                 var end_fmt = moment(result.end_date).format(moment_date_format);
                 $('#hidden_date').text(start_fmt + ' ~ ' + end_fmt);
 
-                // 1. Render Left Side: Assets
-                var assets_tbody = $('#assets_table tbody');
-                assets_tbody.empty();
+                // Group Assets: Current vs Non-Current
+                var current_assets = [];
+                var non_current_assets = [];
+                var sum_current_assets = 0;
+                var sum_non_current_assets = 0;
 
                 if (result.assets && result.assets.length > 0) {
                     result.assets.forEach(function(asset) {
                         var balance = parseFloat(asset.balance) || 0;
                         if (balance != 0) {
-                            total_assets += balance;
-                            assets_tbody.append(
-                                '<tr>' +
-                                '    <td style="padding-left: 20px;">' + asset.name + '</td>' +
-                                '    <td class="text-right" style="width: 35%;">' + __currency_trans_from_en(balance, true) + '</td>' +
-                                '</tr>'
-                            );
+                            var sub_type = asset.sub_type;
+                            if (['accounts_receivable', 'current_assets', 'cash_and_cash_equivalents'].indexOf(sub_type) !== -1) {
+                                current_assets.push(asset);
+                                sum_current_assets += balance;
+                            } else if (['fixed_assets', 'non_current_assets'].indexOf(sub_type) !== -1) {
+                                non_current_assets.push(asset);
+                                sum_non_current_assets += balance;
+                            } else {
+                                // fallback to current assets
+                                current_assets.push(asset);
+                                sum_current_assets += balance;
+                            }
                         }
                     });
                 }
 
-                if (total_assets == 0) {
+                // 1. Render Left Side: Assets
+                var assets_tbody = $('#assets_table tbody');
+                assets_tbody.empty();
+
+                // Group Aset Lancar
+                assets_tbody.append(
+                    '<tr style="background-color: #f9f9f9;">' +
+                    '    <th colspan="2" style="padding-left: 10px; color: #333;"><strong>ASET LANCAR</strong></th>' +
+                    '</tr>'
+                );
+                if (current_assets.length > 0) {
+                    current_assets.forEach(function(asset) {
+                        assets_tbody.append(
+                            '<tr>' +
+                            '    <td style="padding-left: 20px;">' + asset.name + '</td>' +
+                            '    <td class="text-right" style="width: 35%;">' + __currency_trans_from_en(asset.balance, true) + '</td>' +
+                            '</tr>'
+                        );
+                    });
+                } else {
                     assets_tbody.append(
                         '<tr>' +
-                        '    <td colspan="2" class="text-center text-muted"><em>Tidak ada aset tercatat</em></td>' +
+                        '    <td colspan="2" class="text-center text-muted" style="font-style: italic;">Tidak ada aset lancar tercatat</td>' +
                         '</tr>'
                     );
+                }
+                assets_tbody.append(
+                    '<tr style="background-color: #fafafa; border-top: 1px solid #ddd;">' +
+                    '    <th style="padding-left: 15px;"><strong>Jumlah Aset Lancar</strong></th>' +
+                    '    <th class="text-right"><strong>' + __currency_trans_from_en(sum_current_assets, true) + '</strong></th>' +
+                    '</tr>'
+                );
+
+                // Group Aset Tidak Lancar
+                assets_tbody.append(
+                    '<tr style="background-color: #f9f9f9;">' +
+                    '    <th colspan="2" style="padding-left: 10px; color: #333; border-top: 2px solid #ddd;"><strong>ASET TIDAK LANCAR</strong></th>' +
+                    '</tr>'
+                );
+                if (non_current_assets.length > 0) {
+                    non_current_assets.forEach(function(asset) {
+                        assets_tbody.append(
+                            '<tr>' +
+                            '    <td style="padding-left: 20px;">' + asset.name + '</td>' +
+                            '    <td class="text-right" style="width: 35%;">' + __currency_trans_from_en(asset.balance, true) + '</td>' +
+                            '</tr>'
+                        );
+                    });
+                } else {
+                    assets_tbody.append(
+                        '<tr>' +
+                        '    <td colspan="2" class="text-center text-muted" style="font-style: italic;">Tidak ada aset tidak lancar tercatat</td>' +
+                        '</tr>'
+                    );
+                }
+                assets_tbody.append(
+                    '<tr style="background-color: #fafafa; border-top: 1px solid #ddd;">' +
+                    '    <th style="padding-left: 15px;"><strong>Jumlah Aset Tidak Lancar</strong></th>' +
+                    '    <th class="text-right"><strong>' + __currency_trans_from_en(sum_non_current_assets, true) + '</strong></th>' +
+                    '</tr>'
+                );
+
+                total_assets = sum_current_assets + sum_non_current_assets;
+
+                // Group Liabilities: Current vs Non-Current
+                var current_liabilities = [];
+                var non_current_liabilities = [];
+                var sum_current_liabilities = 0;
+                var sum_non_current_liabilities = 0;
+
+                if (result.liabilities && result.liabilities.length > 0) {
+                    result.liabilities.forEach(function(liability) {
+                        var balance = parseFloat(liability.balance) || 0;
+                        if (balance != 0) {
+                            var sub_type = liability.sub_type;
+                            if (['accounts_payable', 'credit_card', 'current_liabilities'].indexOf(sub_type) !== -1) {
+                                current_liabilities.push(liability);
+                                sum_current_liabilities += balance;
+                            } else if (sub_type === 'non_current_liabilities') {
+                                non_current_liabilities.push(liability);
+                                sum_non_current_liabilities += balance;
+                            } else {
+                                // fallback to current liabilities
+                                current_liabilities.push(liability);
+                                sum_current_liabilities += balance;
+                            }
+                        }
+                    });
                 }
 
                 // 2. Render Right Side: Pasiva
                 var pasiva_tbody = $('#pasiva_table tbody');
                 pasiva_tbody.empty();
 
-                // 2a. LIABILITAS (KEWAJIBAN / HUTANG) header
+                // Header LIABILITAS
                 pasiva_tbody.append(
-                    '<tr style="background-color: #f5f5f5;">' +
-                    '    <th colspan="2" style="padding-left: 10px; color: #444;"><strong>LIABILITAS (KEWAJIBAN / HUTANG)</strong></th>' +
+                    '<tr style="background-color: #f9f9f9;">' +
+                    '    <th colspan="2" style="padding-left: 10px; color: #333;"><strong>LIABILITAS</strong></th>' +
                     '</tr>'
                 );
 
-                var liabilities_count = 0;
-                if (result.liabilities && result.liabilities.length > 0) {
-                    result.liabilities.forEach(function(liability) {
-                        var balance = parseFloat(liability.balance) || 0;
-                        if (balance != 0) {
-                            total_liabilities += balance;
-                            liabilities_count++;
-                            pasiva_tbody.append(
-                                '<tr>' +
-                                '    <td style="padding-left: 20px;">' + liability.name + '</td>' +
-                                '    <td class="text-right" style="width: 35%;">' + __currency_trans_from_en(balance, true) + '</td>' +
-                                '</tr>'
-                            );
-                        }
+                // Subsection LIABILITAS JANGKA PENDEK
+                pasiva_tbody.append(
+                    '<tr style="background-color: #fafafa;">' +
+                    '    <th colspan="2" style="padding-left: 15px; font-weight: normal; color: #555;"><em>LIABILITAS JANGKA PENDEK</em></th>' +
+                    '</tr>'
+                );
+                if (current_liabilities.length > 0) {
+                    current_liabilities.forEach(function(liability) {
+                        pasiva_tbody.append(
+                            '<tr>' +
+                            '    <td style="padding-left: 25px;">' + liability.name + '</td>' +
+                            '    <td class="text-right" style="width: 35%;">' + __currency_trans_from_en(liability.balance, true) + '</td>' +
+                            '</tr>'
+                        );
                     });
-                }
-
-                if (liabilities_count == 0) {
+                } else {
                     pasiva_tbody.append(
                         '<tr>' +
-                        '    <td colspan="2" class="text-center text-muted"><em>Tidak ada liabilitas tercatat</em></td>' +
+                        '    <td colspan="2" class="text-center text-muted" style="font-style: italic; padding-left: 25px;">Tidak ada liabilitas jangka pendek tercatat</td>' +
                         '</tr>'
                     );
                 }
-
                 pasiva_tbody.append(
-                    '<tr style="background-color: #fafafa; border-top: 1px solid #ddd;">' +
-                    '    <th style="padding-left: 15px;"><strong>TOTAL LIABILITAS</strong></th>' +
+                    '<tr style="border-top: 1px solid #ddd;">' +
+                    '    <th style="padding-left: 20px; font-weight: normal; color: #666;">Jumlah Liabilitas Jangka Pendek</th>' +
+                    '    <th class="text-right" style="font-weight: normal; color: #666;">' + __currency_trans_from_en(sum_current_liabilities, true) + '</th>' +
+                    '</tr>'
+                );
+
+                // Subsection LIABILITAS JANGKA PANJANG
+                pasiva_tbody.append(
+                    '<tr style="background-color: #fafafa; border-top: 1.5px solid #eee;">' +
+                    '    <th colspan="2" style="padding-left: 15px; font-weight: normal; color: #555;"><em>LIABILITAS JANGKA PANJANG</em></th>' +
+                    '</tr>'
+                );
+                if (non_current_liabilities.length > 0) {
+                    non_current_liabilities.forEach(function(liability) {
+                        pasiva_tbody.append(
+                            '<tr>' +
+                            '    <td style="padding-left: 25px;">' + liability.name + '</td>' +
+                            '    <td class="text-right" style="width: 35%;">' + __currency_trans_from_en(liability.balance, true) + '</td>' +
+                            '</tr>'
+                        );
+                    });
+                } else {
+                    pasiva_tbody.append(
+                        '<tr>' +
+                        '    <td colspan="2" class="text-center text-muted" style="font-style: italic; padding-left: 25px;">Tidak ada liabilitas jangka panjang tercatat</td>' +
+                        '</tr>'
+                    );
+                }
+                pasiva_tbody.append(
+                    '<tr style="border-top: 1px solid #ddd;">' +
+                    '    <th style="padding-left: 20px; font-weight: normal; color: #666;">Jumlah Liabilitas Jangka Panjang</th>' +
+                    '    <th class="text-right" style="font-weight: normal; color: #666;">' + __currency_trans_from_en(sum_non_current_liabilities, true) + '</th>' +
+                    '</tr>'
+                );
+
+                total_liabilities = sum_current_liabilities + sum_non_current_liabilities;
+                pasiva_tbody.append(
+                    '<tr style="background-color: #f5f5f5; border-top: 2px solid #ddd;">' +
+                    '    <th style="padding-left: 15px;"><strong>Jumlah Liabilitas</strong></th>' +
                     '    <th class="text-right"><strong>' + __currency_trans_from_en(total_liabilities, true) + '</strong></th>' +
                     '</tr>'
                 );
 
-                // 2b. EKUITAS (MODAL) header
+                // 2c. EKUITAS (MODAL) header
                 pasiva_tbody.append(
-                    '<tr style="background-color: #f5f5f5;">' +
-                    '    <th colspan="2" style="padding-left: 10px; color: #444; border-top: 2px solid #ddd;"><strong>EKUITAS (MODAL)</strong></th>' +
+                    '<tr style="background-color: #f9f9f9;">' +
+                    '    <th colspan="2" style="padding-left: 10px; color: #333; border-top: 2px solid #ddd;"><strong>EKUITAS</strong></th>' +
                     '</tr>'
                 );
 
@@ -249,14 +372,14 @@
 
                 pasiva_tbody.append(
                     '<tr>' +
-                    '    <td style="padding-left: 20px;"><strong>Laba Bersih Tahun Berjalan</strong></td>' +
+                    '    <td style="padding-left: 20px;">Laba Tahun Ini</td>' +
                     '    <td class="text-right">' + __currency_trans_from_en(net_profit, true) + '</td>' +
                     '</tr>'
                 );
 
                 pasiva_tbody.append(
                     '<tr style="background-color: #fafafa; border-top: 1px solid #ddd;">' +
-                    '    <th style="padding-left: 15px;"><strong>TOTAL EKUITAS</strong></th>' +
+                    '    <th style="padding-left: 15px;"><strong>Jumlah Ekuitas</strong></th>' +
                     '    <th class="text-right"><strong>' + __currency_trans_from_en(total_equities, true) + '</strong></th>' +
                     '</tr>'
                 );
