@@ -189,6 +189,9 @@ $(document).ready(function() {
                 if (account_dropdown.length) {
                     account_dropdown.prop('disabled', true);
                     if (account_dropdown.hasClass('select2') && typeof account_dropdown.select2 === 'function') {
+                        try {
+                            account_dropdown.select2('destroy');
+                        } catch(e) {}
                         account_dropdown.select2({
                             dropdownParent: $('#modal_payment'),
                             width: '100%'
@@ -202,6 +205,9 @@ $(document).ready(function() {
                 if (account_dropdown.length) {
                     account_dropdown.prop('disabled', false);
                     if (account_dropdown.hasClass('select2') && typeof account_dropdown.select2 === 'function') {
+                        try {
+                            account_dropdown.select2('destroy');
+                        } catch(e) {}
                         account_dropdown.select2({
                             dropdownParent: $('#modal_payment'),
                             width: '100%'

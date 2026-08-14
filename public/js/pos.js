@@ -3047,6 +3047,9 @@ $(document).on('change', '.payment_types_dropdown', function(e) {
             if (account_dropdown.length) {
                 account_dropdown.prop('disabled', true);
                 if (account_dropdown.hasClass('select2') && typeof account_dropdown.select2 === 'function') {
+                    try {
+                        account_dropdown.select2('destroy');
+                    } catch(e) {}
                     account_dropdown.select2({
                         dropdownParent: $('#modal_payment'),
                         width: '100%'
@@ -3063,6 +3066,9 @@ $(document).on('change', '.payment_types_dropdown', function(e) {
             if (account_dropdown.length) {
                 account_dropdown.prop('disabled', false);
                 if (account_dropdown.hasClass('select2') && typeof account_dropdown.select2 === 'function') {
+                    try {
+                        account_dropdown.select2('destroy');
+                    } catch(e) {}
                     account_dropdown.select2({
                         dropdownParent: $('#modal_payment'),
                         width: '100%'
@@ -3086,6 +3092,9 @@ $(document).on('change', '.payment_types_dropdown', function(e) {
                 select_account_dropdown.val(default_account);
                 select_account_dropdown.change();
                 if (select_account_dropdown.hasClass('select2') && typeof select_account_dropdown.select2 === 'function') {
+                    try {
+                        select_account_dropdown.select2('destroy');
+                    } catch(e) {}
                     select_account_dropdown.select2({
                         dropdownParent: $('#modal_payment'),
                         width: '100%'
