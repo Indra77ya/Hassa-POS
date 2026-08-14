@@ -3024,7 +3024,7 @@ $(document).on('change', '.payment_types_dropdown', function(e) {
     var payment_type = $(this).val();
     var payment_row = $(this).closest('.payment_row');
     if (payment_type && payment_type != 'advance') {
-        var default_account = default_accounts && default_accounts[payment_type]['account'] ? 
+        var default_account = default_accounts && default_accounts[payment_type] && default_accounts[payment_type]['account'] ?
             default_accounts[payment_type]['account'] : '';
         var row_index = payment_row.find('.payment_row_index').val();
 
@@ -3036,8 +3036,8 @@ $(document).on('change', '.payment_types_dropdown', function(e) {
     }
 
     //Validate max amount and disable account if advance 
-    amount_element = payment_row.find('.payment-amount');
-    account_dropdown = payment_row.find('.account-dropdown');
+    var amount_element = payment_row.find('.payment-amount');
+    var account_dropdown = payment_row.find('.account-dropdown');
     if (payment_type == 'advance') {
         max_value = $('#advance_balance').val();
         msg = $('#advance_balance').data('error-msg');
