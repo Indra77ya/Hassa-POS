@@ -3023,24 +3023,13 @@ $(document).on('change', '.payment_types_dropdown', function(e) {
                 .data('default_payment_accounts') : $('#location_id').data('default_payment_accounts');
     var payment_type = $(this).val();
     var payment_row = $(this).closest('.payment_row');
-    if (payment_type && payment_type != 'advance') {
-        var default_account = default_accounts && default_accounts[payment_type]['account'] ? 
-            default_accounts[payment_type]['account'] : '';
-        var row_index = payment_row.find('.payment_row_index').val();
-
-        var account_dropdown = payment_row.find('select#account_' + row_index);
-        if (account_dropdown.length && default_accounts) {
-            account_dropdown.val(default_account);
-            account_dropdown.change();
-        }
-    }
 
     //Validate max amount and disable account if advance 
-    amount_element = payment_row.find('.payment-amount');
-    account_dropdown = payment_row.find('.account-dropdown');
+    var amount_element = payment_row.find('.payment-amount');
+    var account_dropdown = payment_row.find('.account-dropdown');
     if (payment_type == 'advance') {
-        max_value = $('#advance_balance').val();
-        msg = $('#advance_balance').data('error-msg');
+        var max_value = $('#advance_balance').val();
+        var msg = $('#advance_balance').data('error-msg');
         amount_element.rules('add', {
             'max-value': max_value,
             messages: {
@@ -3057,6 +3046,18 @@ $(document).on('change', '.payment_types_dropdown', function(e) {
             account_dropdown.prop('disabled', false); 
             account_dropdown.closest('.form-group').removeClass('hide');
         }    
+    }
+
+    if (payment_type && payment_type != 'advance') {
+        var default_account = default_accounts && default_accounts[payment_type] && default_accounts[payment_type]['account'] ?
+            default_accounts[payment_type]['account'] : '';
+        var row_index = payment_row.find('.payment_row_index').val();
+
+        var account_dropdown_by_id = payment_row.find('select#account_' + row_index);
+        if (account_dropdown_by_id.length && default_accounts) {
+            account_dropdown_by_id.val(default_account);
+            account_dropdown_by_id.change();
+        }
     }
 });
 
