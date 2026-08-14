@@ -48,6 +48,8 @@
                 <tr>
                     <th>@lang('accounting::lang.journal_date')</th>
                     <th>@lang('purchase.ref_no')</th>
+                    <th>@lang('accounting::lang.debit')</th>
+                    <th>@lang('accounting::lang.credit')</th>
                     <th>@lang('lang_v1.added_by')</th>
                     <th>@lang('lang_v1.additional_notes')</th>
                     <th style="width: 10%;">@lang('messages.action')</th>
@@ -92,6 +94,8 @@
             columns: [
                 { data: 'operation_date', name: 'operation_date' },
                 { data: 'ref_no', name: 'ref_no' },
+                { data: 'debit', name: 'debit', orderable: false, searchable: false },
+                { data: 'credit', name: 'credit', orderable: false, searchable: false },
                 { data: 'added_by', name: 'added_by' },
                 { data: 'note', name: 'note' },
                 { data: 'action', name: 'action', orderable: false, searchable: false, width: '10%' }

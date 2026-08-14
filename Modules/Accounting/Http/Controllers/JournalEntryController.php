@@ -52,6 +52,7 @@ class JournalEntryController extends Controller
             $journal = AccountingAccTransMapping::where('accounting_acc_trans_mappings.business_id', $business_id)
                         ->join('users as u', 'accounting_acc_trans_mappings.created_by', 'u.id')
                         ->where('type', 'journal_entry')
+                        ->with(['accounts_transactions.account'])
                         ->select(['accounting_acc_trans_mappings.id', 'ref_no', 'operation_date', 'note',
                             DB::raw("CONCAT(COALESCE(u.surname, ''),' ',COALESCE(u.first_name, ''),' ',COALESCE(u.last_name,'')) as added_by"),
                         ]);
@@ -64,6 +65,24 @@ class JournalEntryController extends Controller
             }
 
             return Datatables::of($journal)
+                ->addColumn('debit', function ($row) {
+                    $html = '';
+                    foreach ($row->accounts_transactions as $at) {
+                        if ($at->type == 'debit') {
+                            $html .= ($at->account->name ?? '') . ': <b>' . $this->accountingUtil->num_f($at->amount, true) . '</b><br>';
+                        }
+                    }
+                    return $html;
+                })
+                ->addColumn('credit', function ($row) {
+                    $html = '';
+                    foreach ($row->accounts_transactions as $at) {
+                        if ($at->type == 'credit') {
+                            $html .= ($at->account->name ?? '') . ': <b>' . $this->accountingUtil->num_f($at->amount, true) . '</b><br>';
+                        }
+                    }
+                    return $html;
+                })
                 ->addColumn(
                     'action', function ($row) {
                         $html = '<div class="btn-group">
@@ -102,7 +121,7 @@ class JournalEntryController extends Controller
 
                         return $html;
                     })
-                ->rawColumns(['action'])
+                ->rawColumns(['action', 'debit', 'credit'])
                 ->make(true);
         }
 
