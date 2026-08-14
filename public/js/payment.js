@@ -154,13 +154,15 @@ $(document).on('change', '.payment_types_dropdown', function(e) {
     var payment_type = $('#transaction_payment_add_form .payment_types_dropdown').val();
     account_dropdown = $('#transaction_payment_add_form #account_id');
     if (payment_type == 'advance') {
-        if (account_dropdown) {
+        if (account_dropdown.length) {
             account_dropdown.prop('disabled', true);
+            account_dropdown.trigger('change');
             account_dropdown.closest('.form-group').addClass('hide');
         }
     } else {
-        if (account_dropdown) {
+        if (account_dropdown.length) {
             account_dropdown.prop('disabled', false); 
+            account_dropdown.trigger('change');
             account_dropdown.closest('.form-group').removeClass('hide');
         }    
     }

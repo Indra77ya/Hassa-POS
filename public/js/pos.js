@@ -3047,14 +3047,16 @@ $(document).on('change', '.payment_types_dropdown', function(e) {
                 'max-value': msg,
             },
         });
-        if (account_dropdown) {
+        if (account_dropdown.length) {
             account_dropdown.prop('disabled', true);
+            account_dropdown.trigger('change');
             account_dropdown.closest('.form-group').addClass('hide');
         }
     } else {
         amount_element.rules("remove", "max-value");
-        if (account_dropdown) {
+        if (account_dropdown.length) {
             account_dropdown.prop('disabled', false); 
+            account_dropdown.trigger('change');
             account_dropdown.closest('.form-group').removeClass('hide');
         }    
     }
