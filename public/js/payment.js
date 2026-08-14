@@ -160,7 +160,7 @@ $(document).on('change', '.payment_types_dropdown', function(e) {
         }
     } else {
         if (account_dropdown) {
-            account_dropdown.prop('disabled', false); 
+            account_dropdown.prop('disabled', false).trigger('change');
             account_dropdown.closest('.form-group').removeClass('hide');
         }    
     }
