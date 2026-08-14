@@ -3054,7 +3054,14 @@ $(document).on('change', '.payment_types_dropdown', function(e) {
     } else {
         amount_element.rules("remove", "max-value");
         if (account_dropdown) {
-            account_dropdown.prop('disabled', false).trigger('change');
+            account_dropdown.prop('disabled', false);
+            if (account_dropdown.hasClass('select2-hidden-accessible')) {
+                account_dropdown.select2('destroy');
+            }
+            account_dropdown.select2({
+                dropdownParent: $('#modal_payment'),
+                width: '100%'
+            });
             account_dropdown.closest('.form-group').removeClass('hide');
         }    
     }
