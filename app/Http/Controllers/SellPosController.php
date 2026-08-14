@@ -201,7 +201,7 @@ class SellPosController extends Controller
             }
         }
 
-        $payment_types = $this->productUtil->payment_types(null, true, $business_id);
+        $payment_types = $this->productUtil->payment_types(null, false, $business_id);
 
         //Shortcuts
         $shortcuts = json_decode($business_details->keyboard_shortcuts, true);
@@ -866,7 +866,7 @@ class SellPosController extends Controller
 
         $location_id = $transaction->location_id;
         $business_location = BusinessLocation::find($location_id);
-        $payment_types = $this->productUtil->payment_types($business_location, true);
+        $payment_types = $this->productUtil->payment_types($business_location, false);
         $location_printer_type = $business_location->receipt_printer_type;
         $sell_details = TransactionSellLine::join(
             'products AS p',
@@ -1674,7 +1674,7 @@ class SellPosController extends Controller
         $row_index = $request->input('row_index');
         $location_id = $request->input('location_id');
         $removable = true;
-        $payment_types = $this->productUtil->payment_types($location_id, true);
+        $payment_types = $this->productUtil->payment_types($location_id, false);
 
         $payment_line = $this->dummyPaymentLine;
 
