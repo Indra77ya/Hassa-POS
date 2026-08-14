@@ -165,3 +165,56 @@
 		</div>
 	</div>
 </div>
+
+<script type="text/javascript">
+$(document).ready(function() {
+    var row_index = "{{ $row_index }}";
+    var method_dropdown = $('#method_' + row_index);
+    if (!method_dropdown.length) {
+        method_dropdown = $('#method_advance_' + row_index);
+    }
+
+    if (method_dropdown.length) {
+        method_dropdown.off('change.inline_row_handler').on('change.inline_row_handler', function() {
+            var payment_type = $(this).val();
+            var account_dropdown = $('#account_' + row_index);
+            if (!account_dropdown.length) {
+                account_dropdown = $('#account_advance_' + row_index);
+            }
+            if (!account_dropdown.length) {
+                account_dropdown = $(this).closest('.payment_row').find('.account-dropdown');
+            }
+
+            if (payment_type === 'advance') {
+                if (account_dropdown.length) {
+                    account_dropdown.prop('disabled', true);
+                    if (account_dropdown.hasClass('select2') && typeof account_dropdown.select2 === 'function') {
+                        account_dropdown.select2({
+                            dropdownParent: $('#modal_payment'),
+                            width: '100%'
+                        });
+                    }
+                    account_dropdown.trigger('change');
+                    var form_group = account_dropdown.closest('.form-group');
+                    form_group.addClass('hide').hide();
+                    form_group.find('.select2-container').hide();
+                }
+            } else {
+                if (account_dropdown.length) {
+                    account_dropdown.prop('disabled', false);
+                    if (account_dropdown.hasClass('select2') && typeof account_dropdown.select2 === 'function') {
+                        account_dropdown.select2({
+                            dropdownParent: $('#modal_payment'),
+                            width: '100%'
+                        });
+                    }
+                    account_dropdown.trigger('change');
+                    var form_group = account_dropdown.closest('.form-group');
+                    form_group.removeClass('hide').show();
+                    form_group.find('.select2-container').show();
+                }
+            }
+        });
+    }
+});
+</script>
