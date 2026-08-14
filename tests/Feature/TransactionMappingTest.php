@@ -202,11 +202,25 @@ class TransactionMappingTest extends TestCase
             $table->unsignedBigInteger('accounting_account_id');
             $table->integer('transaction_id')->nullable();
             $table->integer('transaction_payment_id')->nullable();
+            $table->unsignedBigInteger('acc_trans_mapping_id')->nullable();
             $table->decimal('amount', 22, 4);
             $table->string('type', 100);
             $table->string('sub_type', 100)->nullable();
             $table->string('map_type', 100)->nullable();
             $table->integer('created_by')->nullable();
+            $table->dateTime('operation_date');
+            $table->text('note')->nullable();
+            $table->timestamps();
+        });
+
+        // Create accounting_acc_trans_mappings
+        Schema::dropIfExists('accounting_acc_trans_mappings');
+        Schema::create('accounting_acc_trans_mappings', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->integer('business_id');
+            $table->string('ref_no', 100);
+            $table->string('type', 100);
+            $table->integer('created_by');
             $table->dateTime('operation_date');
             $table->text('note')->nullable();
             $table->timestamps();
@@ -1227,5 +1241,71 @@ class TransactionMappingTest extends TestCase
         ]);
         $responseTerm->assertStatus(200);
         $this->assertCount(1, $responseTerm->json());
+    }
+
+    public function testJournalEntryTableDetailedColumns()
+    {
+        $user = \App\User::create([
+            'surname' => 'Mr',
+            'first_name' => 'Admin',
+            'username' => 'admin_test2',
+            'email' => 'admin_test2@test.com',
+            'password' => bcrypt('password'),
+            'business_id' => 1,
+        ]);
+
+        $this->actingAs($user);
+
+        // Seed some accounting accounts and a journal entry mapping
+        DB::table('accounting_accounts')->insert([
+            ['id' => 200, 'name' => 'Kas Jurnal', 'business_id' => 1, 'account_primary_type' => 'asset', 'account_sub_type_id' => 3, 'status' => 'active'],
+            ['id' => 201, 'name' => 'Peralatan Jurnal', 'business_id' => 1, 'account_primary_type' => 'asset', 'account_sub_type_id' => 4, 'status' => 'active'],
+        ]);
+
+        $mappingId = DB::table('accounting_acc_trans_mappings')->insertGetId([
+            'business_id' => 1,
+            'ref_no' => 'JN/2026/001',
+            'note' => 'Beli Peralatan',
+            'type' => 'journal_entry',
+            'created_by' => $user->id,
+            'operation_date' => '2026-08-14 10:30:00',
+        ]);
+
+        DB::table('accounting_accounts_transactions')->insert([
+            [
+                'accounting_account_id' => 201, // Peralatan Jurnal (Debit)
+                'acc_trans_mapping_id' => $mappingId,
+                'amount' => 500000,
+                'type' => 'debit',
+                'sub_type' => 'journal_entry',
+                'operation_date' => '2026-08-14 10:30:00',
+            ],
+            [
+                'accounting_account_id' => 200, // Kas Jurnal (Credit)
+                'acc_trans_mapping_id' => $mappingId,
+                'amount' => 500000,
+                'type' => 'credit',
+                'sub_type' => 'journal_entry',
+                'operation_date' => '2026-08-14 10:30:00',
+            ]
+        ]);
+
+        // Hit the /accounting/journal-entry via Ajax
+        $response = $this->get('/accounting/journal-entry', [
+            'X-Requested-With' => 'XMLHttpRequest',
+            'Accept' => 'application/json'
+        ]);
+
+        $response->assertStatus(200);
+        $data = $response->json('data');
+
+        $this->assertCount(1, $data);
+        $row = $data[0];
+
+        $this->assertEquals('JN/2026/001', $row['ref_no']);
+        $this->assertStringContainsString('Peralatan Jurnal', $row['debit']);
+        $this->assertStringContainsString('Kas Jurnal', $row['credit']);
+        $this->assertStringContainsString('500.000', $row['debit']);
+        $this->assertStringContainsString('500.000', $row['credit']);
     }
 }
