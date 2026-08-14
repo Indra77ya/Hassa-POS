@@ -131,6 +131,22 @@ $(document).ready(function() {
 });
 
 $(document).on('change', '#transaction_payment_add_form .payment_types_dropdown', function(e) {
+    var payment_type = $('#transaction_payment_add_form .payment_types_dropdown').val();
+    var account_dropdown = $('#transaction_payment_add_form #account_id');
+    if (payment_type == 'advance') {
+        if (account_dropdown.length) {
+            account_dropdown.prop('disabled', true);
+            account_dropdown.trigger('change');
+            account_dropdown.closest('.form-group').addClass('hide');
+        }
+    } else {
+        if (account_dropdown.length) {
+            account_dropdown.prop('disabled', false);
+            account_dropdown.trigger('change');
+            account_dropdown.closest('.form-group').removeClass('hide');
+        }
+    }
+
     set_default_payment_account();
 });
 
@@ -149,24 +165,6 @@ function set_default_payment_account() {
         $('#transaction_payment_add_form #account_id').change();
     }
 }
-
-$(document).on('change', '.payment_types_dropdown', function(e) {
-    var payment_type = $('#transaction_payment_add_form .payment_types_dropdown').val();
-    var account_dropdown = $('#transaction_payment_add_form #account_id');
-    if (payment_type == 'advance') {
-        if (account_dropdown.length) {
-            account_dropdown.prop('disabled', true);
-            account_dropdown.trigger('change');
-            account_dropdown.closest('.form-group').addClass('hide');
-        }
-    } else {
-        if (account_dropdown.length) {
-            account_dropdown.prop('disabled', false); 
-            account_dropdown.trigger('change');
-            account_dropdown.closest('.form-group').removeClass('hide');
-        }    
-    }
-});
 
 $(document).on('submit', 'form#transaction_payment_add_form', function(e){
     var is_valid = true;

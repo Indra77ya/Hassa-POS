@@ -3023,17 +3023,6 @@ $(document).on('change', '.payment_types_dropdown', function(e) {
                 .data('default_payment_accounts') : $('#location_id').data('default_payment_accounts');
     var payment_type = $(this).val();
     var payment_row = $(this).closest('.payment_row');
-    if (payment_type && payment_type != 'advance') {
-        var default_account = default_accounts && default_accounts[payment_type] && default_accounts[payment_type]['account'] ?
-            default_accounts[payment_type]['account'] : '';
-        var row_index = payment_row.find('.payment_row_index').val();
-
-        var account_dropdown = payment_row.find('select#account_' + row_index);
-        if (account_dropdown.length && default_accounts) {
-            account_dropdown.val(default_account);
-            account_dropdown.change();
-        }
-    }
 
     //Validate max amount and disable account if advance 
     var amount_element = payment_row.find('.payment-amount');
@@ -3059,6 +3048,18 @@ $(document).on('change', '.payment_types_dropdown', function(e) {
             account_dropdown.trigger('change');
             account_dropdown.closest('.form-group').removeClass('hide');
         }    
+    }
+
+    if (payment_type && payment_type != 'advance') {
+        var default_account = default_accounts && default_accounts[payment_type] && default_accounts[payment_type]['account'] ?
+            default_accounts[payment_type]['account'] : '';
+        var row_index = payment_row.find('.payment_row_index').val();
+
+        var select_account_dropdown = payment_row.find('select#account_' + row_index);
+        if (select_account_dropdown.length && default_accounts) {
+            select_account_dropdown.val(default_account);
+            select_account_dropdown.change();
+        }
     }
 });
 
