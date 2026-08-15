@@ -114,6 +114,7 @@ class AccountTypeController extends Controller
                 ['key' => 'pendapatan_lainnya', 'parent' => null],
                 ['key' => 'harga_pokok_penjualan', 'parent' => null],
                 ['key' => 'beban_operasional', 'parent' => null],
+                ['key' => 'biaya_penyusutan', 'parent' => null],
                 ['key' => 'beban_lain_lain', 'parent' => null],
                 ['key' => 'beban_pajak', 'parent' => null],
             ];
@@ -154,13 +155,14 @@ class AccountTypeController extends Controller
                 ['name' => 'Beban Sewa', 'type' => 'beban_operasional', 'number' => '6102', 'balance' => 'debit'],
                 ['name' => 'Beban Listrik & Air', 'type' => 'beban_operasional', 'number' => '6103', 'balance' => 'debit'],
                 ['name' => 'Beban Kerusakan/Kehilangan', 'type' => 'beban_operasional', 'number' => '6104', 'balance' => 'debit'],
+                ['name' => 'Biaya Penyusutan', 'type' => 'biaya_penyusutan', 'number' => '6105', 'balance' => 'debit'],
                 ['name' => 'Peralatan', 'type' => 'aktiva_tetap', 'number' => '1401', 'balance' => 'debit'],
                 ['name' => 'Kendaraan', 'type' => 'aktiva_tetap', 'number' => '1402', 'balance' => 'debit'],
                 ['name' => 'Akumulasi Penyusutan', 'type' => 'akumulasi_penyusutan', 'number' => '1403', 'balance' => 'credit'],
                 ['name' => 'Hutang Jangka Panjang', 'type' => 'hutang_jangka_panjang', 'number' => '2201', 'balance' => 'credit'],
             ];
 
-            $user_id = $request->session()->get('user.id');
+            $user_id = $request->session()->get('user.id') ?? 1;
             foreach ($default_accounts as $da) {
                 $exists = \App\Account::where('business_id', $business_id)
                                       ->where('name', $da['name'])
@@ -177,6 +179,8 @@ class AccountTypeController extends Controller
                 }
             }
 
+            self::syncDepreciationForBusiness($business_id, $user_id);
+
             $output = ['success' => true,
                 'msg' => __('lang_v1.added_success'),
             ];
@@ -192,5 +196,156 @@ class AccountTypeController extends Controller
         }
 
         return redirect()->back()->with('status', $output);
+    }
+
+    /**
+     * Synchronize Depreciation accounts and expense category for a business.
+     */
+    public static function syncDepreciationForBusiness($business_id, $user_id = 1)
+    {
+        // 1. Ensure POS AccountType 'biaya_penyusutan' and 'akumulasi_penyusutan' exist
+        $type_biaya = AccountType::where('business_id', $business_id)->where('fixed_key', 'biaya_penyusutan')->first();
+        if (! $type_biaya) {
+            $type_biaya = AccountType::create([
+                'name' => __('account.biaya_penyusutan'),
+                'business_id' => $business_id,
+                'fixed_key' => 'biaya_penyusutan',
+            ]);
+        } else {
+            $type_biaya->update(['name' => __('account.biaya_penyusutan')]);
+        }
+
+        $type_akumulasi = AccountType::where('business_id', $business_id)->where('fixed_key', 'akumulasi_penyusutan')->first();
+        if (! $type_akumulasi) {
+            $type_akumulasi = AccountType::create([
+                'name' => __('account.akumulasi_penyusutan'),
+                'business_id' => $business_id,
+                'fixed_key' => 'akumulasi_penyusutan',
+            ]);
+        } else {
+            $type_akumulasi->update(['name' => __('account.akumulasi_penyusutan')]);
+        }
+
+        // 2. Ensure POS Account 'Biaya Penyusutan' exists
+        $pos_biaya = \App\Account::where('business_id', $business_id)
+            ->where(function ($q) use ($type_biaya) {
+                $q->where('name', 'Biaya Penyusutan')
+                  ->orWhere('name', 'Beban Penyusutan')
+                  ->orWhere('account_type_id', $type_biaya->id);
+            })->first();
+
+        if (! $pos_biaya) {
+            $pos_biaya = \App\Account::create([
+                'name' => 'Biaya Penyusutan',
+                'business_id' => $business_id,
+                'account_number' => '6105',
+                'account_type_id' => $type_biaya->id,
+                'normal_balance' => 'debit',
+                'created_by' => $user_id,
+            ]);
+        } else {
+            if ($pos_biaya->account_type_id != $type_biaya->id) {
+                $pos_biaya->update(['account_type_id' => $type_biaya->id]);
+            }
+        }
+
+        // 3. Ensure POS Account 'Akumulasi Penyusutan' exists
+        $pos_akumulasi = \App\Account::where('business_id', $business_id)
+            ->where(function ($q) use ($type_akumulasi) {
+                $q->where('name', 'Akumulasi Penyusutan')
+                  ->orWhere('account_type_id', $type_akumulasi->id);
+            })->first();
+
+        if (! $pos_akumulasi) {
+            $pos_akumulasi = \App\Account::create([
+                'name' => 'Akumulasi Penyusutan',
+                'business_id' => $business_id,
+                'account_number' => '1403',
+                'account_type_id' => $type_akumulasi->id,
+                'normal_balance' => 'credit',
+                'created_by' => $user_id,
+            ]);
+        } else {
+            if ($pos_akumulasi->account_type_id != $type_akumulasi->id) {
+                $pos_akumulasi->update(['account_type_id' => $type_akumulasi->id]);
+            }
+        }
+
+        // 4. Ensure AccountingAccount 'Biaya Penyusutan' and 'Akumulasi Penyusutan' exist in Accounting module
+        $acc_biaya = null;
+        $acc_akumulasi = null;
+        if (class_exists(\Modules\Accounting\Entities\AccountingAccount::class)) {
+            $acc_biaya = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                ->where(function ($q) {
+                    $q->where('name', 'Biaya Penyusutan')
+                      ->orWhere('name', 'Beban Penyusutan');
+                })->first();
+
+            if (! $acc_biaya) {
+                $acc_biaya = \Modules\Accounting\Entities\AccountingAccount::create([
+                    'name' => 'Biaya Penyusutan',
+                    'business_id' => $business_id,
+                    'account_primary_type' => 'expenses',
+                    'account_sub_type_id' => 14, // Beban Operasional
+                    'detail_type_id' => 138,
+                    'status' => 'active',
+                    'account_number' => '6105',
+                    'account_id' => $pos_biaya->id,
+                    'created_by' => $user_id,
+                ]);
+            }
+            if (empty($pos_biaya->accounting_account_id)) {
+                $pos_biaya->update(['accounting_account_id' => $acc_biaya->id]);
+            }
+
+            $acc_akumulasi = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                ->where('name', 'Akumulasi Penyusutan')
+                ->first();
+
+            if (! $acc_akumulasi) {
+                $acc_akumulasi = \Modules\Accounting\Entities\AccountingAccount::create([
+                    'name' => 'Akumulasi Penyusutan',
+                    'business_id' => $business_id,
+                    'account_primary_type' => 'asset',
+                    'account_sub_type_id' => 4, // Fixed assets (Aset Tidak Lancar)
+                    'detail_type_id' => 23, // accumulated_depreciation_on_property,_plant_and_equipment
+                    'status' => 'active',
+                    'account_number' => '1403',
+                    'account_id' => $pos_akumulasi->id,
+                    'created_by' => $user_id,
+                ]);
+            }
+            if (empty($pos_akumulasi->accounting_account_id)) {
+                $pos_akumulasi->update(['accounting_account_id' => $acc_akumulasi->id]);
+            }
+        }
+
+        // 5. Ensure ExpenseCategory 'Biaya Penyusutan' exists in expense_categories
+        $exp_cat = \App\ExpenseCategory::where('business_id', $business_id)
+            ->where(function ($q) {
+                $q->where('name', 'Biaya Penyusutan')
+                  ->orWhere('name', 'Beban Penyusutan');
+            })->first();
+
+        if (! $exp_cat) {
+            $exp_cat = \App\ExpenseCategory::create([
+                'name' => 'Biaya Penyusutan',
+                'business_id' => $business_id,
+                'code' => '6105',
+            ]);
+        }
+
+        // Sync accounting_default_map for business locations
+        if ($acc_biaya && $acc_akumulasi && $exp_cat) {
+            $locations = \App\BusinessLocation::where('business_id', $business_id)->get();
+            foreach ($locations as $loc) {
+                $map = json_decode($loc->accounting_default_map, true) ?: [];
+                $map['expense_' . $exp_cat->id] = [
+                    'deposit_to' => $acc_biaya->id,
+                    'payment_account' => $acc_akumulasi->id,
+                ];
+                $loc->update(['accounting_default_map' => json_encode($map)]);
+            }
+        }
     }
 }

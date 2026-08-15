@@ -100,6 +100,7 @@ return [
     'pendapatan_lainnya' => 'Other Income',
     'harga_pokok_penjualan' => 'Cost of Goods Sold',
     'beban_operasional' => 'Operating Expenses',
+    'biaya_penyusutan' => 'Depreciation Expense',
     'beban_lain_lain' => 'Other Expenses',
     'beban_pajak' => 'Tax Expense',
 

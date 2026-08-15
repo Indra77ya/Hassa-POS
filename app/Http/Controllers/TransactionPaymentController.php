@@ -103,6 +103,10 @@ class TransactionPaymentController extends Controller
                     $inputs['account_id'] = $request->input('account_id');
                 }
 
+                if ($transaction->type == 'expense' && \App\Http\Controllers\ExpenseController::isDepreciationCategory($transaction->expense_category_id, $transaction->business_id)) {
+                    $inputs['account_id'] = \App\Http\Controllers\ExpenseController::getAccumulatedDepreciationAccountId($transaction->business_id);
+                }
+
                 $prefix_type = 'purchase_payment';
                 if (in_array($transaction->type, ['sell', 'sell_return'])) {
                     $prefix_type = 'sell_payment';
@@ -274,6 +278,10 @@ class TransactionPaymentController extends Controller
 
             if (! empty($request->input('account_id'))) {
                 $inputs['account_id'] = $request->input('account_id');
+            }
+
+            if ($transaction->type == 'expense' && \App\Http\Controllers\ExpenseController::isDepreciationCategory($transaction->expense_category_id, $transaction->business_id)) {
+                $inputs['account_id'] = \App\Http\Controllers\ExpenseController::getAccumulatedDepreciationAccountId($transaction->business_id);
             }
 
             if (! empty($request->input('denominations'))) {

@@ -304,7 +304,7 @@ class Account extends Model
         $debit_keys = [
             'kas_dan_bank', 'piutang_usaha', 'persediaan', 'aktiva_lancar_lainnya',
             'aktiva_tetap', 'aktiva_lainnya', 'harga_pokok_penjualan',
-            'beban_operasional', 'beban_lain_lain', 'beban_pajak'
+            'beban_operasional', 'biaya_penyusutan', 'beban_lain_lain', 'beban_pajak'
         ];
 
         if (in_array($fixed_key, $debit_keys)) {
@@ -463,7 +463,7 @@ class Account extends Model
             return __('account.equity');
         } elseif (in_array($fixed_key, ['pendapatan_usaha', 'pendapatan_lainnya'])) {
             return __('account.income');
-        } elseif (in_array($fixed_key, ['harga_pokok_penjualan', 'beban_operasional', 'beban_lain_lain', 'beban_pajak'])) {
+        } elseif (in_array($fixed_key, ['harga_pokok_penjualan', 'beban_operasional', 'biaya_penyusutan', 'beban_lain_lain', 'beban_pajak'])) {
             return __('account.expenses');
         }
 

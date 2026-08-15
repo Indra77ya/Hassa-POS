@@ -73,6 +73,26 @@ class MapExpenseTransactions
             }
         }
 
+        // Intercept Depreciation Expenses: Force deposit_to -> Biaya Penyusutan and payment_account -> Akumulasi Penyusutan
+        if (!empty($event->expense->expense_category_id) && class_exists(\App\Http\Controllers\ExpenseController::class) && \App\Http\Controllers\ExpenseController::isDepreciationCategory($event->expense->expense_category_id, $event->expense->business_id)) {
+            $business_id = $event->expense->business_id;
+            $acc_biaya = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                ->where(function ($q) {
+                    $q->where('name', 'Biaya Penyusutan')
+                      ->orWhere('name', 'Beban Penyusutan');
+                })->first();
+            if ($acc_biaya) {
+                $deposit_to = $acc_biaya->id;
+            }
+
+            $acc_akumulasi = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                ->where('name', 'Akumulasi Penyusutan')
+                ->first();
+            if ($acc_akumulasi) {
+                $payment_account = $acc_akumulasi->id;
+            }
+        }
+
         // if expense is deleted then delete the mapping
         if (isset($event->isDeleted) && $event->isDeleted) {
             $accountingUtil = new \Modules\Accounting\Utils\AccountingUtil();

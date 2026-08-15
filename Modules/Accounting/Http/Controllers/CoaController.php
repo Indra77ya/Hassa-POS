@@ -1166,6 +1166,7 @@ class CoaController extends Controller
                     ['name' => 'Beban Sewa', 'type' => 'beban_operasional', 'number' => '6102', 'balance' => 'debit'],
                     ['name' => 'Beban Listrik & Air', 'type' => 'beban_operasional', 'number' => '6103', 'balance' => 'debit'],
                     ['name' => 'Beban Kerusakan/Kehilangan', 'type' => 'beban_operasional', 'number' => '6104', 'balance' => 'debit'],
+                    ['name' => 'Biaya Penyusutan', 'type' => 'biaya_penyusutan', 'number' => '6105', 'balance' => 'debit'],
                     ['name' => 'Peralatan', 'type' => 'aktiva_tetap', 'number' => '1401', 'balance' => 'debit'],
                     ['name' => 'Kendaraan', 'type' => 'aktiva_tetap', 'number' => '1402', 'balance' => 'debit'],
                     ['name' => 'Akumulasi Penyusutan', 'type' => 'akumulasi_penyusutan', 'number' => '1403', 'balance' => 'credit'],
@@ -1176,7 +1177,7 @@ class CoaController extends Controller
                     $exists = \App\Account::where('business_id', $business_id)
                                           ->where('name', $da['name'])
                                           ->first();
-                    if (!$exists) {
+                    if (!$exists && isset($created_types[$da['type']])) {
                         \App\Account::create([
                             'name' => $da['name'],
                             'business_id' => $business_id,
@@ -1187,6 +1188,8 @@ class CoaController extends Controller
                         ]);
                     }
                 }
+
+                \App\Http\Controllers\AccountTypeController::syncDepreciationForBusiness($business_id, $user_id);
             } catch (\Exception $e) {
                 \Log::error('Error seeding default POS accounts: ' . $e->getMessage());
             }

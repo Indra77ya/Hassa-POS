@@ -100,6 +100,7 @@ return [
     'pendapatan_lainnya' => 'Pendapatan Lainnya',
     'harga_pokok_penjualan' => 'Harga Pokok Penjualan',
     'beban_operasional' => 'Beban Operasional',
+    'biaya_penyusutan' => 'Biaya Penyusutan',
     'beban_lain_lain' => 'Beban Lain-lain',
     'beban_pajak' => 'Beban Pajak',
     'inventory_account' => 'Persediaan Barang',

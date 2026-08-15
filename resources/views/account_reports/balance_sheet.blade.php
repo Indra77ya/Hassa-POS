@@ -160,7 +160,10 @@
                         var balance = parseFloat(asset.balance) || 0;
                         if (balance != 0) {
                             var sub_type = asset.sub_type;
-                            if (['accounts_receivable', 'current_assets', 'cash_and_cash_equivalents'].indexOf(sub_type) !== -1) {
+                            if (asset.name.indexOf('Penyusutan') !== -1 || asset.name.indexOf('Depreciation') !== -1) {
+                                non_current_assets.push(asset);
+                                sum_non_current_assets += balance;
+                            } else if (['accounts_receivable', 'current_assets', 'cash_and_cash_equivalents'].indexOf(sub_type) !== -1) {
                                 current_assets.push(asset);
                                 sum_current_assets += balance;
                             } else if (['fixed_assets', 'non_current_assets'].indexOf(sub_type) !== -1) {

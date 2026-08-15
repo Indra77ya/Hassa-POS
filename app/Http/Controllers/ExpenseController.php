@@ -397,6 +397,27 @@ class ExpenseController extends Controller
                 }
             }
 
+            // Intercept depreciation expenses: force payment account to Akumulasi Penyusutan
+            if (self::isDepreciationCategory($request->input('expense_category_id'), $business_id)) {
+                $akumulasi_id = self::getAccumulatedDepreciationAccountId($business_id);
+                if ($akumulasi_id) {
+                    $payments = $request->input('payment', []);
+                    if (!empty($payments)) {
+                        foreach ($payments as $key => $p) {
+                            $payments[$key]['account_id'] = $akumulasi_id;
+                        }
+                    } else {
+                        $payments = [[
+                            'amount' => $request->input('final_total', 0),
+                            'method' => 'cash',
+                            'account_id' => $akumulasi_id,
+                            'paid_on' => $request->input('transaction_date', \Carbon::now()->toDateTimeString()),
+                        ]];
+                    }
+                    $request->merge(['payment' => $payments]);
+                }
+            }
+
             $user_id = $request->session()->get('user.id');
 
             DB::beginTransaction();
@@ -520,6 +541,15 @@ class ExpenseController extends Controller
             }
 
             $expense = $this->transactionUtil->updateExpense($request, $id, $business_id);
+
+            // Intercept depreciation expenses on update: update payment account to Akumulasi Penyusutan
+            if (self::isDepreciationCategory($expense->expense_category_id, $business_id)) {
+                $akumulasi_id = self::getAccumulatedDepreciationAccountId($business_id);
+                if ($akumulasi_id) {
+                    \DB::table('transaction_payments')->where('transaction_id', $expense->id)->update(['account_id' => $akumulasi_id]);
+                    \App\AccountTransaction::where('transaction_id', $expense->id)->update(['account_id' => $akumulasi_id]);
+                }
+            }
 
             $this->transactionUtil->activityLog($expense, 'edited');
 
@@ -906,6 +936,95 @@ class ExpenseController extends Controller
 
         return redirect('import-expense')->with('status', $output);
 
+    }
+
+    /**
+     * Checks if a given expense category ID belongs to Depreciation.
+     */
+    public static function isDepreciationCategory($category_id, $business_id)
+    {
+        if (empty($category_id)) {
+            return false;
+        }
+
+        $category = \App\ExpenseCategory::where('business_id', $business_id)
+            ->where('id', $category_id)
+            ->first();
+
+        if (!$category) {
+            return false;
+        }
+
+        // 1. Check if category name matches standard depreciation terms
+        if (in_array(strtolower(trim($category->name)), ['biaya penyusutan', 'beban penyusutan', 'depreciation expense'])) {
+            return true;
+        }
+
+        // 2. Check location default map or linked account with fixed_key = 'biaya_penyusutan'
+        $location = \App\BusinessLocation::where('business_id', $business_id)->first();
+        if ($location) {
+            $map = json_decode($location->accounting_default_map, true) ?: [];
+            $deposit_to_id = $map['expense_' . $category_id]['deposit_to'] ?? null;
+            if ($deposit_to_id && class_exists(\Modules\Accounting\Entities\AccountingAccount::class)) {
+                $acc = \Modules\Accounting\Entities\AccountingAccount::find($deposit_to_id);
+                if ($acc && !empty($acc->account_id)) {
+                    $pos_acc = \App\Account::find($acc->account_id);
+                    if ($pos_acc && $pos_acc->account_type && $pos_acc->account_type->fixed_key === 'biaya_penyusutan') {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        // 3. Fallback check on account matching name in accounts table
+        $pos_acc = \App\Account::where('business_id', $business_id)
+            ->where('name', $category->name)
+            ->first();
+        if ($pos_acc && $pos_acc->account_type && $pos_acc->account_type->fixed_key === 'biaya_penyusutan') {
+            return true;
+        }
+
+        if (stripos($category->name, 'penyusutan') !== false || stripos($category->name, 'depreciation') !== false) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Finds the Accumulated Depreciation POS Account ID for a business.
+     */
+    public static function getAccumulatedDepreciationAccountId($business_id)
+    {
+        $type = \App\AccountType::where('business_id', $business_id)
+            ->where('fixed_key', 'akumulasi_penyusutan')
+            ->first();
+
+        if ($type) {
+            $account = \App\Account::where('business_id', $business_id)
+                ->where('account_type_id', $type->id)
+                ->first();
+            if ($account) {
+                return $account->id;
+            }
+        }
+
+        $account = \App\Account::where('business_id', $business_id)
+            ->where('name', 'Akumulasi Penyusutan')
+            ->first();
+
+        if ($account) {
+            return $account->id;
+        }
+
+        // Fallback: sync depreciation for this business to guarantee it exists
+        \App\Http\Controllers\AccountTypeController::syncDepreciationForBusiness($business_id);
+
+        $account = \App\Account::where('business_id', $business_id)
+            ->where('name', 'Akumulasi Penyusutan')
+            ->first();
+
+        return $account ? $account->id : null;
     }
 
 }
