@@ -363,6 +363,34 @@ class SyncPaymentAccountingAccounts extends Command
                 }
             }
 
+            // 5. Sync Operating Expense accounts to Expense Categories
+            if (class_exists(AccountingAccount::class) && class_exists(\App\ExpenseCategory::class)) {
+                $op_expenses = AccountingAccount::whereIn('account_primary_type', ['expense', 'expenses'])
+                    ->where('account_sub_type_id', 14)
+                    ->get();
+
+                $this->info('Processing ' . $op_expenses->count() . ' Operating Expense accounts for Expense Categories sync...');
+
+                foreach ($op_expenses as $oe) {
+                    $exp_cat = \App\ExpenseCategory::where('business_id', $oe->business_id)
+                        ->where('name', $oe->name)
+                        ->first();
+
+                    if (!$exp_cat) {
+                        $this->info("Creating Expense Category for Operating Expense: {$oe->name} (Business ID: {$oe->business_id})");
+                        \App\ExpenseCategory::create([
+                            'name' => $oe->name,
+                            'business_id' => $oe->business_id,
+                            'code' => $oe->gl_code,
+                        ]);
+                    } else {
+                        if (empty($exp_cat->code) && !empty($oe->gl_code)) {
+                            $exp_cat->update(['code' => $oe->gl_code]);
+                        }
+                    }
+                }
+            }
+
             DB::commit();
             $this->info('Bidirectional Payment Accounts & Accounting module synchronization completed successfully!');
 

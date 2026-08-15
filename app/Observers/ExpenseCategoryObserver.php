@@ -26,16 +26,28 @@ class ExpenseCategoryObserver
             $business_id = $expenseCategory->business_id;
             $created_by = request()->session()->get('user.id') ?? 1;
 
-            // 1. Create AccountingAccount
-            $accountingAccount = AccountingAccount::create([
-                'name' => $expenseCategory->name,
-                'business_id' => $business_id,
-                'account_primary_type' => 'expenses',
-                'account_sub_type_id' => 14, // Beban Operasional
-                'detail_type_id' => 138, // Uncategorised Expense
-                'status' => 'active',
-                'created_by' => $created_by
-            ]);
+            // 1. Create AccountingAccount if it doesn't exist
+            $accountingAccount = AccountingAccount::where('business_id', $business_id)
+                ->where('name', $expenseCategory->name)
+                ->whereIn('account_primary_type', ['expense', 'expenses'])
+                ->first();
+
+            if (!$accountingAccount) {
+                $accountingAccount = AccountingAccount::create([
+                    'name' => $expenseCategory->name,
+                    'business_id' => $business_id,
+                    'account_primary_type' => 'expenses',
+                    'account_sub_type_id' => 14, // Beban Operasional
+                    'detail_type_id' => 138, // Uncategorised Expense
+                    'status' => 'active',
+                    'gl_code' => $expenseCategory->code,
+                    'created_by' => $created_by
+                ]);
+            } else {
+                if (empty($accountingAccount->gl_code) && !empty($expenseCategory->code)) {
+                    $accountingAccount->update(['gl_code' => $expenseCategory->code]);
+                }
+            }
 
             // 2. Double-check if the POS Account was successfully created via AccountingAccount's observer.
             // If not, create it manually here to guarantee both exist.

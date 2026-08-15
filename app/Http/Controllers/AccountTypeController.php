@@ -177,6 +177,19 @@ class AccountTypeController extends Controller
                         'created_by' => $user_id
                     ]);
                 }
+
+                if (in_array($da['type'], ['beban_operasional', 'biaya_penyusutan'])) {
+                    $exp_cat = \App\ExpenseCategory::where('business_id', $business_id)
+                        ->where('name', $da['name'])
+                        ->first();
+                    if (!$exp_cat) {
+                        \App\ExpenseCategory::create([
+                            'name' => $da['name'],
+                            'business_id' => $business_id,
+                            'code' => $da['number'],
+                        ]);
+                    }
+                }
             }
 
             self::syncDepreciationForBusiness($business_id, $user_id);

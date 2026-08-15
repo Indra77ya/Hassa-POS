@@ -75,6 +75,28 @@ class AccountingAccount extends Model
                     }
                 }
             }
+
+            // Sync Operating Expense (sub_type_id 14) to ExpenseCategory
+            if (in_array($accountingAccount->account_primary_type, ['expense', 'expenses']) && $accountingAccount->account_sub_type_id == 14) {
+                if (class_exists(\App\ExpenseCategory::class)) {
+                    try {
+                        $exp_cat = \App\ExpenseCategory::where('business_id', $accountingAccount->business_id)
+                            ->where('name', $accountingAccount->name)
+                            ->first();
+                        if (!$exp_cat) {
+                            \App\ExpenseCategory::create([
+                                'name' => $accountingAccount->name,
+                                'business_id' => $accountingAccount->business_id,
+                                'code' => $accountingAccount->gl_code,
+                            ]);
+                        } elseif (empty($exp_cat->code) && !empty($accountingAccount->gl_code)) {
+                            $exp_cat->update(['code' => $accountingAccount->gl_code]);
+                        }
+                    } catch (\Exception $e) {
+                        \Log::error('Error syncing Operating Expense Accounting Account to ExpenseCategory: ' . $e->getMessage());
+                    }
+                }
+            }
         });
 
         static::updated(function ($accountingAccount) {
@@ -159,6 +181,33 @@ class AccountingAccount extends Model
                     }
                 }
             }
+
+            // Sync Operating Expense (sub_type_id 14) to ExpenseCategory
+            if (in_array($accountingAccount->account_primary_type, ['expense', 'expenses']) && $accountingAccount->account_sub_type_id == 14) {
+                if (class_exists(\App\ExpenseCategory::class)) {
+                    try {
+                        $old_name = $accountingAccount->getOriginal('name') ?? $accountingAccount->name;
+                        $exp_cat = \App\ExpenseCategory::where('business_id', $accountingAccount->business_id)
+                            ->where(function($q) use ($old_name, $accountingAccount) {
+                                $q->where('name', $old_name)->orWhere('name', $accountingAccount->name);
+                            })->first();
+                        if ($exp_cat) {
+                            $exp_cat->update([
+                                'name' => $accountingAccount->name,
+                                'code' => $accountingAccount->gl_code,
+                            ]);
+                        } else {
+                            \App\ExpenseCategory::create([
+                                'name' => $accountingAccount->name,
+                                'business_id' => $accountingAccount->business_id,
+                                'code' => $accountingAccount->gl_code,
+                            ]);
+                        }
+                    } catch (\Exception $e) {
+                        \Log::error('Error updating ExpenseCategory from Operating Expense Accounting Account: ' . $e->getMessage());
+                    }
+                }
+            }
         });
 
         static::deleted(function ($accountingAccount) {
@@ -184,6 +233,22 @@ class AccountingAccount extends Model
                 } finally {
                     self::$is_syncing = false;
                     \App\Account::$is_syncing = false;
+                }
+            }
+
+            // Sync Operating Expense (sub_type_id 14) deletion to ExpenseCategory
+            if (in_array($accountingAccount->account_primary_type, ['expense', 'expenses']) && $accountingAccount->account_sub_type_id == 14) {
+                if (class_exists(\App\ExpenseCategory::class)) {
+                    try {
+                        $exp_cat = \App\ExpenseCategory::where('business_id', $accountingAccount->business_id)
+                            ->where('name', $accountingAccount->name)
+                            ->first();
+                        if ($exp_cat) {
+                            $exp_cat->delete();
+                        }
+                    } catch (\Exception $e) {
+                        \Log::error('Error deleting ExpenseCategory from Operating Expense Accounting Account: ' . $e->getMessage());
+                    }
                 }
             }
         });

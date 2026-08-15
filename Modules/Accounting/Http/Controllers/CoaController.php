@@ -1334,6 +1334,19 @@ class CoaController extends Controller
                 if (!$exists) {
                     AccountingAccount::create($account);
                 }
+
+                if (in_array($account['account_primary_type'], ['expense', 'expenses']) && ($account['account_sub_type_id'] ?? null) == 14) {
+                    $exp_cat = \App\ExpenseCategory::where('business_id', $business_id)
+                        ->where('name', $account['name'])
+                        ->first();
+                    if (!$exp_cat) {
+                        \App\ExpenseCategory::create([
+                            'name' => $account['name'],
+                            'business_id' => $business_id,
+                            'code' => $account['gl_code'] ?? null,
+                        ]);
+                    }
+                }
             }
 
             // 3. Run bidirectional sync to link and create any missing accounts between POS and Accounting
