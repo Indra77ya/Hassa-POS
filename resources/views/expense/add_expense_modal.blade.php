@@ -23,7 +23,10 @@
                 <div class="col-sm-6">
                     <div class="form-group">
                         {!! Form::label('expense_category_id', __('expense.expense_category').':') !!}
-                        {!! Form::select('expense_category_id', $expense_categories, null, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select')]); !!}
+                        {!! Form::select('expense_category_id', $expense_categories, null, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select')], $category_attributes ?? []); !!}
+                        <div id="depreciation_info_alert" class="alert alert-info tw-mt-2" style="display: none; margin-top: 8px; margin-bottom: 0;">
+                            <i class="fa fa-info-circle"></i> <strong>Mode Penyusutan Aktif:</strong> Jurnal kredit akan otomatis diarahkan ke akun Akumulasi Penyusutan tanpa memotong Kas.
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-6">

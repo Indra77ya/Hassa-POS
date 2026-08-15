@@ -32,7 +32,10 @@
 				<div class="col-sm-4">
 					<div class="form-group">
 						{!! Form::label('expense_category_id', __('expense.expense_category').':') !!}
-						{!! Form::select('expense_category_id', $expense_categories, null, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select')]); !!}
+						{!! Form::select('expense_category_id', $expense_categories, null, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select')], $category_attributes ?? []); !!}
+						<div id="depreciation_info_alert" class="alert alert-info tw-mt-2" style="display: none; margin-top: 8px; margin-bottom: 0;">
+							<i class="fa fa-info-circle"></i> <strong>Mode Penyusutan Aktif:</strong> Jurnal kredit akan otomatis diarahkan ke akun Akumulasi Penyusutan tanpa memotong Kas.
+						</div>
 					</div>
 				</div>
 				<div class="col-md-4">
@@ -196,5 +199,36 @@
 	        }
 	    }
 	});
+
+	function toggleDepreciationMode(container) {
+		var $container = container ? $(container) : $(document);
+		var $categorySelect = $container.find('select#expense_category_id');
+		if (!$categorySelect.length) return;
+
+		var $selectedOption = $categorySelect.find('option:selected');
+		var isDepreciation = $selectedOption.data('is-depreciation') == true || $selectedOption.attr('data-is-depreciation') === 'true';
+
+		var $alert = $container.find('#depreciation_info_alert');
+		var $paymentSection = $container.find('#payment_rows_div, .payment_row');
+
+		if (isDepreciation) {
+			$alert.stop(true, true).slideDown();
+			$paymentSection.stop(true, true).slideUp();
+			$paymentSection.find('select[name*="[account_id]"]').removeAttr('required');
+			$paymentSection.find('.payment_types_dropdown').removeAttr('required');
+		} else {
+			$alert.stop(true, true).slideUp();
+			$paymentSection.stop(true, true).slideDown();
+			$paymentSection.find('select[name*="[account_id]"]').attr('required', 'required');
+			$paymentSection.find('.payment_types_dropdown').attr('required', 'required');
+		}
+	}
+
+	$(document).on('change', 'select#expense_category_id', function() {
+		var container = $(this).closest('.modal-content').length ? $(this).closest('.modal-content') : $(document);
+		toggleDepreciationMode(container);
+	});
+
+	toggleDepreciationMode($(document));
 </script>
 @endsection

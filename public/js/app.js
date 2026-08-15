@@ -2826,6 +2826,37 @@ $(document).on('change', 'input#expense_final_total, #add_expense_modal_form .pa
     calculateExpensePaymentDue();
 });
 
+$(document).on('change', 'select#expense_category_id', function() {
+    var $form = $(this).closest('form');
+    if (!$form.length || ($form.attr('id') !== 'add_expense_form' && $form.attr('id') !== 'add_expense_modal_form')) {
+        return;
+    }
+    var $selectedOption = $(this).find('option:selected');
+    var isDepreciation = $selectedOption.data('is-depreciation') == true || $selectedOption.attr('data-is-depreciation') === 'true';
+
+    var $alert = $form.find('#depreciation_info_alert');
+    var $paymentSection = $form.find('#payment_rows_div, .payment_row');
+
+    if (isDepreciation) {
+        $alert.stop(true, true).slideDown();
+        $paymentSection.stop(true, true).slideUp();
+        $paymentSection.find('select[name*="[account_id]"]').removeAttr('required');
+        $paymentSection.find('.payment_types_dropdown').removeAttr('required');
+    } else {
+        $alert.stop(true, true).slideUp();
+        $paymentSection.stop(true, true).slideDown();
+        $paymentSection.find('select[name*="[account_id]"]').attr('required', 'required');
+        $paymentSection.find('.payment_types_dropdown').attr('required', 'required');
+    }
+});
+
+$(document).on('shown.bs.modal', '.modal', function() {
+    var $categorySelect = $(this).find('select#expense_category_id');
+    if ($categorySelect.length) {
+        $categorySelect.trigger('change');
+    }
+});
+
 function calculateExpensePaymentDue() {
     var final_total = __read_number($('input#expense_final_total'));
     var payment_amount = __read_number($('#add_expense_modal_form input.payment-amount'));

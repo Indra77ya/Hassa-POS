@@ -343,13 +343,20 @@ class ExpenseController extends Controller
             $accounts = Account::forDropdown($business_id, false, false, true, true);
         }
 
+        $category_attributes = [];
+        foreach ($expense_categories as $cat_id => $cat_name) {
+            if (self::isDepreciationCategory($cat_id, $business_id)) {
+                $category_attributes[$cat_id] = ['data-is-depreciation' => 'true'];
+            }
+        }
+
         if (request()->ajax()) {
             return view('expense.add_expense_modal')
-                ->with(compact('expense_categories', 'business_locations', 'users', 'taxes', 'payment_line', 'payment_types', 'accounts', 'bl_attributes', 'contacts'));
+                ->with(compact('expense_categories', 'business_locations', 'users', 'taxes', 'payment_line', 'payment_types', 'accounts', 'bl_attributes', 'contacts', 'category_attributes'));
         }
 
         return view('expense.create')
-            ->with(compact('expense_categories', 'business_locations', 'users', 'taxes', 'payment_line', 'payment_types', 'accounts', 'bl_attributes', 'contacts'));
+            ->with(compact('expense_categories', 'business_locations', 'users', 'taxes', 'payment_line', 'payment_types', 'accounts', 'bl_attributes', 'contacts', 'category_attributes'));
     }
 
     /**
@@ -510,8 +517,15 @@ class ExpenseController extends Controller
                 ->toArray();
         }
 
+        $category_attributes = [];
+        foreach ($expense_categories as $cat_id => $cat_name) {
+            if (self::isDepreciationCategory($cat_id, $business_id)) {
+                $category_attributes[$cat_id] = ['data-is-depreciation' => 'true'];
+            }
+        }
+
         return view('expense.edit')
-            ->with(compact('expense', 'expense_categories', 'business_locations', 'users', 'taxes', 'contacts', 'sub_categories'));
+            ->with(compact('expense', 'expense_categories', 'business_locations', 'users', 'taxes', 'contacts', 'sub_categories', 'category_attributes'));
     }
 
     /**
