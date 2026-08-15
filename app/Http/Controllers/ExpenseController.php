@@ -79,6 +79,7 @@ class ExpenseController extends Controller
                             'ref_no',
                             'ec.name as category',
                             'esc.name as sub_category',
+                            'transactions.expense_category_id',
                             'payment_status',
                             'additional_notes',
                             'final_total',
@@ -180,32 +181,36 @@ class ExpenseController extends Controller
             return Datatables::of($expenses)
                 ->addColumn(
                     'action',
-                    '<div class="btn-group">
-                        <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-info tw-w-max dropdown-toggle" 
-                            data-toggle="dropdown" aria-expanded="false"> @lang("messages.actions")<span class="caret"></span><span class="sr-only">Toggle Dropdown
-                                </span>
-                        </button>
-                    <ul class="dropdown-menu dropdown-menu-left" role="menu">
-                    @if(auth()->user()->can("expense.edit"))
-                        <li><a href="{{action(\'App\Http\Controllers\ExpenseController@edit\', [$id])}}"><i class="glyphicon glyphicon-edit"></i> @lang("messages.edit")</a></li>
-                    @endif
-                    @if($document)
-                        <li><a href="{{ url(\'uploads/documents/\' . $document)}}" 
-                        download=""><i class="fa fa-download" aria-hidden="true"></i> @lang("purchase.download_document")</a></li>
-                        @if(isFileImage($document))
-                            <li><a href="#" data-href="{{ url(\'uploads/documents/\' . $document)}}" class="view_uploaded_document"><i class="fas fa-file-image" aria-hidden="true"></i>@lang("lang_v1.view_document")</a></li>
-                        @endif
-                    @endif
-                    @if(auth()->user()->can("expense.delete"))
-                        <li>
-                        <a href="#" data-href="{{action(\'App\Http\Controllers\ExpenseController@destroy\', [$id])}}" class="delete_expense"><i class="glyphicon glyphicon-trash"></i> @lang("messages.delete")</a></li>
-                    @endif
-                    <li class="divider"></li> 
-                    @if($payment_status != "paid")
-                        <li><a href="{{action([\App\Http\Controllers\TransactionPaymentController::class, \'addPayment\'], [$id])}}" class="add_payment_modal"><i class="fas fa-money-bill-alt" aria-hidden="true"></i> @lang("purchase.add_payment")</a></li>
-                    @endif
-                    <li><a href="{{action([\App\Http\Controllers\TransactionPaymentController::class, \'show\'], [$id])}}" class="view_payment_modal"><i class="fas fa-money-bill-alt" aria-hidden="true" ></i> @lang("purchase.view_payments")</a></li>
-                    </ul></div>'
+                    function ($row) use ($business_id) {
+                        $html = '<div class="btn-group">
+                            <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info tw-w-max dropdown-toggle"
+                                data-toggle="dropdown" aria-expanded="false"> ' . __('messages.actions') . '<span class="caret"></span><span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                        <ul class="dropdown-menu dropdown-menu-left" role="menu">';
+
+                        if (auth()->user()->can('expense.edit')) {
+                            $html .= '<li><a href="' . action([\App\Http\Controllers\ExpenseController::class, 'edit'], [$row->id]) . '"><i class="glyphicon glyphicon-edit"></i> ' . __('messages.edit') . '</a></li>';
+                        }
+                        if ($row->document) {
+                            $html .= '<li><a href="' . url('uploads/documents/' . $row->document) . '" download=""><i class="fa fa-download" aria-hidden="true"></i> ' . __('purchase.download_document') . '</a></li>';
+                            if (isFileImage($row->document)) {
+                                $html .= '<li><a href="#" data-href="' . url('uploads/documents/' . $row->document) . '" class="view_uploaded_document"><i class="fas fa-file-image" aria-hidden="true"></i>' . __('lang_v1.view_document') . '</a></li>';
+                            }
+                        }
+                        if (auth()->user()->can('expense.delete')) {
+                            $html .= '<li><a href="#" data-href="' . action([\App\Http\Controllers\ExpenseController::class, 'destroy'], [$row->id]) . '" class="delete_expense"><i class="glyphicon glyphicon-trash"></i> ' . __('messages.delete') . '</a></li>';
+                        }
+                        $html .= '<li class="divider"></li>';
+
+                        $is_depreciation = self::isDepreciationCategory($row->expense_category_id, $business_id);
+                        if ($row->payment_status != 'paid' && !$is_depreciation) {
+                            $html .= '<li><a href="' . action([\App\Http\Controllers\TransactionPaymentController::class, 'addPayment'], [$row->id]) . '" class="add_payment_modal"><i class="fas fa-money-bill-alt" aria-hidden="true"></i> ' . __('purchase.add_payment') . '</a></li>';
+                        }
+                        $html .= '<li><a href="' . action([\App\Http\Controllers\TransactionPaymentController::class, 'show'], [$row->id]) . '" class="view_payment_modal"><i class="fas fa-money-bill-alt" aria-hidden="true"></i> ' . __('purchase.view_payments') . '</a></li>';
+                        $html .= '</ul></div>';
+
+                        return $html;
+                    }
                 )
                 ->removeColumn('id')
                 ->editColumn(
@@ -556,12 +561,28 @@ class ExpenseController extends Controller
 
             $expense = $this->transactionUtil->updateExpense($request, $id, $business_id);
 
-            // Intercept depreciation expenses on update: update payment account to Akumulasi Penyusutan
+            // Intercept depreciation expenses on update: ensure payment line exists with full amount and Akumulasi Penyusutan account
             if (self::isDepreciationCategory($expense->expense_category_id, $business_id)) {
                 $akumulasi_id = self::getAccumulatedDepreciationAccountId($business_id);
                 if ($akumulasi_id) {
-                    \DB::table('transaction_payments')->where('transaction_id', $expense->id)->update(['account_id' => $akumulasi_id]);
-                    \App\AccountTransaction::where('transaction_id', $expense->id)->update(['account_id' => $akumulasi_id]);
+                    $payment_count = \DB::table('transaction_payments')->where('transaction_id', $expense->id)->count();
+                    if ($payment_count == 0) {
+                        $payments = [[
+                            'amount' => $expense->final_total,
+                            'method' => 'cash',
+                            'account_id' => $akumulasi_id,
+                            'paid_on' => $expense->transaction_date,
+                        ]];
+                        $this->transactionUtil->createOrUpdatePaymentLines($expense, $payments, $business_id);
+                        $this->transactionUtil->updatePaymentStatus($expense->id, $expense->final_total);
+                    } else {
+                        \DB::table('transaction_payments')->where('transaction_id', $expense->id)->update([
+                            'amount' => $expense->final_total,
+                            'account_id' => $akumulasi_id
+                        ]);
+                        \App\AccountTransaction::where('transaction_id', $expense->id)->update(['account_id' => $akumulasi_id]);
+                        $this->transactionUtil->updatePaymentStatus($expense->id, $expense->final_total);
+                    }
                 }
             }
 
