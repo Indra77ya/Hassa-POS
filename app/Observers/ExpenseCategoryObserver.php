@@ -57,6 +57,12 @@ class ExpenseCategoryObserver
             }
 
             if (!$pos_account) {
+                $pos_account = \App\Account::where('business_id', $business_id)
+                    ->where('name', $expenseCategory->name)
+                    ->first();
+            }
+
+            if (!$pos_account) {
                 $account_type_id = \App\Account::getPOSAccountTypeIdFromAccounting('expenses', 14, $business_id);
 
                 $pos_account = \App\Account::create([
@@ -73,6 +79,9 @@ class ExpenseCategoryObserver
             } else {
                 if (empty($pos_account->accounting_account_id)) {
                     $pos_account->update(['accounting_account_id' => $accountingAccount->id]);
+                }
+                if (empty($accountingAccount->account_id)) {
+                    $accountingAccount->update(['account_id' => $pos_account->id]);
                 }
             }
 

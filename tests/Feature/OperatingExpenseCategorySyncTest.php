@@ -212,4 +212,42 @@ class OperatingExpenseCategorySyncTest extends TestCase
         $this->assertNotNull($exp_cat);
         $this->assertEquals('6120', $exp_cat->code);
     }
+
+    /**
+     * Test hotfix migration cleans up duplicate accounts with same name.
+     */
+    public function testHotfixMigrationCleansUpDuplicateAccounts()
+    {
+        $business_id = 1;
+
+        // Insert duplicate POS accounts
+        \DB::table('accounts')->insert([
+            'id' => 10,
+            'name' => 'Beban Gaji',
+            'business_id' => $business_id,
+            'account_number' => '6101',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        \DB::table('accounts')->insert([
+            'id' => 11,
+            'name' => 'Beban Gaji',
+            'business_id' => $business_id,
+            'account_number' => null,
+            'note' => 'Uncategorised Expense',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->assertEquals(2, Account::where('name', 'Beban Gaji')->count());
+
+        $migration = new \SyncOperatingExpenseCategories();
+        $migration->up();
+
+        // Verify duplicate was merged and deleted
+        $this->assertEquals(1, Account::where('name', 'Beban Gaji')->count());
+        $remaining = Account::where('name', 'Beban Gaji')->first();
+        $this->assertEquals('6101', $remaining->account_number);
+    }
 }

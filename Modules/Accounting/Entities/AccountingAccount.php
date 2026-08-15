@@ -36,6 +36,12 @@ class AccountingAccount extends Model
                         }
 
                         if (!$account) {
+                            $account = \App\Account::where('business_id', $accountingAccount->business_id)
+                                ->where('name', $accountingAccount->name)
+                                ->first();
+                        }
+
+                        if (!$account) {
                             $account_type_id = \App\Account::getPOSAccountTypeIdFromAccounting(
                                 $accountingAccount->account_primary_type,
                                 $accountingAccount->account_sub_type_id,
@@ -60,6 +66,9 @@ class AccountingAccount extends Model
                                 $accountingAccount->business_id
                             );
                             $account->account_type_id = $account_type_id;
+                            if (empty($account->account_number) && !empty($accountingAccount->gl_code)) {
+                                $account->account_number = $accountingAccount->gl_code;
+                            }
                             $account->save();
                         }
 

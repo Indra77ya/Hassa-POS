@@ -36,6 +36,12 @@ class Account extends Model
                     }
 
                     if (!$accounting_account) {
+                        $accounting_account = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $account->business_id)
+                            ->where('name', $account->name)
+                            ->first();
+                    }
+
+                    if (!$accounting_account) {
                         $mapped_type = self::getMappedAccountingType($account);
                         $accounting_account = \Modules\Accounting\Entities\AccountingAccount::create([
                             'name' => $account->name,
@@ -50,6 +56,9 @@ class Account extends Model
                         ]);
                     } else {
                         $accounting_account->account_id = $account->id;
+                        if (empty($accounting_account->gl_code) && !empty($account->account_number)) {
+                            $accounting_account->gl_code = $account->account_number;
+                        }
                         $accounting_account->save();
                     }
 

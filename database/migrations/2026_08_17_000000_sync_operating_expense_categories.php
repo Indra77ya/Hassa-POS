@@ -18,8 +18,82 @@ class SyncOperatingExpenseCategories extends Migration
             return;
         }
 
+        // Disable model observers during migration cleanup to prevent recursion loops
+        Account::$is_syncing = true;
+        if (class_exists(AccountingAccount::class)) {
+            AccountingAccount::$is_syncing = true;
+        }
+
         \DB::beginTransaction();
         try {
+            // 0. Clean up duplicate accounts with same name & business_id
+            if (class_exists(Account::class)) {
+                $duplicate_names = \DB::table('accounts')
+                    ->whereNull('deleted_at')
+                    ->select('business_id', 'name', \DB::raw('COUNT(*) as count'))
+                    ->groupBy('business_id', 'name')
+                    ->having('count', '>', 1)
+                    ->get();
+
+                foreach ($duplicate_names as $dup) {
+                    $all_accs = Account::where('business_id', $dup->business_id)
+                        ->where('name', $dup->name)
+                        ->orderByRaw("CASE WHEN account_number IS NOT NULL AND account_number != '' THEN 0 ELSE 1 END")
+                        ->orderBy('id', 'asc')
+                        ->get();
+
+                    $primary = $all_accs->first();
+                    $duplicates = $all_accs->slice(1);
+
+                    foreach ($duplicates as $dup_acc) {
+                        if (\Illuminate\Support\Facades\Schema::hasTable('account_transactions')) {
+                            \DB::table('account_transactions')
+                                ->where('account_id', $dup_acc->id)
+                                ->update(['account_id' => $primary->id]);
+                        }
+                        if (\Illuminate\Support\Facades\Schema::hasTable('accounting_accounts')) {
+                            \DB::table('accounting_accounts')
+                                ->where('account_id', $dup_acc->id)
+                                ->update(['account_id' => $primary->id]);
+                        }
+                        $dup_acc->forceDelete();
+                    }
+                }
+            }
+
+            if (class_exists(AccountingAccount::class)) {
+                $duplicate_acc_names = \DB::table('accounting_accounts')
+                    ->select('business_id', 'name', \DB::raw('COUNT(*) as count'))
+                    ->groupBy('business_id', 'name')
+                    ->having('count', '>', 1)
+                    ->get();
+
+                foreach ($duplicate_acc_names as $dup) {
+                    $all_accs = AccountingAccount::where('business_id', $dup->business_id)
+                        ->where('name', $dup->name)
+                        ->orderByRaw("CASE WHEN gl_code IS NOT NULL AND gl_code != '' THEN 0 ELSE 1 END")
+                        ->orderBy('id', 'asc')
+                        ->get();
+
+                    $primary = $all_accs->first();
+                    $duplicates = $all_accs->slice(1);
+
+                    foreach ($duplicates as $dup_acc) {
+                        if (\Illuminate\Support\Facades\Schema::hasTable('accounting_accounts_transactions')) {
+                            \DB::table('accounting_accounts_transactions')
+                                ->where('accounting_account_id', $dup_acc->id)
+                                ->update(['accounting_account_id' => $primary->id]);
+                        }
+                        if (\Illuminate\Support\Facades\Schema::hasTable('accounts')) {
+                            \DB::table('accounts')
+                                ->where('accounting_account_id', $dup_acc->id)
+                                ->update(['accounting_account_id' => $primary->id]);
+                        }
+                        $dup_acc->delete();
+                    }
+                }
+            }
+
             // 1. Sync from AccountingAccount (primary: expense/expenses, sub_type_id: 14)
             if (class_exists(AccountingAccount::class)) {
                 $accountingAccounts = AccountingAccount::whereIn('account_primary_type', ['expense', 'expenses'])
@@ -75,6 +149,11 @@ class SyncOperatingExpenseCategories extends Migration
             \DB::rollBack();
             \Log::error('Error in hotfix migration SyncOperatingExpenseCategories: ' . $e->getMessage());
             throw $e;
+        } finally {
+            Account::$is_syncing = false;
+            if (class_exists(AccountingAccount::class)) {
+                AccountingAccount::$is_syncing = false;
+            }
         }
     }
 
