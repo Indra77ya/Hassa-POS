@@ -409,23 +409,16 @@ class ExpenseController extends Controller
                 }
             }
 
-            // Intercept depreciation expenses: force payment account to Akumulasi Penyusutan
+            // Intercept depreciation expenses: force payment line to Akumulasi Penyusutan with 100% final_total
             if (self::isDepreciationCategory($request->input('expense_category_id'), $business_id)) {
                 $akumulasi_id = self::getAccumulatedDepreciationAccountId($business_id);
                 if ($akumulasi_id) {
-                    $payments = $request->input('payment', []);
-                    if (!empty($payments)) {
-                        foreach ($payments as $key => $p) {
-                            $payments[$key]['account_id'] = $akumulasi_id;
-                        }
-                    } else {
-                        $payments = [[
-                            'amount' => $request->input('final_total', 0),
-                            'method' => 'cash',
-                            'account_id' => $akumulasi_id,
-                            'paid_on' => $request->input('transaction_date', \Carbon::now()->toDateTimeString()),
-                        ]];
-                    }
+                    $payments = [[
+                        'amount' => $request->input('final_total', 0),
+                        'method' => 'cash',
+                        'account_id' => $akumulasi_id,
+                        'paid_on' => $request->input('transaction_date', \Carbon::now()->toDateTimeString()),
+                    ]];
                     $request->merge(['payment' => $payments]);
                 }
             }

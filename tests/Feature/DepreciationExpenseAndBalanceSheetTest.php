@@ -160,6 +160,7 @@ class DepreciationExpenseAndBalanceSheetTest extends TestCase
             $table->integer('expense_category_id')->nullable();
             $table->string('ref_no')->nullable();
             $table->string('invoice_no')->nullable();
+            $table->string('payment_status')->nullable();
             $table->timestamps();
         });
 
@@ -248,10 +249,12 @@ class DepreciationExpenseAndBalanceSheetTest extends TestCase
         if (ExpenseController::isDepreciationCategory($request->input('expense_category_id'), 1)) {
             $akumulasi_id = ExpenseController::getAccumulatedDepreciationAccountId(1);
             if ($akumulasi_id) {
-                $payments = $request->input('payment', []);
-                foreach ($payments as $key => $p) {
-                    $payments[$key]['account_id'] = $akumulasi_id;
-                }
+                $payments = [[
+                    'amount' => $request->input('final_total', 0),
+                    'method' => 'cash',
+                    'account_id' => $akumulasi_id,
+                    'paid_on' => $request->input('transaction_date', \Carbon::now()->toDateTimeString()),
+                ]];
                 $request->merge(['payment' => $payments]);
             }
         }

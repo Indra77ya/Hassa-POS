@@ -27,13 +27,14 @@ return new class extends Migration
                 if ($akumulasi_id) {
                     $paymentCount = DB::table('transaction_payments')->where('transaction_id', $expense->id)->count();
                     if ($paymentCount == 0) {
+                        $paid_on = !empty($expense->transaction_date) ? \Carbon\Carbon::parse($expense->transaction_date)->toDateTimeString() : \Carbon\Carbon::now()->toDateTimeString();
                         $payments = [[
                             'amount' => $expense->final_total,
                             'method' => 'cash',
                             'account_id' => $akumulasi_id,
-                            'paid_on' => $expense->transaction_date,
+                            'paid_on' => $paid_on,
                         ]];
-                        $transactionUtil->createOrUpdatePaymentLines($expense, $payments, $expense->business_id);
+                        $transactionUtil->createOrUpdatePaymentLines($expense, $payments, $expense->business_id, null, false);
                         $transactionUtil->updatePaymentStatus($expense->id, $expense->final_total);
                     } else {
                         DB::table('transaction_payments')->where('transaction_id', $expense->id)->update([
