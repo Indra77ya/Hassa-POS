@@ -713,7 +713,7 @@ class PaymentAccountingSyncTest extends TestCase
             $this->assertEquals($case['name'], $pos->name);
         }
 
-        // Test Disallowed Cases are blocked and DO NOT sync to POS
+        // All account types now sync 1-to-1 to POS
         foreach ($disallowed_cases as $case) {
             $aa = AccountingAccount::create([
                 'name' => $case['name'],
@@ -725,8 +725,8 @@ class PaymentAccountingSyncTest extends TestCase
                 'status' => 'active'
             ]);
 
-            $this->assertFalse(AccountingAccount::shouldSyncToPOSStatic($aa));
-            $this->assertNull($aa->account_id, "Disallowed account [{$case['name']}] synced to POS but should be blocked.");
+            $this->assertTrue(AccountingAccount::shouldSyncToPOSStatic($aa));
+            $this->assertNotNull($aa->account_id, "Account [{$case['name']}] should sync to POS.");
         }
     }
 }

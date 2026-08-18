@@ -197,47 +197,7 @@ class AccountingAccount extends Model
      */
     public static function shouldSyncToPOSStatic($accountingAccount)
     {
-        $primary = $accountingAccount->account_primary_type;
-        $sub = $accountingAccount->account_sub_type_id;
-
-        if ($primary == 'asset') {
-            // a. Akun Kas & Bank (cash_and_cash_equivalents)
-            if ($sub == 3) {
-                return true;
-            }
-            // b. Akun Piutang Usaha (accounts_receivable)
-            if ($sub == 1) {
-                return true;
-            }
-            // d. Akun Persediaan (current_assets khusus inventory)
-            if ($sub == 2) {
-                $detail_type_name = \Modules\Accounting\Entities\AccountingAccountType::where('id', $accountingAccount->detail_type_id)->value('name');
-                if ($detail_type_name == 'inventory') {
-                    return true;
-                }
-            }
-        } elseif ($primary == 'liability') {
-            // c. Akun Hutang Usaha (accounts_payable)
-            if ($sub == 6) {
-                return true;
-            }
-        } elseif ($primary == 'income') {
-            // e. Akun Pendapatan Usaha (income)
-            if ($sub == 11) {
-                return true;
-            }
-        } elseif (in_array($primary, ['expense', 'expenses'])) {
-            // f. Akun HPP (cost_of_sale)
-            if ($sub == 13) {
-                return true;
-            }
-            // g. Akun Beban Operasional (expenses)
-            if ($sub == 14) {
-                return true;
-            }
-        }
-
-        return false;
+        return true;
     }
 
     public function child_accounts()
