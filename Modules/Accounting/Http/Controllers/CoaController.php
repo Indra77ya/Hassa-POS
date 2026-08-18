@@ -1044,7 +1044,7 @@ class CoaController extends Controller
                 'name' => 'Accumulated depreciation on property, plant and equipment',
                 'business_id' => $business_id,
                 'account_primary_type' => 'asset',
-                'account_sub_type_id' => 4,
+                'account_sub_type_id' => 17,
                 'detail_type_id' => 38,
                 'status' => 'active',
                 'created_by' => $user_id,

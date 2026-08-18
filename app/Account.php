@@ -347,38 +347,41 @@ class Account extends Model
 
         switch ($fixed_key) {
             case 'kas_dan_bank':
-                return ['primary' => 'asset', 'sub_type_id' => 3]; // cash_and_cash_equivalents
+                return ['primary' => 'asset', 'sub_type_id' => 3]; // kas_dan_bank
             case 'piutang_usaha':
-                return ['primary' => 'asset', 'sub_type_id' => 1]; // accounts_receivable
+                return ['primary' => 'asset', 'sub_type_id' => 1]; // piutang_usaha
             case 'persediaan':
+                return ['primary' => 'asset', 'sub_type_id' => 2]; // persediaan
             case 'aktiva_lancar_lainnya':
-                return ['primary' => 'asset', 'sub_type_id' => 2]; // current_assets
+                return ['primary' => 'asset', 'sub_type_id' => 16]; // aktiva_lancar_lainnya
             case 'aktiva_tetap':
+                return ['primary' => 'asset', 'sub_type_id' => 4]; // aktiva_tetap
             case 'akumulasi_penyusutan':
-                return ['primary' => 'asset', 'sub_type_id' => 4]; // fixed_assets
+                return ['primary' => 'asset', 'sub_type_id' => 17]; // akumulasi_penyusutan
             case 'aktiva_lainnya':
-                return ['primary' => 'asset', 'sub_type_id' => 5]; // non_current_assets
+                return ['primary' => 'asset', 'sub_type_id' => 5]; // aktiva_lainnya
             case 'hutang_usaha':
-                return ['primary' => 'liability', 'sub_type_id' => 6]; // accounts_payable
+                return ['primary' => 'liability', 'sub_type_id' => 6]; // hutang_usaha
             case 'hutang_lancar_lainnya':
-                return ['primary' => 'liability', 'sub_type_id' => 8]; // current_liabilities
+                return ['primary' => 'liability', 'sub_type_id' => 8]; // hutang_lancar_lainnya
             case 'hutang_jangka_panjang':
-                return ['primary' => 'liability', 'sub_type_id' => 9]; // non_current_liabilities
+                return ['primary' => 'liability', 'sub_type_id' => 9]; // hutang_jangka_panjang
             case 'ekuitas':
-                return ['primary' => 'equity', 'sub_type_id' => 10]; // owners_equity
+                return ['primary' => 'equity', 'sub_type_id' => 10]; // ekuitas
             case 'pendapatan_usaha':
-                return ['primary' => 'income', 'sub_type_id' => 11]; // income
+                return ['primary' => 'income', 'sub_type_id' => 11]; // pendapatan_usaha
             case 'pendapatan_lainnya':
-                return ['primary' => 'income', 'sub_type_id' => 12]; // other_income
+                return ['primary' => 'income', 'sub_type_id' => 12]; // pendapatan_lainnya
             case 'harga_pokok_penjualan':
-                return ['primary' => 'expenses', 'sub_type_id' => 13]; // cost_of_sale
+                return ['primary' => 'expenses', 'sub_type_id' => 13]; // harga_pokok_penjualan
             case 'beban_operasional':
-            case 'beban_pajak':
-                return ['primary' => 'expenses', 'sub_type_id' => 14]; // expenses
+                return ['primary' => 'expenses', 'sub_type_id' => 14]; // beban_operasional
             case 'beban_lain_lain':
-                return ['primary' => 'expenses', 'sub_type_id' => 15]; // other_expense
+                return ['primary' => 'expenses', 'sub_type_id' => 15]; // beban_lain_lain
+            case 'beban_pajak':
+                return ['primary' => 'expenses', 'sub_type_id' => 18]; // beban_pajak
             default:
-                return ['primary' => 'asset', 'sub_type_id' => 3]; // fallback to Cash & equivalents
+                return ['primary' => 'asset', 'sub_type_id' => 3]; // fallback to Kas & Bank
         }
     }
 
@@ -399,9 +402,13 @@ class Account extends Model
             } elseif ($sub_type_id == 1) {
                 $fixed_key = 'piutang_usaha';
             } elseif ($sub_type_id == 2) {
-                $fixed_key = 'persediaan'; // or aktiva_lancar_lainnya, choose persediaan as default
+                $fixed_key = 'persediaan';
+            } elseif ($sub_type_id == 16) {
+                $fixed_key = 'aktiva_lancar_lainnya';
             } elseif ($sub_type_id == 4) {
                 $fixed_key = 'aktiva_tetap';
+            } elseif ($sub_type_id == 17) {
+                $fixed_key = 'akumulasi_penyusutan';
             } elseif ($sub_type_id == 5) {
                 $fixed_key = 'aktiva_lainnya';
             }
@@ -428,6 +435,8 @@ class Account extends Model
                 $fixed_key = 'beban_operasional';
             } elseif ($sub_type_id == 15) {
                 $fixed_key = 'beban_lain_lain';
+            } elseif ($sub_type_id == 18) {
+                $fixed_key = 'beban_pajak';
             }
         }
 

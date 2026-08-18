@@ -29,7 +29,7 @@ class CreateAccountingAccountTypesTable extends Migration
         $account_sub_types = [
             [
                 'id' => 1,
-                'name' => 'accounts_receivable',
+                'name' => 'piutang_usaha',
                 'show_balance' => 0,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'asset',
@@ -37,7 +37,7 @@ class CreateAccountingAccountTypesTable extends Migration
             ],
             [
                 'id' => 2,
-                'name' => 'current_assets',
+                'name' => 'persediaan',
                 'show_balance' => 1,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'asset',
@@ -45,7 +45,7 @@ class CreateAccountingAccountTypesTable extends Migration
             ],
             [
                 'id' => 3,
-                'name' => 'cash_and_cash_equivalents',
+                'name' => 'kas_dan_bank',
                 'show_balance' => 1,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'asset',
@@ -53,7 +53,7 @@ class CreateAccountingAccountTypesTable extends Migration
             ],
             [
                 'id' => 4,
-                'name' => 'fixed_assets',
+                'name' => 'aktiva_tetap',
                 'show_balance' => 1,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'asset',
@@ -61,7 +61,7 @@ class CreateAccountingAccountTypesTable extends Migration
             ],
             [
                 'id' => 5,
-                'name' => 'non_current_assets',
+                'name' => 'aktiva_lainnya',
                 'show_balance' => 1,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'asset',
@@ -69,7 +69,7 @@ class CreateAccountingAccountTypesTable extends Migration
             ],
             [
                 'id' => 6,
-                'name' => 'accounts_payable',
+                'name' => 'hutang_usaha',
                 'show_balance' => 0,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'liability',
@@ -85,7 +85,7 @@ class CreateAccountingAccountTypesTable extends Migration
             ],
             [
                 'id' => 8,
-                'name' => 'current_liabilities',
+                'name' => 'hutang_lancar_lainnya',
                 'show_balance' => 1,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'liability',
@@ -93,7 +93,7 @@ class CreateAccountingAccountTypesTable extends Migration
             ],
             [
                 'id' => 9,
-                'name' => 'non_current_liabilities',
+                'name' => 'hutang_jangka_panjang',
                 'show_balance' => 1,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'liability',
@@ -101,7 +101,7 @@ class CreateAccountingAccountTypesTable extends Migration
             ],
             [
                 'id' => 10,
-                'name' => 'owners_equity',
+                'name' => 'ekuitas',
                 'show_balance' => 1,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'equity',
@@ -109,7 +109,7 @@ class CreateAccountingAccountTypesTable extends Migration
             ],
             [
                 'id' => 11,
-                'name' => 'income',
+                'name' => 'pendapatan_usaha',
                 'show_balance' => 0,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'income',
@@ -117,7 +117,7 @@ class CreateAccountingAccountTypesTable extends Migration
             ],
             [
                 'id' => 12,
-                'name' => 'other_income',
+                'name' => 'pendapatan_lainnya',
                 'show_balance' => 0,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'income',
@@ -125,7 +125,7 @@ class CreateAccountingAccountTypesTable extends Migration
             ],
             [
                 'id' => 13,
-                'name' => 'cost_of_sale',
+                'name' => 'harga_pokok_penjualan',
                 'show_balance' => 0,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'expenses',
@@ -133,7 +133,7 @@ class CreateAccountingAccountTypesTable extends Migration
             ],
             [
                 'id' => 14,
-                'name' => 'expenses',
+                'name' => 'beban_operasional',
                 'show_balance' => 0,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'expenses',
@@ -141,7 +141,31 @@ class CreateAccountingAccountTypesTable extends Migration
             ],
             [
                 'id' => 15,
-                'name' => 'other_expense',
+                'name' => 'beban_lain_lain',
+                'show_balance' => 0,
+                'account_type' => 'sub_type',
+                'account_primary_type' => 'expenses',
+                'parent_id' => null,
+            ],
+            [
+                'id' => 16,
+                'name' => 'aktiva_lancar_lainnya',
+                'show_balance' => 1,
+                'account_type' => 'sub_type',
+                'account_primary_type' => 'asset',
+                'parent_id' => null,
+            ],
+            [
+                'id' => 17,
+                'name' => 'akumulasi_penyusutan',
+                'show_balance' => 1,
+                'account_type' => 'sub_type',
+                'account_primary_type' => 'asset',
+                'parent_id' => null,
+            ],
+            [
+                'id' => 18,
+                'name' => 'beban_pajak',
                 'show_balance' => 0,
                 'account_type' => 'sub_type',
                 'account_primary_type' => 'expenses',
