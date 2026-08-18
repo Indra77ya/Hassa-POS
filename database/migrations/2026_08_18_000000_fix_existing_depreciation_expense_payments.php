@@ -23,6 +23,7 @@ return new class extends Migration
 
         foreach ($depreciationExpenses as $expense) {
             if (ExpenseController::isDepreciationCategory($expense->expense_category_id, $expense->business_id)) {
+                \App\Http\Controllers\AccountTypeController::syncDepreciationForBusiness($expense->business_id, 1);
                 $akumulasi_id = ExpenseController::getAccumulatedDepreciationAccountId($expense->business_id);
                 if ($akumulasi_id) {
                     $paymentCount = DB::table('transaction_payments')->where('transaction_id', $expense->id)->count();
@@ -45,6 +46,9 @@ return new class extends Migration
                         $transactionUtil->updatePaymentStatus($expense->id, $expense->final_total);
                     }
                 }
+
+                // Fire ExpenseCreatedOrModified event to ensure Accounting journal mapping is populated
+                event(new \App\Events\ExpenseCreatedOrModified($expense));
             }
         }
     }
