@@ -49,12 +49,12 @@
                 <td>@if(!empty($account->account_primary_type)){{__('accounting::lang.' . $account->account_primary_type)}}@endif</td>
                 <td>
                     @if(!empty($account->account_sub_type))
-                        {{Str::contains(__('accounting::lang.' . $account->account_sub_type->name), 'lang.') ? $account->account_sub_type->name : __('accounting::lang.' . $account->account_sub_type->name)}}
+                        {{$account->account_sub_type->account_type_name}}
                     @endif
                 </td>
                 <td>
                     @if(!empty($account->detail_type))
-                        {{Str::contains(__('accounting::lang.' . $account->detail_type->name), 'lang.') ? $account->detail_type->name : __('accounting::lang.' . $account->detail_type->name)}}
+                        {{$account->detail_type->account_type_name}}
                     @endif
                 </td>
                 <td>@if(!empty($account->balance)) @format_currency($account->balance) @endif</td>
@@ -103,12 +103,12 @@
                         <td>@if(!empty($child_account->account_primary_type)){{__('accounting::lang.' . $child_account->account_primary_type)}}@endif</td>
                         <td>
                             @if(!empty($child_account->account_sub_type))
-                                {{Str::contains(__('accounting::lang.' . $child_account->account_sub_type->name), 'lang.') ? $child_account->account_sub_type->name : __('accounting::lang.' . $child_account->account_sub_type->name)}}
+                                {{$child_account->account_sub_type->account_type_name}}
                             @endif
                         </td>
                         <td>
                             @if(!empty($child_account->detail_type))
-                                {{Str::contains(__('accounting::lang.' . $child_account->detail_type->name), 'lang.') ? $child_account->detail_type->name : __('accounting::lang.' . $child_account->detail_type->name)}}
+                                {{$child_account->detail_type->account_type_name}}
                             @endif
                         </td>
                         <td>@if(!empty($child_account->balance)) @format_currency($child_account->balance) @endif</td>
