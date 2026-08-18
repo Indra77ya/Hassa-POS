@@ -15,9 +15,19 @@ class AccountingAccountType extends Model
 
     public function getAccountTypeNameAttribute()
     {
-        $name = ! empty($this->business_id) ? $this->name : __('accounting::lang.'.$this->name);
+        if (! empty($this->business_id)) {
+            return $this->name;
+        }
 
-        return $name;
+        if (\Lang::has('accounting::lang.'.$this->name)) {
+            return __('accounting::lang.'.$this->name);
+        }
+
+        if (\Lang::has('account.'.$this->name)) {
+            return __('account.'.$this->name);
+        }
+
+        return $this->name;
     }
 
     public function getAccountTypeDescriptionAttribute()
