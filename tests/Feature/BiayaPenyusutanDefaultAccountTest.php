@@ -122,7 +122,7 @@ class BiayaPenyusutanDefaultAccountTest extends TestCase
 
         $this->assertNotNull($accountingAccount);
         $this->assertEquals('expenses', $accountingAccount->account_primary_type);
-        $this->assertEquals(14, $accountingAccount->account_sub_type_id);
+        $this->assertEquals(15, $accountingAccount->account_sub_type_id);
 
         // Assert Biaya Penyusutan exists in POS accounts
         $posAccount = Account::where('business_id', $business->id)
