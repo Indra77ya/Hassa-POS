@@ -17,8 +17,58 @@ class AddBiayaPenyusutanDefaultAccount extends Migration
     {
         $businesses = Business::all();
 
+        // Pairs of [duplicate_name => primary_name]
+        $duplicate_pairs = [
+            'Piutang Usaha (A/R)' => 'Piutang Usaha',
+            'Hutang Dagang (A/P)' => 'Hutang Usaha',
+            'Harga Pokok Penjualan (HPP)' => 'Harga Pokok Penjualan',
+            'Persediaan' => 'Persediaan Barang',
+            'Beban Utilitas' => 'Beban Listrik & Air',
+            'Beban Sewa atau Kontrak' => 'Beban Sewa',
+            'Beban Upah' => 'Beban Gaji',
+            'Properti, Pabrik & Peralatan' => 'Peralatan',
+            'Akumulasi Penyusutan Properti, Pabrik & Peralatan' => 'Akumulasi Penyusutan',
+        ];
+
         foreach ($businesses as $business) {
             $business_id = $business->id;
+
+            // Clean up duplicates if both primary and duplicate exist
+            foreach ($duplicate_pairs as $duplicate_name => $primary_name) {
+                if (class_exists(AccountingAccount::class)) {
+                    $primary_acc = AccountingAccount::where('business_id', $business_id)
+                        ->where('name', $primary_name)
+                        ->first();
+
+                    $duplicate_acc = AccountingAccount::where('business_id', $business_id)
+                        ->where('name', $duplicate_name)
+                        ->first();
+
+                    if ($primary_acc && $duplicate_acc && $primary_acc->id != $duplicate_acc->id) {
+                        \DB::table('accounting_accounts_transactions')
+                            ->where('accounting_account_id', $duplicate_acc->id)
+                            ->update(['accounting_account_id' => $primary_acc->id]);
+
+                        $duplicate_acc->delete();
+                    }
+                }
+
+                $primary_pos = Account::where('business_id', $business_id)
+                    ->where('name', $primary_name)
+                    ->first();
+
+                $duplicate_pos = Account::where('business_id', $business_id)
+                    ->where('name', $duplicate_name)
+                    ->first();
+
+                if ($primary_pos && $duplicate_pos && $primary_pos->id != $duplicate_pos->id) {
+                    \DB::table('account_transactions')
+                        ->where('account_id', $duplicate_pos->id)
+                        ->update(['account_id' => $primary_pos->id]);
+
+                    $duplicate_pos->delete();
+                }
+            }
 
             // 1. Ensure POS AccountType 'beban_lain_lain' exists
             $type = AccountType::where('business_id', $business_id)

@@ -48,6 +48,16 @@ class BiayaPenyusutanDefaultAccountTest extends TestCase
             $table->timestamps();
         });
 
+        // Create account_transactions table
+        Schema::dropIfExists('account_transactions');
+        Schema::create('account_transactions', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('account_id');
+            $table->integer('transaction_id')->nullable();
+            $table->decimal('amount', 22, 4)->default(0);
+            $table->timestamps();
+        });
+
         // Create account_types table
         Schema::dropIfExists('account_types');
         Schema::create('account_types', function (Blueprint $table) {
@@ -89,12 +99,21 @@ class BiayaPenyusutanDefaultAccountTest extends TestCase
             $table->timestamps();
         });
 
+        // Create accounting_accounts_transactions
+        Schema::dropIfExists('accounting_accounts_transactions');
+        Schema::create('accounting_accounts_transactions', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('accounting_account_id');
+            $table->decimal('amount', 22, 4)->default(0);
+            $table->timestamps();
+        });
+
         // Reset sync states
         Account::$is_syncing = false;
         AccountingAccount::$is_syncing = false;
     }
 
-    public function test_create_default_accounts_includes_biaya_penyusutan()
+    public function test_create_default_accounts_includes_biaya_penyusutan_without_duplicates()
     {
         $business = Business::create(['name' => 'Toko Sampel', 'owner_id' => 1]);
 
@@ -132,11 +151,34 @@ class BiayaPenyusutanDefaultAccountTest extends TestCase
         $this->assertNotNull($posAccount);
         $this->assertEquals('6105', $posAccount->account_number);
         $this->assertEquals('debit', $posAccount->normal_balance);
+
+        // Assert no duplicate accounts like 'Piutang Usaha (A/R)'
+        $piutangAR = AccountingAccount::where('business_id', $business->id)
+            ->where('name', 'Piutang Usaha (A/R)')
+            ->first();
+        $this->assertNull($piutangAR, "Piutang Usaha (A/R) should not be created as a duplicate!");
+
+        $piutangUsahaCount = AccountingAccount::where('business_id', $business->id)
+            ->where('name', 'Piutang Usaha')
+            ->count();
+        $this->assertEquals(1, $piutangUsahaCount, "There should be exactly one Piutang Usaha account!");
+
+        $hutangAP = AccountingAccount::where('business_id', $business->id)
+            ->where('name', 'Hutang Dagang (A/P)')
+            ->first();
+        $this->assertNull($hutangAP, "Hutang Dagang (A/P) should not be created as a duplicate!");
     }
 
-    public function test_migration_seeds_biaya_penyusutan_for_existing_businesses()
+    public function test_migration_seeds_biaya_penyusutan_and_cleans_duplicates()
     {
         $business = Business::create(['name' => 'Toko Lama', 'owner_id' => 1]);
+
+        // Manually create duplicate accounts to simulate existing state
+        AccountingAccount::create(['name' => 'Piutang Usaha', 'business_id' => $business->id, 'account_primary_type' => 'asset', 'account_sub_type_id' => 1]);
+        AccountingAccount::create(['name' => 'Piutang Usaha (A/R)', 'business_id' => $business->id, 'account_primary_type' => 'asset', 'account_sub_type_id' => 1]);
+
+        Account::create(['name' => 'Piutang Usaha', 'business_id' => $business->id]);
+        Account::create(['name' => 'Piutang Usaha (A/R)', 'business_id' => $business->id]);
 
         $migration = new \AddBiayaPenyusutanDefaultAccount();
         $migration->up();
@@ -154,5 +196,11 @@ class BiayaPenyusutanDefaultAccountTest extends TestCase
 
         $this->assertNotNull($accountingAccount);
         $this->assertEquals('expenses', $accountingAccount->account_primary_type);
+
+        // Verify duplicate account was merged and deleted
+        $duplicateCount = AccountingAccount::where('business_id', $business->id)
+            ->where('name', 'Piutang Usaha (A/R)')
+            ->count();
+        $this->assertEquals(0, $duplicateCount);
     }
 }
