@@ -215,6 +215,57 @@
                 }
             });
         });
+
+        $(document).on('click', 'a.btn-generate-demo', function(e) {
+            e.preventDefault();
+            var business_id = $(this).data('business_id');
+            var business_name = $(this).data('business_name');
+            var url = '/superadmin/business/' + business_id + '/generate-demo-data';
+
+            swal({
+                title: LANG.sure,
+                text: "{{ __('superadmin::lang.generate_demo_data_confirm') }} (" + business_name + ")",
+                icon: "warning",
+                buttons: ["Batal", "Ya, Generate Data Demo"],
+                dangerMode: true,
+            }).then((confirmed) => {
+                if (confirmed) {
+                    swal({
+                        title: "Memproses Data Demo...",
+                        text: "Mohon tunggu sejenak saat data demo sedang dibuat.",
+                        icon: "info",
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    $.ajax({
+                        method: 'POST',
+                        url: url,
+                        dataType: 'json',
+                        data: {
+                            _token: "{{ csrf_token() }}"
+                        },
+                        success: function(result) {
+                            if (result.success == true) {
+                                toastr.success(result.msg);
+                                if (typeof superadmin_business_table !== 'undefined') {
+                                    superadmin_business_table.ajax.reload();
+                                }
+                                swal.close();
+                            } else {
+                                toastr.error(result.msg);
+                                swal.close();
+                            }
+                        },
+                        error: function() {
+                            toastr.error("Terjadi kesalahan saat membuat data demo.");
+                            swal.close();
+                        }
+                    });
+                }
+            });
+        });
     </script>
 
 @endsection

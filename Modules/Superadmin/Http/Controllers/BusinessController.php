@@ -163,6 +163,8 @@ class BusinessController extends BaseController
 
                     $html .= '<li><a href="#" class="btn-modal" data-href="' . action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'getResetModal'], [$row->id]) . '" data-container=".view_modal"><i class="fa fa-undo"></i> ' . __('superadmin::lang.reset_business_data') . '</a></li>';
 
+                    $html .= '<li><a href="#" class="btn-generate-demo" data-business_id="' . $row->id . '" data-business_name="' . e($row->name) . '"><i class="fa fa-magic"></i> ' . __('superadmin::lang.generate_demo_data') . '</a></li>';
+
                     if (request()->session()->get('user.business_id') != $row->id) {
                         $html .= '<li class="divider"></li>';
                         $html .= '<li><a href="' . action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'destroy'], [$row->id]) . '" class="delete_business_confirmation" style="color: #ef4444 !important;"><i class="fa fa-trash text-danger" style="color: #ef4444 !important;"></i> ' . __('messages.delete') . '</a></li>';
@@ -1011,6 +1013,50 @@ class BusinessController extends BaseController
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+
+            $output = [
+                'success' => false,
+                'msg' => __('messages.something_went_wrong') . ' ' . $e->getMessage()
+            ];
+        }
+
+        return response()->json($output);
+    }
+
+    /**
+     * Generates demo data for a specific business.
+     *
+     * @param  int  $id
+     * @return Response
+     */
+    public function generateDemoData($id)
+    {
+        if (! auth()->user()->can('superadmin')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+            $notAllowed = $this->businessUtil->notAllowedInDemo();
+            if (! empty($notAllowed)) {
+                return response()->json($notAllowed);
+            }
+
+            $demoUtil = new \App\Utils\DemoDataUtil();
+            $result = $demoUtil->generateDemoData($id);
+
+            if ($result) {
+                $output = [
+                    'success' => true,
+                    'msg' => __('superadmin::lang.generate_demo_data_success')
+                ];
+            } else {
+                $output = [
+                    'success' => false,
+                    'msg' => __('messages.something_went_wrong')
+                ];
+            }
+        } catch (\Exception $e) {
+            \Log::emergency('File:' . $e->getFile() . ' Line:' . $e->getLine() . ' Message:' . $e->getMessage());
 
             $output = [
                 'success' => false,

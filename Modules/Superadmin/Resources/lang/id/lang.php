@@ -285,4 +285,7 @@ return [
     'reset_taxes' => 'Pajak Khusus (Custom Taxes)',
     'reset_selected' => 'Setel Ulang Data Terpilih',
     'reset_success' => 'Data berhasil disetel ulang!',
+    'generate_demo_data' => 'Generate Data Demo',
+    'generate_demo_data_confirm' => 'Apakah Anda yakin ingin membuat data demo untuk bisnis ini? Data yang ada saat ini akan disetel ulang dan digantikan dengan data demo baru!',
+    'generate_demo_data_success' => 'Data demo berhasil dibuat!',
 ];

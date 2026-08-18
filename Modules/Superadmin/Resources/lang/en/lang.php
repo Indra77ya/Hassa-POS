@@ -292,4 +292,7 @@ return [
     'reset_taxes' => 'Custom Taxes',
     'reset_selected' => 'Reset Selected Data',
     'reset_success' => 'Data successfully reset!',
+    'generate_demo_data' => 'Generate Demo Data',
+    'generate_demo_data_confirm' => 'Are you sure you want to generate demo data for this business? Existing business data will be reset and populated with fresh demo records!',
+    'generate_demo_data_success' => 'Demo data generated successfully!',
 ];
