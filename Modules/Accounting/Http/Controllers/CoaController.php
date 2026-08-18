@@ -1106,6 +1106,17 @@ class CoaController extends Controller
                 'created_at' => \Carbon::now(),
                 'updated_at' => \Carbon::now(),
             ],
+            88 => [
+                'name' => 'Depreciation expense',
+                'business_id' => $business_id,
+                'account_primary_type' => 'expenses',
+                'account_sub_type_id' => 15,
+                'detail_type_id' => 152,
+                'status' => 'active',
+                'created_by' => $user_id,
+                'created_at' => \Carbon::now(),
+                'updated_at' => \Carbon::now(),
+            ],
         ];
 
         // 1. Seed POS Account Types and Accounts
@@ -1166,6 +1177,7 @@ class CoaController extends Controller
                     ['name' => 'Beban Sewa', 'type' => 'beban_operasional', 'number' => '6102', 'balance' => 'debit'],
                     ['name' => 'Beban Listrik & Air', 'type' => 'beban_operasional', 'number' => '6103', 'balance' => 'debit'],
                     ['name' => 'Beban Kerusakan/Kehilangan', 'type' => 'beban_operasional', 'number' => '6104', 'balance' => 'debit'],
+                    ['name' => 'Biaya Penyusutan', 'type' => 'beban_lain_lain', 'number' => '6105', 'balance' => 'debit'],
                     ['name' => 'Peralatan', 'type' => 'aktiva_tetap', 'number' => '1401', 'balance' => 'debit'],
                     ['name' => 'Kendaraan', 'type' => 'aktiva_tetap', 'number' => '1402', 'balance' => 'debit'],
                     ['name' => 'Akumulasi Penyusutan', 'type' => 'akumulasi_penyusutan', 'number' => '1403', 'balance' => 'credit'],
@@ -1193,10 +1205,10 @@ class CoaController extends Controller
 
             // Translate default accounts to Indonesian standard (PSAK) before bulk insert
             $translation_map = [
-                'Accounts Payable (A/P)' => 'Hutang Dagang (A/P)',
+                'Accounts Payable (A/P)' => 'Hutang Usaha',
                 'Credit Card' => 'Kartu Kredit',
-                'Wage expenses' => 'Beban Upah',
-                'Utilities' => 'Beban Utilitas',
+                'Wage expenses' => 'Beban Gaji',
+                'Utilities' => 'Beban Listrik & Air',
                 'Unrealised loss on securities, net of tax' => 'Kerugian Tidak Terealisasi pada Efek, Neto Setelah Pajak',
                 'Undeposited Funds' => 'Dana Belum Disetor',
                 'Uncategorised Income' => 'Pendapatan Belum Terklasifikasi',
@@ -1218,10 +1230,10 @@ class CoaController extends Controller
                 'Revenue - General' => 'Pendapatan - Umum',
                 'Retained Earnings' => 'Laba Ditahan',
                 'Repair and maintenance' => 'Perbaikan & Pemeliharaan',
-                'Rent or lease payments' => 'Beban Sewa atau Kontrak',
+                'Rent or lease payments' => 'Beban Sewa',
                 'Reconciliation Discrepancies' => 'Selisih Rekonsiliasi',
                 'Purchases' => 'Pembelian',
-                'Property, plant and equipment' => 'Properti, Pabrik & Peralatan',
+                'Property, plant and equipment' => 'Peralatan',
                 'Prepaid Expenses' => 'Biaya Dibayar Dimuka',
                 'Payroll liabilities' => 'Kewajiban Gaji',
                 'Payroll Expenses' => 'Beban Gaji',
@@ -1244,7 +1256,7 @@ class CoaController extends Controller
                 'Liabilities related to assets held for sale' => 'Kewajiban Terkait Aset yang Dimiliki untuk Dijual',
                 'Legal and professional fees' => 'Biaya Hukum & Profesional',
                 'Inventory Asset' => 'Aset Persediaan',
-                'Inventory' => 'Persediaan',
+                'Inventory' => 'Persediaan Barang',
                 'Interest income' => 'Pendapatan Bunga',
                 'Interest expense' => 'Beban Bunga',
                 'Intangibles' => 'Aset Tak Berwujud',
@@ -1264,7 +1276,7 @@ class CoaController extends Controller
                 'Discounts given - COS' => 'Diskon Diberikan - HPP',
                 'Direct labour - COS' => 'Tenaga Kerja Langsung - HPP',
                 'Deferred tax assets' => 'Aset Pajak Tangguhan',
-                'Cost of sales' => 'Harga Pokok Penjualan (HPP)',
+                'Cost of sales' => 'Harga Pokok Penjualan',
                 'Commissions and fees' => 'Komisi & Biaya',
                 'Change in inventory - COS' => 'Perubahan Persediaan - HPP',
                 'Cash and cash equivalents' => 'Kas dan Setara Kas',
@@ -1275,12 +1287,13 @@ class CoaController extends Controller
                 'Assets held for sale' => 'Aset Dimiliki untuk Dijual',
                 'Amortisation expense' => 'Beban Amortisasi',
                 'Allowance for bad debts' => 'Cadangan Kerugian Piutang',
-                'Accumulated depreciation on property, plant and equipment' => 'Akumulasi Penyusutan Properti, Pabrik & Peralatan',
+                'Accumulated depreciation on property, plant and equipment' => 'Akumulasi Penyusutan',
                 'Accrued non-current liabilities' => 'Kewajiban Non-Lancar Akrual',
                 'Accrued liabilities' => 'Kewajiban Akrual',
                 'Accrued holiday payable' => 'Hutang Cuti Akrual',
-                'Accounts Receivable (A/R)' => 'Piutang Usaha (A/R)',
+                'Accounts Receivable (A/R)' => 'Piutang Usaha',
                 'Inventory Loss/Damage' => 'Beban Kerusakan/Kehilangan',
+                'Depreciation expense' => 'Biaya Penyusutan',
             ];
 
             $counters = [

@@ -41,7 +41,7 @@
                             <th>@lang( 'accounting::lang.account_sub_type' ):</th>
                             <td>
                                 @if(!empty($account->account_sub_type))
-                                    {{__('accounting::lang.' . $account->account_sub_type->name)}}
+                                    {{$account->account_sub_type->account_type_name}}
                                 @endif
                             </td>
                         </tr>
@@ -50,7 +50,7 @@
                             <th>@lang( 'accounting::lang.detail_type' ):</th>
                             <td>
                                 @if(!empty($account->detail_type))
-                                    {{__('accounting::lang.' . $account->detail_type->name)}}
+                                    {{$account->detail_type->account_type_name}}
                                 @endif
                             </td>
                         </tr>
