@@ -285,7 +285,16 @@ class AccountingAccount extends Model
                 $accounts[$k]->account_primary_type = ! empty($account_types[$v->account_primary_type]) ?
                 $account_types[$v->account_primary_type]['label'] : $v->account_primary_type;
 
-                $accounts[$k]->sub_type = ! empty($v->sub_type_business_id) ? $v->sub_type : __('accounting::lang.'.$v->sub_type);
+                $sub_type_label = $v->sub_type;
+                if (! empty($v->sub_type)) {
+                    if (\Lang::has('accounting::lang.'.$v->sub_type)) {
+                        $sub_type_label = __('accounting::lang.'.$v->sub_type);
+                    } elseif (\Lang::has('account.'.$v->sub_type)) {
+                        $sub_type_label = __('account.'.$v->sub_type);
+                    }
+                }
+
+                $accounts[$k]->sub_type = ! empty($v->sub_type_business_id) ? $v->sub_type : $sub_type_label;
             }
 
             return $accounts;

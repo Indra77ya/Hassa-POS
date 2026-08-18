@@ -51,7 +51,7 @@ class AccountTypeController extends Controller
                     $html = '';
 
                     if (empty($row->business_id)) {
-                        $html = __('accounting::lang.'.$row->name);
+                        $html = $row->account_type_name;
                     } else {
                         $html = $row->name;
                     }
