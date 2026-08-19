@@ -1040,17 +1040,6 @@ class CoaController extends Controller
                 'created_at' => \Carbon::now(),
                 'updated_at' => \Carbon::now(),
             ],
-            82 => [
-                'name' => 'Accumulated depreciation on property, plant and equipment',
-                'business_id' => $business_id,
-                'account_primary_type' => 'asset',
-                'account_sub_type_id' => 17,
-                'detail_type_id' => 38,
-                'status' => 'active',
-                'created_by' => $user_id,
-                'created_at' => \Carbon::now(),
-                'updated_at' => \Carbon::now(),
-            ],
             83 => [
                 'name' => 'Accrued non-current liabilities',
                 'business_id' => $business_id,
@@ -1101,17 +1090,6 @@ class CoaController extends Controller
                 'account_primary_type' => 'expenses',
                 'account_sub_type_id' => 14,
                 'detail_type_id' => 138,
-                'status' => 'active',
-                'created_by' => $user_id,
-                'created_at' => \Carbon::now(),
-                'updated_at' => \Carbon::now(),
-            ],
-            88 => [
-                'name' => 'Depreciation expense',
-                'business_id' => $business_id,
-                'account_primary_type' => 'expenses',
-                'account_sub_type_id' => 15,
-                'detail_type_id' => 152,
                 'status' => 'active',
                 'created_by' => $user_id,
                 'created_at' => \Carbon::now(),
@@ -1177,10 +1155,8 @@ class CoaController extends Controller
                     ['name' => 'Beban Sewa', 'type' => 'beban_operasional', 'number' => '6102', 'balance' => 'debit'],
                     ['name' => 'Beban Listrik & Air', 'type' => 'beban_operasional', 'number' => '6103', 'balance' => 'debit'],
                     ['name' => 'Beban Kerusakan/Kehilangan', 'type' => 'beban_operasional', 'number' => '6104', 'balance' => 'debit'],
-                    ['name' => 'Biaya Penyusutan', 'type' => 'beban_lain_lain', 'number' => '6105', 'balance' => 'debit'],
                     ['name' => 'Peralatan', 'type' => 'aktiva_tetap', 'number' => '1401', 'balance' => 'debit'],
                     ['name' => 'Kendaraan', 'type' => 'aktiva_tetap', 'number' => '1402', 'balance' => 'debit'],
-                    ['name' => 'Akumulasi Penyusutan', 'type' => 'akumulasi_penyusutan', 'number' => '1403', 'balance' => 'credit'],
                     ['name' => 'Hutang Jangka Panjang', 'type' => 'hutang_jangka_panjang', 'number' => '2201', 'balance' => 'credit'],
                 ];
 
@@ -1287,13 +1263,11 @@ class CoaController extends Controller
                 'Assets held for sale' => 'Aset Dimiliki untuk Dijual',
                 'Amortisation expense' => 'Beban Amortisasi',
                 'Allowance for bad debts' => 'Cadangan Kerugian Piutang',
-                'Accumulated depreciation on property, plant and equipment' => 'Akumulasi Penyusutan',
                 'Accrued non-current liabilities' => 'Kewajiban Non-Lancar Akrual',
                 'Accrued liabilities' => 'Kewajiban Akrual',
                 'Accrued holiday payable' => 'Hutang Cuti Akrual',
                 'Accounts Receivable (A/R)' => 'Piutang Usaha',
                 'Inventory Loss/Damage' => 'Beban Kerusakan/Kehilangan',
-                'Depreciation expense' => 'Biaya Penyusutan',
             ];
 
             $counters = [
