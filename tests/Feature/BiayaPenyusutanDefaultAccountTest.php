@@ -6,11 +6,12 @@ use Tests\TestCase;
 use App\Business;
 use App\User;
 use App\Account;
+use App\ExpenseCategory;
 use Modules\Accounting\Entities\AccountingAccount;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 
-require_once __DIR__ . '/../../database/migrations/2026_08_20_000000_add_biaya_penyusutan_default_account.php';
+require_once __DIR__ . '/../../database/migrations/2026_08_25_000000_remove_biaya_penyusutan_and_akumulasi_penyusutan_accounts.php';
 
 class BiayaPenyusutanDefaultAccountTest extends TestCase
 {
@@ -28,6 +29,16 @@ class BiayaPenyusutanDefaultAccountTest extends TestCase
             $table->increments('id');
             $table->string('name');
             $table->integer('owner_id')->nullable();
+            $table->timestamps();
+        });
+
+        // Create business_locations table
+        Schema::dropIfExists('business_locations');
+        Schema::create('business_locations', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('business_id');
+            $table->string('name');
+            $table->text('accounting_default_map')->nullable();
             $table->timestamps();
         });
 
@@ -55,6 +66,18 @@ class BiayaPenyusutanDefaultAccountTest extends TestCase
             $table->unsignedBigInteger('account_id');
             $table->integer('transaction_id')->nullable();
             $table->decimal('amount', 22, 4)->default(0);
+            $table->timestamps();
+        });
+
+        // Create expense_categories table
+        Schema::dropIfExists('expense_categories');
+        Schema::create('expense_categories', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->string('code')->nullable();
+            $table->integer('business_id');
+            $table->integer('parent_id')->default(0);
+            $table->softDeletes();
             $table->timestamps();
         });
 
@@ -113,7 +136,7 @@ class BiayaPenyusutanDefaultAccountTest extends TestCase
         AccountingAccount::$is_syncing = false;
     }
 
-    public function test_create_default_accounts_includes_biaya_penyusutan_without_duplicates()
+    public function test_create_default_accounts_excludes_biaya_penyusutan_and_akumulasi_penyusutan()
     {
         $business = Business::create(['name' => 'Toko Sampel', 'owner_id' => 1]);
 
@@ -132,75 +155,56 @@ class BiayaPenyusutanDefaultAccountTest extends TestCase
             app(\App\Utils\ModuleUtil::class)
         );
 
-        $response = $controller->createDefaultAccounts();
+        $controller->createDefaultAccounts();
 
-        // Assert Biaya Penyusutan exists in accounting_accounts
-        $accountingAccount = AccountingAccount::where('business_id', $business->id)
+        // Assert Biaya Penyusutan does NOT exist in accounting_accounts
+        $biayaPenyusutanAcc = AccountingAccount::where('business_id', $business->id)
             ->where('name', 'Biaya Penyusutan')
             ->first();
+        $this->assertNull($biayaPenyusutanAcc);
 
-        $this->assertNotNull($accountingAccount);
-        $this->assertEquals('expenses', $accountingAccount->account_primary_type);
-        $this->assertEquals(15, $accountingAccount->account_sub_type_id);
+        // Assert Akumulasi Penyusutan does NOT exist in accounting_accounts
+        $akumulasiPenyusutanAcc = AccountingAccount::where('business_id', $business->id)
+            ->where('name', 'Akumulasi Penyusutan')
+            ->first();
+        $this->assertNull($akumulasiPenyusutanAcc);
 
-        // Assert Biaya Penyusutan exists in POS accounts
-        $posAccount = Account::where('business_id', $business->id)
+        // Assert Biaya Penyusutan does NOT exist in POS accounts
+        $biayaPenyusutanPos = Account::where('business_id', $business->id)
             ->where('name', 'Biaya Penyusutan')
             ->first();
+        $this->assertNull($biayaPenyusutanPos);
 
-        $this->assertNotNull($posAccount);
-        $this->assertEquals('6105', $posAccount->account_number);
-        $this->assertEquals('debit', $posAccount->normal_balance);
-
-        // Assert no duplicate accounts like 'Piutang Usaha (A/R)'
-        $piutangAR = AccountingAccount::where('business_id', $business->id)
-            ->where('name', 'Piutang Usaha (A/R)')
+        // Assert Akumulasi Penyusutan does NOT exist in POS accounts
+        $akumulasiPenyusutanPos = Account::where('business_id', $business->id)
+            ->where('name', 'Akumulasi Penyusutan')
             ->first();
-        $this->assertNull($piutangAR, "Piutang Usaha (A/R) should not be created as a duplicate!");
-
-        $piutangUsahaCount = AccountingAccount::where('business_id', $business->id)
-            ->where('name', 'Piutang Usaha')
-            ->count();
-        $this->assertEquals(1, $piutangUsahaCount, "There should be exactly one Piutang Usaha account!");
-
-        $hutangAP = AccountingAccount::where('business_id', $business->id)
-            ->where('name', 'Hutang Dagang (A/P)')
-            ->first();
-        $this->assertNull($hutangAP, "Hutang Dagang (A/P) should not be created as a duplicate!");
+        $this->assertNull($akumulasiPenyusutanPos);
     }
 
-    public function test_migration_seeds_biaya_penyusutan_and_cleans_duplicates()
+    public function test_migration_removes_biaya_penyusutan_and_akumulasi_penyusutan_records()
     {
         $business = Business::create(['name' => 'Toko Lama', 'owner_id' => 1]);
 
-        // Manually create duplicate accounts to simulate existing state
-        AccountingAccount::create(['name' => 'Piutang Usaha', 'business_id' => $business->id, 'account_primary_type' => 'asset', 'account_sub_type_id' => 1]);
-        AccountingAccount::create(['name' => 'Piutang Usaha (A/R)', 'business_id' => $business->id, 'account_primary_type' => 'asset', 'account_sub_type_id' => 1]);
+        // Manually create accounts to simulate existing state before migration
+        AccountingAccount::create(['name' => 'Biaya Penyusutan', 'business_id' => $business->id, 'account_primary_type' => 'expenses', 'account_sub_type_id' => 15]);
+        AccountingAccount::create(['name' => 'Akumulasi Penyusutan', 'business_id' => $business->id, 'account_primary_type' => 'asset', 'account_sub_type_id' => 17]);
 
-        Account::create(['name' => 'Piutang Usaha', 'business_id' => $business->id]);
-        Account::create(['name' => 'Piutang Usaha (A/R)', 'business_id' => $business->id]);
+        Account::create(['name' => 'Biaya Penyusutan', 'business_id' => $business->id]);
+        Account::create(['name' => 'Akumulasi Penyusutan', 'business_id' => $business->id]);
 
-        $migration = new \AddBiayaPenyusutanDefaultAccount();
+        ExpenseCategory::create(['name' => 'Biaya Penyusutan', 'business_id' => $business->id]);
+
+        $migration = new \RemoveBiayaPenyusutanAndAkumulasiPenyusutanAccounts();
         $migration->up();
 
-        $posAccount = Account::where('business_id', $business->id)
-            ->where('name', 'Biaya Penyusutan')
-            ->first();
+        // Verify accounts were deleted
+        $this->assertNull(Account::where('business_id', $business->id)->where('name', 'Biaya Penyusutan')->first());
+        $this->assertNull(Account::where('business_id', $business->id)->where('name', 'Akumulasi Penyusutan')->first());
 
-        $this->assertNotNull($posAccount);
-        $this->assertEquals('6105', $posAccount->account_number);
+        $this->assertNull(AccountingAccount::where('business_id', $business->id)->where('name', 'Biaya Penyusutan')->first());
+        $this->assertNull(AccountingAccount::where('business_id', $business->id)->where('name', 'Akumulasi Penyusutan')->first());
 
-        $accountingAccount = AccountingAccount::where('business_id', $business->id)
-            ->where('name', 'Biaya Penyusutan')
-            ->first();
-
-        $this->assertNotNull($accountingAccount);
-        $this->assertEquals('expenses', $accountingAccount->account_primary_type);
-
-        // Verify duplicate account was merged and deleted
-        $duplicateCount = AccountingAccount::where('business_id', $business->id)
-            ->where('name', 'Piutang Usaha (A/R)')
-            ->count();
-        $this->assertEquals(0, $duplicateCount);
+        $this->assertNull(ExpenseCategory::where('business_id', $business->id)->where('name', 'Biaya Penyusutan')->first());
     }
 }
