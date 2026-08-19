@@ -806,6 +806,31 @@ class AdminSidebarMenu
                   </svg>', 'active' => request()->segment(1) == 'notification-templates'])->order(80);
             }
 
+            //Asset Management Dropdown
+            if (auth()->user()->can('superadmin') || auth()->user()->can('asset.view')) {
+                $menu->dropdown(
+                    __('assetmanagement::lang.asset_management'),
+                    function ($sub) {
+                        $sub->url(
+                            action([\Modules\AssetManagement\Http\Controllers\AssetController::class, 'index']),
+                            __('assetmanagement::lang.assets'),
+                            ['icon' => '', 'active' => request()->segment(1) == 'asset-management' && request()->segment(2) == 'assets']
+                        );
+                        $sub->url(
+                            action([\Modules\AssetManagement\Http\Controllers\AssetCategoryController::class, 'index']),
+                            __('assetmanagement::lang.categories'),
+                            ['icon' => '', 'active' => request()->segment(1) == 'asset-management' && request()->segment(2) == 'categories']
+                        );
+                        $sub->url(
+                            action([\Modules\AssetManagement\Http\Controllers\AssetDepreciationController::class, 'index']),
+                            __('assetmanagement::lang.depreciation_logs'),
+                            ['icon' => '', 'active' => request()->segment(1) == 'asset-management' && request()->segment(2) == 'depreciations']
+                        );
+                    },
+                    ['icon' => '<svg aria-hidden="true" class="tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 21l18 0"/><path d="M5 21v-14l8 -4v18"/><path d="M19 21v-10l-6 -4"/><path d="M9 9l0 .01"/><path d="M9 12l0 .01"/><path d="M9 15l0 .01"/><path d="M9 18l0 .01"/></svg>']
+                )->order(51);
+            }
+
             //Settings Dropdown
             if (auth()->user()->can('business_settings.access') ||
                 auth()->user()->can('barcode_settings.access') ||

@@ -1,0 +1,15 @@
+{
+    "name": "AssetManagement",
+    "alias": "assetmanagement",
+    "description": "Fixed Asset Management Module with total separation of depreciation from operational cash expenses.",
+    "keywords": [],
+    "active": 1,
+    "order": 1,
+    "providers": [
+        "Modules\\AssetManagement\\Providers\\AssetManagementServiceProvider",
+        "Modules\\AssetManagement\\Providers\\RouteServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

@@ -33,6 +33,9 @@ class Kernel extends ConsoleKernel
 
             $schedule->command('pos:generateRecurringExpense')->dailyAt('02:00');
 
+            // Schedule monthly fixed asset depreciation on the last day of the month at 23:59
+            $schedule->command('asset:run-depreciation')->lastDayOfMonth('23:59');
+
         }
 
         if ($env === 'demo') {
