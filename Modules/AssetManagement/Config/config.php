@@ -1,5 +1,6 @@
 <?php
 
 return [
-    'name' => 'AssetManagement'
+    'name' => 'AssetManagement',
+    'module_version' => '1.0',
 ];
