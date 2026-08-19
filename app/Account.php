@@ -411,14 +411,18 @@ class Account extends Model
                 $fixed_key = 'akumulasi_penyusutan';
             } elseif ($sub_type_id == 5) {
                 $fixed_key = 'aktiva_lainnya';
+            } else {
+                $fixed_key = 'aktiva_lancar_lainnya';
             }
         } elseif ($primary == 'liability') {
             if ($sub_type_id == 6) {
                 $fixed_key = 'hutang_usaha';
-            } elseif ($sub_type_id == 8) {
+            } elseif ($sub_type_id == 7 || $sub_type_id == 8) {
                 $fixed_key = 'hutang_lancar_lainnya';
             } elseif ($sub_type_id == 9) {
                 $fixed_key = 'hutang_jangka_panjang';
+            } else {
+                $fixed_key = 'hutang_lancar_lainnya';
             }
         } elseif ($primary == 'equity') {
             $fixed_key = 'ekuitas';
@@ -427,6 +431,8 @@ class Account extends Model
                 $fixed_key = 'pendapatan_usaha';
             } elseif ($sub_type_id == 12) {
                 $fixed_key = 'pendapatan_lainnya';
+            } else {
+                $fixed_key = 'pendapatan_usaha';
             }
         } elseif (in_array($primary, ['expense', 'expenses'])) {
             if ($sub_type_id == 13) {
@@ -437,6 +443,8 @@ class Account extends Model
                 $fixed_key = 'beban_lain_lain';
             } elseif ($sub_type_id == 18) {
                 $fixed_key = 'beban_pajak';
+            } else {
+                $fixed_key = 'beban_operasional';
             }
         }
 
