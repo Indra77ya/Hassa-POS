@@ -15,6 +15,11 @@
             @show_tooltip(__('lang_v1.leave_empty_to_autogenerate'))
             {!! Form::text('ref_no', $mapping_transaction->ref_no, ['class' => 'form-control']); !!}
         </div>
+
+        <div class="form-group">
+            {!! Form::label('location_id', __('purchase.business_location') . ':') !!}
+            {!! Form::select('location_id', $business_locations, $mapping_transaction->location_id, ['class' => 'form-control select2', 'placeholder' => __('lang_v1.all')]); !!}
+        </div>
         <div class="form-group">
             {!! Form::label('from_account', __( 'lang_v1.transfer_from' ) .":*") !!}
             {!! Form::select('from_account', [], $debit_tansaction->accounting_account_id, ['class' => 'form-control', 'required', 

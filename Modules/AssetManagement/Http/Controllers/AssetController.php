@@ -191,6 +191,7 @@ class AssetController extends Controller
 
                 $accTransMapping = new AccountingAccTransMapping();
                 $accTransMapping->business_id = $business_id;
+                $accTransMapping->location_id = !empty($input['location_id']) ? $input['location_id'] : null;
                 $accTransMapping->ref_no = $refNo;
                 $accTransMapping->note = "Perolehan Aset Tetap: {$input['name']}" . (!empty($input['asset_code']) ? " ({$input['asset_code']})" : '');
                 $accTransMapping->type = 'journal_entry';
@@ -335,6 +336,7 @@ class AssetController extends Controller
                     $accTransMapping->created_by = auth()->user()->id;
                 }
 
+                $accTransMapping->location_id = !empty($input['location_id']) ? $input['location_id'] : null;
                 $accTransMapping->note = "Perolehan Aset Tetap: {$input['name']}" . (!empty($input['asset_code']) ? " ({$input['asset_code']})" : '');
                 $accTransMapping->operation_date = $input['purchase_date'];
                 $accTransMapping->save();
@@ -457,6 +459,7 @@ class AssetController extends Controller
 
             $accTransMapping = new AccountingAccTransMapping();
             $accTransMapping->business_id = $business_id;
+            $accTransMapping->location_id = $asset->location_id;
             $accTransMapping->ref_no = $refNo;
             $accTransMapping->note = "Penyusutan Bulanan Manual Aset: {$asset->name}" . (!empty($asset->asset_code) ? " ({$asset->asset_code})" : '') . " Periode {$year}-" . sprintf('%02d', $month);
             $accTransMapping->type = 'journal_entry';

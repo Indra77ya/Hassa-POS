@@ -154,7 +154,9 @@ class TransferController extends Controller
         }
 
         if (request()->ajax()) {
-            return view('accounting::transfer.create');
+            $business_locations = \App\BusinessLocation::forDropdown($business_id, true);
+
+            return view('accounting::transfer.create')->with(compact('business_locations'));
         }
     }
 
@@ -198,6 +200,7 @@ class TransferController extends Controller
 
             $acc_trans_mapping = new AccountingAccTransMapping();
             $acc_trans_mapping->business_id = $business_id;
+            $acc_trans_mapping->location_id = $request->get('location_id');
             $acc_trans_mapping->ref_no = $ref_no;
             $acc_trans_mapping->note = $request->get('note');
             $acc_trans_mapping->type = 'transfer';
@@ -279,8 +282,10 @@ class TransferController extends Controller
                                     ->where('type', 'debit')
                                     ->first();
 
+            $business_locations = \App\BusinessLocation::forDropdown($business_id, true);
+
             return view('accounting::transfer.edit')->with(compact('mapping_transaction',
-            'debit_tansaction', 'credit_tansaction'));
+            'debit_tansaction', 'credit_tansaction', 'business_locations'));
         }
     }
 
@@ -326,6 +331,7 @@ class TransferController extends Controller
             }
 
             $mapping_transaction->ref_no = $ref_no;
+            $mapping_transaction->location_id = $request->get('location_id');
             $mapping_transaction->note = $request->get('note');
             $mapping_transaction->operation_date = $date;
             $mapping_transaction->save();

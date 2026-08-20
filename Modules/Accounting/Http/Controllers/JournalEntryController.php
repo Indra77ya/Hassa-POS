@@ -143,7 +143,9 @@ class JournalEntryController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        return view('accounting::journal_entry.create');
+        $business_locations = \App\BusinessLocation::forDropdown($business_id, true);
+
+        return view('accounting::journal_entry.create')->with(compact('business_locations'));
     }
 
     /**
@@ -186,6 +188,7 @@ class JournalEntryController extends Controller
 
             $acc_trans_mapping = new AccountingAccTransMapping();
             $acc_trans_mapping->business_id = $business_id;
+            $acc_trans_mapping->location_id = $request->get('location_id');
             $acc_trans_mapping->ref_no = $ref_no;
             $acc_trans_mapping->note = $request->get('note');
             $acc_trans_mapping->type = 'journal_entry';
@@ -282,8 +285,10 @@ class JournalEntryController extends Controller
                                     ->where('acc_trans_mapping_id', $id)
                                     ->get()->toArray();
 
+        $business_locations = \App\BusinessLocation::forDropdown($business_id, true);
+
         return view('accounting::journal_entry.edit')
-            ->with(compact('journal', 'accounts_transactions'));
+            ->with(compact('journal', 'accounts_transactions', 'business_locations'));
     }
 
     /**
@@ -318,6 +323,7 @@ class JournalEntryController extends Controller
                         ->where('type', 'journal_entry')
                         ->where('id', $id)
                         ->firstOrFail();
+            $acc_trans_mapping->location_id = $request->get('location_id');
             $acc_trans_mapping->note = $request->get('note');
             $acc_trans_mapping->operation_date = $this->util->uf_date($journal_date, true);
             $acc_trans_mapping->update();

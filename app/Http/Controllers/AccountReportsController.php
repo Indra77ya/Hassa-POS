@@ -88,6 +88,11 @@ class AccountReportsController extends Controller
                             ->from('transaction_payments as TP')
                             ->join('transactions as T', 'TP.transaction_id', '=', 'T.id')
                             ->where('T.location_id', $location_id);
+                    })
+                    ->orWhereIn('AAT.acc_trans_mapping_id', function($subQuery) use ($location_id) {
+                        $subQuery->select('id')
+                            ->from('accounting_acc_trans_mappings')
+                            ->where('location_id', $location_id);
                     });
                 });
             }
@@ -115,6 +120,11 @@ class AccountReportsController extends Controller
                             ->from('transaction_payments as TP')
                             ->join('transactions as T', 'TP.transaction_id', '=', 'T.id')
                             ->where('T.location_id', $location_id);
+                    })
+                    ->orWhereIn('AAT.acc_trans_mapping_id', function($subQuery) use ($location_id) {
+                        $subQuery->select('id')
+                            ->from('accounting_acc_trans_mappings')
+                            ->where('location_id', $location_id);
                     });
                 });
             }
@@ -142,6 +152,11 @@ class AccountReportsController extends Controller
                             ->from('transaction_payments as TP')
                             ->join('transactions as T', 'TP.transaction_id', '=', 'T.id')
                             ->where('T.location_id', $location_id);
+                    })
+                    ->orWhereIn('AAT.acc_trans_mapping_id', function($subQuery) use ($location_id) {
+                        $subQuery->select('id')
+                            ->from('accounting_acc_trans_mappings')
+                            ->where('location_id', $location_id);
                     });
                 });
             }
@@ -167,6 +182,11 @@ class AccountReportsController extends Controller
                             ->from('transaction_payments as TP')
                             ->join('transactions as T', 'TP.transaction_id', '=', 'T.id')
                             ->where('T.location_id', $location_id);
+                    })
+                    ->orWhereIn('AAT.acc_trans_mapping_id', function($subQuery) use ($location_id) {
+                        $subQuery->select('id')
+                            ->from('accounting_acc_trans_mappings')
+                            ->where('location_id', $location_id);
                     });
                 });
             }
@@ -191,6 +211,11 @@ class AccountReportsController extends Controller
                             ->from('transaction_payments as TP')
                             ->join('transactions as T', 'TP.transaction_id', '=', 'T.id')
                             ->where('T.location_id', $location_id);
+                    })
+                    ->orWhereIn('AAT.acc_trans_mapping_id', function($subQuery) use ($location_id) {
+                        $subQuery->select('id')
+                            ->from('accounting_acc_trans_mappings')
+                            ->where('location_id', $location_id);
                     });
                 });
             }
@@ -260,6 +285,11 @@ class AccountReportsController extends Controller
                             ->from('transaction_payments as TP')
                             ->join('transactions as T', 'TP.transaction_id', '=', 'T.id')
                             ->where('T.location_id', $location_id);
+                    })
+                    ->orWhereIn('AAT.acc_trans_mapping_id', function($subQuery) use ($location_id) {
+                        $subQuery->select('id')
+                            ->from('accounting_acc_trans_mappings')
+                            ->where('location_id', $location_id);
                     });
                 });
             }
