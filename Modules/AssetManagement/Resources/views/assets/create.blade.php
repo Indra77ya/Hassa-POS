@@ -1,0 +1,99 @@
+@extends('layouts.app')
+@section('title', __('assetmanagement::lang.add_asset'))
+
+@section('content')
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">{{ __('assetmanagement::lang.add_asset') }}</h1>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    @component('components.widget', ['class' => 'box-primary'])
+        {!! Form::open(['url' => action([\Modules\AssetManagement\Http\Controllers\AssetController::class, 'store']), 'method' => 'post', 'id' => 'add_asset_form']) !!}
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    {!! Form::label('name', __('assetmanagement::lang.asset_name') . ':*') !!}
+                    {!! Form::text('name', null, ['class' => 'form-control', 'required', 'placeholder' => __('assetmanagement::lang.asset_name')]) !!}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    {!! Form::label('asset_code', __('assetmanagement::lang.asset_code') . ':') !!}
+                    {!! Form::text('asset_code', null, ['class' => 'form-control', 'placeholder' => __('assetmanagement::lang.asset_code')]) !!}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    {!! Form::label('asset_category_id', __('assetmanagement::lang.asset_category') . ':') !!}
+                    {!! Form::select('asset_category_id', $categories, null, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select')]) !!}
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    {!! Form::label('location_id', __('assetmanagement::lang.location') . ':') !!}
+                    {!! Form::select('location_id', $locations, null, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select')]) !!}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    {!! Form::label('purchase_date', __('assetmanagement::lang.purchase_date') . ':*') !!}
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                        {!! Form::text('purchase_date', @format_date('now'), ['class' => 'form-control date-picker', 'required', 'readonly']) !!}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    {!! Form::label('purchase_price', __('assetmanagement::lang.purchase_price') . ':*') !!}
+                    {!! Form::text('purchase_price', null, ['class' => 'form-control input_number', 'required', 'placeholder' => __('assetmanagement::lang.purchase_price')]) !!}
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    {!! Form::label('salvage_value', __('assetmanagement::lang.salvage_value') . ':') !!}
+                    {!! Form::text('salvage_value', 0, ['class' => 'form-control input_number', 'placeholder' => __('assetmanagement::lang.salvage_value')]) !!}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    {!! Form::label('useful_life', __('assetmanagement::lang.useful_life') . ':*') !!}
+                    {!! Form::number('useful_life', null, ['class' => 'form-control', 'required', 'min' => 1, 'placeholder' => __('assetmanagement::lang.useful_life_in_months')]) !!}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    {!! Form::label('depreciation_method', __('assetmanagement::lang.depreciation_method') . ':*') !!}
+                    {!! Form::select('depreciation_method', ['straight_line' => __('assetmanagement::lang.straight_line')], 'straight_line', ['class' => 'form-control select2', 'required']) !!}
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    {!! Form::label('status', __('assetmanagement::lang.status') . ':*') !!}
+                    {!! Form::select('status', ['active' => 'Active', 'sold' => 'Sold', 'disposed' => 'Disposed'], 'active', ['class' => 'form-control select2', 'required']) !!}
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="form-group">
+                    {!! Form::label('description', __('lang_v1.description') . ':') !!}
+                    {!! Form::textarea('description', null, ['class' => 'form-control', 'rows' => 3, 'placeholder' => __('lang_v1.description')]) !!}
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 text-right">
+                <button type="submit" class="btn btn-primary">@lang('messages.save')</button>
+            </div>
+        </div>
+        {!! Form::close() !!}
+    @endcomponent
+</section>
+@endsection

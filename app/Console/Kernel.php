@@ -18,6 +18,9 @@ class Kernel extends ConsoleKernel
         $env = config('app.env');
         $email = config('mail.username');
 
+        // Asset depreciation scheduled to run on the last day of every month at 23:59
+        $schedule->command('asset:run-depreciation')->lastDayOfMonth('23:59');
+
         if ($env === 'live') {
             //Scheduling backup, specify the time when the backup will get cleaned & time when it will run.
             
