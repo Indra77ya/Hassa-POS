@@ -154,7 +154,7 @@ class TransferController extends Controller
         }
 
         if (request()->ajax()) {
-            $business_locations = \App\BusinessLocation::forDropdown($business_id, true);
+            $business_locations = \App\BusinessLocation::forDropdown($business_id, false);
 
             return view('accounting::transfer.create')->with(compact('business_locations'));
         }
@@ -282,7 +282,7 @@ class TransferController extends Controller
                                     ->where('type', 'debit')
                                     ->first();
 
-            $business_locations = \App\BusinessLocation::forDropdown($business_id, true);
+            $business_locations = \App\BusinessLocation::forDropdown($business_id, false);
 
             return view('accounting::transfer.edit')->with(compact('mapping_transaction',
             'debit_tansaction', 'credit_tansaction', 'business_locations'));

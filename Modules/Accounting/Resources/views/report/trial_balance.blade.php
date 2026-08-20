@@ -11,7 +11,7 @@
         <div class="col-md-3">
             <div class="form-group">
                 {!! Form::label('location_id', __('purchase.business_location') . ':') !!}
-                {!! Form::select('location_id', $business_locations, request()->input('location_id'), ['class' => 'form-control select2', 'id' => 'location_id', 'placeholder' => __('lang_v1.all')]); !!}
+                {!! Form::select('location_id', $business_locations, request()->input('location_id'), ['class' => 'form-control select2', 'id' => 'location_id']); !!}
             </div>
         </div>
         <div class="col-md-3">

@@ -143,7 +143,7 @@ class JournalEntryController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $business_locations = \App\BusinessLocation::forDropdown($business_id, true);
+        $business_locations = \App\BusinessLocation::forDropdown($business_id, false);
 
         return view('accounting::journal_entry.create')->with(compact('business_locations'));
     }
@@ -285,7 +285,7 @@ class JournalEntryController extends Controller
                                     ->where('acc_trans_mapping_id', $id)
                                     ->get()->toArray();
 
-        $business_locations = \App\BusinessLocation::forDropdown($business_id, true);
+        $business_locations = \App\BusinessLocation::forDropdown($business_id, false);
 
         return view('accounting::journal_entry.edit')
             ->with(compact('journal', 'accounts_transactions', 'business_locations'));
