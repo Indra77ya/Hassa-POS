@@ -15,6 +15,11 @@
             @show_tooltip(__('lang_v1.leave_empty_to_autogenerate'))
             {!! Form::text('ref_no', null, ['class' => 'form-control']); !!}
         </div>
+
+        <div class="form-group">
+            {!! Form::label('location_id', __('purchase.business_location') . ':') !!}
+            {!! Form::select('location_id', $business_locations, null, ['class' => 'form-control select2', 'placeholder' => __('lang_v1.all')]); !!}
+        </div>
         <div class="form-group">
             {!! Form::label('from_account', __( 'lang_v1.transfer_from' ) .":*") !!}
             {!! Form::select('from_account', [], null, ['class' => 'form-control accounts-dropdown', 'required', 

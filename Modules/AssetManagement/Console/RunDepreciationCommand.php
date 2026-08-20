@@ -110,6 +110,7 @@ class RunDepreciationCommand extends Command
                     // Create AccTransMapping entry for journal entry
                     $accTransMapping = new AccountingAccTransMapping();
                     $accTransMapping->business_id = $business->id;
+                    $accTransMapping->location_id = $asset->location_id;
                     $accTransMapping->ref_no = $refNo;
                     $accTransMapping->note = "Penyusutan Bulanan Aset: {$asset->name} ({$asset->asset_code}) Periode {$year}-" . sprintf('%02d', $month);
                     $accTransMapping->type = 'journal_entry';

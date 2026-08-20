@@ -31,6 +31,13 @@
 				</div>
 			</div>
 
+            <div class="col-sm-3">
+                <div class="form-group">
+                    {!! Form::label('location_id', __('purchase.business_location') . ':') !!}
+                    {!! Form::select('location_id', $business_locations, $journal->location_id, ['class' => 'form-control select2', 'placeholder' => __('lang_v1.all')]); !!}
+                </div>
+            </div>
+
         </div>
 
         <div class="row">

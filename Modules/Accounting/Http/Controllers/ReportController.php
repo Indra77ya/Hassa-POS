@@ -170,13 +170,35 @@ class ReportController extends Controller
             $end_date = $fy['end'];
         }
 
+        $location_id = request()->input('location_id', null);
+
         // Query with support for Opening Balance, Current Period mutation, and Ending Balance
-        $raw_accounts = AccountingAccount::leftJoin('accounting_accounts_transactions as AAT', function($join) use ($end_date) {
+        $raw_accounts_query = AccountingAccount::leftJoin('accounting_accounts_transactions as AAT', function($join) use ($end_date) {
                                 $join->on('AAT.accounting_account_id', '=', 'accounting_accounts.id')
                                      ->whereDate('AAT.operation_date', '<=', $end_date);
                             })
-                            ->where('accounting_accounts.business_id', $business_id)
-                            ->select(
+                            ->where('accounting_accounts.business_id', $business_id);
+
+        if (! empty($location_id)) {
+            $raw_accounts_query->where(function ($q) use ($location_id) {
+                $q->whereIn('AAT.transaction_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('id')->from('transactions')->where('location_id', $location_id);
+                })
+                ->orWhereIn('AAT.transaction_payment_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('TP.id')
+                        ->from('transaction_payments as TP')
+                        ->join('transactions as T', 'TP.transaction_id', '=', 'T.id')
+                        ->where('T.location_id', $location_id);
+                })
+                ->orWhereIn('AAT.acc_trans_mapping_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('id')
+                        ->from('accounting_acc_trans_mappings')
+                        ->where('location_id', $location_id);
+                });
+            });
+        }
+
+        $raw_accounts = $raw_accounts_query->select(
                                 'accounting_accounts.id',
                                 'accounting_accounts.name',
                                 'accounting_accounts.account_primary_type',
@@ -250,8 +272,10 @@ class ReportController extends Controller
             ];
         }
 
+        $business_locations = \App\BusinessLocation::forDropdown($business_id, true);
+
         return view('accounting::report.trial_balance')
-            ->with(compact('accounts', 'start_date', 'end_date'));
+            ->with(compact('accounts', 'start_date', 'end_date', 'business_locations'));
     }
 
     /**
@@ -278,31 +302,72 @@ class ReportController extends Controller
             $end_date = $fy['end'];
         }
 
+        $location_id = request()->input('location_id', null);
         $balance_formula = $this->accountingUtil->balanceFormula();
 
         // Neraca / Balance Sheet calculates cumulative assets, liabilities, equities up to $end_date
         // Split Assets into Current Assets (sub_type_id 1, 2, 3) and Non-Current Assets (sub_type_id 4, 5)
-        $current_assets = AccountingAccount::join('accounting_accounts_transactions as AAT',
+        $current_assets_query = AccountingAccount::join('accounting_accounts_transactions as AAT',
                                 'AAT.accounting_account_id', '=', 'accounting_accounts.id')
                     ->join('accounting_account_types as AATP',
                                 'AATP.id', '=', 'accounting_accounts.account_sub_type_id')
                     ->whereDate('AAT.operation_date', '<=', $end_date)
-                    ->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
                     ->where('accounting_accounts.business_id', $business_id)
                     ->whereIn('accounting_accounts.account_primary_type', ['asset'])
-                    ->whereIn('accounting_accounts.account_sub_type_id', [1, 2, 3])
+                    ->whereIn('accounting_accounts.account_sub_type_id', [1, 2, 3]);
+
+        if (! empty($location_id)) {
+            $current_assets_query->where(function ($q) use ($location_id) {
+                $q->whereIn('AAT.transaction_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('id')->from('transactions')->where('location_id', $location_id);
+                })
+                ->orWhereIn('AAT.transaction_payment_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('TP.id')
+                        ->from('transaction_payments as TP')
+                        ->join('transactions as T', 'TP.transaction_id', '=', 'T.id')
+                        ->where('T.location_id', $location_id);
+                })
+                ->orWhereIn('AAT.acc_trans_mapping_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('id')
+                        ->from('accounting_acc_trans_mappings')
+                        ->where('location_id', $location_id);
+                });
+            });
+        }
+
+        $current_assets = $current_assets_query->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
                     ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
                     ->get();
 
-        $non_current_assets = AccountingAccount::join('accounting_accounts_transactions as AAT',
+        $non_current_assets_query = AccountingAccount::join('accounting_accounts_transactions as AAT',
                                 'AAT.accounting_account_id', '=', 'accounting_accounts.id')
                     ->join('accounting_account_types as AATP',
                                 'AATP.id', '=', 'accounting_accounts.account_sub_type_id')
                     ->whereDate('AAT.operation_date', '<=', $end_date)
-                    ->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type', 'accounting_accounts.account_sub_type_id')
                     ->where('accounting_accounts.business_id', $business_id)
                     ->whereIn('accounting_accounts.account_primary_type', ['asset'])
-                    ->whereIn('accounting_accounts.account_sub_type_id', [4, 5, 17])
+                    ->whereIn('accounting_accounts.account_sub_type_id', [4, 5, 17]);
+
+        if (! empty($location_id)) {
+            $non_current_assets_query->where(function ($q) use ($location_id) {
+                $q->whereIn('AAT.transaction_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('id')->from('transactions')->where('location_id', $location_id);
+                })
+                ->orWhereIn('AAT.transaction_payment_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('TP.id')
+                        ->from('transaction_payments as TP')
+                        ->join('transactions as T', 'TP.transaction_id', '=', 'T.id')
+                        ->where('T.location_id', $location_id);
+                })
+                ->orWhereIn('AAT.acc_trans_mapping_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('id')
+                        ->from('accounting_acc_trans_mappings')
+                        ->where('location_id', $location_id);
+                });
+            });
+        }
+
+        $non_current_assets = $non_current_assets_query->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type', 'accounting_accounts.account_sub_type_id')
                     ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name', 'accounting_accounts.account_sub_type_id')
                     ->get()
                     ->sortBy(function($item) {
@@ -311,63 +376,165 @@ class ReportController extends Controller
                     ->values();
 
         // Split Liabilities into Current Liabilities (sub_type_id 6, 7, 8) and Non-Current Liabilities (sub_type_id 9)
-        $current_liabilities = AccountingAccount::join('accounting_accounts_transactions as AAT',
+        $current_liabilities_query = AccountingAccount::join('accounting_accounts_transactions as AAT',
                                 'AAT.accounting_account_id', '=', 'accounting_accounts.id')
                     ->join('accounting_account_types as AATP',
                                 'AATP.id', '=', 'accounting_accounts.account_sub_type_id')
                     ->whereDate('AAT.operation_date', '<=', $end_date)
-                    ->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
                     ->where('accounting_accounts.business_id', $business_id)
                     ->whereIn('accounting_accounts.account_primary_type', ['liability'])
-                    ->whereIn('accounting_accounts.account_sub_type_id', [6, 7, 8])
+                    ->whereIn('accounting_accounts.account_sub_type_id', [6, 7, 8]);
+
+        if (! empty($location_id)) {
+            $current_liabilities_query->where(function ($q) use ($location_id) {
+                $q->whereIn('AAT.transaction_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('id')->from('transactions')->where('location_id', $location_id);
+                })
+                ->orWhereIn('AAT.transaction_payment_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('TP.id')
+                        ->from('transaction_payments as TP')
+                        ->join('transactions as T', 'TP.transaction_id', '=', 'T.id')
+                        ->where('T.location_id', $location_id);
+                })
+                ->orWhereIn('AAT.acc_trans_mapping_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('id')
+                        ->from('accounting_acc_trans_mappings')
+                        ->where('location_id', $location_id);
+                });
+            });
+        }
+
+        $current_liabilities = $current_liabilities_query->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
                     ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
                     ->get();
 
-        $non_current_liabilities = AccountingAccount::join('accounting_accounts_transactions as AAT',
+        $non_current_liabilities_query = AccountingAccount::join('accounting_accounts_transactions as AAT',
                                 'AAT.accounting_account_id', '=', 'accounting_accounts.id')
                     ->join('accounting_account_types as AATP',
                                 'AATP.id', '=', 'accounting_accounts.account_sub_type_id')
                     ->whereDate('AAT.operation_date', '<=', $end_date)
-                    ->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
                     ->where('accounting_accounts.business_id', $business_id)
                     ->whereIn('accounting_accounts.account_primary_type', ['liability'])
-                    ->whereIn('accounting_accounts.account_sub_type_id', [9])
+                    ->whereIn('accounting_accounts.account_sub_type_id', [9]);
+
+        if (! empty($location_id)) {
+            $non_current_liabilities_query->where(function ($q) use ($location_id) {
+                $q->whereIn('AAT.transaction_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('id')->from('transactions')->where('location_id', $location_id);
+                })
+                ->orWhereIn('AAT.transaction_payment_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('TP.id')
+                        ->from('transaction_payments as TP')
+                        ->join('transactions as T', 'TP.transaction_id', '=', 'T.id')
+                        ->where('T.location_id', $location_id);
+                })
+                ->orWhereIn('AAT.acc_trans_mapping_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('id')
+                        ->from('accounting_acc_trans_mappings')
+                        ->where('location_id', $location_id);
+                });
+            });
+        }
+
+        $non_current_liabilities = $non_current_liabilities_query->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
                     ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
                     ->get();
 
-        $equities = AccountingAccount::join('accounting_accounts_transactions as AAT',
+        $equities_query = AccountingAccount::join('accounting_accounts_transactions as AAT',
                                 'AAT.accounting_account_id', '=', 'accounting_accounts.id')
                     ->join('accounting_account_types as AATP',
                                 'AATP.id', '=', 'accounting_accounts.account_sub_type_id')
                     ->whereDate('AAT.operation_date', '<=', $end_date)
-                    ->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
                     ->where('accounting_accounts.business_id', $business_id)
-                    ->whereIn('accounting_accounts.account_primary_type', ['equity'])
+                    ->whereIn('accounting_accounts.account_primary_type', ['equity']);
+
+        if (! empty($location_id)) {
+            $equities_query->where(function ($q) use ($location_id) {
+                $q->whereIn('AAT.transaction_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('id')->from('transactions')->where('location_id', $location_id);
+                })
+                ->orWhereIn('AAT.transaction_payment_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('TP.id')
+                        ->from('transaction_payments as TP')
+                        ->join('transactions as T', 'TP.transaction_id', '=', 'T.id')
+                        ->where('T.location_id', $location_id);
+                })
+                ->orWhereIn('AAT.acc_trans_mapping_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('id')
+                        ->from('accounting_acc_trans_mappings')
+                        ->where('location_id', $location_id);
+                });
+            });
+        }
+
+        $equities = $equities_query->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
                     ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
                     ->get();
 
         // Calculate Net Profit of the current period up to $end_date to balance the Balance Sheet dynamically
         // Profit = Income - Expenses for the period (cumulative up to end_date).
-        $total_income = AccountingAccount::join('accounting_accounts_transactions as AAT',
+        $total_income_query = AccountingAccount::join('accounting_accounts_transactions as AAT',
                                 'AAT.accounting_account_id', '=', 'accounting_accounts.id')
                     ->whereDate('AAT.operation_date', '<=', $end_date)
                     ->where('accounting_accounts.business_id', $business_id)
-                    ->where('accounting_accounts.account_primary_type', 'income')
-                    ->select(DB::raw($balance_formula))
+                    ->where('accounting_accounts.account_primary_type', 'income');
+
+        if (! empty($location_id)) {
+            $total_income_query->where(function ($q) use ($location_id) {
+                $q->whereIn('AAT.transaction_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('id')->from('transactions')->where('location_id', $location_id);
+                })
+                ->orWhereIn('AAT.transaction_payment_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('TP.id')
+                        ->from('transaction_payments as TP')
+                        ->join('transactions as T', 'TP.transaction_id', '=', 'T.id')
+                        ->where('T.location_id', $location_id);
+                })
+                ->orWhereIn('AAT.acc_trans_mapping_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('id')
+                        ->from('accounting_acc_trans_mappings')
+                        ->where('location_id', $location_id);
+                });
+            });
+        }
+
+        $total_income = $total_income_query->select(DB::raw($balance_formula))
                     ->first()->balance ?? 0;
 
-        $total_expenses = AccountingAccount::join('accounting_accounts_transactions as AAT',
+        $total_expenses_query = AccountingAccount::join('accounting_accounts_transactions as AAT',
                                 'AAT.accounting_account_id', '=', 'accounting_accounts.id')
                     ->whereDate('AAT.operation_date', '<=', $end_date)
                     ->where('accounting_accounts.business_id', $business_id)
-                    ->whereIn('accounting_accounts.account_primary_type', ['expense', 'expenses'])
-                    ->select(DB::raw($balance_formula))
+                    ->whereIn('accounting_accounts.account_primary_type', ['expense', 'expenses']);
+
+        if (! empty($location_id)) {
+            $total_expenses_query->where(function ($q) use ($location_id) {
+                $q->whereIn('AAT.transaction_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('id')->from('transactions')->where('location_id', $location_id);
+                })
+                ->orWhereIn('AAT.transaction_payment_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('TP.id')
+                        ->from('transaction_payments as TP')
+                        ->join('transactions as T', 'TP.transaction_id', '=', 'T.id')
+                        ->where('T.location_id', $location_id);
+                })
+                ->orWhereIn('AAT.acc_trans_mapping_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('id')
+                        ->from('accounting_acc_trans_mappings')
+                        ->where('location_id', $location_id);
+                });
+            });
+        }
+
+        $total_expenses = $total_expenses_query->select(DB::raw($balance_formula))
                     ->first()->balance ?? 0;
 
         $current_period_net_profit = $total_income - $total_expenses;
 
+        $business_locations = \App\BusinessLocation::forDropdown($business_id, true);
+
         return view('accounting::report.balance_sheet')
-            ->with(compact('current_assets', 'non_current_assets', 'current_liabilities', 'non_current_liabilities', 'equities', 'current_period_net_profit', 'start_date', 'end_date'));
+            ->with(compact('current_assets', 'non_current_assets', 'current_liabilities', 'non_current_liabilities', 'equities', 'current_period_net_profit', 'start_date', 'end_date', 'business_locations'));
     }
 
     public function accountReceivableAgeingReport()

@@ -10,6 +10,12 @@
     <div class="row">
         <div class="col-md-3">
             <div class="form-group">
+                {!! Form::label('location_id', __('purchase.business_location') . ':') !!}
+                {!! Form::select('location_id', $business_locations, request()->input('location_id'), ['class' => 'form-control select2', 'id' => 'location_id']); !!}
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
                 {!! Form::label('date_range_filter', __('report.date_range') . ':') !!}
                 {!! Form::text('date_range_filter', null,
                     ['placeholder' => __('lang_v1.select_a_date_range'),
@@ -146,6 +152,10 @@
             apply_filter();
         });
 
+        $('#location_id').change(function(){
+            apply_filter();
+        });
+
         function apply_filter(){
             var start = '';
             var end = '';
@@ -159,9 +169,16 @@
                     .endDate.format('YYYY-MM-DD');
             }
 
+            var location_id = $('#location_id').val();
+
             const urlParams = new URLSearchParams(window.location.search);
             urlParams.set('start_date', start);
             urlParams.set('end_date', end);
+            if (location_id) {
+                urlParams.set('location_id', location_id);
+            } else {
+                urlParams.delete('location_id');
+            }
             window.location.search = urlParams;
         }
     });
