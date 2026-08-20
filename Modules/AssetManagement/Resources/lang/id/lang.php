@@ -36,4 +36,10 @@ return [
     'category_updated_successfully' => 'Kategori aset berhasil diperbarui',
     'category_deleted_successfully' => 'Kategori aset berhasil dihapus',
     'depreciation_logs' => 'Riwayat Penyusutan',
+    'process_depreciation' => 'Proses Penyusutan',
+    'depreciation_accounts_not_configured' => 'Akun penyusutan belum dikonfigurasi di Pengaturan Aset',
+    'already_depreciated_this_month' => 'Aset ini sudah diproses penyusutannya untuk bulan ini',
+    'asset_fully_depreciated' => 'Aset ini sudah terdepresiasi penuh',
+    'invalid_depreciation_amount' => 'Nominal penyusutan tidak valid',
+    'depreciation_processed_successfully' => 'Penyusutan aset berhasil diproses dan jurnal otomatis dibuat',
 ];

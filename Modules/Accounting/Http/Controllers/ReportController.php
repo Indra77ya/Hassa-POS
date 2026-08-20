@@ -299,12 +299,16 @@ class ReportController extends Controller
                     ->join('accounting_account_types as AATP',
                                 'AATP.id', '=', 'accounting_accounts.account_sub_type_id')
                     ->whereDate('AAT.operation_date', '<=', $end_date)
-                    ->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
+                    ->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type', 'accounting_accounts.account_sub_type_id')
                     ->where('accounting_accounts.business_id', $business_id)
                     ->whereIn('accounting_accounts.account_primary_type', ['asset'])
-                    ->whereIn('accounting_accounts.account_sub_type_id', [4, 5])
-                    ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
-                    ->get();
+                    ->whereIn('accounting_accounts.account_sub_type_id', [4, 5, 17])
+                    ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name', 'accounting_accounts.account_sub_type_id')
+                    ->get()
+                    ->sortBy(function($item) {
+                        return $item->account_sub_type_id == 17 ? 1 : 0;
+                    })
+                    ->values();
 
         // Split Liabilities into Current Liabilities (sub_type_id 6, 7, 8) and Non-Current Liabilities (sub_type_id 9)
         $current_liabilities = AccountingAccount::join('accounting_accounts_transactions as AAT',

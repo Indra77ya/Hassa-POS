@@ -160,16 +160,15 @@
                         var balance = parseFloat(asset.balance) || 0;
                         if (balance != 0) {
                             var sub_type = asset.sub_type;
-                            if (['accounts_receivable', 'current_assets', 'cash_and_cash_equivalents'].indexOf(sub_type) !== -1) {
+                            if (['accounts_receivable', 'current_assets', 'cash_and_cash_equivalents', 'piutang_usaha', 'persediaan', 'kas_dan_bank', 'aktiva_lancar_lainnya'].indexOf(sub_type) !== -1) {
                                 current_assets.push(asset);
                                 sum_current_assets += balance;
-                            } else if (['fixed_assets', 'non_current_assets'].indexOf(sub_type) !== -1) {
+                            } else if (['fixed_assets', 'non_current_assets', 'aktiva_tetap', 'aktiva_lainnya', 'akumulasi_penyusutan'].indexOf(sub_type) !== -1) {
                                 non_current_assets.push(asset);
                                 sum_non_current_assets += balance;
                             } else {
-                                // fallback to current assets
-                                current_assets.push(asset);
-                                sum_current_assets += balance;
+                                non_current_assets.push(asset);
+                                sum_non_current_assets += balance;
                             }
                         }
                     });
@@ -208,7 +207,13 @@
                     '</tr>'
                 );
 
-                // Group Aset Tidak Lancar
+                // Group Aset Tidak Lancar (Sort Akumulasi Penyusutan to the bottom)
+                non_current_assets.sort(function(a, b) {
+                    var isAccA = a.sub_type === 'akumulasi_penyusutan' || a.name.toLowerCase().indexOf('akumulasi penyusutan') !== -1 ? 1 : 0;
+                    var isAccB = b.sub_type === 'akumulasi_penyusutan' || b.name.toLowerCase().indexOf('akumulasi penyusutan') !== -1 ? 1 : 0;
+                    return isAccA - isAccB;
+                });
+
                 assets_tbody.append(
                     '<tr style="background-color: #f9f9f9;">' +
                     '    <th colspan="2" style="padding-left: 10px; color: #333; border-top: 2px solid #ddd;"><strong>ASET TIDAK LANCAR</strong></th>' +

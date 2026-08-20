@@ -12,6 +12,20 @@
     @component('components.widget', ['class' => 'box-primary'])
         {!! Form::open(['url' => action([\Modules\AssetManagement\Http\Controllers\AssetController::class, 'update'], [$asset->id]), 'method' => 'put', 'id' => 'edit_asset_form']) !!}
         <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    {!! Form::label('fixed_asset_account_id', 'Akun Aset Tetap (Debit):') !!}
+                    {!! Form::select('fixed_asset_account_id', $fixed_asset_accounts, $asset->fixed_asset_account_id, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select')]) !!}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    {!! Form::label('payment_account_id', 'Sumber Dana / Akun Pembayaran (Kredit):') !!}
+                    {!! Form::select('payment_account_id', $payment_accounts, $asset->payment_account_id, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select')]) !!}
+                </div>
+            </div>
+        </div>
+        <div class="row">
             <div class="col-md-4">
                 <div class="form-group">
                     {!! Form::label('name', __('assetmanagement::lang.asset_name') . ':*') !!}

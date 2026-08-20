@@ -42,7 +42,6 @@
             <table class="table table-bordered table-striped" id="assets_table">
                 <thead>
                     <tr>
-                        <th>@lang('messages.action')</th>
                         <th>@lang('assetmanagement::lang.asset_code')</th>
                         <th>@lang('assetmanagement::lang.asset_name')</th>
                         <th>@lang('assetmanagement::lang.asset_category')</th>
@@ -53,6 +52,7 @@
                         <th>@lang('assetmanagement::lang.accumulated_depreciation')</th>
                         <th>@lang('assetmanagement::lang.net_book_value')</th>
                         <th>@lang('assetmanagement::lang.status')</th>
+                        <th>@lang('messages.action')</th>
                     </tr>
                 </thead>
             </table>
@@ -76,7 +76,6 @@ $(document).ready(function() {
             }
         },
         columns: [
-            { data: 'action', name: 'action', orderable: false, searchable: false },
             { data: 'asset_code', name: 'assets.asset_code' },
             { data: 'name', name: 'assets.name' },
             { data: 'category_name', name: 'asset_categories.name' },
@@ -86,12 +85,41 @@ $(document).ready(function() {
             { data: 'monthly_depreciation', name: 'monthly_depreciation', orderable: false, searchable: false },
             { data: 'total_accumulated_depreciation', name: 'total_accumulated_depreciation', orderable: false, searchable: false },
             { data: 'net_book_value', name: 'net_book_value', orderable: false, searchable: false },
-            { data: 'status', name: 'assets.status' }
+            { data: 'status', name: 'assets.status' },
+            { data: 'action', name: 'action', orderable: false, searchable: false }
         ]
     });
 
     $(document).on('change', '#filter_category_id, #filter_location_id, #filter_status', function() {
         assets_table.ajax.reload();
+    });
+
+    $(document).on('click', '.process_depreciation_button', function(e) {
+        e.preventDefault();
+        var href = $(this).attr('href');
+        swal({
+            title: 'Proses Penyusutan Bulanan?',
+            text: 'Sistem akan menghitung penyusutan bulan ini dan membuat jurnal otomatis ke Buku Besar.',
+            icon: 'info',
+            buttons: true,
+            dangerMode: false,
+        }).then(willProcess => {
+            if (willProcess) {
+                $.ajax({
+                    method: 'POST',
+                    url: href,
+                    dataType: 'json',
+                    success: function(result) {
+                        if (result.success == true) {
+                            toastr.success(result.msg);
+                            assets_table.ajax.reload();
+                        } else {
+                            toastr.error(result.msg);
+                        }
+                    }
+                });
+            }
+        });
     });
 
     $(document).on('click', '.delete_asset_button', function(e) {
