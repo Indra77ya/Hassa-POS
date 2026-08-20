@@ -523,7 +523,13 @@ class FixedAssetManagementTest extends TestCase
         $txsUpdated = AccountingAccountsTransaction::where('acc_trans_mapping_id', $mapping->id)->get();
         $this->assertEquals(30000000, $txsUpdated->where('type', 'debit')->first()->amount);
 
-        // 4. HTTP DELETE Asset
+        // 4. Test Manual Per-Asset Depreciation HTTP POST
+        $depreciateResponse = $this->post(action([\Modules\AssetManagement\Http\Controllers\AssetController::class, 'depreciate'], [$asset->id]));
+        $depreciateResponse->assertJson(['success' => true]);
+
+        $this->assertEquals(1, AssetDepreciationLog::where('asset_id', $asset->id)->count());
+
+        // 5. HTTP DELETE Asset
         $deleteResponse = $this->delete(action([\Modules\AssetManagement\Http\Controllers\AssetController::class, 'destroy'], [$asset->id]));
         $deleteResponse->assertJson(['success' => true]);
 

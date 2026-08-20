@@ -94,6 +94,34 @@ $(document).ready(function() {
         assets_table.ajax.reload();
     });
 
+    $(document).on('click', '.process_depreciation_button', function(e) {
+        e.preventDefault();
+        var href = $(this).attr('href');
+        swal({
+            title: 'Proses Penyusutan Bulanan?',
+            text: 'Sistem akan menghitung penyusutan bulan ini dan membuat jurnal otomatis ke Buku Besar.',
+            icon: 'info',
+            buttons: true,
+            dangerMode: false,
+        }).then(willProcess => {
+            if (willProcess) {
+                $.ajax({
+                    method: 'POST',
+                    url: href,
+                    dataType: 'json',
+                    success: function(result) {
+                        if (result.success == true) {
+                            toastr.success(result.msg);
+                            assets_table.ajax.reload();
+                        } else {
+                            toastr.error(result.msg);
+                        }
+                    }
+                });
+            }
+        });
+    });
+
     $(document).on('click', '.delete_asset_button', function(e) {
         e.preventDefault();
         var href = $(this).attr('href');

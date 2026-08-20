@@ -36,4 +36,10 @@ return [
     'category_updated_successfully' => 'Asset category updated successfully',
     'category_deleted_successfully' => 'Asset category deleted successfully',
     'depreciation_logs' => 'Depreciation History',
+    'process_depreciation' => 'Process Depreciation',
+    'depreciation_accounts_not_configured' => 'Depreciation accounts are not configured in Asset Settings',
+    'already_depreciated_this_month' => 'This asset has already been depreciated for this month',
+    'asset_fully_depreciated' => 'This asset is fully depreciated',
+    'invalid_depreciation_amount' => 'Invalid depreciation amount',
+    'depreciation_processed_successfully' => 'Asset depreciation processed successfully and journal entry recorded',
 ];

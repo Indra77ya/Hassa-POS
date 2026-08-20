@@ -7,6 +7,7 @@ use Modules\AssetManagement\Http\Controllers\AssetSettingController;
 use Modules\AssetManagement\Http\Controllers\InstallController;
 
 Route::middleware(['web', 'SetSessionData', 'auth', 'language', 'timezone', 'AdminSidebarMenu'])->group(function () {
+    Route::post('assets/{id}/depreciate', [AssetController::class, 'depreciate'])->name('assets.depreciate');
     Route::resource('assets', AssetController::class);
     Route::resource('asset-categories', AssetCategoryController::class)->except(['create', 'show', 'edit']);
     Route::get('asset-settings', [AssetSettingController::class, 'index'])->name('asset-settings.index');

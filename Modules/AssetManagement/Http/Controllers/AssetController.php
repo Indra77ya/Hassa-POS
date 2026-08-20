@@ -10,8 +10,10 @@ use Illuminate\Support\Facades\DB;
 use Modules\Accounting\Entities\AccountingAccount;
 use Modules\Accounting\Entities\AccountingAccountsTransaction;
 use Modules\Accounting\Entities\AccountingAccTransMapping;
+use Carbon\Carbon;
 use Modules\AssetManagement\Entities\Asset;
 use Modules\AssetManagement\Entities\AssetCategory;
+use Modules\AssetManagement\Entities\AssetDepreciationLog;
 use Modules\AssetManagement\Entities\AssetSetting;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -73,6 +75,10 @@ class AssetController extends Controller
 
                     if (auth()->user()->can('asset.edit')) {
                         $html .= '<li><a href="' . action([\Modules\AssetManagement\Http\Controllers\AssetController::class, 'edit'], [$row->id]) . '"><i class="glyphicon glyphicon-edit"></i> ' . __('messages.edit') . '</a></li>';
+                    }
+
+                    if (auth()->user()->can('asset.edit')) {
+                        $html .= '<li><a href="' . action([\Modules\AssetManagement\Http\Controllers\AssetController::class, 'depreciate'], [$row->id]) . '" class="process_depreciation_button"><i class="fa fa-calculator"></i> ' . __('assetmanagement::lang.process_depreciation') . '</a></li>';
                     }
 
                     if (auth()->user()->can('asset.delete')) {
@@ -383,6 +389,130 @@ class AssetController extends Controller
         }
 
         return redirect()->action([\Modules\AssetManagement\Http\Controllers\AssetController::class, 'index'])->with('status', $output);
+    }
+
+    public function depreciate($id)
+    {
+        if (!auth()->user()->can('asset.edit')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+            $business_id = request()->session()->get('user.business_id');
+            $asset = Asset::where('business_id', $business_id)->findOrFail($id);
+
+            $setting = AssetSetting::forBusiness($business_id);
+            $expenseAccountId = $setting->depreciation_expense_account_id;
+            $accumAccountId = $setting->accumulated_depreciation_account_id;
+
+            if (!$expenseAccountId || !$accumAccountId) {
+                return [
+                    'success' => false,
+                    'msg' => __('assetmanagement::lang.depreciation_accounts_not_configured'),
+                ];
+            }
+
+            $now = Carbon::now();
+            $year = $now->year;
+            $month = $now->month;
+            $depreciationDate = $now->format('Y-m-d');
+
+            $alreadyLogged = AssetDepreciationLog::where('asset_id', $asset->id)
+                ->where('year', $year)
+                ->where('month', $month)
+                ->exists();
+
+            if ($alreadyLogged) {
+                return [
+                    'success' => false,
+                    'msg' => __('assetmanagement::lang.already_depreciated_this_month'),
+                ];
+            }
+
+            $monthlyAmount = $asset->monthly_depreciation;
+            $maxDepreciable = max(0, $asset->purchase_price - $asset->salvage_value);
+            $currentAccumulated = $asset->total_accumulated_depreciation;
+
+            if ($currentAccumulated >= $maxDepreciable) {
+                return [
+                    'success' => false,
+                    'msg' => __('assetmanagement::lang.asset_fully_depreciated'),
+                ];
+            }
+
+            if ($currentAccumulated + $monthlyAmount > $maxDepreciable) {
+                $monthlyAmount = round($maxDepreciable - $currentAccumulated, 4);
+            }
+
+            if ($monthlyAmount <= 0) {
+                return [
+                    'success' => false,
+                    'msg' => __('assetmanagement::lang.invalid_depreciation_amount'),
+                ];
+            }
+
+            DB::beginTransaction();
+
+            $refNo = 'DEPR-' . $business_id . '-' . $asset->id . '-' . $year . sprintf('%02d', $month);
+
+            $accTransMapping = new AccountingAccTransMapping();
+            $accTransMapping->business_id = $business_id;
+            $accTransMapping->ref_no = $refNo;
+            $accTransMapping->note = "Penyusutan Bulanan Manual Aset: {$asset->name}" . (!empty($asset->asset_code) ? " ({$asset->asset_code})" : '') . " Periode {$year}-" . sprintf('%02d', $month);
+            $accTransMapping->type = 'journal_entry';
+            $accTransMapping->created_by = auth()->user()->id;
+            $accTransMapping->operation_date = $depreciationDate;
+            $accTransMapping->save();
+
+            // Debit: Beban Penyusutan
+            $debitTrans = new AccountingAccountsTransaction();
+            $debitTrans->accounting_account_id = $expenseAccountId;
+            $debitTrans->amount = $monthlyAmount;
+            $debitTrans->type = 'debit';
+            $debitTrans->created_by = auth()->user()->id;
+            $debitTrans->operation_date = $depreciationDate;
+            $debitTrans->sub_type = 'journal_entry';
+            $debitTrans->acc_trans_mapping_id = $accTransMapping->id;
+            $debitTrans->save();
+
+            // Credit: Akumulasi Penyusutan
+            $creditTrans = new AccountingAccountsTransaction();
+            $creditTrans->accounting_account_id = $accumAccountId;
+            $creditTrans->amount = $monthlyAmount;
+            $creditTrans->type = 'credit';
+            $creditTrans->created_by = auth()->user()->id;
+            $creditTrans->operation_date = $depreciationDate;
+            $creditTrans->sub_type = 'journal_entry';
+            $creditTrans->acc_trans_mapping_id = $accTransMapping->id;
+            $creditTrans->save();
+
+            // Create log entry
+            AssetDepreciationLog::create([
+                'business_id' => $business_id,
+                'asset_id' => $asset->id,
+                'depreciation_date' => $depreciationDate,
+                'year' => $year,
+                'month' => $month,
+                'amount' => $monthlyAmount,
+                'accounting_acc_trans_mapping_id' => $accTransMapping->id,
+            ]);
+
+            DB::commit();
+
+            $output = [
+                'success' => true,
+                'msg' => __('assetmanagement::lang.depreciation_processed_successfully'),
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::emergency('File:' . $e->getFile() . 'Line:' . $e->getLine() . 'Message:' . $e->getMessage());
+            $output = [
+                'success' => false,
+                'msg' => __('messages.something_went_wrong'),
+            ];
+        }
+
+        return $output;
     }
 
     public function destroy($id)
