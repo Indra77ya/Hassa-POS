@@ -5797,21 +5797,6 @@ class TransactionUtil extends Util
             }
         }
 
-        // $data['net_profit'] = $module_total + $data['total_sell']
-        //                         + $data['closing_stock']
-        //                         - $data['total_purchase']
-        //                         - $data['total_sell_discount']
-        //                         + $data['total_sell_round_off']
-        //                         - $data['total_reward_amount']
-        //                         - $data['opening_stock']
-        //                         - $data['total_expense']
-        //                         + $data['total_recovered']
-        //                         - $data['total_transfer_shipping_charges']
-        //                         - $data['total_purchase_shipping_charge']
-        //                         + $data['total_sell_shipping_charge']
-        //                         + $data['total_purchase_discount']
-        //                         + $data['total_purchase_return']
-        //                         - $data['total_sell_return'];
         $data['net_profit'] = $module_total + $gross_profit
                                 + ($data['total_sell_round_off'] + $data['total_recovered'] + $data['total_sell_shipping_charge'] + $data['total_purchase_discount'] + $data['total_sell_additional_expense'] + $data['total_sell_return_discount']
                                 ) - ($data['total_reward_amount'] + $data['total_expense'] + $data['total_adjustment'] + $data['total_transfer_shipping_charges'] + $data['total_purchase_shipping_charge'] + $data['total_purchase_additional_expense'] + $data['total_sell_discount']
@@ -5826,11 +5811,6 @@ class TransactionUtil extends Util
         ];
         $grossProfitData = $moduleUtil->getModuleData('grossProfit', $module_parameters);
 
-        // if (! empty($project_module_data['Project']['gross_profit'])) {
-        //     $gross_profit = $gross_profit + $project_module_data['Project']['gross_profit'];
-        //     $data['gross_profit_label'] = __('project::lang.project_invoice');
-        // }
-
         $data['gross_profit_label'] = [];
         if(! empty($grossProfitData)){
             foreach($grossProfitData as $value){
@@ -5840,6 +5820,132 @@ class TransactionUtil extends Util
         }
 
         $data['gross_profit'] = $gross_profit;
+
+        // --- ACCOUNTING MODULE P&L INTEGRATION ---
+        // Check if Accounting module is installed and active
+        $accounting_has_transactions = false;
+        if (\Schema::hasTable('accounting_accounts') && \Schema::hasTable('accounting_accounts_transactions')) {
+            $has_acc_trans = \Modules\Accounting\Entities\AccountingAccountsTransaction::join('accounting_accounts', 'accounting_accounts.id', '=', 'accounting_accounts_transactions.accounting_account_id')
+                ->where('accounting_accounts.business_id', $business_id)
+                ->whereBetween('accounting_accounts_transactions.operation_date', [$start_date, $end_date])
+                ->exists();
+
+            if ($has_acc_trans) {
+                $accounting_has_transactions = true;
+                $balance_formula = "SUM( IF(
+                    (accounting_accounts.account_primary_type='asset' AND AAT.type='debit')
+                    OR (accounting_accounts.account_primary_type='expenses' AND AAT.type='debit')
+                    OR (accounting_accounts.account_primary_type='expense' AND AAT.type='debit')
+                    OR (accounting_accounts.account_primary_type='income' AND AAT.type='credit')
+                    OR (accounting_accounts.account_primary_type='equity' AND AAT.type='credit')
+                    OR (accounting_accounts.account_primary_type='liability' AND AAT.type='credit'),
+                    amount, -1*amount)) as balance";
+
+                // Base accounting query builder
+                $acc_base_query = function() use ($business_id, $start_date, $end_date, $location_id) {
+                    $q = \Modules\Accounting\Entities\AccountingAccount::join('accounting_accounts_transactions as AAT',
+                        'AAT.accounting_account_id', '=', 'accounting_accounts.id')
+                        ->join('accounting_account_types as AATP',
+                            'AATP.id', '=', 'accounting_accounts.account_sub_type_id')
+                        ->whereBetween('AAT.operation_date', [$start_date, $end_date])
+                        ->where('accounting_accounts.business_id', $business_id);
+
+                    if (! empty($location_id)) {
+                        $q->where(function ($sub) use ($location_id) {
+                            $sub->whereIn('AAT.transaction_id', function($subQuery) use ($location_id) {
+                                $subQuery->select('id')->from('transactions')->where('location_id', $location_id);
+                            })
+                            ->orWhereIn('AAT.transaction_payment_id', function($subQuery) use ($location_id) {
+                                $subQuery->select('TP.id')
+                                    ->from('transaction_payments as TP')
+                                    ->join('transactions as T', 'TP.transaction_id', '=', 'T.id')
+                                    ->where('T.location_id', $location_id);
+                            })
+                            ->orWhereIn('AAT.acc_trans_mapping_id', function($subQuery) use ($location_id) {
+                                $subQuery->select('id')
+                                    ->from('accounting_acc_trans_mappings')
+                                    ->where('location_id', $location_id);
+                            });
+                        });
+                    }
+
+                    return $q;
+                };
+
+                // 1. Pendapatan (Income)
+                $incomes_acc = $acc_base_query()
+                    ->where('accounting_accounts.account_primary_type', 'income')
+                    ->whereNotIn('accounting_accounts.account_sub_type_id', [12]) // Exclude other income
+                    ->select(DB::raw($balance_formula), 'accounting_accounts.id', 'accounting_accounts.gl_code', 'accounting_accounts.name', 'AATP.name as sub_type')
+                    ->groupBy('accounting_accounts.id', 'accounting_accounts.gl_code', 'accounting_accounts.name', 'AATP.name')
+                    ->get();
+
+                // 2. Cost of Sales / HPP (sub_type_id 13 or cogs)
+                $cogs_acc = $acc_base_query()
+                    ->whereIn('accounting_accounts.account_primary_type', ['expense', 'expenses'])
+                    ->where('accounting_accounts.account_sub_type_id', 13)
+                    ->select(DB::raw($balance_formula), 'accounting_accounts.id', 'accounting_accounts.gl_code', 'accounting_accounts.name', 'AATP.name as sub_type')
+                    ->groupBy('accounting_accounts.id', 'accounting_accounts.gl_code', 'accounting_accounts.name', 'AATP.name')
+                    ->get();
+
+                // 3. Operating Expenses (sub_type_id 14)
+                $expenses_acc = $acc_base_query()
+                    ->whereIn('accounting_accounts.account_primary_type', ['expense', 'expenses'])
+                    ->where('accounting_accounts.account_sub_type_id', 14)
+                    ->select(DB::raw($balance_formula), 'accounting_accounts.id', 'accounting_accounts.gl_code', 'accounting_accounts.name', 'AATP.name as sub_type')
+                    ->groupBy('accounting_accounts.id', 'accounting_accounts.gl_code', 'accounting_accounts.name', 'AATP.name')
+                    ->get();
+
+                // 4. Other Income & Expense (sub_type_id 12, 15, etc.)
+                $other_income_acc = $acc_base_query()
+                    ->where('accounting_accounts.account_primary_type', 'income')
+                    ->where('accounting_accounts.account_sub_type_id', 12)
+                    ->select(DB::raw($balance_formula), 'accounting_accounts.id', 'accounting_accounts.gl_code', 'accounting_accounts.name', 'AATP.name as sub_type')
+                    ->groupBy('accounting_accounts.id', 'accounting_accounts.gl_code', 'accounting_accounts.name', 'AATP.name')
+                    ->get();
+
+                $other_expense_acc = $acc_base_query()
+                    ->whereIn('accounting_accounts.account_primary_type', ['expense', 'expenses'])
+                    ->where('accounting_accounts.account_sub_type_id', 15)
+                    ->select(DB::raw($balance_formula), 'accounting_accounts.id', 'accounting_accounts.gl_code', 'accounting_accounts.name', 'AATP.name as sub_type')
+                    ->groupBy('accounting_accounts.id', 'accounting_accounts.gl_code', 'accounting_accounts.name', 'AATP.name')
+                    ->get();
+
+                $total_income_acc = $incomes_acc->sum('balance');
+                $total_cogs_acc = $cogs_acc->sum('balance');
+                $gross_profit_acc = $total_income_acc - $total_cogs_acc;
+                $total_operating_expense_acc = $expenses_acc->sum('balance');
+                $total_other_income_acc = $other_income_acc->sum('balance');
+                $total_other_expense_acc = $other_expense_acc->sum('balance');
+                $net_profit_acc = $gross_profit_acc - $total_operating_expense_acc + $total_other_income_acc - $total_other_expense_acc;
+
+                $data['accounting_data'] = [
+                    'is_accounting' => true,
+                    'incomes' => $incomes_acc,
+                    'cogs' => $cogs_acc,
+                    'operating_expenses' => $expenses_acc,
+                    'other_incomes' => $other_income_acc,
+                    'other_expenses' => $other_expense_acc,
+                    'total_income' => $total_income_acc,
+                    'total_cogs' => $total_cogs_acc,
+                    'gross_profit' => $gross_profit_acc,
+                    'total_operating_expense' => $total_operating_expense_acc,
+                    'total_other_income' => $total_other_income_acc,
+                    'total_other_expense' => $total_other_expense_acc,
+                    'net_profit' => $net_profit_acc,
+                ];
+
+                // Override high-level gross and net profit for consistency across reports
+                $data['gross_profit'] = $gross_profit_acc;
+                $data['net_profit'] = $net_profit_acc;
+            }
+        }
+
+        if (! $accounting_has_transactions) {
+            $data['accounting_data'] = [
+                'is_accounting' => false,
+            ];
+        }
 
         //get sub type for total sales
         $sales_by_subtype = Transaction::where('business_id', $business_id)
