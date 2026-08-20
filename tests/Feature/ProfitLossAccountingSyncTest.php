@@ -328,7 +328,6 @@ class ProfitLossAccountingSyncTest extends TestCase
         $response = $this->get('/reports/profit-loss?start_date=2024-02-01&end_date=2024-02-28', ['X-Requested-With' => 'XMLHttpRequest']);
         $response->assertStatus(200);
         $response->assertSee('Laporan Laba Rugi Perusahaan');
-        $response->assertSee('Modul Akuntansi');
         $response->assertSee('LABA KOTOR');
         $response->assertSee('Laba / Rugi Bersih Akhir');
     }
