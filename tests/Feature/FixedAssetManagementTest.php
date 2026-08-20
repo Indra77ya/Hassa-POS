@@ -62,6 +62,46 @@ class FixedAssetManagementTest extends TestCase
             });
         }
 
+        if (!Schema::hasTable('account_types')) {
+            Schema::create('account_types', function (Blueprint $table) {
+                $table->id();
+                $table->string('name');
+                $table->string('fixed_key')->nullable();
+                $table->integer('parent_account_type_id')->nullable();
+                $table->integer('business_id')->unsigned()->nullable();
+                $table->timestamps();
+            });
+        }
+
+        if (!Schema::hasTable('accounts')) {
+            Schema::create('accounts', function (Blueprint $table) {
+                $table->id();
+                $table->integer('business_id')->unsigned();
+                $table->string('name');
+                $table->string('account_number')->nullable();
+                $table->integer('account_type_id')->unsigned()->nullable();
+                $table->text('note')->nullable();
+                $table->boolean('is_closed')->default(0);
+                $table->integer('accounting_account_id')->unsigned()->nullable();
+                $table->integer('created_by')->unsigned();
+                $table->softDeletes();
+                $table->timestamps();
+            });
+        }
+
+        if (!Schema::hasTable('accounting_account_types')) {
+            Schema::create('accounting_account_types', function (Blueprint $table) {
+                $table->id();
+                $table->string('name');
+                $table->string('account_type');
+                $table->string('account_primary_type')->nullable();
+                $table->boolean('show_balance')->default(1);
+                $table->integer('parent_id')->nullable();
+                $table->integer('business_id')->nullable();
+                $table->timestamps();
+            });
+        }
+
         if (!Schema::hasTable('business_locations')) {
             Schema::create('business_locations', function (Blueprint $table) {
                 $table->id();
@@ -93,8 +133,11 @@ class FixedAssetManagementTest extends TestCase
                 $table->integer('business_id')->unsigned();
                 $table->string('name');
                 $table->string('account_number')->nullable();
+                $table->string('gl_code')->nullable();
                 $table->string('account_primary_type')->nullable();
                 $table->integer('account_sub_type_id')->unsigned()->nullable();
+                $table->integer('account_id')->unsigned()->nullable();
+                $table->text('description')->nullable();
                 $table->string('status')->default('active');
                 $table->integer('created_by')->unsigned()->nullable();
                 $table->timestamps();
@@ -237,6 +280,17 @@ class FixedAssetManagementTest extends TestCase
         $this->assertNotNull($setting);
         $this->assertNotNull($setting->depreciation_expense_account_id);
         $this->assertNotNull($setting->accumulated_depreciation_account_id);
+
+        // Check that payment accounts (POS accounts) were synchronized bi-directionally
+        $expenseAcc = AccountingAccount::find($setting->depreciation_expense_account_id);
+        $this->assertNotNull($expenseAcc);
+        $this->assertNotNull($expenseAcc->account_id);
+        $this->assertNotNull(\App\Account::find($expenseAcc->account_id));
+
+        $accumAcc = AccountingAccount::find($setting->accumulated_depreciation_account_id);
+        $this->assertNotNull($accumAcc);
+        $this->assertNotNull($accumAcc->account_id);
+        $this->assertNotNull(\App\Account::find($accumAcc->account_id));
 
         // Create asset category
         $category = AssetCategory::create([

@@ -47,13 +47,58 @@ class AssetSetting extends Model
                     'business_id' => $business_id,
                     'name' => 'Beban Penyusutan',
                     'account_number' => '6105',
+                    'gl_code' => '6105',
+                    'account_primary_type' => 'expenses',
                     'account_sub_type_id' => 14, // Operating Expense / Beban Operasional
                     'status' => 'active',
                     'created_by' => auth()->id() ?? 1,
                 ]);
+            } else {
+                $needsSave = false;
+                if (empty($expenseAcc->account_primary_type)) {
+                    $expenseAcc->account_primary_type = 'expenses';
+                    $needsSave = true;
+                }
+                if (empty($expenseAcc->account_sub_type_id)) {
+                    $expenseAcc->account_sub_type_id = 14;
+                    $needsSave = true;
+                }
+                if (empty($expenseAcc->gl_code)) {
+                    $expenseAcc->gl_code = '6105';
+                    $needsSave = true;
+                }
+                if (empty($expenseAcc->account_id) || (class_exists(\App\Account::class) && !\App\Account::find($expenseAcc->account_id))) {
+                    $needsSave = true;
+                }
+                if ($needsSave) {
+                    $expenseAcc->save();
+                }
             }
 
             $setting->depreciation_expense_account_id = $expenseAcc->id;
+        } else {
+            $expenseAcc = AccountingAccount::find($setting->depreciation_expense_account_id);
+            if ($expenseAcc) {
+                $needsSave = false;
+                if (empty($expenseAcc->account_primary_type)) {
+                    $expenseAcc->account_primary_type = 'expenses';
+                    $needsSave = true;
+                }
+                if (empty($expenseAcc->account_sub_type_id)) {
+                    $expenseAcc->account_sub_type_id = 14;
+                    $needsSave = true;
+                }
+                if (empty($expenseAcc->gl_code)) {
+                    $expenseAcc->gl_code = '6105';
+                    $needsSave = true;
+                }
+                if (empty($expenseAcc->account_id) || (class_exists(\App\Account::class) && !\App\Account::find($expenseAcc->account_id))) {
+                    $needsSave = true;
+                }
+                if ($needsSave) {
+                    $expenseAcc->save();
+                }
+            }
         }
 
         // Auto-seed or lookup accumulated depreciation account ('Akumulasi Penyusutan')
@@ -67,13 +112,58 @@ class AssetSetting extends Model
                     'business_id' => $business_id,
                     'name' => 'Akumulasi Penyusutan',
                     'account_number' => '1701',
-                    'account_sub_type_id' => 16, // Akumulasi Penyusutan (Contra Asset)
+                    'gl_code' => '1701',
+                    'account_primary_type' => 'asset',
+                    'account_sub_type_id' => 17, // Akumulasi Penyusutan (Contra Asset)
                     'status' => 'active',
                     'created_by' => auth()->id() ?? 1,
                 ]);
+            } else {
+                $needsSave = false;
+                if (empty($accumAcc->account_primary_type)) {
+                    $accumAcc->account_primary_type = 'asset';
+                    $needsSave = true;
+                }
+                if (empty($accumAcc->account_sub_type_id)) {
+                    $accumAcc->account_sub_type_id = 17;
+                    $needsSave = true;
+                }
+                if (empty($accumAcc->gl_code)) {
+                    $accumAcc->gl_code = '1701';
+                    $needsSave = true;
+                }
+                if (empty($accumAcc->account_id) || (class_exists(\App\Account::class) && !\App\Account::find($accumAcc->account_id))) {
+                    $needsSave = true;
+                }
+                if ($needsSave) {
+                    $accumAcc->save();
+                }
             }
 
             $setting->accumulated_depreciation_account_id = $accumAcc->id;
+        } else {
+            $accumAcc = AccountingAccount::find($setting->accumulated_depreciation_account_id);
+            if ($accumAcc) {
+                $needsSave = false;
+                if (empty($accumAcc->account_primary_type)) {
+                    $accumAcc->account_primary_type = 'asset';
+                    $needsSave = true;
+                }
+                if (empty($accumAcc->account_sub_type_id)) {
+                    $accumAcc->account_sub_type_id = 17;
+                    $needsSave = true;
+                }
+                if (empty($accumAcc->gl_code)) {
+                    $accumAcc->gl_code = '1701';
+                    $needsSave = true;
+                }
+                if (empty($accumAcc->account_id) || (class_exists(\App\Account::class) && !\App\Account::find($accumAcc->account_id))) {
+                    $needsSave = true;
+                }
+                if ($needsSave) {
+                    $accumAcc->save();
+                }
+            }
         }
 
         $setting->save();
