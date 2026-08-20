@@ -160,16 +160,15 @@
                         var balance = parseFloat(asset.balance) || 0;
                         if (balance != 0) {
                             var sub_type = asset.sub_type;
-                            if (['accounts_receivable', 'current_assets', 'cash_and_cash_equivalents'].indexOf(sub_type) !== -1) {
+                            if (['accounts_receivable', 'current_assets', 'cash_and_cash_equivalents', 'piutang_usaha', 'persediaan', 'kas_dan_bank', 'aktiva_lancar_lainnya'].indexOf(sub_type) !== -1) {
                                 current_assets.push(asset);
                                 sum_current_assets += balance;
-                            } else if (['fixed_assets', 'non_current_assets'].indexOf(sub_type) !== -1) {
+                            } else if (['fixed_assets', 'non_current_assets', 'aktiva_tetap', 'aktiva_lainnya', 'akumulasi_penyusutan'].indexOf(sub_type) !== -1) {
                                 non_current_assets.push(asset);
                                 sum_non_current_assets += balance;
                             } else {
-                                // fallback to current assets
-                                current_assets.push(asset);
-                                sum_current_assets += balance;
+                                non_current_assets.push(asset);
+                                sum_non_current_assets += balance;
                             }
                         }
                     });

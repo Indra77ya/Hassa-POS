@@ -6,6 +6,10 @@ use App\BusinessLocation;
 use App\Utils\Util;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
+use Modules\Accounting\Entities\AccountingAccount;
+use Modules\Accounting\Entities\AccountingAccountsTransaction;
+use Modules\Accounting\Entities\AccountingAccTransMapping;
 use Modules\AssetManagement\Entities\Asset;
 use Modules\AssetManagement\Entities\AssetCategory;
 use Modules\AssetManagement\Entities\AssetSetting;
@@ -119,7 +123,19 @@ class AssetController extends Controller
         $categories = AssetCategory::where('business_id', $business_id)->pluck('name', 'id');
         $locations = BusinessLocation::forDropdown($business_id);
 
-        return view('assetmanagement::assets.create', compact('categories', 'locations'));
+        // Fixed Asset accounts (Debit options: sub_type_id 4 - aktiva_tetap or sub_type_id 5 - aktiva_lainnya)
+        $fixed_asset_accounts = AccountingAccount::where('business_id', $business_id)
+            ->where('status', 'active')
+            ->whereIn('account_sub_type_id', [4, 5])
+            ->pluck('name', 'id');
+
+        // Payment accounts / Funding Sources (Credit options: Kas/Bank [3], Hutang [6,7,8,9], Modal [10])
+        $payment_accounts = AccountingAccount::where('business_id', $business_id)
+            ->where('status', 'active')
+            ->whereIn('account_sub_type_id', [3, 6, 7, 8, 9, 10])
+            ->pluck('name', 'id');
+
+        return view('assetmanagement::assets.create', compact('categories', 'locations', 'fixed_asset_accounts', 'payment_accounts'));
     }
 
     public function store(Request $request)
@@ -138,6 +154,8 @@ class AssetController extends Controller
                 'useful_life' => 'required|integer|min:1',
             ]);
 
+            DB::beginTransaction();
+
             $input = $request->only([
                 'name',
                 'asset_code',
@@ -148,6 +166,8 @@ class AssetController extends Controller
                 'depreciation_method',
                 'status',
                 'description',
+                'fixed_asset_account_id',
+                'payment_account_id',
             ]);
 
             $input['business_id'] = $business_id;
@@ -156,16 +176,57 @@ class AssetController extends Controller
             $input['salvage_value'] = $request->filled('salvage_value') ? $this->commonUtil->num_uf($request->input('salvage_value')) : 0;
             $input['created_by'] = auth()->user()->id;
 
-            Asset::create($input);
-
             // Ensure settings & accounts exist
             AssetSetting::forBusiness($business_id);
+
+            // Auto-Journal for Asset Acquisition
+            if (!empty($input['fixed_asset_account_id']) && !empty($input['payment_account_id']) && $input['purchase_price'] > 0) {
+                $refNo = 'ASSET-ACQ-' . $business_id . '-' . time();
+
+                $accTransMapping = new AccountingAccTransMapping();
+                $accTransMapping->business_id = $business_id;
+                $accTransMapping->ref_no = $refNo;
+                $accTransMapping->note = "Perolehan Aset Tetap: {$input['name']}" . (!empty($input['asset_code']) ? " ({$input['asset_code']})" : '');
+                $accTransMapping->type = 'journal_entry';
+                $accTransMapping->created_by = auth()->user()->id;
+                $accTransMapping->operation_date = $input['purchase_date'];
+                $accTransMapping->save();
+
+                // Debit: Fixed Asset Account
+                $debitTrans = new AccountingAccountsTransaction();
+                $debitTrans->accounting_account_id = $input['fixed_asset_account_id'];
+                $debitTrans->amount = $input['purchase_price'];
+                $debitTrans->type = 'debit';
+                $debitTrans->created_by = auth()->user()->id;
+                $debitTrans->operation_date = $input['purchase_date'];
+                $debitTrans->sub_type = 'journal_entry';
+                $debitTrans->acc_trans_mapping_id = $accTransMapping->id;
+                $debitTrans->save();
+
+                // Credit: Payment Account (Funding Source)
+                $creditTrans = new AccountingAccountsTransaction();
+                $creditTrans->accounting_account_id = $input['payment_account_id'];
+                $creditTrans->amount = $input['purchase_price'];
+                $creditTrans->type = 'credit';
+                $creditTrans->created_by = auth()->user()->id;
+                $creditTrans->operation_date = $input['purchase_date'];
+                $creditTrans->sub_type = 'journal_entry';
+                $creditTrans->acc_trans_mapping_id = $accTransMapping->id;
+                $creditTrans->save();
+
+                $input['accounting_acc_trans_mapping_id'] = $accTransMapping->id;
+            }
+
+            Asset::create($input);
+
+            DB::commit();
 
             $output = [
                 'success' => true,
                 'msg' => __('assetmanagement::lang.asset_created_successfully'),
             ];
         } catch (\Exception $e) {
+            DB::rollBack();
             \Log::emergency('File:' . $e->getFile() . 'Line:' . $e->getLine() . 'Message:' . $e->getMessage());
             $output = [
                 'success' => false,
@@ -201,7 +262,17 @@ class AssetController extends Controller
         $categories = AssetCategory::where('business_id', $business_id)->pluck('name', 'id');
         $locations = BusinessLocation::forDropdown($business_id);
 
-        return view('assetmanagement::assets.edit', compact('asset', 'categories', 'locations'));
+        $fixed_asset_accounts = AccountingAccount::where('business_id', $business_id)
+            ->where('status', 'active')
+            ->whereIn('account_sub_type_id', [4, 5])
+            ->pluck('name', 'id');
+
+        $payment_accounts = AccountingAccount::where('business_id', $business_id)
+            ->where('status', 'active')
+            ->whereIn('account_sub_type_id', [3, 6, 7, 8, 9, 10])
+            ->pluck('name', 'id');
+
+        return view('assetmanagement::assets.edit', compact('asset', 'categories', 'locations', 'fixed_asset_accounts', 'payment_accounts'));
     }
 
     public function update(Request $request, $id)
@@ -221,6 +292,8 @@ class AssetController extends Controller
                 'useful_life' => 'required|integer|min:1',
             ]);
 
+            DB::beginTransaction();
+
             $input = $request->only([
                 'name',
                 'asset_code',
@@ -231,19 +304,77 @@ class AssetController extends Controller
                 'depreciation_method',
                 'status',
                 'description',
+                'fixed_asset_account_id',
+                'payment_account_id',
             ]);
 
             $input['purchase_date'] = $this->commonUtil->uf_date($request->input('purchase_date'));
             $input['purchase_price'] = $this->commonUtil->num_uf($request->input('purchase_price'));
             $input['salvage_value'] = $request->filled('salvage_value') ? $this->commonUtil->num_uf($request->input('salvage_value')) : 0;
 
+            // Sync Acquisition Journal Entry
+            if (!empty($input['fixed_asset_account_id']) && !empty($input['payment_account_id']) && $input['purchase_price'] > 0) {
+                $accTransMapping = null;
+                if (!empty($asset->accounting_acc_trans_mapping_id)) {
+                    $accTransMapping = AccountingAccTransMapping::where('business_id', $business_id)
+                        ->find($asset->accounting_acc_trans_mapping_id);
+                }
+
+                if (!$accTransMapping) {
+                    $refNo = 'ASSET-ACQ-' . $business_id . '-' . time();
+                    $accTransMapping = new AccountingAccTransMapping();
+                    $accTransMapping->business_id = $business_id;
+                    $accTransMapping->ref_no = $refNo;
+                    $accTransMapping->type = 'journal_entry';
+                    $accTransMapping->created_by = auth()->user()->id;
+                }
+
+                $accTransMapping->note = "Perolehan Aset Tetap: {$input['name']}" . (!empty($input['asset_code']) ? " ({$input['asset_code']})" : '');
+                $accTransMapping->operation_date = $input['purchase_date'];
+                $accTransMapping->save();
+
+                // Clear previous transactions on this mapping
+                AccountingAccountsTransaction::where('acc_trans_mapping_id', $accTransMapping->id)->delete();
+
+                // Debit: Fixed Asset Account
+                $debitTrans = new AccountingAccountsTransaction();
+                $debitTrans->accounting_account_id = $input['fixed_asset_account_id'];
+                $debitTrans->amount = $input['purchase_price'];
+                $debitTrans->type = 'debit';
+                $debitTrans->created_by = auth()->user()->id;
+                $debitTrans->operation_date = $input['purchase_date'];
+                $debitTrans->sub_type = 'journal_entry';
+                $debitTrans->acc_trans_mapping_id = $accTransMapping->id;
+                $debitTrans->save();
+
+                // Credit: Payment Account (Funding Source)
+                $creditTrans = new AccountingAccountsTransaction();
+                $creditTrans->accounting_account_id = $input['payment_account_id'];
+                $creditTrans->amount = $input['purchase_price'];
+                $creditTrans->type = 'credit';
+                $creditTrans->created_by = auth()->user()->id;
+                $creditTrans->operation_date = $input['purchase_date'];
+                $creditTrans->sub_type = 'journal_entry';
+                $creditTrans->acc_trans_mapping_id = $accTransMapping->id;
+                $creditTrans->save();
+
+                $input['accounting_acc_trans_mapping_id'] = $accTransMapping->id;
+            } elseif (!empty($asset->accounting_acc_trans_mapping_id)) {
+                AccountingAccountsTransaction::where('acc_trans_mapping_id', $asset->accounting_acc_trans_mapping_id)->delete();
+                AccountingAccTransMapping::where('id', $asset->accounting_acc_trans_mapping_id)->delete();
+                $input['accounting_acc_trans_mapping_id'] = null;
+            }
+
             $asset->update($input);
+
+            DB::commit();
 
             $output = [
                 'success' => true,
                 'msg' => __('assetmanagement::lang.asset_updated_successfully'),
             ];
         } catch (\Exception $e) {
+            DB::rollBack();
             \Log::emergency('File:' . $e->getFile() . 'Line:' . $e->getLine() . 'Message:' . $e->getMessage());
             $output = [
                 'success' => false,
@@ -263,13 +394,24 @@ class AssetController extends Controller
         try {
             $business_id = request()->session()->get('user.business_id');
             $asset = Asset::where('business_id', $business_id)->findOrFail($id);
+
+            DB::beginTransaction();
+
+            if (!empty($asset->accounting_acc_trans_mapping_id)) {
+                AccountingAccountsTransaction::where('acc_trans_mapping_id', $asset->accounting_acc_trans_mapping_id)->delete();
+                AccountingAccTransMapping::where('id', $asset->accounting_acc_trans_mapping_id)->delete();
+            }
+
             $asset->delete();
+
+            DB::commit();
 
             $output = [
                 'success' => true,
                 'msg' => __('assetmanagement::lang.asset_deleted_successfully'),
             ];
         } catch (\Exception $e) {
+            DB::rollBack();
             \Log::emergency('File:' . $e->getFile() . 'Line:' . $e->getLine() . 'Message:' . $e->getMessage());
             $output = [
                 'success' => false,

@@ -302,7 +302,7 @@ class ReportController extends Controller
                     ->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
                     ->where('accounting_accounts.business_id', $business_id)
                     ->whereIn('accounting_accounts.account_primary_type', ['asset'])
-                    ->whereIn('accounting_accounts.account_sub_type_id', [4, 5])
+                    ->whereIn('accounting_accounts.account_sub_type_id', [4, 5, 17])
                     ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
                     ->get();
 

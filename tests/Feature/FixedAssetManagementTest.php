@@ -62,6 +62,65 @@ class FixedAssetManagementTest extends TestCase
             });
         }
 
+        if (!Schema::hasTable('account_transactions')) {
+            Schema::create('account_transactions', function (Blueprint $table) {
+                $table->id();
+                $table->integer('account_id')->unsigned();
+                $table->integer('transaction_id')->unsigned()->nullable();
+                $table->integer('transaction_payment_id')->unsigned()->nullable();
+                $table->decimal('amount', 22, 4);
+                $table->string('type');
+                $table->string('sub_type')->nullable();
+                $table->integer('created_by')->unsigned();
+                $table->dateTime('operation_date');
+                $table->text('note')->nullable();
+                $table->integer('accounting_accounts_transaction_id')->unsigned()->nullable();
+                $table->timestamps();
+            });
+        }
+
+        if (!Schema::hasTable('roles')) {
+            Schema::create('roles', function (Blueprint $table) {
+                $table->id();
+                $table->string('name');
+                $table->string('guard_name')->default('web');
+                $table->integer('business_id')->unsigned()->nullable();
+                $table->timestamps();
+            });
+        }
+
+        if (!Schema::hasTable('permissions')) {
+            Schema::create('permissions', function (Blueprint $table) {
+                $table->id();
+                $table->string('name');
+                $table->string('guard_name')->default('web');
+                $table->timestamps();
+            });
+        }
+
+        if (!Schema::hasTable('model_has_roles')) {
+            Schema::create('model_has_roles', function (Blueprint $table) {
+                $table->integer('role_id')->unsigned();
+                $table->string('model_type');
+                $table->integer('model_id')->unsigned();
+            });
+        }
+
+        if (!Schema::hasTable('model_has_permissions')) {
+            Schema::create('model_has_permissions', function (Blueprint $table) {
+                $table->integer('permission_id')->unsigned();
+                $table->string('model_type');
+                $table->integer('model_id')->unsigned();
+            });
+        }
+
+        if (!Schema::hasTable('role_has_permissions')) {
+            Schema::create('role_has_permissions', function (Blueprint $table) {
+                $table->integer('permission_id')->unsigned();
+                $table->integer('role_id')->unsigned();
+            });
+        }
+
         if (!Schema::hasTable('account_types')) {
             Schema::create('account_types', function (Blueprint $table) {
                 $table->id();
@@ -195,6 +254,9 @@ class FixedAssetManagementTest extends TestCase
                 $table->decimal('purchase_price', 22, 4);
                 $table->decimal('salvage_value', 22, 4)->default(0);
                 $table->integer('useful_life');
+                $table->integer('fixed_asset_account_id')->nullable();
+                $table->integer('payment_account_id')->nullable();
+                $table->integer('accounting_acc_trans_mapping_id')->nullable();
                 $table->string('depreciation_method')->default('straight_line');
                 $table->string('status')->default('active');
                 $table->text('description')->nullable();
@@ -267,7 +329,10 @@ class FixedAssetManagementTest extends TestCase
         ]);
 
         $this->actingAs($this->user);
-        session(['user' => ['id' => $this->user->id, 'business_id' => $this->business->id]]);
+        session([
+            'user' => ['id' => $this->user->id, 'business_id' => $this->business->id],
+            'business' => ['date_format' => 'Y-m-d', 'time_zone' => 'Asia/Jakarta'],
+        ]);
 
         // Auto-seed default accounts and asset settings
         AssetSetting::forBusiness($this->business->id);
@@ -381,5 +446,89 @@ class FixedAssetManagementTest extends TestCase
         // 4. Verify asset accumulated depreciation & net book value
         $this->assertEquals(1000000, $asset->total_accumulated_depreciation);
         $this->assertEquals(11000000, $asset->net_book_value);
+    }
+
+    public function test_asset_acquisition_auto_journal_lifecycle()
+    {
+        // 1. Create Fixed Asset Account & Payment Account
+        $fixedAssetAccount = AccountingAccount::create([
+            'business_id' => $this->business->id,
+            'name' => 'Bangunan & Ruko',
+            'gl_code' => '1405',
+            'account_primary_type' => 'asset',
+            'account_sub_type_id' => 4, // aktiva_tetap
+            'created_by' => $this->user->id,
+        ]);
+
+        $bankAccount = AccountingAccount::create([
+            'business_id' => $this->business->id,
+            'name' => 'Bank BCA',
+            'gl_code' => '1102',
+            'account_primary_type' => 'asset',
+            'account_sub_type_id' => 3, // kas_dan_bank
+            'created_by' => $this->user->id,
+        ]);
+
+        // 2. HTTP POST Store Asset
+        $response = $this->post(action([\Modules\AssetManagement\Http\Controllers\AssetController::class, 'store']), [
+            'name' => 'Ruko Dua Lantai',
+            'asset_code' => 'RUKO-01',
+            'purchase_date' => '2026-01-15',
+            'purchase_price' => '25000000',
+            'useful_life' => 120,
+            'fixed_asset_account_id' => $fixedAssetAccount->id,
+            'payment_account_id' => $bankAccount->id,
+        ]);
+
+        if (session('status') && isset(session('status')['msg']) && session('status')['success'] === false) {
+            $this->fail('Asset store failed with error: ' . session('status')['msg']);
+        }
+
+        $response->assertRedirect();
+
+        $asset = Asset::where('name', 'Ruko Dua Lantai')->first();
+        $this->assertNotNull($asset);
+        $this->assertEquals(25000000, $asset->purchase_price);
+        $this->assertNotNull($asset->accounting_acc_trans_mapping_id);
+
+        // Verify Journal Entry created
+        $mapping = AccountingAccTransMapping::find($asset->accounting_acc_trans_mapping_id);
+        $this->assertNotNull($mapping);
+
+        $txs = AccountingAccountsTransaction::where('acc_trans_mapping_id', $mapping->id)->get();
+        $this->assertCount(2, $txs);
+
+        $debitTx = $txs->where('type', 'debit')->first();
+        $this->assertEquals($fixedAssetAccount->id, $debitTx->accounting_account_id);
+        $this->assertEquals(25000000, $debitTx->amount);
+
+        $creditTx = $txs->where('type', 'credit')->first();
+        $this->assertEquals($bankAccount->id, $creditTx->accounting_account_id);
+        $this->assertEquals(25000000, $creditTx->amount);
+
+        // 3. HTTP PUT Update Asset Amount to 30.000.000
+        $updateResponse = $this->put(action([\Modules\AssetManagement\Http\Controllers\AssetController::class, 'update'], [$asset->id]), [
+            'name' => 'Ruko Dua Lantai (Renovated)',
+            'purchase_date' => '2026-01-15',
+            'purchase_price' => '30000000',
+            'useful_life' => 120,
+            'fixed_asset_account_id' => $fixedAssetAccount->id,
+            'payment_account_id' => $bankAccount->id,
+        ]);
+
+        $updateResponse->assertRedirect();
+        $asset->refresh();
+        $this->assertEquals(30000000, $asset->purchase_price);
+
+        $txsUpdated = AccountingAccountsTransaction::where('acc_trans_mapping_id', $mapping->id)->get();
+        $this->assertEquals(30000000, $txsUpdated->where('type', 'debit')->first()->amount);
+
+        // 4. HTTP DELETE Asset
+        $deleteResponse = $this->delete(action([\Modules\AssetManagement\Http\Controllers\AssetController::class, 'destroy'], [$asset->id]));
+        $deleteResponse->assertJson(['success' => true]);
+
+        $this->assertNull(Asset::find($asset->id));
+        $this->assertNull(AccountingAccTransMapping::find($mapping->id));
+        $this->assertEquals(0, AccountingAccountsTransaction::where('acc_trans_mapping_id', $mapping->id)->count());
     }
 }
