@@ -61,11 +61,21 @@ class SuperadminSubscriptionsController extends BaseController
             return DataTables::of($superadmin_subscription)
                         ->addColumn(
                             'action',
-                            '<button data-href ="{{action(\'\Modules\Superadmin\Http\Controllers\SuperadminSubscriptionsController@edit\',[$id])}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-info change_status" data-toggle="modal" data-target="#statusModal">
-                            @lang( "superadmin::lang.status")
-                            </button> <button data-href ="{{action(\'\Modules\Superadmin\Http\Controllers\SuperadminSubscriptionsController@editSubscription\',["id" => $id])}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary btn-modal tw-m-1" data-container=".view_modal">
-                            @lang( "messages.edit")
-                            </button>'
+                            function ($row) {
+                                $html = '<div class="btn-group">
+                                    <button type="button" class="btn btn-info btn-xs dropdown-toggle" data-toggle="dropdown" aria-expanded="false">'
+                                        . __('messages.actions') . ' <span class="caret"></span><span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu">';
+
+                                $html .= '<li><a href="#" data-href="' . action([\Modules\Superadmin\Http\Controllers\SuperadminSubscriptionsController::class, 'edit'], [$row->id]) . '" class="change_status" data-toggle="modal" data-target="#statusModal"><i class="fa fa-power-off"></i> ' . __('superadmin::lang.status') . '</a></li>';
+
+                                $html .= '<li><a href="#" data-href="' . action([\Modules\Superadmin\Http\Controllers\SuperadminSubscriptionsController::class, 'editSubscription'], ['id' => $row->id]) . '" class="btn-modal" data-container=".view_modal"><i class="glyphicon glyphicon-edit"></i> ' . __('messages.edit') . '</a></li>';
+
+                                $html .= '</ul></div>';
+
+                                return $html;
+                            }
                         )
                         ->editColumn('created_at', '{{@format_datetime($created_at)}}')
                         ->editColumn('trial_end_date', '@if(!empty($trial_end_date)){{@format_date($trial_end_date)}} @endif')
@@ -97,7 +107,7 @@ class SuperadminSubscriptionsController extends BaseController
                             </span>'
                         )
                         ->removeColumn('id')
-                        ->rawColumns([2, 8, 9, 12])
+                        ->rawColumns(['action', 'status', 'package_price', 'original_price'])
                         ->make(false);
         }
 
