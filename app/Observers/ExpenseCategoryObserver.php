@@ -28,7 +28,7 @@ class ExpenseCategoryObserver
         \DB::beginTransaction();
         try {
             $business_id = $expenseCategory->business_id;
-            $created_by = request()->session()->get('user.id') ?? 1;
+            $created_by = request()->hasSession() ? (request()->session()->get('user.id') ?? 1) : 1;
 
             // 1. Create AccountingAccount
             $accountingAccount = AccountingAccount::create([
