@@ -107,7 +107,7 @@ class SuperadminSubscriptionsController extends BaseController
                             </span>'
                         )
                         ->removeColumn('id')
-                        ->rawColumns(['action', 'status', 'package_price', 'original_price'])
+                        ->rawColumns([2, 8, 9, 12, 'action', 'status', 'package_price', 'original_price'])
                         ->make(false);
         }
 
