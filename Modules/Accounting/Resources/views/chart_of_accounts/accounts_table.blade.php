@@ -131,7 +131,7 @@
                 <td colspan="10" class="text-center">
                     <h3>@lang( 'accounting::lang.no_accounts' )</h3>
                     <p>@lang( 'accounting::lang.add_default_accounts_help' )</p>
-                    <a href="{{route('accounting.create-default-accounts')}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent">@lang( 'accounting::lang.add_default_accounts' ) <i class="fas fa-file-import"></i></a>
+                    <a href="{{route('accounting.create-default-accounts')}}" class="btn btn-primary btn-sm">@lang( 'accounting::lang.add_default_accounts' ) <i class="fas fa-file-import"></i></a>
                 </td>
             </tr>
         @endif
