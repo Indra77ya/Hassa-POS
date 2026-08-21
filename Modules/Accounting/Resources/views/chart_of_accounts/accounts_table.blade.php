@@ -15,9 +15,9 @@
     </thead>
     <tbody>
         @foreach($accounts as $account)
-            <tr class="bg-gray">
+            <tr style="background-color: #f8fafc;" class="tw-font-semibold">
                 <td>
-                    <div class="btn-group"><button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info tw-w-max dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{{__("messages.actions")}}<span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button>
+                    <div class="btn-group"><button type="button" class="btn btn-info btn-xs dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{{__("messages.actions")}} <span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button>
                         <ul class="dropdown-menu" style="left: 40px !important; right: auto !important; min-width: 120px !important;" role="menu">
                             <li>
                                 <a
@@ -57,7 +57,7 @@
                         {{$account->detail_type->account_type_name}}
                     @endif
                 </td>
-                <td>@if(!empty($account->balance)) @format_currency($account->balance) @endif</td>
+                <td class="text-right">@if(!empty($account->balance)) @format_currency($account->balance) @endif</td>
                 <!-- <td></td> -->
                 <td>@if($account->status == 'active') 
                         <span class="label bg-light-green">@lang( 'accounting::lang.active' )</span> 
@@ -71,7 +71,7 @@
                 @foreach($account->child_accounts as $child_account)
                     <tr>
                         <td>
-                        <div class="btn-group"><button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info tw-w-max dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{{__("messages.actions")}}<span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button>
+                        <div class="btn-group"><button type="button" class="btn btn-info btn-xs dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{{__("messages.actions")}} <span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button>
                             <ul class="dropdown-menu" style="left: 40px !important; right: auto !important; min-width: 120px !important;" role="menu">
                                 <li>
                                     <a
@@ -97,7 +97,7 @@
                             </ul>
                         </div>
                         </td>
-                        <td style="padding-left:30px">{{$child_account->name}}</td>
+                        <td style="padding-left: 24px;"><span class="text-muted">↳</span> {{$child_account->name}}</td>
                         <td>{{$child_account->gl_code}}</td>
                         <td>{{$account->name}}</td>
                         <td>@if(!empty($child_account->account_primary_type)){{__('accounting::lang.' . $child_account->account_primary_type)}}@endif</td>
@@ -111,7 +111,7 @@
                                 {{$child_account->detail_type->account_type_name}}
                             @endif
                         </td>
-                        <td>@if(!empty($child_account->balance)) @format_currency($child_account->balance) @endif</td>
+                        <td class="text-right">@if(!empty($child_account->balance)) @format_currency($child_account->balance) @endif</td>
                         <!-- <td></td> -->
                         <td>
                             @if($child_account->status == 'active') 
