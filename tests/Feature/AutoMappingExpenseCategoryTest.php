@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Gate;
 use DB;
 
 require_once __DIR__ . '/../../database/migrations/2026_08_01_000000_sync_existing_expense_categories.php';
+require_once __DIR__ . '/../../database/migrations/2026_08_29_000000_sync_operating_expense_categories.php';
 
 class AutoMappingExpenseCategoryTest extends TestCase
 {
@@ -585,5 +586,117 @@ class AutoMappingExpenseCategoryTest extends TestCase
         $this->assertEquals($expense_accounting_account->id, $debit_entry->accounting_account_id);
         $this->assertEquals($bank_accounting_account->id, $credit_entry->accounting_account_id, "The credit leg should point to Bank Mandiri account!");
         $this->assertEquals(25000, $credit_entry->amount);
+    }
+
+    /**
+     * Test creating an AccountingAccount (Operating Expense) automatically creates ExpenseCategory
+     * with code set from gl_code and maps it in BusinessLocation.
+     */
+    public function testAccountingAccountCreationSyncsToExpenseCategory()
+    {
+        $business_id = 1;
+
+        $cash_account = AccountingAccount::create([
+            'name' => 'Kas Toko',
+            'business_id' => $business_id,
+            'account_primary_type' => 'asset',
+            'account_sub_type_id' => 3,
+            'status' => 'active',
+        ]);
+
+        $location = BusinessLocation::create([
+            'business_id' => $business_id,
+            'accounting_default_map' => json_encode([]),
+        ]);
+
+        // Create Operating Expense AccountingAccount
+        $acc = AccountingAccount::create([
+            'name' => 'Beban Kebersihan',
+            'business_id' => $business_id,
+            'account_primary_type' => 'expenses',
+            'account_sub_type_id' => 14,
+            'gl_code' => '6105',
+            'status' => 'active',
+        ]);
+
+        // Verify ExpenseCategory created automatically
+        $category = ExpenseCategory::where('business_id', $business_id)
+            ->where('name', 'Beban Kebersihan')
+            ->first();
+
+        $this->assertNotNull($category);
+        $this->assertEquals('6105', $category->code);
+
+        // Verify location default map updated
+        $location->refresh();
+        $map = json_decode($location->accounting_default_map, true);
+        $this->assertArrayHasKey('expense_' . $category->id, $map);
+        $this->assertEquals($acc->id, $map['expense_' . $category->id]['deposit_to']);
+        $this->assertEquals($cash_account->id, $map['expense_' . $category->id]['payment_account']);
+    }
+
+    /**
+     * Test updating AccountingAccount updates ExpenseCategory name and code.
+     */
+    public function testAccountingAccountUpdateSyncsToExpenseCategory()
+    {
+        $business_id = 1;
+
+        $location = BusinessLocation::create([
+            'business_id' => $business_id,
+            'accounting_default_map' => json_encode([]),
+        ]);
+
+        $acc = AccountingAccount::create([
+            'name' => 'Beban Kebersihan',
+            'business_id' => $business_id,
+            'account_primary_type' => 'expenses',
+            'account_sub_type_id' => 14,
+            'gl_code' => '6105',
+            'status' => 'active',
+        ]);
+
+        // Update name and gl_code
+        $acc->update([
+            'name' => 'Beban Kebersihan & K3',
+            'gl_code' => '6106',
+        ]);
+
+        $category = ExpenseCategory::where('business_id', $business_id)
+            ->where('name', 'Beban Kebersihan & K3')
+            ->first();
+
+        $this->assertNotNull($category);
+        $this->assertEquals('6106', $category->code);
+    }
+
+    /**
+     * Test deleting AccountingAccount deletes corresponding ExpenseCategory.
+     */
+    public function testAccountingAccountDeleteSyncsToExpenseCategory()
+    {
+        $business_id = 1;
+
+        $location = BusinessLocation::create([
+            'business_id' => $business_id,
+            'accounting_default_map' => json_encode([]),
+        ]);
+
+        $acc = AccountingAccount::create([
+            'name' => 'Beban Kebersihan',
+            'business_id' => $business_id,
+            'account_primary_type' => 'expenses',
+            'account_sub_type_id' => 14,
+            'gl_code' => '6105',
+            'status' => 'active',
+        ]);
+
+        $category = ExpenseCategory::where('business_id', $business_id)->where('name', 'Beban Kebersihan')->first();
+        $this->assertNotNull($category);
+
+        $acc->delete();
+
+        $category_check = ExpenseCategory::find($category->id);
+        $this->assertNull($category_check);
     }
 }
