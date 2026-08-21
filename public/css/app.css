@@ -554,8 +554,34 @@ input[type=number]::-webkit-outer-spin-button {
 .bg-info>a:hover{
     background-color: #337ab7 !important;
 }
-ul.dt-button-collection{
-    background-color: #00c0ef;
+ul.dt-button-collection {
+    background-color: #ffffff !important;
+    border: 1px solid #d2d6de !important;
+    border-radius: 4px !important;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, .175) !important;
+    padding: 5px 0 !important;
+}
+ul.dt-button-collection a.dt-button,
+ul.dt-button-collection button.dt-button {
+    color: #333333 !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    border: none !important;
+    padding: 6px 15px !important;
+    font-size: 13px !important;
+    display: block !important;
+    text-align: left !important;
+}
+ul.dt-button-collection a.dt-button:hover,
+ul.dt-button-collection button.dt-button:hover {
+    background-color: #f4f4f4 !important;
+    color: #111111 !important;
+}
+ul.dt-button-collection a.dt-button.active,
+ul.dt-button-collection button.dt-button.active {
+    background-color: #e8f0fe !important;
+    color: #1a73e8 !important;
+    font-weight: 600 !important;
 }
 td.details-control {
     background: url('/img/details_open.png') no-repeat center center;
