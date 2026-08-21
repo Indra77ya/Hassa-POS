@@ -1,6 +1,6 @@
 LANG = {
     'required': 'Diperlukan',
-    'sure': 'Anda yakin ?',
+    'sure': 'Apakah Anda yakin?',
     'remove_product': 'Anda yakin menghapus produk?',
     'cancel_invoice':  'Anda yakin membatalkan faktur?',
     'no_products': 'Tidak ada produk yang ditambahkan',
