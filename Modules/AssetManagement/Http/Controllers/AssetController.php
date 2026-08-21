@@ -109,7 +109,17 @@ class AssetController extends Controller
                 ->editColumn('purchase_date', function ($row) {
                     return $this->commonUtil->format_date($row->purchase_date);
                 })
-                ->rawColumns(['action'])
+                ->editColumn('status', function ($row) {
+                    if ($row->status == 'active') {
+                        return '<span class="label bg-light-green">' . __('accounting::lang.active') . '</span>';
+                    } elseif ($row->status == 'sold') {
+                        return '<span class="label label-info">Sold</span>';
+                    } elseif ($row->status == 'disposed') {
+                        return '<span class="label bg-red">Disposed</span>';
+                    }
+                    return '<span class="label label-default">' . ucfirst($row->status) . '</span>';
+                })
+                ->rawColumns(['action', 'status'])
                 ->make(true);
         }
 
