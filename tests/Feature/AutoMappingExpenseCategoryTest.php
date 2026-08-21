@@ -699,4 +699,49 @@ class AutoMappingExpenseCategoryTest extends TestCase
         $category_check = ExpenseCategory::find($category->id);
         $this->assertNull($category_check);
     }
+
+    /**
+     * Test creating a Payment Account of type Operating Expense creates both AccountingAccount and ExpenseCategory.
+     */
+    public function testPaymentAccountCreationSyncsToAccountingAndExpenseCategory()
+    {
+        $business_id = 1;
+
+        $op_type = \App\AccountType::create([
+            'name' => 'Operating Expenses',
+            'fixed_key' => 'beban_operasional',
+            'business_id' => $business_id,
+        ]);
+
+        $location = BusinessLocation::create([
+            'business_id' => $business_id,
+            'accounting_default_map' => json_encode([]),
+        ]);
+
+        // Create account via Payment Accounts menu (Account::create)
+        $payment_account = Account::create([
+            'name' => 'Cek Biaya 2',
+            'business_id' => $business_id,
+            'account_type_id' => $op_type->id,
+            'account_number' => '66666',
+        ]);
+
+        // Verify AccountingAccount was created
+        $acc = AccountingAccount::where('business_id', $business_id)
+            ->where('name', 'Cek Biaya 2')
+            ->first();
+
+        $this->assertNotNull($acc);
+        $this->assertEquals('expenses', $acc->account_primary_type);
+        $this->assertEquals(14, $acc->account_sub_type_id);
+        $this->assertEquals('66666', $acc->gl_code);
+
+        // Verify ExpenseCategory was created with matching code
+        $category = ExpenseCategory::where('business_id', $business_id)
+            ->where('name', 'Cek Biaya 2')
+            ->first();
+
+        $this->assertNotNull($category);
+        $this->assertEquals('66666', $category->code);
+    }
 }

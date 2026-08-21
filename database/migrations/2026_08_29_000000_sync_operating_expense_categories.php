@@ -19,6 +19,40 @@ return new class extends Migration
             return;
         }
 
+        // 1. Ensure any Payment Accounts in `accounts` table of type Operating Expense are synced to `AccountingAccount`
+        if (Schema::hasTable('accounts') && Schema::hasTable('account_types')) {
+            $payment_accounts = \App\Account::whereHas('account_type', function ($q) {
+                $q->where('fixed_key', 'beban_operasional');
+            })->where('is_closed', 0)->get();
+
+            foreach ($payment_accounts as $p_account) {
+                if (empty($p_account->accounting_account_id)) {
+                    $acc_account = AccountingAccount::where('business_id', $p_account->business_id)
+                        ->where('name', $p_account->name)
+                        ->first();
+
+                    if (!$acc_account) {
+                        $acc_account = AccountingAccount::create([
+                            'name' => $p_account->name,
+                            'business_id' => $p_account->business_id,
+                            'created_by' => $p_account->created_by ?? 1,
+                            'description' => $p_account->note,
+                            'gl_code' => $p_account->account_number,
+                            'status' => 'active',
+                            'account_primary_type' => 'expenses',
+                            'account_sub_type_id' => 14,
+                            'account_id' => $p_account->id,
+                        ]);
+                    }
+
+                    if ($acc_account) {
+                        $p_account->accounting_account_id = $acc_account->id;
+                        $p_account->save();
+                    }
+                }
+            }
+        }
+
         $operating_expense_accounts = AccountingAccount::where('account_sub_type_id', 14)
             ->where('status', 'active')
             ->get();

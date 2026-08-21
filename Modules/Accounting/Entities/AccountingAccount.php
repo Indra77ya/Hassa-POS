@@ -222,10 +222,7 @@ class AccountingAccount extends Model
      */
     public static function syncToExpenseCategory($accountingAccount)
     {
-        if (self::$is_syncing) {
-            return;
-        }
-
+        $previous_state = self::$is_syncing;
         self::$is_syncing = true;
         try {
             $business_id = $accountingAccount->business_id;
@@ -287,7 +284,7 @@ class AccountingAccount extends Model
         } catch (\Exception $e) {
             \Log::error('Error in syncToExpenseCategory: ' . $e->getMessage());
         } finally {
-            self::$is_syncing = false;
+            self::$is_syncing = $previous_state;
         }
     }
 
@@ -299,10 +296,7 @@ class AccountingAccount extends Model
      */
     public static function deleteExpenseCategorySync($accountingAccount)
     {
-        if (self::$is_syncing) {
-            return;
-        }
-
+        $previous_state = self::$is_syncing;
         self::$is_syncing = true;
         try {
             $business_id = $accountingAccount->business_id;
@@ -317,7 +311,7 @@ class AccountingAccount extends Model
         } catch (\Exception $e) {
             \Log::error('Error in deleteExpenseCategorySync: ' . $e->getMessage());
         } finally {
-            self::$is_syncing = false;
+            self::$is_syncing = $previous_state;
         }
     }
 

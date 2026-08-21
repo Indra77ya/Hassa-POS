@@ -56,6 +56,10 @@ class Account extends Model
                     if ($accounting_account) {
                         $account->accounting_account_id = $accounting_account->id;
                         $account->save();
+
+                        if (\Modules\Accounting\Entities\AccountingAccount::shouldSyncToExpenseCategory($accounting_account)) {
+                            \Modules\Accounting\Entities\AccountingAccount::syncToExpenseCategory($accounting_account);
+                        }
                     }
                 } catch (\Exception $e) {
                     \Log::error('Error syncing Payment Account to Accounting Account: ' . $e->getMessage());
@@ -104,6 +108,10 @@ class Account extends Model
                             $account->accounting_account_id = $accounting_account->id;
                             $account->save();
                         }
+
+                        if (\Modules\Accounting\Entities\AccountingAccount::shouldSyncToExpenseCategory($accounting_account)) {
+                            \Modules\Accounting\Entities\AccountingAccount::syncToExpenseCategory($accounting_account);
+                        }
                     }
                 } catch (\Exception $e) {
                     \Log::error('Error updating Accounting Account from Payment Account: ' . $e->getMessage());
@@ -130,6 +138,9 @@ class Account extends Model
                     }
 
                     if ($accounting_account) {
+                        if (\Modules\Accounting\Entities\AccountingAccount::shouldSyncToExpenseCategory($accounting_account)) {
+                            \Modules\Accounting\Entities\AccountingAccount::deleteExpenseCategorySync($accounting_account);
+                        }
                         $accounting_account->delete();
                     }
                 } catch (\Exception $e) {
