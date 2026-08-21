@@ -139,14 +139,14 @@ class BusinessController extends BaseController
                 ->addColumn('business_contact_number', '{{$mobile}} @if(!empty($alternate_number)), {{$alternate_number}}@endif')
                 ->editColumn('is_active', function ($row) {
                     if ($row->is_active == 1) {
-                        return '<span class="tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-rounded-full tw-bg-emerald-50 tw-text-emerald-700 tw-border tw-border-emerald-300">' . __("business.is_active") . '</span>';
+                        return '<span class="label bg-light-green">' . __("business.is_active") . '</span>';
                     } else {
-                        return '<span class="tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-rounded-full tw-bg-gray-100 tw-text-gray-700 tw-border tw-border-gray-300">' . __("lang_v1.inactive") . '</span>';
+                        return '<span class="label bg-red">' . __("lang_v1.inactive") . '</span>';
                     }
                 })
                 ->addColumn('action', function ($row) {
                     $html = '<div class="btn-group">
-                                <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info dropdown-toggle" data-toggle="dropdown" aria-expanded="false">'
+                                <button type="button" class="btn btn-info btn-xs dropdown-toggle" data-toggle="dropdown" aria-expanded="false">'
                                     . __('messages.actions') . ' <span class="caret"></span><span class="sr-only">Toggle Dropdown</span>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-right" role="menu">';
