@@ -11,18 +11,20 @@
 </table>
 @else
 <div class="row" style="margin-bottom: 15px;">
-    <div class="col-md-4 col-md-offset-4">
+    <div class="col-md-6">
         <div class="input-group">
-            <input type="text" class="form-control" id="accounts_tree_search" placeholder="@lang('accounting::lang.search') / GL Code...">
+            <input type="text" class="form-control" id="accounts_tree_search" placeholder="@lang('lang_v1.search')... / GL Code">
             <span class="input-group-addon">
                 <i class="fas fa-search"></i>
             </span>
         </div>
     </div>
-    <div class="col-md-4 text-right">
+    <div class="col-md-6 text-right">
         <button class="btn btn-primary btn-sm" id="expand_all"><i class="fas fa-expand-arrows-alt"></i> @lang('accounting::lang.expand_all')</button>
         <button class="btn btn-default btn-sm" id="collapse_all"><i class="fas fa-compress-arrows-alt"></i> @lang('accounting::lang.collapse_all')</button>
     </div>
+</div>
+<div class="row">
     <div class="col-md-12" id="accounts_tree_container">
         <ul>
         @foreach($account_types as $key => $value)
