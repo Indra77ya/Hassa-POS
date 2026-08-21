@@ -75,6 +75,11 @@ class AccountingAccount extends Model
                     }
                 }
             }
+
+            // Sync Operating Expenses (account_sub_type_id = 14) to POS ExpenseCategory
+            if (self::shouldSyncToExpenseCategory($accountingAccount)) {
+                self::syncToExpenseCategory($accountingAccount);
+            }
         });
 
         static::updated(function ($accountingAccount) {
@@ -159,6 +164,11 @@ class AccountingAccount extends Model
                     }
                 }
             }
+
+            // Sync Operating Expenses to POS ExpenseCategory upon update
+            if (self::shouldSyncToExpenseCategory($accountingAccount)) {
+                self::syncToExpenseCategory($accountingAccount);
+            }
         });
 
         static::deleted(function ($accountingAccount) {
@@ -186,7 +196,129 @@ class AccountingAccount extends Model
                     \App\Account::$is_syncing = false;
                 }
             }
+
+            if (self::shouldSyncToExpenseCategory($accountingAccount)) {
+                self::deleteExpenseCategorySync($accountingAccount);
+            }
         });
+    }
+
+    /**
+     * Determine if the Accounting account should sync to ExpenseCategory.
+     *
+     * @param  \Modules\Accounting\Entities\AccountingAccount  $accountingAccount
+     * @return bool
+     */
+    public static function shouldSyncToExpenseCategory($accountingAccount)
+    {
+        return $accountingAccount->account_sub_type_id == 14 && class_exists(\App\ExpenseCategory::class);
+    }
+
+    /**
+     * Synchronize AccountingAccount with ExpenseCategory and default location maps.
+     *
+     * @param  \Modules\Accounting\Entities\AccountingAccount  $accountingAccount
+     * @return void
+     */
+    public static function syncToExpenseCategory($accountingAccount)
+    {
+        if (self::$is_syncing) {
+            return;
+        }
+
+        self::$is_syncing = true;
+        try {
+            $business_id = $accountingAccount->business_id;
+
+            // Find existing matching ExpenseCategory by name or via default map
+            $category = \App\ExpenseCategory::where('business_id', $business_id)
+                ->where('name', $accountingAccount->name)
+                ->first();
+
+            if (!$category) {
+                // Search via BusinessLocation default map
+                $location = \App\BusinessLocation::where('business_id', $business_id)->first();
+                if ($location) {
+                    $map = json_decode($location->accounting_default_map, true) ?: [];
+                    foreach ($map as $key => $val) {
+                        if (str_starts_with($key, 'expense_') && isset($val['deposit_to']) && $val['deposit_to'] == $accountingAccount->id) {
+                            $cat_id = str_replace('expense_', '', $key);
+                            $category = \App\ExpenseCategory::where('business_id', $business_id)->find($cat_id);
+                            if ($category) {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if ($category) {
+                $category->update([
+                    'name' => $accountingAccount->name,
+                    'code' => $accountingAccount->gl_code,
+                ]);
+            } else {
+                $category = \App\ExpenseCategory::create([
+                    'name' => $accountingAccount->name,
+                    'business_id' => $business_id,
+                    'code' => $accountingAccount->gl_code,
+                ]);
+            }
+
+            // Find primary active Cash Account (sub_type_id 3)
+            $cash_account = AccountingAccount::where('business_id', $business_id)
+                ->where('account_sub_type_id', 3)
+                ->where('status', 'active')
+                ->orderBy('id', 'asc')
+                ->first();
+
+            $cash_account_id = $cash_account ? $cash_account->id : null;
+
+            // Update accounting_default_map in all BusinessLocations for this business
+            $locations = \App\BusinessLocation::where('business_id', $business_id)->get();
+            foreach ($locations as $loc) {
+                $map = json_decode($loc->accounting_default_map, true) ?: [];
+                $map['expense_' . $category->id] = [
+                    'deposit_to' => $accountingAccount->id,
+                    'payment_account' => $cash_account_id,
+                ];
+                $loc->update(['accounting_default_map' => json_encode($map)]);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error in syncToExpenseCategory: ' . $e->getMessage());
+        } finally {
+            self::$is_syncing = false;
+        }
+    }
+
+    /**
+     * Handle deletion sync of AccountingAccount to ExpenseCategory.
+     *
+     * @param  \Modules\Accounting\Entities\AccountingAccount  $accountingAccount
+     * @return void
+     */
+    public static function deleteExpenseCategorySync($accountingAccount)
+    {
+        if (self::$is_syncing) {
+            return;
+        }
+
+        self::$is_syncing = true;
+        try {
+            $business_id = $accountingAccount->business_id;
+
+            $category = \App\ExpenseCategory::where('business_id', $business_id)
+                ->where('name', $accountingAccount->name)
+                ->first();
+
+            if ($category) {
+                $category->delete();
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error in deleteExpenseCategorySync: ' . $e->getMessage());
+        } finally {
+            self::$is_syncing = false;
+        }
     }
 
     /**

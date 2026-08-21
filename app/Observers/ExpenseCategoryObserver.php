@@ -21,10 +21,14 @@ class ExpenseCategoryObserver
             return;
         }
 
+        if (AccountingAccount::$is_syncing) {
+            return;
+        }
+
         \DB::beginTransaction();
         try {
             $business_id = $expenseCategory->business_id;
-            $created_by = request()->session()->get('user.id') ?? 1;
+            $created_by = request()->hasSession() ? (request()->session()->get('user.id') ?? 1) : 1;
 
             // 1. Create AccountingAccount
             $accountingAccount = AccountingAccount::create([
@@ -104,6 +108,10 @@ class ExpenseCategoryObserver
             return;
         }
 
+        if (AccountingAccount::$is_syncing) {
+            return;
+        }
+
         \DB::beginTransaction();
         try {
             // Only synchronize if name has changed
@@ -160,6 +168,10 @@ class ExpenseCategoryObserver
     public function deleted(ExpenseCategory $expenseCategory)
     {
         if (!class_exists(AccountingAccount::class)) {
+            return;
+        }
+
+        if (AccountingAccount::$is_syncing) {
             return;
         }
 
