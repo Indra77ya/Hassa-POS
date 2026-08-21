@@ -321,15 +321,15 @@ $(document).ready(function () {
             // Items — only direct <a>/<button> of <li>, never the <li> itself.
             '.pdf-orient-collection>li>a,.pdf-orient-collection>li>button{' +
             'all:unset !important;box-sizing:border-box !important;display:flex !important;align-items:center !important;' +
-            'width:100% !important;height:1.5rem !important;padding:0 .5rem !important;' +
-            'font-size:.75rem !important;font-weight:600 !important;color:#000 !important;' +
-            'background:#fff !important;border:1px solid #000 !important;border-radius:.375rem !important;' +
+            'width:100% !important;height:2rem !important;padding:0 .75rem !important;' +
+            'font-size:.875rem !important;font-weight:500 !important;color:#333 !important;' +
+            'background:#fff !important;border:none !important;border-radius:4px !important;' +
             'cursor:pointer !important;text-align:left !important}' +
             '.pdf-orient-collection>li>a:hover,.pdf-orient-collection>li>a:focus,' +
             '.pdf-orient-collection>li>a:active,.pdf-orient-collection>li>a.active,' +
             '.pdf-orient-collection>li>button:hover,.pdf-orient-collection>li>button:focus,' +
             '.pdf-orient-collection>li>button:active,.pdf-orient-collection>li>button.active{' +
-            'background:#1f2937 !important;color:#fff !important;border-color:#1f2937 !important;' +
+            'background:#f4f4f4 !important;color:#111 !important;' +
             'box-shadow:none !important;text-shadow:none !important}' +
             '.pdf-orient-collection>li>a>*,.pdf-orient-collection>li>button>*{' +
             'background:transparent !important;color:inherit !important;box-shadow:none !important}';
