@@ -161,17 +161,10 @@
             class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md  tw-ring-gray-200">
             <div class="tw-p-4 sm:tw-p-5">
                 <div class="tw-flex tw-justify-end tw-gap-2.5">
-                    
-                        <a class="tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] pull-right"
-                            href="{{ action([\Modules\Superadmin\Http\Controllers\PackagesController::class, 'create']) }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                class="icon icon-tabler icons-tabler-outline icon-tabler-plus">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                <path d="M12 5l0 14" />
-                                <path d="M5 12l14 0" />
-                            </svg> @lang('messages.add')
-                        </a>
+                    <a class="btn btn-primary btn-sm pull-right"
+                        href="{{ action([\Modules\Superadmin\Http\Controllers\PackagesController::class, 'create']) }}">
+                        <i class="fa fa-plus"></i> @lang('messages.add')
+                    </a>
                 </div>
                 <div class="tw-flow-root tw-mt-5 tw-border-b tw-border-gray-200">
                     <div class="tw-mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
