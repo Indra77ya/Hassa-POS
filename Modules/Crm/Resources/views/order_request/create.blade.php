@@ -139,7 +139,7 @@
 	
 	<div class="row">
 		<div class="col-sm-12 text-center">
-			<button type="button" id="submit-sell" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-lg">@lang('messages.save')</button>
+			<button type="button" id="submit-sell" class="btn btn-primary btn-lg">@lang('messages.save')</button>
 		</div>
 	</div>
 	

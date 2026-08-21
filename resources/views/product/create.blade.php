@@ -365,16 +365,16 @@
             <div class="text-center">
                 <div class="btn-group">
                     @if($selling_price_group_count)
-                    <button type="submit" value="submit_n_add_selling_prices" class="tw-dw-btn tw-dw-btn-warning tw-dw-btn-lg tw-text-white submit_product_form">@lang('lang_v1.save_n_add_selling_price_group_prices')</button>
+                    <button type="submit" value="submit_n_add_selling_prices" class="btn btn-warning btn-lg submit_product_form">@lang('lang_v1.save_n_add_selling_price_group_prices')</button>
                     @endif
 
                     @can('product.opening_stock')
-                    <button id="opening_stock_button" @if(!empty($duplicate_product) && $duplicate_product->enable_stock == 0) disabled @endif type="submit" value="submit_n_add_opening_stock" class="tw-dw-btn tw-dw-btn-lg tw-text-white bg-purple submit_product_form">@lang('lang_v1.save_n_add_opening_stock')</button>
+                    <button id="opening_stock_button" @if(!empty($duplicate_product) && $duplicate_product->enable_stock == 0) disabled @endif type="submit" value="submit_n_add_opening_stock" class="btn btn-lg bg-purple submit_product_form">@lang('lang_v1.save_n_add_opening_stock')</button>
                     @endcan
 
-                    <button type="submit" value="save_n_add_another" class="tw-dw-btn tw-dw-btn-lg bg-maroon submit_product_form">@lang('lang_v1.save_n_add_another')</button>
+                    <button type="submit" value="save_n_add_another" class="btn btn-lg bg-maroon submit_product_form">@lang('lang_v1.save_n_add_another')</button>
 
-                    <button type="submit" value="submit" class="tw-dw-btn tw-dw-btn-primary tw-dw-btn-lg tw-text-white submit_product_form">@lang('messages.save')</button>
+                    <button type="submit" value="submit" class="btn btn-primary btn-lg submit_product_form">@lang('messages.save')</button>
                 </div>
 
             </div>

@@ -8,7 +8,7 @@
                 <i class="fa fa-tasks"></i>
                 {{$project_task->subject}}
                 <code>({{$project_task->task_id}})</code>
-                <button data-href="{{action([\Modules\Project\Http\Controllers\TaskController::class, 'edit'], [$project_task->id, 'project_id' => $project_task->project_id])}}" class="cursor-pointer edit_a_task_from_view_task mr-16 tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm pull-right">
+                <button data-href="{{action([\Modules\Project\Http\Controllers\TaskController::class, 'edit'], [$project_task->id, 'project_id' => $project_task->project_id])}}" class="cursor-pointer edit_a_task_from_view_task mr-16 btn btn-primary btn-sm pull-right">
                     <i class="fa fa-edit"></i>
                     {{__("messages.edit")}}
                 </button>
@@ -101,13 +101,13 @@
                         <input type="hidden" id="comment_media" name="file_name[]" value="">
                     </div>
                 </div>
-                <button type="button" class="tw-dw-btn tw-dw-btn-info tw-text-white tw-dw-btn-sm upload_doc">
+                <button type="button" class="btn btn-info btn-sm upload_doc">
                     @lang('project::lang.upload_doc')
                 </button>
-                <button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm ladda-button comment_btn" data-style="expand-right">
+                <button type="submit" class="btn btn-primary btn-sm ladda-button comment_btn" data-style="expand-right">
                    <span class="ladda-label">@lang('project::lang.save_comment')</span>
                 </button>
-                <button type="button" class="tw-dw-btn tw-dw-btn-neutral tw-text-white tw-dw-btn-sm hide_upload_btn toggleMedia">
+                <button type="button" class="btn btn-default btn-sm hide_upload_btn toggleMedia">
                     @lang('messages.close')
                 </button>
             {!! Form::close() !!}
@@ -132,7 +132,7 @@
                 ])
                 {{@format_date($project_task->created_at)}}
             </span>
-            <button type="button" class="tw-dw-btn tw-dw-btn-neutral tw-text-white" data-dismiss="modal">
+            <button type="button" class="btn btn-default" data-dismiss="modal">
                 @lang('messages.close')
             </button>
         </div>

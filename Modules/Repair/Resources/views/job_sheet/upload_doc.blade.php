@@ -71,7 +71,7 @@
 		            <input type="hidden" id="images" name="images" value="">
 		        </div>
 		    </div>
-		    <button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-w-full pull-right">
+		    <button type="submit" class="btn btn-primary tw-w-full pull-right">
                 @lang('messages.save')
             </button>
 	    {!! Form::close() !!}

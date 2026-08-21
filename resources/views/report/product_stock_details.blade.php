@@ -50,7 +50,7 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <br>
-                                <button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white">@lang('lang_v1.search')</button>
+                                <button type="submit" class="btn btn-primary">@lang('lang_v1.search')</button>
                             </div>
                         </div>
                         {!! Form::close() !!}

@@ -42,7 +42,7 @@
                         @endforeach
                         @if(isModuleEnabled('Essentials'))
                         <div class="col-md-12">
-                            <button class="tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-sm tw-w-full btn-modal" 
+                            <button class="btn btn-success btn-sm tw-w-full btn-modal"
                                 data-href="{{action([\Modules\Essentials\Http\Controllers\ToDoController::class, 'create'])}}?from_calendar=true" 
                                 data-container="#task_modal">
                                 <i class="fa fa-plus"></i> @lang( 'essentials::lang.add_to_do' )</a>

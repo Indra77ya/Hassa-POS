@@ -39,7 +39,7 @@
 	@component('components.widget', ['class' => 'box-primary', 'title' => __('crm::lang.all_leads')])
         @slot('tool')
             <div class="box-tools">
-                <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm btn-add-lead pull-right m-5" data-href="{{action([\Modules\Crm\Http\Controllers\LeadController::class, 'create'])}}">
+                <button type="button" class="btn btn-primary btn-sm btn-add-lead pull-right m-5" data-href="{{action([\Modules\Crm\Http\Controllers\LeadController::class, 'create'])}}">
                     <i class="fa fa-plus"></i> @lang('messages.add')
                 </button>
 

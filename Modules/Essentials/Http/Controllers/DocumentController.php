@@ -71,23 +71,23 @@ class DocumentController extends Controller
                     @endphp
 
                     @if($session_userid == $user_id)
-                    <button data-href ="{{action(\'\Modules\Essentials\Http\Controllers\DocumentController@destroy\',[$id])}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-error delete_doc">
+                    <button data-href ="{{action(\'\Modules\Essentials\Http\Controllers\DocumentController@destroy\',[$id])}}" class="btn btn-xs btn-danger delete_doc">
                      <i class="fa fa-trash"></i>
                      @lang( "essentials::lang.delete")
                     </button>
 
-                    <button data-href ="{{action(\'\Modules\Essentials\Http\Controllers\DocumentShareController@edit\',[$id])}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent share_doc">
+                    <button data-href ="{{action(\'\Modules\Essentials\Http\Controllers\DocumentShareController@edit\',[$id])}}" class="btn btn-xs btn-primary share_doc">
                          <i class="fa fa-share"></i>
                          @lang( "essentials::lang.share")
                     </button>
                     @endif
                     @if($type == "document")
-                        <a href ="{{action(\'\Modules\Essentials\Http\Controllers\DocumentController@download\',[$id])}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-info download">
+                        <a href ="{{action(\'\Modules\Essentials\Http\Controllers\DocumentController@download\',[$id])}}" class="btn btn-xs btn-info download">
                              <i class="fa fa-download"></i>
                              @lang( "essentials::lang.download")
                         </a>
                     @elseif($type == "memos")
-                            <button data-href ="{{action(\'\Modules\Essentials\Http\Controllers\DocumentController@show\',[$id])}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary view_memos">
+                            <button data-href ="{{action(\'\Modules\Essentials\Http\Controllers\DocumentController@show\',[$id])}}" class="btn btn-xs btn-primary view_memos">
                                 <i class="fa fa-eye"></i>
                                 @lang("essentials::lang.view")
                             </button>

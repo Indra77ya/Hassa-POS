@@ -14,7 +14,7 @@
 		@component('components.widget', ['class' => 'box-solid'])
 			{!! Form::open(['url' => action([\Modules\Crm\Http\Controllers\ProposalTemplateController::class, 'store']), 'method' => 'post', 'id' => 'proposal_template_form', 'files' => true]) !!}
 				@includeIf('crm::proposal_template.partials.template_form', ['attachments' => true])
-				<button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white ladda-button pull-right" data-style="expand-right">
+				<button type="submit" class="btn btn-primary ladda-button pull-right" data-style="expand-right">
                     <span class="ladda-label">@lang('messages.save')</span>
                 </button>
 			{!! Form::close() !!}

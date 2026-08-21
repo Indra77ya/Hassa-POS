@@ -17,7 +17,7 @@
         @foreach($accounts as $account)
             <tr class="bg-gray">
                 <td>
-                    <div class="btn-group"><button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info tw-w-max dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{{__("messages.actions")}}<span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button>
+                    <div class="btn-group"><button type="button" class="btn btn-xs btn-info tw-w-max dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{{__("messages.actions")}}<span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button>
                         <ul class="dropdown-menu" style="left: 40px !important; right: auto !important; min-width: 120px !important;" role="menu">
                             <li>
                                 <a
@@ -71,7 +71,7 @@
                 @foreach($account->child_accounts as $child_account)
                     <tr>
                         <td>
-                        <div class="btn-group"><button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info tw-w-max dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{{__("messages.actions")}}<span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button>
+                        <div class="btn-group"><button type="button" class="btn btn-xs btn-info tw-w-max dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{{__("messages.actions")}}<span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button>
                             <ul class="dropdown-menu" style="left: 40px !important; right: auto !important; min-width: 120px !important;" role="menu">
                                 <li>
                                     <a
@@ -131,7 +131,7 @@
                 <td colspan="10" class="text-center">
                     <h3>@lang( 'accounting::lang.no_accounts' )</h3>
                     <p>@lang( 'accounting::lang.add_default_accounts_help' )</p>
-                    <a href="{{route('accounting.create-default-accounts')}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent">@lang( 'accounting::lang.add_default_accounts' ) <i class="fas fa-file-import"></i></a>
+                    <a href="{{route('accounting.create-default-accounts')}}" class="btn btn-xs btn-primary">@lang( 'accounting::lang.add_default_accounts' ) <i class="fas fa-file-import"></i></a>
                 </td>
             </tr>
         @endif

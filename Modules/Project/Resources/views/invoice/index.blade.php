@@ -1,6 +1,6 @@
 <div class="row">
 	<div class="col-md-12">
-		<a type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm task_btn pull-right" href="{{action([\Modules\Project\Http\Controllers\InvoiceController::class, 'create'], ['project_id' => $project->id])}}">
+		<a type="button" class="btn btn-primary btn-sm task_btn pull-right" href="{{action([\Modules\Project\Http\Controllers\InvoiceController::class, 'create'], ['project_id' => $project->id])}}">
 		    @lang('messages.add')&nbsp;
 		    <i class="fa fa-plus"></i>
 		</a>

@@ -71,7 +71,7 @@
             </table>
         </div>
         <div class="box-footer">
-            <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white no-print pull-right"onclick="window.print()">
+            <button type="button" class="btn btn-primary no-print pull-right"onclick="window.print()">
           <i class="fa fa-print"></i> @lang('messages.print')</button>
         </div>
     </div>

@@ -60,7 +60,7 @@
                             </li>
                         </ul>
                         @can('user.update')
-                            <a href="{{action([\App\Http\Controllers\ManageUserController::class, 'edit'], [$user->id])}}" class="tw-dw-btn tw-dw-btn-primary tw-dw-btn-sm tw-text-white">
+                            <a href="{{action([\App\Http\Controllers\ManageUserController::class, 'edit'], [$user->id])}}" class="btn btn-primary btn-sm">
                                 <i class="glyphicon glyphicon-edit"></i>
                                 @lang("messages.edit")
                             </a>

@@ -13,7 +13,7 @@
 
 <tr class="variation_row">
     <td>
-        <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-error delete_complete_row"><i class="fa fa-trash"></i></button>
+        <button type="button" class="btn btn-xs btn-danger delete_complete_row"><i class="fa fa-trash"></i></button>
     </td>
     <td>
         {!! Form::select('product_variation[' . $row_index .'][variation_template_id]', $variation_templates, null, ['class' => 'form-control input-sm variation_template', 'required']); !!}
@@ -50,7 +50,7 @@
                     <!-- &nbsp;&nbsp;<b><i class="fa fa-info-circle" aria-hidden="true" data-toggle="popover" data-html="true" data-trigger="hover" data-content="<p class='text-primary'>Drag the mouse over the table cells to copy input values</p>" data-placement="top"></i></b> -->
                 </th>
                 <th>@lang('lang_v1.variation_images')</th>
-                <th><button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent add_variation_value_row">+</button></th>
+                <th><button type="button" class="btn btn-xs btn-primary add_variation_value_row">+</button></th>
             </tr>
             </thead>
 
@@ -102,7 +102,7 @@
                         ]); !!}
                         
                         {{-- Upload button --}}
-                        <label for="variation_img_{{$row_index}}_0" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-primary variation-upload-btn" style="cursor: pointer; margin: 0;">
+                        <label for="variation_img_{{$row_index}}_0" class="btn btn-xs btn-primary variation-upload-btn" style="cursor: pointer; margin: 0;">
                             <i class="fas fa-camera"></i>
                             <span class="image-count-badge" style="display: none;"></span>
                         </label>
@@ -112,7 +112,7 @@
                     </div>
                 </td>
                 <td>
-                    <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-error remove_variation_value_row"><i class="fa fa-trash"></i></button>
+                    <button type="button" class="btn btn-xs btn-danger remove_variation_value_row"><i class="fa fa-trash"></i></button>
                     <input type="hidden" class="variation_row_index" value="0">
                 </td>
             </tr>

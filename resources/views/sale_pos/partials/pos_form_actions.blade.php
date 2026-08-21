@@ -12,7 +12,7 @@
                     <button type="button" class="tw-leading-none tw-whitespace-nowrap tw-font-bold tw-text-rose-600 tw-cursor-pointer tw-text-xs md:tw-text-sm tw-bg-rose-50 hover:tw-bg-rose-100 tw-border tw-border-rose-100 tw-p-2.5 tw-rounded-xl tw-w-[5.5rem] tw-flex tw-flex-row tw-items-center tw-justify-center tw-gap-1 active:tw-scale-95 tw-transition-all js-pos-cancel"> <i
                             class="fas fa-window-close"></i> @lang('sale.cancel')</button>
                 @else
-                    <button type="button" class="btn-danger tw-dw-btn hide tw-dw-btn-xs js-pos-delete" id="pos-delete"
+                    <button type="button" class="btn-danger btn hide btn-xs js-pos-delete" id="pos-delete"
                         @if (!empty($only_payment)) disabled @endif> <i class="fas fa-trash-alt"></i>
                         @lang('messages.delete')</button>
                 @endif

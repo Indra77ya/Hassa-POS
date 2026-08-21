@@ -250,7 +250,7 @@
                     {!! Form::checkbox('notify_employee', 1, 0 , 
                     [ 'class' => 'input-icheck']); !!} {{ __( 'essentials::lang.notify_employee' ) }}
                 </label>
-                <button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-lg" id="submit_user_button">
+                <button type="submit" class="btn btn-primary btn-lg" id="submit_user_button">
                     {{$submit_btn_text}}
                 </button>
             </div>

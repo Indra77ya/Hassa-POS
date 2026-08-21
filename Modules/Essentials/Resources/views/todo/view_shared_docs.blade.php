@@ -38,7 +38,7 @@
                                         {{$spreadsheet->sheet_name}}
                                     </td>
                                     <td>
-                                        <a href="{{action([\Modules\Spreadsheet\Http\Controllers\SpreadsheetController::class, 'show'], [$spreadsheet->sheet_id])}}" target="_blank" title="@lang('messages.view')" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent">
+                                        <a href="{{action([\Modules\Spreadsheet\Http\Controllers\SpreadsheetController::class, 'show'], [$spreadsheet->sheet_id])}}" target="_blank" title="@lang('messages.view')" class="btn btn-xs btn-primary">
                                             <i class="fas fa-eye"></i>
                                             @lang('messages.view')
                                         </a>
@@ -82,7 +82,7 @@
                                     </td>
                                     <td>{{$media->display_name}}</td>
                                     <td>
-                                        <a href="{{$media->display_url}}" download class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent">
+                                        <a href="{{$media->display_url}}" download class="btn btn-xs btn-primary">
                                             @lang('lang_v1.download')
                                         </a>
                                     </td>
@@ -102,7 +102,7 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="tw-dw-btn tw-dw-btn-neutral tw-text-white" data-dismiss="modal">
+            <button type="button" class="btn btn-default" data-dismiss="modal">
                 @lang('messages.close')
             </button>
         </div>

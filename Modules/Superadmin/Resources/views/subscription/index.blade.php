@@ -152,7 +152,7 @@
                                 <div class="box-footer bg-gray disabled text-center">
 
                                     <a href="{{ route('force-active', $next->id) }}"
-                                        class="tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-sm tw-dw-btn-wide force_activate_now">
+                                        class="btn btn-success btn-sm force_activate_now">
                                         @lang('superadmin::lang.force_activate_now')
                                     </a>
                                 </div>

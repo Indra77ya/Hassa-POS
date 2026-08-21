@@ -90,7 +90,7 @@
 	</div>
 	<div class="row">
 		<div class="col-md-12">
-			<button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white pull-right">
+			<button type="submit" class="btn btn-primary pull-right">
 		        @lang('messages.update')
 		    </button>
 	    </div>

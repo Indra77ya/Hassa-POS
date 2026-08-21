@@ -248,7 +248,7 @@
 				<span class="input-group-addon">
 				<i class="fa fa-info"></i>
 				</span>
-				{!!Form::text('shipping_charges',@num_format(0.00),['class'=>'form-control input_number','placeholder'=> __('sale.shipping_charges')]);!!}
+				{!!Form::text('shipping_charges',@num_format(0.00),['class' => 'form-control input_number','placeholder'=> __('sale.shipping_charges')]);!!}
 				</div>
 			</div>
 		</div>
@@ -376,7 +376,7 @@
 	</div>
 	<div class="row">
 			<div class="col-md-12 text-center">
-				<button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm" id="toggle_additional_expense"> <i class="fas fa-plus"></i> @lang('lang_v1.add_additional_expenses') <i class="fas fa-chevron-down"></i></button>
+				<button type="button" class="btn btn-primary btn-sm" id="toggle_additional_expense"> <i class="fas fa-plus"></i> @lang('lang_v1.add_additional_expenses') <i class="fas fa-chevron-down"></i></button>
 			</div>
 			<div class="col-md-8 col-md-offset-4" id="additional_expenses_div" style="display: none;">
 				<table class="table table-condensed">
@@ -491,7 +491,7 @@
 	@endcomponent
 	<div class="row">
 			<div class="col-sm-12 text-center">
-				<button type="button" id="submit_purchase_form" class="tw-dw-btn tw-dw-btn-primary tw-dw-btn-lg tw-text-white">@lang('messages.save')</button>
+				<button type="button" id="submit_purchase_form" class="btn btn-primary btn-lg">@lang('messages.save')</button>
 			</div>
 		</div>
 

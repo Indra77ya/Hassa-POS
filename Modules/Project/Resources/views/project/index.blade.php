@@ -71,7 +71,7 @@
                         </label>
                     </div>
                     @can('project.create_project')
-                        <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm add_new_project"
+                        <button type="button" class="btn btn-primary btn-sm add_new_project"
                             data-href="{{ action([\Modules\Project\Http\Controllers\ProjectController::class, 'create']) }}">
                             @lang('project::lang.new_project')&nbsp;
                             <i class="fa fa-plus"></i>

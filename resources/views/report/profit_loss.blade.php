@@ -29,7 +29,7 @@
 
             <div class="col-md-3 col-xs-12">
                 <div class="input-group">
-                    <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm" id="profit_loss_date_filter">
+                    <button type="button" class="btn btn-primary btn-sm" id="profit_loss_date_filter">
                         <span><i class="fa fa-calendar"></i> {{ __('messages.filter_by_date') }}</span>
                         <i class="fa fa-caret-down"></i>
                     </button>
@@ -38,7 +38,7 @@
 
             <div class="col-md-6 col-xs-12 tw-flex tw-items-center tw-justify-end tw-gap-2">
                 <div id="ai-analysis-container" class="ai-analysis-content"></div>
-                <button class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm no-print" aria-label="Print"
+                <button class="btn btn-primary btn-sm no-print" aria-label="Print"
                     onclick="window.print();">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"

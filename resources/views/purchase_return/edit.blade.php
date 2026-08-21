@@ -140,7 +140,7 @@
 	</div> <!--box end-->
 	<div class="row">
 		<div class="col-md-12">
-			<button type="button" id="submit_purchase_return_form" class="tw-dw-btn tw-dw-btn-primary tw-dw-btn-lg tw-text-white pull-right">@lang('messages.update')</button>
+			<button type="button" id="submit_purchase_return_form" class="btn btn-primary btn-lg pull-right">@lang('messages.update')</button>
 		</div>
 	</div>
 	{!! Form::close() !!}

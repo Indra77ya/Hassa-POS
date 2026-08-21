@@ -87,7 +87,7 @@
                 <div class="tab-content">
                     @can('essentials.crud_all_attendance')
                         <div class="tab-pane active" id="shifts_tab">
-                            <button type="button" class="tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] pull-right"
+                            <button type="button" class="btn pull-right btn-primary"
                                 data-toggle="modal" data-target="#shift_modal">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -134,7 +134,7 @@
                             </div>
                             @can('essentials.crud_all_attendance')
                             <div class="col-md-6 spacer">
-                            <button type="button" class="tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] pull-right btn-modal"
+                            <button type="button" class="btn pull-right btn-modal btn-primary"
                                 data-href="{{action([\Modules\Essentials\Http\Controllers\AttendanceController::class, 'create'])}}" data-container="#attendance_modal">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"

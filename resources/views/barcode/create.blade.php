@@ -178,7 +178,7 @@
       </div>
     </div>
     <div class="col-sm-12 text-center">
-      <button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-dw-btn-lg tw-text-white">@lang('messages.save')</button>
+      <button type="submit" class="btn btn-primary btn-lg">@lang('messages.save')</button>
     </div>
   </div>
   @endcomponent

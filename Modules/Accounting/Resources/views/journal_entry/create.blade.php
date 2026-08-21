@@ -101,7 +101,7 @@
                         <td></td>
                         <td></td>
                         <td>
-                            <button type="button" id="addRow" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm pull-right">@lang('accounting::lang.add_more_row')</button>
+                            <button type="button" id="addRow" class="btn btn-primary btn-sm pull-right">@lang('accounting::lang.add_more_row')</button>
                         </td>
                     </tr>
                     <tr>
@@ -119,7 +119,7 @@
 
         <div class="row">
             <div class="col-sm-12">
-                <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white pull-right journal_add_btn">@lang('messages.save')</button>
+                <button type="button" class="btn btn-primary pull-right journal_add_btn">@lang('messages.save')</button>
             </div>
         </div>
         

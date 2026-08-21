@@ -111,8 +111,8 @@
         </div>
 
         <div class="modal-footer">
-            <button type="submit" class="tw-dw-btn tw-dw-btn-error tw-text-white" id="btn-submit-reset">@lang('superadmin::lang.reset_selected')</button>
-            <button type="button" class="tw-dw-btn tw-dw-btn-neutral tw-text-white" data-dismiss="modal">@lang('messages.close')</button>
+            <button type="submit" class="btn btn-danger" id="btn-submit-reset">@lang('superadmin::lang.reset_selected')</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal">@lang('messages.close')</button>
         </div>
         {!! Form::close() !!}
     </div>

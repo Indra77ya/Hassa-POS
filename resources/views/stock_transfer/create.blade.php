@@ -158,7 +158,7 @@
                 <br>
                 <br>
                 <div class="col-sm-12 text-center">
-                    <button type="submit" id="save_stock_transfer" class="tw-dw-btn tw-dw-btn-primary tw-dw-btn-lg tw-text-white">@lang('messages.save')</button>
+                    <button type="submit" id="save_stock_transfer" class="btn btn-primary btn-lg">@lang('messages.save')</button>
                 </div>
             </div>
         @endcomponent

@@ -16,7 +16,7 @@
     };
 </script>
 @if($can_crud_task || $is_lead_or_admin)
-<button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm task_btn pull-right m-5" data-href="{{action([\Modules\Project\Http\Controllers\TaskController::class, 'create'], ['project_id' => $project->id])}}">
+<button type="button" class="btn btn-primary btn-sm task_btn pull-right m-5" data-href="{{action([\Modules\Project\Http\Controllers\TaskController::class, 'create'], ['project_id' => $project->id])}}">
     @lang('messages.add')&nbsp;
     <i class="fa fa-plus"></i>
 </button>

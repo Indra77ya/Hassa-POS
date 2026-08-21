@@ -79,7 +79,7 @@ class ShiftController extends Controller
                     }
                 })
                 ->addColumn('action', function ($row) {
-                    $html = '<a href="#" data-href="'.action([\Modules\Essentials\Http\Controllers\ShiftController::class, 'edit'], [$row->id]).'" data-container="#edit_shift_modal" class="btn-modal tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-primary"><i class="fas fa-edit" aria-hidden="true"></i> '.__('messages.edit').'</a> &nbsp;<a href="#" data-href="'.action([\Modules\Essentials\Http\Controllers\ShiftController::class, 'getAssignUsers'], [$row->id]).'" data-container="#user_shift_modal" class="btn-modal tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-accent"><i class="fas fa-users" aria-hidden="true"></i> '.__('essentials::lang.assign_users').'</a>';
+                    $html = '<a href="#" data-href="'.action([\Modules\Essentials\Http\Controllers\ShiftController::class, 'edit'], [$row->id]).'" data-container="#edit_shift_modal" class="btn-modal btn btn-xs btn-primary"><i class="fas fa-edit" aria-hidden="true"></i> '.__('messages.edit').'</a> &nbsp;<a href="#" data-href="'.action([\Modules\Essentials\Http\Controllers\ShiftController::class, 'getAssignUsers'], [$row->id]).'" data-container="#user_shift_modal" class="btn-modal btn btn-xs btn-primary"><i class="fas fa-users" aria-hidden="true"></i> '.__('essentials::lang.assign_users').'</a>';
 
                     return $html;
                 })

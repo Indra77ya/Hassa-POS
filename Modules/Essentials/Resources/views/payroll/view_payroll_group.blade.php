@@ -15,7 +15,7 @@
 			<div class="box box-solid" id="payroll-group">
 				<div class="box-header no-print">
 					<div class="box-tools">
-						<button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white" aria-label="Print" id="print_payrollgroup">
+						<button type="button" class="btn btn-primary" aria-label="Print" id="print_payrollgroup">
 							<i class="fa fa-print"></i>
 							@lang( 'messages.print' )
 				      	</button>

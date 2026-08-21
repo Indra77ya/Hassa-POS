@@ -155,8 +155,8 @@
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white" id="posShippingModalUpdate">@lang('messages.update')</button>
-			    <button type="button" class="tw-dw-btn tw-dw-btn-neutral tw-text-white" data-dismiss="modal">@lang('messages.cancel')</button>
+				<button type="button" class="btn btn-primary" id="posShippingModalUpdate">@lang('messages.update')</button>
+			    <button type="button" class="btn btn-default" data-dismiss="modal">@lang('messages.cancel')</button>
 			</div>
 		</div><!-- /.modal-content -->
 	</div><!-- /.modal-dialog -->

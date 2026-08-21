@@ -32,7 +32,7 @@
 	@component('components.widget', ['class' => 'box-solid'])
         @slot('tool')
             <div class="box-tools">
-                <button type="button" class="tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] btn-modal"
+                <button type="button" class="btn btn-modal btn-primary"
                     data-toggle="modal"  
                     data-target="#add_budget_modal" >
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -88,8 +88,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white">@lang( 'accounting::lang.continue' )</button>
-                <button type="button" class="tw-dw-btn tw-dw-btn-neutral tw-text-white" data-dismiss="modal">@lang( 'messages.close' )</button>
+                <button type="submit" class="btn btn-primary">@lang( 'accounting::lang.continue' )</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">@lang( 'messages.close' )</button>
             </div>
             {!! Form::close() !!}
         </div>

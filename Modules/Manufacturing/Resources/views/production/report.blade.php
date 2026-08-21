@@ -27,7 +27,7 @@
         <div class="col-md-2 col-xs-6">
             <div class="form-group pull-right">
                 <div class="input-group">
-                  <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm" id="mfg_report_date_filter">
+                  <button type="button" class="btn btn-primary btn-sm" id="mfg_report_date_filter">
                     <span>
                       <i class="fa fa-calendar"></i> {{ __('messages.filter_by_date') }}
                     </span>
@@ -80,26 +80,26 @@
     <br>
     <div class="row no-print">
         <div class="col-md-3">
-            <a href="{{action([\App\Http\Controllers\ReportController::class, 'getStockReport'])}}?only_mfg=true" class="tw-dw-btn tw-dw-btn-info tw-text-white tw-dw-btn-wide tw-dw-btn-sm">@lang('report.stock_report')</a>
+            <a href="{{action([\App\Http\Controllers\ReportController::class, 'getStockReport'])}}?only_mfg=true" class="btn btn-info btn-sm">@lang('report.stock_report')</a>
         </div>
         @if(session('business.enable_lot_number') == 1)
         <div class="col-md-3">
-            <a href="{{action([\App\Http\Controllers\ReportController::class, 'getLotReport'])}}?only_mfg=true" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-wide tw-dw-btn-sm">@lang('lang_v1.lot_report')</a>
+            <a href="{{action([\App\Http\Controllers\ReportController::class, 'getLotReport'])}}?only_mfg=true" class="btn btn-success btn-sm">@lang('lang_v1.lot_report')</a>
         </div>
         @endif
         @if(session('business.enable_product_expiry') == 1)
         <div class="col-md-3">
-            <a href="{{action([\App\Http\Controllers\ReportController::class, 'getStockExpiryReport'])}}?only_mfg=true" class="tw-dw-btn tw-dw-btn-warning tw-text-white tw-dw-btn-wide tw-dw-btn-sm">@lang('report.stock_expiry_report')</a>
+            <a href="{{action([\App\Http\Controllers\ReportController::class, 'getStockExpiryReport'])}}?only_mfg=true" class="btn btn-warning btn-sm">@lang('report.stock_expiry_report')</a>
         </div>
         @endif
         <div class="col-md-3">
-            <a href="{{action([\App\Http\Controllers\ReportController::class, 'itemsReport'])}}?only_mfg=true" class="tw-dw-btn tw-dw-btn-error tw-text-white tw-dw-btn-wide tw-dw-btn-sm">@lang('lang_v1.items_report')</a>
+            <a href="{{action([\App\Http\Controllers\ReportController::class, 'itemsReport'])}}?only_mfg=true" class="btn btn-danger btn-sm">@lang('lang_v1.items_report')</a>
         </div>
     </div>
     <br>
     <div class="row no-print">
         <div class="col-sm-12">
-            <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white pull-right" 
+            <button type="button" class="btn btn-primary pull-right"
             aria-label="Print" onclick="window.print();"
             ><i class="fa fa-print"></i> @lang( 'messages.print' )</button>
         </div>

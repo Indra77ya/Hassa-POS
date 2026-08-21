@@ -12,7 +12,7 @@
 			@if(!empty($proposal_template) && auth()->user()->can('crm.access_proposal'))
 		        @slot('tool')
 		            <div class="box-tools">
-		                <a class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm pull-right " href="{{action([\Modules\Crm\Http\Controllers\ProposalTemplateController::class, 'send'])}}">
+		                <a class="btn btn-primary btn-sm pull-right" href="{{action([\Modules\Crm\Http\Controllers\ProposalTemplateController::class, 'send'])}}">
 		                	<i class="fas fa-paper-plane"></i> @lang('crm::lang.send')
 		                </a>
 		            </div>

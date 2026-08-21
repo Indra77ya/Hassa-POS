@@ -69,10 +69,10 @@
 		            <div class="col-md-6 hide follow_up_by_payment_field" >
 		               <div class="form-group">
 		                    {!! Form::label('invoices', __('lang_v1.invoices') .':') !!}
-		                    <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary select-all">
+		                    <button type="button" class="btn btn-xs btn-primary select-all">
 		                        @lang('lang_v1.select_all')
 		                    </button>
-		                    <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary deselect-all">
+		                    <button type="button" class="btn btn-xs btn-primary deselect-all">
 		                        @lang('lang_v1.deselect_all')
 		                    </button>
 		                    {!! Form::select('invoices', [], null, ['class' => 'form-control select2', 'style' => 'width: 100%;', 'id' => 'invoices', 'multiple']); !!}
@@ -87,10 +87,10 @@
 		            <div class="col-md-6 hide follow_up_by_contact_name" >
 		            	<div class="form-group">
 		                    {!! Form::label('contact_ids', __('lang_v1.customers') .':') !!}
-		                    <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary select-all">
+		                    <button type="button" class="btn btn-xs btn-primary select-all">
 		                        @lang('lang_v1.select_all')
 		                    </button>
-		                    <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary deselect-all">
+		                    <button type="button" class="btn btn-xs btn-primary deselect-all">
 		                        @lang('lang_v1.deselect_all')
 		                    </button>
 		                    {!! Form::select('contact_ids', $customers, null, ['class' => 'form-control select2', 'style' => 'width: 100%;', 'id' => 'contact_ids', 'multiple']); !!}
@@ -231,7 +231,7 @@
 
 		        <div class="row">
 		        	<div class="col-md-12">
-		        		<button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white pull-right">
+					<button type="submit" class="btn btn-primary pull-right">
 		                    @lang('messages.save')
 		                </button>
 		                <small class="pull-right text-muted mt-5 mr-8">

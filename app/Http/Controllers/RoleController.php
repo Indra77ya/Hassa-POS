@@ -48,7 +48,7 @@ class RoleController extends Controller
                 ->addColumn('action', function ($row) {
                     if (! $row->is_default || $row->name == 'Cashier#'.$row->business_id) {
                         $action = '<div class="btn-group">
-                            <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info dropdown-toggle"
+                            <button type="button" class="btn btn-xs btn-info dropdown-toggle"
                                 data-toggle="dropdown" aria-expanded="false">'.
                                 __('messages.actions').
                                 '<span class="caret"></span>

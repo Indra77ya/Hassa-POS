@@ -151,7 +151,7 @@ class PurchaseOrderController extends Controller
             return Datatables::of($purchase_orders)
                 ->addColumn('action', function ($row) use ($is_admin) {
                     $html = '<div class="btn-group">
-                            <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info tw-w-max dropdown-toggle" 
+                            <button type="button" class="btn btn-xs btn-info tw-w-max dropdown-toggle"
                                 data-toggle="dropdown" aria-expanded="false">'.
                                 __('messages.actions').
                                 '<span class="caret"></span><span class="sr-only">Toggle Dropdown

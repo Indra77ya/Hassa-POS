@@ -203,7 +203,7 @@
     @endif
     <div class="row">
         <div class="col-md-12 text-center">
-            <button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-dw-btn-lg tw-text-white" id="submit_user_button">@lang( 'messages.update' )</button>
+            <button type="submit" class="btn btn-primary btn-lg" id="submit_user_button">@lang( 'messages.update' )</button>
         </div>
     </div>
     {!! Form::close() !!}

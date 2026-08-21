@@ -160,7 +160,7 @@
 			<br>
 			<div class="row">
 				<div class="col-sm-12">
-					<button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white pull-right">@lang('messages.save')</button>
+					<button type="submit" class="btn btn-primary pull-right">@lang('messages.save')</button>
 				</div>
 			</div>
 		</div>

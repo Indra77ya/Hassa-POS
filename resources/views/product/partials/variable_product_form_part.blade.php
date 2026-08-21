@@ -19,7 +19,7 @@
 
 
 <div class="col-sm-12">
-    <h4>@lang('product.add_variation'):* <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm" id="add_variation"
+    <h4>@lang('product.add_variation'):* <button type="button" class="btn btn-primary btn-sm" id="add_variation"
             data-action="add">+</button></h4>
 </div>
 <div class="col-sm-12">

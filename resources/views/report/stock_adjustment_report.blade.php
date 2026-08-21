@@ -25,7 +25,7 @@
         <div class="col-md-2 col-xs-6">
             <div class="form-group pull-right">
                 <div class="input-group">
-                  <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm" id="stock_adjustment_date_filter">
+                  <button type="button" class="btn btn-primary btn-sm" id="stock_adjustment_date_filter">
                     <span>
                       <i class="fa fa-calendar"></i> {{ __('messages.filter_by_date') }}
                     </span>

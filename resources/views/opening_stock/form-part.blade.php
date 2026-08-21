@@ -111,7 +111,7 @@
 	</td>
 	<td>
 		@if($loop->index == 0)
-			<button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary add_stock_row" data-sub-key="{{ count($purchases[$key][$variation->id])}}" 
+			<button type="button" class="btn btn-xs btn-primary add_stock_row" data-sub-key="{{ count($purchases[$key][$variation->id])}}"
 				data-row-html='<tr>
 					<td>
 						{{ $product->name }} @if( $product->type == "variable" ) (<b>{{ $variation->product_variation->name }}</b> : {{ $variation->name }}) @endif

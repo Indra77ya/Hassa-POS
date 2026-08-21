@@ -60,7 +60,7 @@
                     </div>
                 </div>
                 <div class="col-md-12 text-center">
-                    <button type="submit" name="submit_action" value="save" class="tw-dw-btn tw-dw-btn-primary tw-dw-btn-lg tw-text-white submit_form">@lang('messages.save')</button>
+                    <button type="submit" name="submit_action" value="save" class="btn btn-primary btn-lg submit_form">@lang('messages.save')</button>
                 </div>
                 {!! Form::close() !!}
             </div>

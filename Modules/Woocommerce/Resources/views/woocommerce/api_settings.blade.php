@@ -47,7 +47,7 @@
         <div class="row">
             <div class="col-xs-12">
                 <div class="form-group pull-right">
-                    {{ Form::submit('update', ['class' => 'tw-dw-btn tw-dw-btn-error tw-text-white']) }}
+                    {{ Form::submit('update', ['class' => 'btn btn-danger']) }}
                 </div>
             </div>
         </div>

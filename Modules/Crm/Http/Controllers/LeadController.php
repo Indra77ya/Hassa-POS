@@ -87,7 +87,7 @@ class LeadController extends Controller
                     ->addColumn('address', '{{implode(", ", array_filter([$address_line_1, $address_line_2, $city, $state, $country, $zip_code]))}}')
                     ->addColumn('action', function ($row) {
                         $html = '<div class="btn-group">
-                                    <button class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info tw-w-max dropdown-toggle" type="button"  data-toggle="dropdown" aria-expanded="false">
+                                    <button class="btn btn-xs btn-info tw-w-max dropdown-toggle" type="button"  data-toggle="dropdown" aria-expanded="false">
                                         '.__('messages.action').'
                                         <span class="caret"></span>
                                         <span class="sr-only">'
@@ -158,7 +158,7 @@ class LeadController extends Controller
                             </a><br>';
                         }
 
-                        $html .= '<a href="#" data-href="'.action([\Modules\Crm\Http\Controllers\ScheduleController::class, 'create'], ['schedule_for' => 'lead', 'contact_id' => $row->id]).'" class="btn-modal tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-primary" data-container=".schedule">
+                        $html .= '<a href="#" data-href="'.action([\Modules\Crm\Http\Controllers\ScheduleController::class, 'create'], ['schedule_for' => 'lead', 'contact_id' => $row->id]).'" class="btn-modal btn btn-xs btn-primary" data-container=".schedule">
                             <i class="fas fa-plus"></i>'.
                             __('crm::lang.add_schedule').'
                         </a><br>';

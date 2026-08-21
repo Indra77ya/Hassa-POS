@@ -51,7 +51,7 @@
                     <div class="tab-pane active" id="pending_repair_tab">
                         <div class="row">
                             <div class="col-md-12 mb-12">
-                                <a target="_blank" class="tw-dw-btn tw-dw-btn-sm tw-dw-btn-primary tw-text-white pull-right"
+                                <a target="_blank" class="btn btn-sm btn-primary pull-right"
                                     href="{{action([\App\Http\Controllers\SellPosController::class, 'create']). '?sub_type=repair'}}">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -124,7 +124,7 @@
                     <div class="tab-pane" id="completed_repair_tab">
                         <div class="row">
                             <div class="col-md-12 mb-12">
-                                <a target="_blank" class="tw-dw-btn tw-dw-btn-sm tw-dw-btn-primary tw-text-white pull-right"
+                                <a target="_blank" class="btn btn-sm btn-primary pull-right"
                                     href="{{action([\App\Http\Controllers\SellPosController::class, 'create']). '?sub_type=repair'}}">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round"

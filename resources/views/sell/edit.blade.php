@@ -505,7 +505,7 @@
 					<span class="input-group-addon">
 					<i class="fa fa-info"></i>
 					</span>
-					{!!Form::text('shipping_charges',@num_format($transaction->shipping_charges),['class'=>'form-control input_number','placeholder'=> __('sale.shipping_charges')]);!!}
+					{!!Form::text('shipping_charges',@num_format($transaction->shipping_charges),['class' => 'form-control input_number','placeholder'=> __('sale.shipping_charges')]);!!}
 					</div>
 				</div>
 			</div>
@@ -641,7 +641,7 @@
             </div>
 	        <div class="clearfix"></div>
 	        <div class="col-md-12 text-center">
-				<button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm" id="toggle_additional_expense"> <i class="fas fa-plus"></i> @lang('lang_v1.add_additional_expenses') <i class="fas fa-chevron-down"></i></button>
+				<button type="button" class="btn btn-primary btn-sm" id="toggle_additional_expense"> <i class="fas fa-plus"></i> @lang('lang_v1.add_additional_expenses') <i class="fas fa-chevron-down"></i></button>
 			</div>
 			<div class="col-md-8 col-md-offset-4" id="additional_expenses_div">
 				<table class="table table-condensed">
@@ -837,8 +837,8 @@
 	<div class="row">
 		<div class="col-md-12 text-center">
 	    	{!! Form::hidden('is_save_and_print', 0, ['id' => 'is_save_and_print']); !!}
-	    	<button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-lg" id="submit-sell">@lang('messages.update')</button>
-	    	<button type="button" id="save-and-print" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-lg">@lang('lang_v1.update_and_print')</button>
+		<button type="button" class="btn btn-primary btn-lg" id="submit-sell">@lang('messages.update')</button>
+		<button type="button" id="save-and-print" class="btn btn-success btn-lg">@lang('lang_v1.update_and_print')</button>
 	    </div>
 	</div>
 	@if(in_array('subscription', $enabled_modules))

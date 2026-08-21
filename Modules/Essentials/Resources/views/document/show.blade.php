@@ -16,7 +16,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="tw-dw-btn tw-dw-btn-secondary tw-text-white" data-dismiss="modal">Close</button>
+        <button type="button" class="btn tw-dw-btn-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>
 </div>

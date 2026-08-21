@@ -168,7 +168,7 @@ class SellReturnController extends Controller
                         if ($is_zatca) {
                             if ($row->zatca_status == 'success') {
                                 return '<div class="btn-group">
-                                <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info tw-w-max dropdown-toggle"
+                                <button type="button" class="btn btn-xs btn-info tw-w-max dropdown-toggle"
                                     data-toggle="dropdown" aria-expanded="false">' .
                                     __('messages.actions') .
                                     '<span class="caret"></span><span class="sr-only">Toggle Dropdown</span>
@@ -186,11 +186,11 @@ class SellReturnController extends Controller
                                     </li>
                                 </ul></div>';                            
                             } else {
-                                return '<a href="' . action([\Modules\ZatcaIntegrationKsa\Http\Controllers\ZatcaInvoiceController::class, 'sync_sale_return'], [$row->id]) . '" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info tw-w-max return_sale_sycs">' . __('zatcaintegrationksa::lang.sync') . '</a>';
+                                return '<a href="' . action([\Modules\ZatcaIntegrationKsa\Http\Controllers\ZatcaInvoiceController::class, 'sync_sale_return'], [$row->id]) . '" class="btn btn-xs btn-info tw-w-max return_sale_sycs">' . __('zatcaintegrationksa::lang.sync') . '</a>';
                             }
                         }
             $returnString = '<div class="btn-group">
-                                <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info tw-w-max dropdown-toggle"
+                                <button type="button" class="btn btn-xs btn-info tw-w-max dropdown-toggle"
                                     data-toggle="dropdown" aria-expanded="false">' . 
                                     __('messages.actions') . 
                                     '<span class="caret"></span>
@@ -261,9 +261,9 @@ class SellReturnController extends Controller
                     $status = '';
                     if($is_zatca){
                         if (empty($row->zatca_status) || is_null($row->zatca_status)) {
-                            $status = '<small class="label bg-primary tw-dw-btn-xs no-print">'.__('zatcaintegrationksa::lang.pending').'</small>';
+                            $status = '<small class="btn label bg-primary btn-xs no-print">'.__('zatcaintegrationksa::lang.pending').'</small>';
                         } elseif ($row->zatca_status == 'success') {
-                            $status = '<small class="label bg-light-green tw-dw-btn-xs no-print">' . ucfirst($row->zatca_status) . '</small>';
+                            $status = '<small class="btn label bg-light-green btn-xs no-print">' . ucfirst($row->zatca_status) . '</small>';
                         } elseif ($row->zatca_status == 'failed') {
                                 $lastDoc = \Modules\ZatcaIntegrationKsa\Entities\ZatcaDocument::where('transaction_id', $row->id)
                                     ->where('sent_to_zatca_status', 'failed')
@@ -273,9 +273,9 @@ class SellReturnController extends Controller
 
                                 if ($lastDoc && $lastDoc->response_source == 'self' && !empty($lastDoc->response)) {
                                     $safeMsg = htmlspecialchars($lastDoc->response, ENT_QUOTES, 'UTF-8');
-                                    $status = '<small class="label bg-red tw-dw-btn-xs no-print mb-1">' . ucfirst($row->zatca_status) . '</small><br><span class="text-danger">' . $safeMsg . '</span>';
+                                    $status = '<small class="btn label bg-red btn-xs no-print mb-1">' . ucfirst($row->zatca_status) . '</small><br><span class="text-danger">' . $safeMsg . '</span>';
                                 } else if ($lastDoc) {
-                                    $label = '<small class="label bg-red tw-dw-btn-xs no-print mb-1">' . ucfirst($row->zatca_status) . '</small>';
+                                    $label = '<small class="btn label bg-red btn-xs no-print mb-1">' . ucfirst($row->zatca_status) . '</small>';
                                     $button = '<a href="' . action([\Modules\ZatcaIntegrationKsa\Http\Controllers\ZatcaInvoiceController::class, 'showInvoiceError'], ['id' => $row->id]) . '" class="btn btn-xs btn-danger no-print mt-2 status_fail" style="margin-top: 10px;">' . e(__('zatcaintegrationksa::lang.view_error')) . '</a>';
                                     $status = $label . '<br>' . $button;
                                 }

@@ -128,7 +128,7 @@
                     class="tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-rounded-xl tw-w-9 tw-h-9 tw-text-gray-600 popover-default tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95"
                     id="service_staff_replacement" title="{{ __('restaurant.service_staff_replacement') }}"
                     data-toggle="popover" data-trigger="click"
-                    data-content='<div class="m-8"><input type="text" class="form-control" placeholder="@lang('sale.invoice_no')" id="send_for_sell_service_staff_invoice_no"></div><div class="w-100 text-center"><button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-error" id="send_for_sercice_staff_replacement">@lang('lang_v1.send')</button></div>'
+                    data-content='<div class="m-8"><input type="text" class="form-control" placeholder="@lang('sale.invoice_no')" id="send_for_sell_service_staff_invoice_no"></div><div class="w-100 text-center"><button type="button" class="btn btn-xs btn-danger" id="send_for_sercice_staff_replacement">@lang('lang_v1.send')</button></div>'
                     data-html="true" data-placement="bottom">
                     <strong>
                         <i class="fa fa-user-plus tw-text-violet-500 !tw-text-sm"></i>
@@ -162,7 +162,7 @@
             <button type="button"
                 class="tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-rounded-xl tw-w-9 tw-h-9 tw-text-gray-600 popover-default tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95"
                 id="return_sale" title="@lang('lang_v1.sell_return')" data-toggle="popover" data-trigger="click"
-                data-content='<div class="m-8"><input type="text" class="form-control" placeholder="@lang('sale.invoice_no')" id="send_for_sell_return_invoice_no"></div><div class="w-100 text-center"><button type="button" class="tw-dw-btn tw-dw-btn-error tw-text-white tw-dw-btn-sm" id="send_for_sell_return">@lang('lang_v1.send')</button></div>'
+                data-content='<div class="m-8"><input type="text" class="form-control" placeholder="@lang('sale.invoice_no')" id="send_for_sell_return_invoice_no"></div><div class="w-100 text-center"><button type="button" class="btn btn-danger btn-sm" id="send_for_sell_return">@lang('lang_v1.send')</button></div>'
                 data-html="true" data-placement="bottom">
                 <strong>
                     <i class="fas fa-undo tw-text-rose-500 !tw-text-sm"></i>

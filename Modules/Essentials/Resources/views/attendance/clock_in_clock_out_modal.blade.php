@@ -28,7 +28,7 @@
 	    	@if($is_location_required)
 		    	<div class="row">
 		    		<div class="col-md-12">
-		    			<b>@lang('messages.location'):</b> <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary" id="get_current_location"> <i class="fas fa-map-marker-alt"></i> @lang('essentials::lang.get_current_location')</button>
+					<b>@lang('messages.location'):</b> <button type="button" class="btn btn-xs btn-primary" id="get_current_location"> <i class="fas fa-map-marker-alt"></i> @lang('essentials::lang.get_current_location')</button>
 		    			<br><span class="clock_in_out_location"></span>
 		    		</div>
 		    		<div class="col-md-12 ask_location" style="display: none;">
@@ -43,8 +43,8 @@
 	    </div>
 
 	    <div class="modal-footer">
-	      <button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white">@lang( 'messages.submit' )</button>
-	      <button type="button" class="tw-dw-btn tw-dw-btn-neutral tw-text-white" data-dismiss="modal">@lang( 'messages.close' )</button>
+	      <button type="submit" class="btn btn-primary">@lang( 'messages.submit' )</button>
+	      <button type="button" class="btn btn-default" data-dismiss="modal">@lang( 'messages.close' )</button>
 	    </div>
 
 	    {!! Form::close() !!}

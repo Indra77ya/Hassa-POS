@@ -124,7 +124,7 @@ class TaskController extends Controller
                 return Datatables::of($project_task)
                     ->addColumn('action', function ($row) use ($can_crud) {
                         $html = '<div class="btn-group">
-                                    <button class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info tw-w-max dropdown-toggle " type="button"  data-toggle="dropdown" aria-expanded="false">
+                                    <button class="btn btn-xs btn-info tw-w-max dropdown-toggle" type="button"  data-toggle="dropdown" aria-expanded="false">
                                         '.__('messages.action').'
                                         <span class="caret"></span>
                                         <span class="sr-only">'

@@ -62,7 +62,7 @@
 				@component('components.widget', ['class' => 'box box-solid', 'title' => __('crm::lang.all_schedules')])
 					@slot('tool')
 			            <div class="box-tools">
-						<button type="button" class="tw-m-2 tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] pull-right btn-add-schedule">
+						<button type="button" class="tw-m-2 btn pull-right btn-add-schedule btn-primary">
 							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
 								stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
 								class="icon icon-tabler icons-tabler-outline icon-tabler-plus">
@@ -71,7 +71,7 @@
 								<path d="M5 12l14 0" />
 							</svg> @lang('messages.add')
 						</button>
-						<button type="button" data-toggle="modal" data-target="#advance_followup_modal" class=" tw-m-2 tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] pull-right">
+						<button type="button" data-toggle="modal" data-target="#advance_followup_modal" class="tw-m-2 btn pull-right btn-primary">
 							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
 								stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
 								class="icon icon-tabler icons-tabler-outline icon-tabler-plus">

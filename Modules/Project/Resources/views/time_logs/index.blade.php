@@ -1,5 +1,5 @@
 @if($can_crud_timelog || $is_lead_or_admin)
-    <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm time_log_btn pull-right" data-href="{{action([\Modules\Project\Http\Controllers\ProjectTimeLogController::class, 'create'], ['project_id' => $project->id])}}">
+    <button type="button" class="btn btn-primary btn-sm time_log_btn pull-right" data-href="{{action([\Modules\Project\Http\Controllers\ProjectTimeLogController::class, 'create'], ['project_id' => $project->id])}}">
         @lang('messages.add')&nbsp;
         <i class="fa fa-plus"></i>
     </button> <br><br>

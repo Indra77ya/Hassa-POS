@@ -61,9 +61,9 @@ class SuperadminSubscriptionsController extends BaseController
             return DataTables::of($superadmin_subscription)
                         ->addColumn(
                             'action',
-                            '<button data-href ="{{action(\'\Modules\Superadmin\Http\Controllers\SuperadminSubscriptionsController@edit\',[$id])}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-info change_status" data-toggle="modal" data-target="#statusModal">
+                            '<button data-href ="{{action(\'\Modules\Superadmin\Http\Controllers\SuperadminSubscriptionsController@edit\',[$id])}}" class="btn btn-xs btn-info change_status" data-toggle="modal" data-target="#statusModal">
                             @lang( "superadmin::lang.status")
-                            </button> <button data-href ="{{action(\'\Modules\Superadmin\Http\Controllers\SuperadminSubscriptionsController@editSubscription\',["id" => $id])}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary btn-modal tw-m-1" data-container=".view_modal">
+                            </button> <button data-href ="{{action(\'\Modules\Superadmin\Http\Controllers\SuperadminSubscriptionsController@editSubscription\',["id" => $id])}}" class="btn btn-xs btn-primary btn-modal tw-m-1" data-container=".view_modal">
                             @lang( "messages.edit")
                             </button>'
                         )

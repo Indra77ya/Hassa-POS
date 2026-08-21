@@ -30,7 +30,7 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <h4>@lang( 'invoice.all_your_invoice_schemes' )
-                                        <button class="tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] pull-right tw-mb-2 btn-modal"
+                                        <button class="btn pull-right tw-mb-2 btn-modal btn-primary"
                                             data-href="{{action([\App\Http\Controllers\InvoiceSchemeController::class, 'create'])}}" 
                                             data-container=".invoice_modal">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -69,7 +69,7 @@
                     <div class="tab-pane" id="tab_2">
                         <div class="row">
                             <div class="col-md-12">
-                                <h4>@lang( 'invoice.all_your_invoice_layouts' ) <a class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm pull-right" href="{{action([\App\Http\Controllers\InvoiceLayoutController::class, 'create'])}}">
+                                <h4>@lang( 'invoice.all_your_invoice_layouts' ) <a class="btn btn-primary btn-sm pull-right" href="{{action([\App\Http\Controllers\InvoiceLayoutController::class, 'create'])}}">
                                         <i class="fa fa-plus"></i> @lang( 'messages.add' )</a></h4>
                             </div>
                             <div class="col-md-12">

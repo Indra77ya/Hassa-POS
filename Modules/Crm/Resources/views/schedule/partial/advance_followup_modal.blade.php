@@ -13,17 +13,17 @@
 	        <div class="modal-body">
 	            <div class="row">
 	            	<div class="col-md-12 text-center">
-	            		<a href="{{action([\Modules\Crm\Http\Controllers\ScheduleController::class, 'create'])}}" class="tw-dw-btn tw-dw-btn-success tw-dw-btn-sm tw-text-white">
+				<a href="{{action([\Modules\Crm\Http\Controllers\ScheduleController::class, 'create'])}}" class="btn btn-success btn-sm">
 			                <i class="fa fa-plus"></i> @lang('crm::lang.add_onetime_follow_up')
 			            </a>
-			            <a href="{{action([\Modules\Crm\Http\Controllers\ScheduleController::class, 'create'])}}?is_recursive=true" class="tw-dw-btn tw-dw-btn-primary tw-dw-btn-sm tw-text-white">
+			            <a href="{{action([\Modules\Crm\Http\Controllers\ScheduleController::class, 'create'])}}?is_recursive=true" class="btn btn-primary btn-sm">
 			                <i class="fa fa-plus"></i> @lang('crm::lang.add_recursive_follow_up')
 			            </a>
 	            	</div>
 	            </div>
 	        </div>
 	        <div class="modal-footer">
-	            <button type="button" class="tw-dw-btn tw-dw-btn-neutral tw-text-white" data-dismiss="modal">
+	            <button type="button" class="btn btn-default" data-dismiss="modal">
 	            @lang('messages.close')
 	            </button>
 	        </div>

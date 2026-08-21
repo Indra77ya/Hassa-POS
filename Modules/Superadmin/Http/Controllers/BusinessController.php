@@ -146,7 +146,7 @@ class BusinessController extends BaseController
                 })
                 ->addColumn('action', function ($row) {
                     $html = '<div class="btn-group">
-                                <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info dropdown-toggle" data-toggle="dropdown" aria-expanded="false">'
+                                <button type="button" class="btn btn-xs btn-info dropdown-toggle" data-toggle="dropdown" aria-expanded="false">'
                                     . __('messages.actions') . ' <span class="caret"></span><span class="sr-only">Toggle Dropdown</span>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-right" role="menu">';
@@ -536,10 +536,10 @@ class BusinessController extends BaseController
                 ->addColumn(
                     'action',
                     '@can("user.update")
-                        <a href="#" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-primary update_user_password" data-user_id="{{$id}}" data-user_name="{{$full_name}}"><i class="glyphicon glyphicon-edit"></i> @lang("superadmin::lang.update_password")</a>
+                        <a href="#" class="btn btn-xs btn-primary update_user_password" data-user_id="{{$id}}" data-user_name="{{$full_name}}"><i class="glyphicon glyphicon-edit"></i> @lang("superadmin::lang.update_password")</a>
                         &nbsp;
                         @if(!empty($username))
-                        <a href="{{route("sign-in-as-user", $id)}}?save_current=true" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-accent"><i class="fas fa-sign-in-alt"></i> @lang("lang_v1.login_as_username", ["username" => $username])</a>
+                        <a href="{{route("sign-in-as-user", $id)}}?save_current=true" class="btn btn-xs btn-primary"><i class="fas fa-sign-in-alt"></i> @lang("lang_v1.login_as_username", ["username" => $username])</a>
                         @endif
                     @endcan'
                 )

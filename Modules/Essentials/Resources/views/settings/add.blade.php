@@ -53,7 +53,7 @@
         <div class="row">
             <div class="col-xs-12">
                 <div class="form-group text-center">
-                    {{ Form::submit(__('messages.update'), ['class' => 'tw-dw-btn tw-dw-btn-error tw-text-white']) }}
+                    {{ Form::submit(__('messages.update'), ['class' => 'btn btn-danger']) }}
                 </div>
             </div>
         </div>

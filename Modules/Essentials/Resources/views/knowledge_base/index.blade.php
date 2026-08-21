@@ -9,7 +9,7 @@
 			<div class="box-header">
 				<h4 class="box-title">@lang('essentials::lang.knowledge_base')</h4>
 				<div class="box-tools pull-right">
-					<a href="{{action([\Modules\Essentials\Http\Controllers\KnowledgeBaseController::class, 'create'])}}" class="tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] pull-righ ">
+					<a href="{{action([\Modules\Essentials\Http\Controllers\KnowledgeBaseController::class, 'create'])}}" class="btn pull-righ btn-primary">
 						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
 							stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
 							class="icon icon-tabler icons-tabler-outline icon-tabler-plus">

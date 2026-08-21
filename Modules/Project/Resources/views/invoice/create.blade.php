@@ -139,7 +139,7 @@
 				</div>
 				<div class="col-md-4 col-md-offset-4">
 					<br>
-					<button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm tw-w-full add_invoice_line">
+					<button type="button" class="btn btn-primary btn-sm tw-w-full add_invoice_line">
 						@lang('project::lang.add_a_row')
 						<i class="fa fa-plus-circle"></i>
 					</button>
@@ -190,7 +190,7 @@
 	                    </div>
 					</div>
 				</div>
-				<button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white pull-right">
+				<button type="submit" class="btn btn-primary pull-right">
 	                @lang('messages.save')
 	            </button>
 			</div>

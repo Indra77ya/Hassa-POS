@@ -106,7 +106,7 @@
 					</div>
 						<div class="col-md-4 ">
 							<div class="form-group" style="margin-top: 28px">
-								{!! Form::submit('Apply', ['class' => 'tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-sm']) !!}
+								{!! Form::submit('Apply', ['class' => 'btn btn-success btn-sm']) !!}
 							</div>
 						</div>
 					{!! Form::close() !!}

@@ -5,7 +5,7 @@
         <td colspan="10" class="text-center">
             <h3>@lang( 'accounting::lang.no_accounts' )</h3>
             <p>@lang( 'accounting::lang.add_default_accounts_help' )</p>
-            <a href="{{route('accounting.create-default-accounts')}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent">@lang( 'accounting::lang.add_default_accounts' ) <i class="fas fa-file-import"></i></a>
+            <a href="{{route('accounting.create-default-accounts')}}" class="btn btn-xs btn-primary">@lang( 'accounting::lang.add_default_accounts' ) <i class="fas fa-file-import"></i></a>
         </td>
     </tr>
 </table>
@@ -20,8 +20,8 @@
         </div>
     </div>
     <div class="col-md-4">
-        <button class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm" id="expand_all">@lang('accounting::lang.expand_all')</button>
-        <button class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm" id="collapse_all">@lang('accounting::lang.collapse_all')</button>
+        <button class="btn btn-primary btn-sm" id="expand_all">@lang('accounting::lang.expand_all')</button>
+        <button class="btn btn-primary btn-sm" id="collapse_all">@lang('accounting::lang.collapse_all')</button>
     </div>
     <div class="col-md-12" id="accounts_tree_container">
         <ul>

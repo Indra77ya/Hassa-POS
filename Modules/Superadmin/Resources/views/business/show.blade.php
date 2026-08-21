@@ -23,7 +23,7 @@
                     <strong><i class="fa fa-briefcase margin-r-5"></i>
                         {{ $business->name }}</strong>
 
-                    <button type="button" class="tw-dw-btn tw-dw-btn-error tw-text-white tw-font-bold tw-rounded-full btn-modal" data-href="{{ action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'getResetModal'], [$business->id]) }}" data-container=".view_modal">
+                    <button type="button" class="btn btn-danger tw-rounded-full btn-modal" data-href="{{ action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'getResetModal'], [$business->id]) }}" data-container=".view_modal">
                         <i class="fa fa-undo"></i> @lang('superadmin::lang.reset_business_data')
                     </button>
                 </div>

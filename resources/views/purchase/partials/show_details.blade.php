@@ -31,7 +31,7 @@
       @if($purchase->document_path)
         
         <a href="{{$purchase->document_path}}" 
-        download="{{$purchase->document_name}}" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-sm pull-left no-print">
+        download="{{$purchase->document_name}}" class="btn btn-success btn-sm pull-left no-print">
           <i class="fa fa-download"></i> 
             &nbsp;{{ __('purchase.download_document') }}
         </a>

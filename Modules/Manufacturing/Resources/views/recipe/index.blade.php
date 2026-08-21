@@ -14,7 +14,7 @@
         @can("manufacturing.add_recipe")
         @slot('tool')
             <div class="box-tools">
-            <button class="tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] pull-right btn-modal"
+            <button class="btn pull-right btn-modal btn-primary"
                 data-container="#recipe_modal"
                 data-href="{{action([\Modules\Manufacturing\Http\Controllers\RecipeController::class, 'create'])}}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -45,7 +45,7 @@
                 <tfoot>
                     <tr>
                         <td colspan="8">
-                            <button type="button" class="tw-dw-btn tw-dw-btn-outline tw-dw-btn-xs tw-dw-btn-error" id="mass_update_product_price" >@lang('manufacturing::lang.update_product_price')</button> @show_tooltip(__('manufacturing::lang.update_product_price_help'))
+                            <button type="button" class="btn btn-xs btn-danger" id="mass_update_product_price" >@lang('manufacturing::lang.update_product_price')</button> @show_tooltip(__('manufacturing::lang.update_product_price_help'))
                         </td>
                     </tr>
                 </tfoot>

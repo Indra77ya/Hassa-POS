@@ -13,7 +13,7 @@
 		        @slot('tool')
 		            <div class="box-tools">
 				<a href="{{action([\Modules\Crm\Http\Controllers\ProposalTemplateController::class, 'create'])}}"
-					class="tw-m-2 tw-dw-btn  theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] pull-right contact-login-add">
+					class="tw-m-2 btn pull-right contact-login-add btn-primary">
 					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
 						stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
 						class="icon icon-tabler icons-tabler-outline icon-tabler-plus">
@@ -38,19 +38,19 @@
 		        				<div class="row">
 		        					@if(auth()->user()->can('crm.add_proposal_template'))
 			        					<div class="col-md-4">
-			        						<a href="{{action([\Modules\Crm\Http\Controllers\ProposalTemplateController::class, 'getEdit'])}}" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm pull-left">
+										<a href="{{action([\Modules\Crm\Http\Controllers\ProposalTemplateController::class, 'getEdit'])}}" class="btn btn-primary btn-sm pull-left">
 			        							@lang('messages.edit')
 			        						</a>
 			        					</div>
 			        				@endif
 			        				@can('crm.access_proposal')
 			        					<div class="col-md-4">
-			        						<a href="{{action([\Modules\Crm\Http\Controllers\ProposalTemplateController::class, 'getView'])}}" class="tw-dw-btn tw-dw-btn-info tw-text-white tw-dw-btn-sm">
+										<a href="{{action([\Modules\Crm\Http\Controllers\ProposalTemplateController::class, 'getView'])}}" class="btn btn-info btn-sm">
 			        							@lang('messages.view')
 			        						</a>
 			        					</div>
 			        					<div class="col-md-4">
-			        						<a href="{{action([\Modules\Crm\Http\Controllers\ProposalTemplateController::class, 'send'])}}" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-sm pull-right">
+										<a href="{{action([\Modules\Crm\Http\Controllers\ProposalTemplateController::class, 'send'])}}" class="btn btn-success btn-sm pull-right">
 			        							@lang('crm::lang.send')
 			        						</a>
 			        					</div>

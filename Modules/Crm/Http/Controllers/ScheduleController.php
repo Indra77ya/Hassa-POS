@@ -137,7 +137,7 @@ class ScheduleController extends Controller
             return Datatables::of($schedules)
                 ->addColumn('action', function ($row) {
                     $html = '<div class="btn-group">
-                                <button class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info tw-w-max dropdown-toggle" type="button"  data-toggle="dropdown" aria-expanded="false">
+                                <button class="btn btn-xs btn-info tw-w-max dropdown-toggle" type="button"  data-toggle="dropdown" aria-expanded="false">
                                     ' . __('messages.action') . '
                                     <span class="caret"></span>
                                     <span class="sr-only">'
@@ -643,7 +643,7 @@ class ScheduleController extends Controller
         return Datatables::of($schedules)
             ->addColumn('action', function ($row) {
                 $html = '<div class="btn-group">
-                            <button class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info tw-w-max dropdown-toggle" type="button"  data-toggle="dropdown" aria-expanded="false">
+                            <button class="btn btn-xs btn-info tw-w-max dropdown-toggle" type="button"  data-toggle="dropdown" aria-expanded="false">
                                 ' . __('messages.action') . '
                                 <span class="caret"></span>
                                 <span class="sr-only">'

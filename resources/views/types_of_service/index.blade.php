@@ -14,7 +14,7 @@
     @component('components.widget', ['class' => 'box-primary'])
         @slot('tool')
             <div class="box-tools">
-                <button class="tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] btn-modal pull-right"
+                <button class="btn btn-modal pull-right btn-primary"
                     data-href="{{action([\App\Http\Controllers\TypesOfServiceController::class, 'create'])}}" 
                     data-container=".type_of_service_modal">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"

@@ -13,7 +13,7 @@
 			<div class="box-header">
 				<h4 class="box-title">@lang('essentials::lang.all_documents')</h4>
 			<div class="box-tools pull-right">
-				<button type="button" class="tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] pull-righ add_doc">
+				<button type="button" class="btn pull-righ add_doc btn-primary">
 					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
 						stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
 						class="icon icon-tabler icons-tabler-outline icon-tabler-plus">
@@ -49,11 +49,11 @@
 	                            </div>
 	                            <div class="clearfix"></div>
                         		<div class="col-sm-4">
-                                	<button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-dw-btn-sm tw-text-white">
+					<button type="submit" class="btn btn-primary btn-sm">
                                 		@lang('essentials::lang.submit')
                                 	</button>
                                 	&nbsp;
-									<button type="button" class="tw-dw-btn tw-dw-btn-error tw-dw-btn-sm tw-text-white cancel_btn">
+									<button type="button" class="btn btn-danger btn-sm cancel_btn">
 										@lang('essentials::lang.cancel')
 									</button>
                         		</div>
