@@ -633,11 +633,13 @@ class BusinessController extends BaseController
 
             DB::beginTransaction();
 
+            $select_all_global = !empty($request->input('select_all_global'));
+
             // 1. DATA TRANSAKSI
             $select_all_transactions = $request->input('select_all_transactions');
             $reset_transactions = $request->input('reset_transactions', []);
 
-            $reset_all_tx = !empty($select_all_transactions);
+            $reset_all_tx = $select_all_global || !empty($select_all_transactions);
 
             // Sub-category: sales
             if ($reset_all_tx || in_array('sales', $reset_transactions)) {
@@ -917,7 +919,7 @@ class BusinessController extends BaseController
             $select_all_master = $request->input('select_all_master');
             $reset_master = $request->input('reset_master', []);
 
-            $reset_all_mst = !empty($select_all_master);
+            $reset_all_mst = $select_all_global || !empty($select_all_master);
 
             // Sub-category: products
             if ($reset_all_mst || in_array('products', $reset_master)) {
@@ -998,6 +1000,171 @@ class BusinessController extends BaseController
                 if (!empty($tax_rate_ids)) {
                     DB::table('group_sub_taxes')->whereIn('group_tax_id', $tax_rate_ids)->orWhereIn('tax_id', $tax_rate_ids)->delete();
                     DB::table('tax_rates')->whereIn('id', $tax_rate_ids)->delete();
+                }
+            }
+
+            // Sub-category: units
+            if ($reset_all_mst || in_array('units', $reset_master)) {
+                if (\Illuminate\Support\Facades\Schema::hasTable('units')) {
+                    DB::table('units')->where('business_id', $business_id)->delete();
+                }
+            }
+
+            // Sub-category: customer_groups & selling_price_groups
+            if ($reset_all_mst || in_array('customer_groups', $reset_master)) {
+                if (\Illuminate\Support\Facades\Schema::hasTable('customer_groups')) {
+                    DB::table('customer_groups')->where('business_id', $business_id)->delete();
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('selling_price_groups')) {
+                    DB::table('selling_price_groups')->where('business_id', $business_id)->delete();
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('contacts')) {
+                    DB::table('contacts')->where('business_id', $business_id)->update(['customer_group_id' => null]);
+                }
+            }
+
+            // Sub-category: warranties
+            if ($reset_all_mst || in_array('warranties', $reset_master)) {
+                if (\Illuminate\Support\Facades\Schema::hasTable('warranties')) {
+                    $warranty_ids = DB::table('warranties')->where('business_id', $business_id)->pluck('id')->toArray();
+                    if (!empty($warranty_ids) && \Illuminate\Support\Facades\Schema::hasTable('sell_line_warranties')) {
+                        DB::table('sell_line_warranties')->whereIn('warranty_id', $warranty_ids)->delete();
+                    }
+                    DB::table('warranties')->where('business_id', $business_id)->delete();
+                }
+            }
+
+
+            // 3. DATA MODUL
+            $select_all_modules = $request->input('select_all_modules');
+            $reset_modules = $request->input('reset_modules', []);
+
+            $reset_all_mod = $select_all_global || !empty($select_all_modules);
+
+            // Sub-category: asset_management
+            if ($reset_all_mod || in_array('asset_management', $reset_modules)) {
+                if (\Illuminate\Support\Facades\Schema::hasTable('asset_depreciation_logs')) {
+                    DB::table('asset_depreciation_logs')->where('business_id', $business_id)->delete();
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('assets')) {
+                    DB::table('assets')->where('business_id', $business_id)->delete();
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('asset_categories')) {
+                    DB::table('asset_categories')->where('business_id', $business_id)->delete();
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('asset_settings')) {
+                    DB::table('asset_settings')->where('business_id', $business_id)->delete();
+                }
+            }
+
+            // Sub-category: manufacturing
+            if ($reset_all_mod || in_array('manufacturing', $reset_modules)) {
+                if (\Illuminate\Support\Facades\Schema::hasTable('mfg_recipes')) {
+                    $recipe_ids = DB::table('mfg_recipes')->where('business_id', $business_id)->pluck('id')->toArray();
+                    if (!empty($recipe_ids)) {
+                        if (\Illuminate\Support\Facades\Schema::hasTable('mfg_recipe_ingredients')) {
+                            DB::table('mfg_recipe_ingredients')->whereIn('mfg_recipe_id', $recipe_ids)->delete();
+                        }
+                        DB::table('mfg_recipes')->whereIn('id', $recipe_ids)->delete();
+                    }
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('mfg_ingredient_groups')) {
+                    DB::table('mfg_ingredient_groups')->where('business_id', $business_id)->delete();
+                }
+
+                $prod_tx_ids = DB::table('transactions')
+                    ->where('business_id', $business_id)
+                    ->whereIn('type', ['production_purchase', 'production_sell'])
+                    ->pluck('id')
+                    ->toArray();
+
+                if (!empty($prod_tx_ids)) {
+                    DB::table('purchase_lines')->whereIn('transaction_id', $prod_tx_ids)->delete();
+                    DB::table('transaction_sell_lines')->whereIn('transaction_id', $prod_tx_ids)->delete();
+                    DB::table('transaction_payments')->whereIn('transaction_id', $prod_tx_ids)->delete();
+                    DB::table('transactions')->whereIn('id', $prod_tx_ids)->delete();
+                }
+            }
+
+            // Sub-category: repair
+            if ($reset_all_mod || in_array('repair', $reset_modules)) {
+                if (\Illuminate\Support\Facades\Schema::hasTable('repair_job_sheets')) {
+                    DB::table('repair_job_sheets')->where('business_id', $business_id)->delete();
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('repair_device_models')) {
+                    DB::table('repair_device_models')->where('business_id', $business_id)->delete();
+                }
+            }
+
+            // Sub-category: essentials
+            if ($reset_all_mod || in_array('essentials', $reset_modules)) {
+                if (\Illuminate\Support\Facades\Schema::hasTable('essentials_attendances')) {
+                    DB::table('essentials_attendances')->where('business_id', $business_id)->delete();
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('essentials_leaves')) {
+                    DB::table('essentials_leaves')->where('business_id', $business_id)->delete();
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('essentials_payrolls')) {
+                    $payroll_ids = DB::table('essentials_payrolls')->where('business_id', $business_id)->pluck('id')->toArray();
+                    if (!empty($payroll_ids)) {
+                        DB::table('transaction_payments')->whereIn('transaction_id', $payroll_ids)->delete();
+                        DB::table('essentials_payrolls')->whereIn('id', $payroll_ids)->delete();
+                    }
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('essentials_payroll_groups')) {
+                    DB::table('essentials_payroll_groups')->where('business_id', $business_id)->delete();
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('essentials_to_dos')) {
+                    $todo_ids = DB::table('essentials_to_dos')->where('business_id', $business_id)->pluck('id')->toArray();
+                    if (!empty($todo_ids)) {
+                        if (\Illuminate\Support\Facades\Schema::hasTable('essentials_todo_comments')) {
+                            DB::table('essentials_todo_comments')->whereIn('task_id', $todo_ids)->delete();
+                        }
+                        if (\Illuminate\Support\Facades\Schema::hasTable('essentials_todos_users')) {
+                            DB::table('essentials_todos_users')->whereIn('todo_id', $todo_ids)->delete();
+                        }
+                        DB::table('essentials_to_dos')->whereIn('id', $todo_ids)->delete();
+                    }
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('essentials_reminders')) {
+                    DB::table('essentials_reminders')->where('business_id', $business_id)->delete();
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('essentials_documents')) {
+                    DB::table('essentials_documents')->where('business_id', $business_id)->delete();
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('essentials_kb')) {
+                    DB::table('essentials_kb')->where('business_id', $business_id)->delete();
+                }
+            }
+
+            // Sub-category: crm
+            if ($reset_all_mod || in_array('crm', $reset_modules)) {
+                if (\Illuminate\Support\Facades\Schema::hasTable('crm_schedules')) {
+                    $sched_ids = DB::table('crm_schedules')->where('business_id', $business_id)->pluck('id')->toArray();
+                    if (!empty($sched_ids)) {
+                        if (\Illuminate\Support\Facades\Schema::hasTable('crm_schedule_logs')) {
+                            DB::table('crm_schedule_logs')->whereIn('schedule_id', $sched_ids)->delete();
+                        }
+                        if (\Illuminate\Support\Facades\Schema::hasTable('crm_schedule_users')) {
+                            DB::table('crm_schedule_users')->whereIn('schedule_id', $sched_ids)->delete();
+                        }
+                        DB::table('crm_schedules')->whereIn('id', $sched_ids)->delete();
+                    }
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('crm_proposals')) {
+                    DB::table('crm_proposals')->where('business_id', $business_id)->delete();
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('crm_campaigns')) {
+                    DB::table('crm_campaigns')->where('business_id', $business_id)->delete();
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('crm_call_logs')) {
+                    DB::table('crm_call_logs')->where('business_id', $business_id)->delete();
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('crm_lead_users')) {
+                    $contact_ids = DB::table('contacts')->where('business_id', $business_id)->pluck('id')->toArray();
+                    if (!empty($contact_ids)) {
+                        DB::table('crm_lead_users')->whereIn('contact_id', $contact_ids)->delete();
+                    }
                 }
             }
 
