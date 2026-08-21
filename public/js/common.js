@@ -172,7 +172,7 @@ $(document).ready(function () {
         {
             extend: 'csv',
             text: '<i class="fa fa-file-csv" aria-hidden="true"></i> ' + LANG.export_to_csv,
-            className: 'tw-dw-btn-xs  tw-dw-btn tw-dw-btn-outline tw-my-2',
+            className: 'btn btn-default btn-xs',
             exportOptions: {
                 columns: function (idx, data, node) {
                     return $(node).is(':visible') && !$(node).hasClass('not-export');
@@ -205,7 +205,7 @@ $(document).ready(function () {
         {
             extend: 'excel',
             text: '<i class="fa fa-file-excel" aria-hidden="true"></i> ' + LANG.export_to_excel,
-            className: 'tw-dw-btn-xs  tw-dw-btn tw-dw-btn-outline tw-my-2',
+            className: 'btn btn-default btn-xs',
             exportOptions: {
                 columns: function (idx, data, node) {
                     return $(node).is(':visible') && !$(node).hasClass('not-export');
@@ -237,7 +237,7 @@ $(document).ready(function () {
         {
             extend: 'print',
             text: '<i class="fa fa-print" aria-hidden="true"></i> ' + LANG.print,
-            className: 'tw-dw-btn-xs  tw-dw-btn tw-dw-btn-outline tw-my-2',
+            className: 'btn btn-default btn-xs',
             exportOptions: {
                 columns: ':visible',
                 stripHtml: true,
@@ -258,7 +258,7 @@ $(document).ready(function () {
         {
             extend: 'colvis',
             text: '<i class="fa fa-columns" aria-hidden="true"></i> ' + LANG.col_vis,
-            className: 'tw-dw-btn-xs  tw-dw-btn tw-dw-btn-outline tw-my-2',
+            className: 'btn btn-default btn-xs',
         },
     ];
 
@@ -266,7 +266,7 @@ $(document).ready(function () {
     var pdf_btn = {
         extend: 'pdf',
         text: '<i class="fa fa-file-pdf" aria-hidden="true"></i> ' + LANG.export_to_pdf,
-        className: 'tw-dw-btn-xs  tw-dw-btn tw-dw-btn-outline tw-my-2',
+        className: 'btn btn-default btn-xs',
         exportOptions: {
             // Skip hidden columns. Skip "not-export" columns unless they have data-pdf-include.
             columns: function (idx, data, node) {
@@ -336,12 +336,12 @@ $(document).ready(function () {
         document.head.appendChild(pdfDropdownStyle);
     }
 
-    var pdf_item_class = 'tw-dw-btn-xs tw-dw-btn tw-dw-btn-outline';
+    var pdf_item_class = 'btn btn-default btn-xs';
 
     var pdf_dropdown = {
         extend: 'collection',
         text: '<i class="fa fa-file-pdf" aria-hidden="true"></i> ' + LANG.export_to_pdf + ' <i class="fa fa-caret-down" aria-hidden="true"></i>',
-        className: 'tw-dw-btn-xs tw-dw-btn tw-dw-btn-outline tw-my-2',
+        className: 'btn btn-default btn-xs',
         collectionLayout: 'pdf-orient-collection',
         autoClose: true,
         buttons: [
