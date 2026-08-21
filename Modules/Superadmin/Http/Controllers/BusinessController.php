@@ -1060,12 +1060,15 @@ class BusinessController extends BaseController
             // Sub-category: manufacturing
             if ($reset_all_mod || in_array('manufacturing', $reset_modules)) {
                 if (\Illuminate\Support\Facades\Schema::hasTable('mfg_recipes')) {
-                    $recipe_ids = DB::table('mfg_recipes')->where('business_id', $business_id)->pluck('id')->toArray();
-                    if (!empty($recipe_ids)) {
-                        if (\Illuminate\Support\Facades\Schema::hasTable('mfg_recipe_ingredients')) {
-                            DB::table('mfg_recipe_ingredients')->whereIn('mfg_recipe_id', $recipe_ids)->delete();
+                    $product_ids = DB::table('products')->where('business_id', $business_id)->pluck('id')->toArray();
+                    if (!empty($product_ids)) {
+                        $recipe_ids = DB::table('mfg_recipes')->whereIn('product_id', $product_ids)->pluck('id')->toArray();
+                        if (!empty($recipe_ids)) {
+                            if (\Illuminate\Support\Facades\Schema::hasTable('mfg_recipe_ingredients')) {
+                                DB::table('mfg_recipe_ingredients')->whereIn('mfg_recipe_id', $recipe_ids)->delete();
+                            }
+                            DB::table('mfg_recipes')->whereIn('id', $recipe_ids)->delete();
                         }
-                        DB::table('mfg_recipes')->whereIn('id', $recipe_ids)->delete();
                     }
                 }
                 if (\Illuminate\Support\Facades\Schema::hasTable('mfg_ingredient_groups')) {
