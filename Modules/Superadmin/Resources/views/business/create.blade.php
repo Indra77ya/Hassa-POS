@@ -76,7 +76,7 @@
                     </div>
 
                 <div class="col-md-12 text-center">
-                    {!! Form::submit(__('messages.submit'), ['class' => 'tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-lg']) !!}
+                    {!! Form::submit(__('messages.submit'), ['class' => 'btn btn-primary btn-big']) !!}
                 </div>
                     
                 {!! Form::close() !!}
