@@ -1,7 +1,7 @@
 {
     "name": "AssetManagement",
     "alias": "assetmanagement",
-    "description": "",
+    "description": "Useful for managing all kinds of assets.",
     "keywords": [],
     "priority": 0,
     "providers": [
