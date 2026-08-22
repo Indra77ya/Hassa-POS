@@ -78,10 +78,8 @@
                                         {!! Form::label('subject', __('superadmin::lang.subject') . ':*') !!}
                                         {!! Form::text('subject', null, ['class' => 'form-control', 'required']) !!}
                                     </div>
-                                    <div class="col-md-12 form-group ">
-                                        <div class="col-md-8 message-container">
-                                            {!! Form::label('message', __('superadmin::lang.message') . ':*') !!}
-                                        </div>
+                                    <div class="col-md-12 form-group">
+                                        {!! Form::label('message', __('superadmin::lang.message') . ':*') !!}
                                         {!! Form::textarea('message', null, ['class' => 'form-control', 'required', 'rows' => 6]) !!}
                                     </div>
                                     <div class="col-md-12 form-group">
