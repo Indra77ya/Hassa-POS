@@ -557,6 +557,26 @@ input[type=number]::-webkit-outer-spin-button {
 .bg-info>a:hover{
     background-color: #337ab7 !important;
 }
+div.dt-buttons.btn-group {
+    border-radius: 4px;
+    box-shadow: none;
+    margin-bottom: 15px;
+}
+div.dt-buttons.btn-group > a.btn,
+div.dt-buttons.btn-group > button.btn {
+    border: 1px solid #d2d6de !important;
+    background-color: #ffffff !important;
+    color: #444444 !important;
+    font-weight: 500;
+    padding: 5px 10px;
+    box-shadow: none !important;
+}
+div.dt-buttons.btn-group > a.btn:hover,
+div.dt-buttons.btn-group > button.btn:hover {
+    background-color: #e6e6e6 !important;
+    color: #333333 !important;
+    border-color: #adadad !important;
+}
 ul.dt-button-collection {
     background-color: #ffffff !important;
     border: 1px solid #d2d6de !important;
