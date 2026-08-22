@@ -17,15 +17,14 @@
     <div class="row mb-12">
         <div class="col-md-12">
             <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                <label class="btn btn-info active">
-                    <input type="radio" name="view_type" value="tree" class="view_type">
+                <label class="btn btn-primary active">
+                    <input type="radio" name="view_type" value="tree" class="view_type" checked>
                     <i class="fas fa-list-ul"></i> @lang('accounting::lang.tree_view')
                 </label>
-                <label class="btn btn-info">
+                <label class="btn btn-default">
                     <input type="radio" name="view_type" value="table" class="view_type">
                     <i class="fas fa-table"></i> @lang('accounting::lang.tabular_view')
                 </label>
-                
             </div>
         </div>
     </div>
@@ -34,17 +33,11 @@
             @component('components.widget', ['class' => 'box-solid'])
             @slot('tool')
                 <div class="box-tools">
-                    <a class="tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] btn-modal"
+                    <a class="btn btn-primary btn-sm pull-right btn-modal"
                         href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'create'])}}" 
                         data-href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'create'])}}" 
                         data-container="#create_account_modal">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="icon icon-tabler icons-tabler-outline icon-tabler-plus">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <path d="M12 5l0 14" />
-                            <path d="M5 12l14 0" />
-                        </svg> @lang('messages.add')
+                        <i class="fa fa-plus"></i> @lang('messages.add')
                     </a>
                 </div>
             @endslot
@@ -104,6 +97,10 @@
             $('#accounts_tree').addClass('hide');
             $('#tabular_view').removeClass('hide');
         }
+
+        // Toggle active button styling on view selector
+        $('.view_type').parent('label').removeClass('btn-primary active').addClass('btn-default');
+        $(this).parent('label').removeClass('btn-default').addClass('btn-primary active');
     });
 
     function load_accounts_table(view_type='table'){
