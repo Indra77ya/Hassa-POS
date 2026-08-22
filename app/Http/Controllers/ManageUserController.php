@@ -61,7 +61,7 @@ class ManageUserController extends Controller
                 ->addColumn(
                     'action',
                     '<div class="btn-group">
-                        <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info dropdown-toggle"
+                        <button type="button" class="btn btn-info btn-xs dropdown-toggle"
                             data-toggle="dropdown" aria-expanded="false">
                             @lang("messages.actions")
                             <span class="caret"></span>
