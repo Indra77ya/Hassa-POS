@@ -11,7 +11,7 @@
                 </div>
                 <div class="col-sm-4">
                 <br>
-                    <button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm">@lang('messages.submit')</button>
+                    <button type="submit" class="btn btn-primary btn-sm">@lang('messages.submit')</button>
                 </div>
                 </div>
             </div>
@@ -20,9 +20,9 @@
         <br><br>
         <div class="row">
             <div class="col-sm-12">
-                <a href="{{ asset('modules/essentials/files/import_attendance_template.csv') }}" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-sm" download><i class="fa fa-download"></i> @lang('lang_v1.download_template_file') (CSV)</a>
+                <a href="{{ asset('modules/essentials/files/import_attendance_template.csv') }}" class="btn btn-success btn-sm" download><i class="fa fa-download"></i> @lang('lang_v1.download_template_file') (CSV)</a>
                 &nbsp;
-                <a href="{{ asset('modules/essentials/files/import_attendance_template.xls') }}" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-sm" download><i class="fa fa-download"></i> @lang('lang_v1.download_template_file') (Excel)</a>
+                <a href="{{ asset('modules/essentials/files/import_attendance_template.xls') }}" class="btn btn-success btn-sm" download><i class="fa fa-download"></i> @lang('lang_v1.download_template_file') (Excel)</a>
             </div>
         </div>
 

@@ -159,28 +159,28 @@
                     </div>
                   </div>
 
-                  <div class="col-md-4  smtp hide">
+                  <div class="col-md-4 smtp hide">
                     <div class="form-group">
                         <label for="MAIL_PORT">SMTP Mail Port:*</label>
                         <input type="text" class="form-control smtp_input" id="MAIL_PORT" name="MAIL_PORT" required disabled>
                     </div>
                   </div>
 
-                  <div class="col-md-4  smtp hide">
+                  <div class="col-md-4 smtp hide">
                     <div class="form-group">
                         <label for="MAIL_ENCRYPTION">SMTP Mail Encryption:*</label>
                         <input type="text" class="form-control smtp_input" id="MAIL_ENCRYPTION" name="MAIL_ENCRYPTION" required disabled placeholder="tls or ssl">
                     </div>
                   </div>
 
-                  <div class="col-md-6  smtp hide">
+                  <div class="col-md-6 smtp hide">
                     <div class="form-group">
                         <label for="MAIL_USERNAME">SMTP Username:*</label>
                         <input type="text" class="form-control smtp_input" id="MAIL_USERNAME" name="MAIL_USERNAME" required disabled>
                     </div>
                   </div>
 
-                  <div class="col-md-6  smtp hide">
+                  <div class="col-md-6 smtp hide">
                     <div class="form-group">
                         <label for="MAIL_PASSWORD">SMTP Password:*</label>
                         <input type="password" class="form-control smtp_input" id="MAIL_PASSWORD" name="MAIL_PASSWORD" required disabled>

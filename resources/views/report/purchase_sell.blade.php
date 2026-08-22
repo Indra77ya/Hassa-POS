@@ -5,7 +5,7 @@
 
 <!-- Content Header (Page header) -->
 <section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang( 'report.purchase_sell' )
+    <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">@lang( 'report.purchase_sell' )
         <small class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold">@lang( 'report.purchase_sell_msg' )</small>
     </h1>
 </section>
@@ -27,7 +27,7 @@
         <div class="col-md-2 col-xs-6">
             <div class="form-group pull-right">
                 <div class="input-group">
-                  <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm" id="purchase_sell_date_filter">
+                  <button type="button" class="btn btn-primary btn-sm" id="purchase_sell_date_filter">
                     <span>
                       <i class="fa fa-calendar"></i> {{ __('messages.filter_by_date') }}
                     </span>
@@ -144,7 +144,7 @@
     </div>
     <div class="row no-print">
         <div class="col-sm-12">
-            <button class="tw-dw-btn tw-dw-btn-primary tw-text-white pull-right" aria-label="Print"
+            <button class="btn btn-primary pull-right" aria-label="Print"
                 onclick="window.print();">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"

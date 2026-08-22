@@ -35,10 +35,10 @@
     </td>
     <td>
         @if(!empty($add_button))
-            <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary @if($type == 'allowance') add_allowance @elseif($type == 'deduction') add_deduction @endif">
+            <button type="button" class="btn btn-xs btn-primary @if($type == 'allowance') add_allowance @elseif($type 'deduction') add_deduction @endif">
             <i class="fa fa-plus"></i>
         @else
-            <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-error remove_tr"><i class="fa fa-minus"></i></button>
+            <button type="button" class="btn btn-xs btn-danger remove_tr"><i class="fa fa-minus"></i></button>
         @endif
     </button></td>
 </tr>

@@ -30,12 +30,12 @@ class AssetCategoryController extends Controller
 
             return DataTables::of($categories)
                 ->addColumn('action', function ($row) {
-                    $html = '<div class="btn-group">
+                    $html = '<div class="btn btn-group">
                         <button type="button" class="btn btn-info dropdown-toggle btn-xs" data-toggle="dropdown" aria-expanded="false">' . __('messages.action') . ' <span class="caret"></span></button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu">';
 
                     if (auth()->user()->can('asset.edit')) {
-                        $html .= '<li><a href="#" data-href="' . action([\Modules\AssetManagement\Http\Controllers\AssetCategoryController::class, 'update'], [$row->id]) . '" class="btn-modal edit_category_button" data-name="' . e($row->name) . '" data-code="' . e($row->code) . '" data-description="' . e($row->description) . '"><i class="glyphicon glyphicon-edit"></i> ' . __('messages.edit') . '</a></li>';
+                        $html .= '<li><a href="#" data-href="' . action([\Modules\AssetManagement\Http\Controllers\AssetCategoryController::class, 'update'], [$row->id]) . '" class="btn btn-modal edit_category_button" data-name="' . e($row->name) . '" data-code="' . e($row->code) . '" data-description="' . e($row->description) . '"><i class="glyphicon glyphicon-edit"></i> ' . __('messages.edit') . '</a></li>';
                     }
 
                     if (auth()->user()->can('asset.delete')) {

@@ -5,7 +5,7 @@
 
     <!-- Content Header (Page header) -->
     <section class="content-header no-print">
-        <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('lang_v1.purchase_requisition')<br>
+        <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">@lang('lang_v1.purchase_requisition')<br>
             <small class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold">@lang('lang_v1.purchase_requisition_help_text')</small>
         </h1>
     </section>
@@ -60,7 +60,7 @@
                     <div class="box-tools">
                         {{-- <a class="btn btn-block btn-primary" href="{{action([\App\Http\Controllers\PurchaseRequisitionController::class, 'create'])}}">
                     <i class="fa fa-plus"></i> @lang('messages.add')</a> --}}
-                        <a class="tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98]"
+                        <a class="btn btn-primary"
                             href="{{action([\App\Http\Controllers\PurchaseRequisitionController::class, 'create'])}}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"

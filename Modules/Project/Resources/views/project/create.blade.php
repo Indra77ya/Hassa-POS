@@ -1,4 +1,4 @@
-<div class="modal-dialog  modal-lg" role="document">
+<div class="modal-dialog modal-lg" role="document">
     {!! Form::open(['action' => '\Modules\Project\Http\Controllers\ProjectController@store', 'id' => 'project_form', 'method' => 'post']) !!}
     <div class="modal-content">
         <div class="modal-header">
@@ -94,10 +94,10 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white ladda-button" data-style="expand-right">
+            <button type="submit" class="btn btn-primary ladda-button" data-style="expand-right">
                 <span class="ladda-label">@lang('messages.save')</span>
             </button>
-             <button type="button" class="tw-dw-btn tw-dw-btn-neutral tw-text-white" data-dismiss="modal">
+             <button type="button" class="btn btn-default" data-dismiss="modal">
                 @lang('messages.close')
             </button>
         </div>

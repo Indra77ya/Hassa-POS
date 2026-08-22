@@ -5,7 +5,7 @@
 @include('repair::layouts.nav')
 <!-- Content Header (Page header) -->
 <section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black" >@lang('repair::lang.add_jobsheet_parts')</h1>
+    <h1 class="tw-text-xl md:tw-text-3xl tw-text-black" >@lang('repair::lang.add_jobsheet_parts')</h1>
 </section>
 
 <!-- Main content -->
@@ -79,7 +79,7 @@
 	@endif
 	<div class="row">
 		<div class="col-sm-12">
-			<button type="button" id="submit_add_part_form" class="tw-dw-btn tw-dw-btn-primary tw-text-white pull-right">@lang('messages.save')</button>
+			<button type="button" id="submit_add_part_form" class="btn btn-primary pull-right">@lang('messages.save')</button>
 		</div>
 	</div>
 	{!! Form::close() !!}

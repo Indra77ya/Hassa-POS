@@ -11,12 +11,12 @@
 
 <!-- Content Header (Page header) -->
 <section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang( 'accounting::lang.chart_of_accounts' )</h1>
+    <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">@lang( 'accounting::lang.chart_of_accounts' )</h1>
 </section>
 <section class="content">
     <div class="row mb-12">
         <div class="col-md-12">
-            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            <div class="btn btn-group btn-group-toggle" data-toggle="buttons">
                 <label class="btn btn-info active">
                     <input type="radio" name="view_type" value="tree" class="view_type">
                     <i class="fas fa-list-ul"></i> @lang('accounting::lang.tree_view')
@@ -34,7 +34,7 @@
             @component('components.widget', ['class' => 'box-solid'])
             @slot('tool')
                 <div class="box-tools">
-                    <a class="tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] btn-modal"
+                    <a class="btn btn-primary btn-modal"
                         href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'create'])}}" 
                         data-href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'create'])}}" 
                         data-container="#create_account_modal">

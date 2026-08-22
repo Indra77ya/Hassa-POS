@@ -9,7 +9,7 @@
 
     <a href="{{route('home')}}"
         class="tw-sticky tw-top-0 tw-z-30 tw-relative tw-flex tw-items-center tw-justify-center tw-w-full tw-h-15 theme-logo-bg tw-shrink-0">
-        <p class="tw-text-lg tw-font-medium tw-text-white side-bar-heading tw-text-center">
+        <p class="tw-text-lg tw-font-medium side-bar-heading tw-text-center">
             {{ Session::get('business.name') }} <span class="tw-inline-block tw-w-3 tw-h-3 tw-bg-green-400 tw-rounded-full" title="Online"></span>
         </p>
         <div class="tw-absolute -tw-right-px tw-inset-y-0 tw-w-px theme-logo-bg"></div>
@@ -24,10 +24,10 @@
                 <path d="M21 21l-6 -6"/>
             </svg>
             <input type="text" id="sidebar-search" placeholder="Search menu..."
-                class="tw-grow tw-min-w-0 tw-bg-transparent tw-outline-none tw-border-none tw-text-sm tw-font-normal tw-text-gray-600 placeholder:tw-text-gray-400"
+                class="tw-grow tw-min-w-0 tw-bg-transparent tw-outline-none tw-text-sm tw-font-normal tw-text-gray-600 placeholder:tw-text-gray-400"
                 autocomplete="off" />
             <button id="sidebar-search-clear" type="button" aria-label="Clear search"
-                class="tw-hidden tw-shrink-0 tw-text-gray-400 hover:tw-text-gray-600 tw-transition-colors tw-duration-200">
+                class="tw-hidden tw-shrink-0 tw-text-gray-400 hover:tw-text-gray-600 tw-transition-colors">
                 <svg class="tw-size-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                     <path d="M18 6l-12 12"/>

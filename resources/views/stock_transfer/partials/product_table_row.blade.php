@@ -126,10 +126,10 @@
         @endif
     </td>
     <td class="show_price_with_permission">
-        <input type="text" name="products[{{$row_index}}][unit_price]" class="form-control product_unit_price input_number " value="{{@num_format($product->default_purchase_price * $multiplier)}}">
+        <input type="text" name="products[{{$row_index}}][unit_price]" class="form-control product_unit_price input_number" value="{{@num_format($product->default_purchase_price * $multiplier)}}">
     </td>
     <td class="show_price_with_permission">
-        <input type="text" readonly name="products[{{$row_index}}][price]" class="form-control product_line_total " value="{{@num_format($product->quantity_ordered*$product->default_purchase_price)}}">
+        <input type="text" readonly name="products[{{$row_index}}][price]" class="form-control product_line_total" value="{{@num_format($product->quantity_ordered*$product->default_purchase_price)}}">
     </td>
     <td class="text-center">
         <i class="fa fa-trash remove_product_row cursor-pointer" aria-hidden="true"></i>

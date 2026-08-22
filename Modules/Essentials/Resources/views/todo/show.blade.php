@@ -21,7 +21,7 @@
 			<i class="fa fa-trash text-danger pull-right delete_task cursor-pointer action_btn">
 				<span class="hidden">{{ $do->id }}</span>
 			</i>
-			<i class="fa fa-edit text-primary pull-right btn-modal cursor-pointer action_btn"  data-container="#task_modal" data-href="{{action([\Modules\Essentials\Http\Controllers\ToDoController::class, 'edit'], $do->id)}}"></i>
+			<i class="btn fa fa-edit text-primary pull-right btn-modal cursor-pointer action_btn"  data-container="#task_modal" data-href="{{action([\Modules\Essentials\Http\Controllers\ToDoController::class, 'edit'], $do->id)}}"></i>
 		</div>
 	</li>
 	@endforeach

@@ -30,16 +30,16 @@
 		@endphp
 
 		<div class="tw-flex tw-items-center tw-gap-3">
-			<img src="{{ count($product->media) > 0 ? $product->media->first()->display_url : (!empty($product->product_image) ? asset('/uploads/img/' . rawurlencode($product->product_image)) : asset('/img/default.png')) }}" alt="product-img" loading="lazy" class="tw-w-10 tw-h-10 tw-rounded-xl tw-object-cover tw-bg-slate-50 tw-border tw-border-slate-100" onerror="this.style.display='none'">
+			<img src="{{ count($product->media) > 0 ? $product->media->first()->display_url : (!empty($product->product_image) ? asset('/uploads/img/' . rawurlencode($product->product_image)) : asset('/img/default.png')) }}" alt="product-img" loading="lazy" class="tw-w-10 tw-h-10 tw-object-cover tw-bg-slate-50 tw-border tw-border-slate-100" onerror="this.style.display='none'">
 			<div style="min-width:0;flex:1;">
 				@if( ($edit_price || $edit_discount) && empty($is_direct_sell) )
 				<div title="@lang('lang_v1.pos_edit_product_price_help')">
-				<span class="text-link text-info tw-cursor-pointer tw-font-bold tw-text-[13px] tw-text-slate-800 tw-leading-snug tw-block tw-truncate hover:tw-text-indigo-600 tw-transition-colors" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;" data-toggle="modal" data-target="#row_edit_product_price_modal_{{$row_count}}">
+				<span class="text-link text-info tw-cursor-pointer tw-text-[13px] tw-text-slate-800 tw-leading-snug tw-block tw-truncate hover:tw-text-indigo-600 tw-transition-colors" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;" data-toggle="modal" data-target="#row_edit_product_price_modal_{{$row_count}}">
 					{!! $product_name !!} &nbsp;<i class="fa fa-info-circle tw-text-[11px]"></i>
 				</span>
 				</div>
 				@else
-					<span class="tw-font-bold tw-text-[13px] tw-text-slate-800 tw-leading-snug tw-block" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{!! $product_name !!}</span>
+					<span class="tw-text-[13px] tw-text-slate-800 tw-leading-snug tw-block" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{!! $product_name !!}</span>
 				@endif
 				<div class="tw-text-[11px] tw-text-slate-400 tw-font-medium tw-leading-none tw-mt-1">{{ $product_sku_brand }}@if($product->enable_stock) &nbsp;·&nbsp; <span class="tw-text-indigo-500 tw-font-semibold">{{ @num_format($product->qty_available) }} {{$product->unit}}</span>@endif</div>
 			</div>
@@ -235,12 +235,12 @@
         		@endphp
         	@endif
         @endforeach
-		<div class="input-group input-number tw-border tw-border-slate-200 tw-rounded-xl tw-overflow-hidden tw-shadow-none" style="display: table; width: 100%; max-width: 120px; margin: 0 auto;">
+		<div class="input-group input-number tw-border tw-border-slate-200 tw-overflow-hidden tw-shadow-none" style="display: table; width: 100%; max-width: 120px; margin: 0 auto;">
 			<span class="input-group-btn !tw-table-cell" style="width: auto;">
-				<button type="button" class="btn quantity-down !tw-border-0 !tw-bg-slate-50 hover:!tw-bg-slate-100 !tw-text-rose-500 active:tw-scale-95 tw-transition-all !tw-px-2.5 !tw-h-8 tw-inline-flex tw-items-center tw-justify-center" style="border: 0; outline: none; box-shadow: none;"><i class="fa fa-minus tw-text-[10px]"></i></button>
+				<button type="button" class="btn quantity-down !tw-border-0 !tw-bg-slate-50 hover:!tw-bg-slate-100 !tw-text-rose-500 active:tw-scale-95 !tw-px-2.5 !tw-h-8 tw-inline-flex tw-items-center tw-justify-center" style="border: 0; outline: none; box-shadow: none;"><i class="fa fa-minus tw-text-[10px]"></i></button>
 			</span>
 			<input type="text" data-min="1"
-				class="form-control pos_quantity input_number mousetrap input_quantity tw-text-center tw-font-bold !tw-border-0 !tw-bg-transparent !tw-shadow-none !tw-h-8 tw-text-xs focus:tw-outline-none" style="height: 32px; border: 0; box-shadow: none;"
+				class="form-control pos_quantity input_number mousetrap input_quantity tw-text-center !tw-border-0 !tw-bg-transparent !tw-shadow-none !tw-h-8 tw-text-xs focus:tw-outline-none" style="height: 32px; border: 0; box-shadow: none;"
 				value="{{@format_quantity($product->quantity_ordered)}}" name="products[{{$row_count}}][quantity]" data-allow-overselling="@if(empty($pos_settings['allow_overselling'])){{'false'}}@else{{'true'}}@endif"
 				@if($allow_decimal)
 					data-decimal=1
@@ -257,7 +257,7 @@
 				@endif
 			>
 			<span class="input-group-btn !tw-table-cell" style="width: auto;">
-				<button type="button" class="btn quantity-up !tw-border-0 !tw-bg-slate-50 hover:!tw-bg-slate-100 !tw-text-emerald-500 active:tw-scale-95 tw-transition-all !tw-px-2.5 !tw-h-8 tw-inline-flex tw-items-center tw-justify-center" style="border: 0; outline: none; box-shadow: none;"><i class="fa fa-plus tw-text-[10px]"></i></button>
+				<button type="button" class="btn quantity-up !tw-border-0 !tw-bg-slate-50 hover:!tw-bg-slate-100 !tw-text-emerald-500 active:tw-scale-95 !tw-px-2.5 !tw-h-8 tw-inline-flex tw-items-center tw-justify-center" style="border: 0; outline: none; box-shadow: none;"><i class="fa fa-plus tw-text-[10px]"></i></button>
 			</span>
 		</div>
 		
@@ -274,9 +274,9 @@
 			@elseif(count($sub_units) == 1)
 				@php $_su_key = array_key_first($sub_units); $_su = $sub_units[$_su_key]; @endphp
 				<input type="hidden" name="products[{{$row_count}}][sub_unit_id]" value="{{$_su_key}}">
-				<span class="pos-unit-label tw-inline-block tw-text-[10px] tw-font-bold tw-text-slate-400 tw-bg-slate-50 tw-border tw-border-slate-100 tw-rounded-md tw-px-1.5 tw-py-0.5 tw-leading-none tw-mt-0.5">{{$_su['name']}}</span>
+				<span class="pos-unit-label tw-inline-block tw-text-[10px] tw-text-slate-400 tw-bg-slate-50 tw-border tw-border-slate-100 tw-rounded-md tw-px-1.5 tw-py-0.5 tw-leading-none tw-mt-0.5">{{$_su['name']}}</span>
 			@else
-				<span class="pos-unit-label tw-inline-block tw-text-[10px] tw-font-bold tw-text-slate-400 tw-bg-slate-50 tw-border tw-border-slate-100 tw-rounded-md tw-px-1.5 tw-py-0.5 tw-leading-none tw-mt-0.5">{{$product->unit}}</span>
+				<span class="pos-unit-label tw-inline-block tw-text-[10px] tw-text-slate-400 tw-bg-slate-50 tw-border tw-border-slate-100 tw-rounded-md tw-px-1.5 tw-py-0.5 tw-leading-none tw-mt-0.5">{{$product->unit}}</span>
 			@endif
 		</div>
 
@@ -397,7 +397,7 @@
 		@endif
 	@endif
 	<td class="{{$hide_tax}} !tw-align-middle !tw-py-3.5 !tw-px-4">
-		<input type="text" style="width: 100%; min-width: 80px;" name="products[{{$row_count}}][unit_price_inc_tax]" class="form-control pos_unit_price_inc_tax input_number tw-text-center tw-font-bold tw-border-slate-200 tw-rounded-xl" value="{{@num_format($unit_price_inc_tax)}}" @if(!$edit_price) readonly @endif @if(!empty($pos_settings['enable_msp'])) data-rule-min-value="{{$unit_price_inc_tax}}" data-msg-min-value="{{__('lang_v1.minimum_selling_price_error_msg', ['price' => @num_format($unit_price_inc_tax)])}}" @endif>
+		<input type="text" style="width: 100%; min-width: 80px;" name="products[{{$row_count}}][unit_price_inc_tax]" class="form-control pos_unit_price_inc_tax input_number tw-text-center tw-border-slate-200" value="{{@num_format($unit_price_inc_tax)}}" @if(!$edit_price) readonly @endif @if(!empty($pos_settings['enable_msp'])) data-rule-min-value="{{$unit_price_inc_tax}}" data-msg-min-value="{{__('lang_v1.minimum_selling_price_error_msg', ['price' => @num_format($unit_price_inc_tax)])}}" @endif>
 	</td>
 	@if(!empty($common_settings['enable_product_warranty']) && !empty($is_direct_sell))
 		<td class="!tw-align-middle !tw-py-3.5 !tw-px-4">
@@ -410,10 +410,10 @@
 
 		@endphp
 		<input style="width: auto" type="{{$subtotal_type}}" class="form-control pos_line_total @if(!empty($pos_settings['is_pos_subtotal_editable'])) input_number @endif" value="{{@num_format($product->quantity_ordered*$unit_price_inc_tax )}}">
-		<span class="display_currency pos_line_total_text @if(!empty($pos_settings['is_pos_subtotal_editable'])) hide @endif tw-font-bold tw-text-slate-800 tw-text-sm" data-currency_symbol="true">{{$product->quantity_ordered*$unit_price_inc_tax}}</span>
+		<span class="display_currency pos_line_total_text @if(!empty($pos_settings['is_pos_subtotal_editable'])) hide @endif tw-text-slate-800 tw-text-sm" data-currency_symbol="true">{{$product->quantity_ordered*$unit_price_inc_tax}}</span>
 	</td>
 	<td class="text-center v-center !tw-align-middle !tw-py-3.5 !tw-px-4">
-		<button type="button" class="pos_remove_row tw-w-9 tw-h-9 tw-rounded-xl tw-bg-rose-50 tw-text-rose-500 hover:tw-bg-rose-100 active:tw-scale-95 tw-transition-all tw-inline-flex tw-items-center tw-justify-center tw-border-0 tw-cursor-pointer tw-mx-auto" aria-label="Remove item">
+		<button type="button" class="pos_remove_row tw-w-9 tw-h-9 tw-bg-rose-50 tw-text-rose-500 hover:tw-bg-rose-100 active:tw-scale-95 tw-inline-flex tw-items-center tw-justify-center tw-border-0 tw-cursor-pointer tw-mx-auto" aria-label="Remove item">
 			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7l16 0"/><path d="M10 11l0 6"/><path d="M14 11l0 6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/></svg>
 		</button>
 	</td>

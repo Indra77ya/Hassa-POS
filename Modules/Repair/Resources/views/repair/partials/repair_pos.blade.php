@@ -126,7 +126,7 @@
 		</div>
 	</div>
 	<div class="col-sm-6 mt-15">
-		<div class="btn-group mt-5" role="group">
+		<div class="btn btn-group mt-5" role="group">
 			<button type="button" class="btn btn-primary btn-flat" data-toggle="modal" data-target="#checklist_modal"><i class="fa fa-plus"></i> @lang('repair::lang.pre_repair_checklist')</button>
 			<button type="button" class="btn btn-primary btn-flat" data-toggle="modal" data-target="#security_modal"><i class="fa fa-lock"></i> @lang('repair::lang.security')</button>
 		</div>

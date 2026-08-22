@@ -66,26 +66,26 @@ class CampaignController extends Controller
 
             return Datatables::of($campaigns)
                     ->addColumn('action', function ($row) {
-                        $html = '<a data-href="'.action([\Modules\Crm\Http\Controllers\CampaignController::class, 'show'], ['campaign' => $row->id]).'" class="cursor-pointer view_a_campaign tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info m-2">
+                        $html = '<a data-href="'.action([\Modules\Crm\Http\Controllers\CampaignController::class, 'show'], ['campaign' => $row->id]).'" class="cursor-pointer view_a_campaign btn btn-xs btn-info m-2">
                             <i class="fa fa-eye"></i>
                             '.__('messages.view').'
                             </a>';
 
                         if (empty($row->sent_on)) {
                             $html .= '
-                            <a href="'.action([\Modules\Crm\Http\Controllers\CampaignController::class, 'edit'], ['campaign' => $row->id]).'"class="cursor-pointer tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-primary m-2">
+                            <a href="'.action([\Modules\Crm\Http\Controllers\CampaignController::class, 'edit'], ['campaign' => $row->id]).'"class="cursor-pointer btn btn-xs btn-primary m-2">
                                 <i class="fa fa-edit"></i>
                                 '.__('messages.edit').'
                             </a>';
                         }
 
-                        $html .= '<a data-href="'.action([\Modules\Crm\Http\Controllers\CampaignController::class, 'destroy'], ['campaign' => $row->id]).'" class="cursor-pointer delete_a_campaign tw-dw-btn tw-dw-btn-outline tw-dw-btn-xs tw-dw-btn-error m-2">
+                        $html .= '<a data-href="'.action([\Modules\Crm\Http\Controllers\CampaignController::class, 'destroy'], ['campaign' => $row->id]).'" class="cursor-pointer delete_a_campaign btn btn-xs btn-danger m-2">
                             <i class="fas fa-trash"></i>
                             '.__('messages.delete').'
                             </a>';
 
                         if (empty($row->sent_on)) {
-                            $html .= '<a data-href="'.action([\Modules\Crm\Http\Controllers\CampaignController::class, 'sendNotification'], ['id' => $row->id]).'" class="cursor-pointer send_campaign_notification tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-warning m-2">
+                            $html .= '<a data-href="'.action([\Modules\Crm\Http\Controllers\CampaignController::class, 'sendNotification'], ['id' => $row->id]).'" class="cursor-pointer send_campaign_notification btn btn-xs btn-warning m-2">
                                 <i class="fas fa-envelope-square"></i>
                                 '.__('crm::lang.send_notification').'
                             </a>';

@@ -1,16 +1,5 @@
 @forelse($schedules as $schedule)
-<div class="external-event 
-	@if($schedule->status == 'scheduled')
-		bg-yellow
-	@elseif($schedule->status == 'open')
-		bg-blue
-	@elseif($schedule->status == 'canceled')
-		bg-red
-	@elseif($schedule->status == 'completed')
-		bg-green
-	@else
-		bg-yellow
-	@endif width-100" style="display: flex;">
+<div class="external-event @if($schedule->status == 'scheduled') bg-yellow @elseif($schedule->status 'open') bg-blue 'canceled') bg-red 'completed') bg-green @else @endif width-100" style="display: flex;">
 	<div style="width: 75%;">
 		{{$schedule->title}}
 		<br>

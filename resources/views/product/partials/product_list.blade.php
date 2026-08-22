@@ -56,13 +56,13 @@
                             &nbsp;
                             {!! Form::open(['url' => action([\App\Http\Controllers\ProductController::class, 'bulkEdit']), 'method' => 'post', 'id' => 'bulk_edit_form' ]) !!}
                             {!! Form::hidden('selected_products', null, ['id' => 'selected_products_for_edit']); !!}
-                            <button type="submit" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-primary" id="edit-selected"> <i class="fa fa-edit"></i>{{__('lang_v1.bulk_edit')}}</button>
+                            <button type="submit" class="btn btn-xs btn-primary" id="edit-selected"> <i class="fa fa-edit"></i>{{__('lang_v1.bulk_edit')}}</button>
                             {!! Form::close() !!}
                         @endif
                         &nbsp;
-                        <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-accent  update_product_location" data-type="add">@lang('lang_v1.add_to_location')</button>
+                        <button type="button" class="btn btn-xs btn-info update_product_location" data-type="add">@lang('lang_v1.add_to_location')</button>
                         &nbsp;
-                        <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-neutral update_product_location" data-type="remove">@lang('lang_v1.remove_from_location')</button>
+                        <button type="button" class="btn btn-xs btn-default update_product_location" data-type="remove">@lang('lang_v1.remove_from_location')</button>
                     @endcan
                 
                 &nbsp;
@@ -72,7 +72,7 @@
                 {!! Form::close() !!} @show_tooltip(__('lang_v1.deactive_product_tooltip'))
                 &nbsp;
                 @if($is_woocommerce)
-                    <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-warning toggle_woocomerce_sync">
+                    <button type="button" class="btn btn-xs btn-warning toggle_woocomerce_sync">
                         @lang('lang_v1.woocommerce_sync')
                     </button>
                 @endif

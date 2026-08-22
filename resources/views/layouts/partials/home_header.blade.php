@@ -1,5 +1,5 @@
 <!-- Static navbar -->
-<nav class="navbar-default navbar-static-top tw-transition-all tw-duration-5000 tw-shrink-0 tw-rounded-2xl tw-m-[16px] tw-border-2 tw-bg-white">
+<nav class="navbar-default navbar-static-top tw-duration-5000 tw-shrink-0 tw-rounded-2xl tw-m-[16px] tw-border-2 tw-bg-white">
   <div class="container">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar" style="margin-top: 3px; margin-right: 3px;">

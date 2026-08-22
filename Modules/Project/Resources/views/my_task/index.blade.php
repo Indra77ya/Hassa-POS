@@ -20,7 +20,7 @@
     };
 </script>
 <section class="content-header">
-	<h3 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black" >
+	<h3 class="tw-text-xl md:tw-text-3xl tw-text-black" >
 		<i class="fa fa-tasks"></i>
 		@lang('project::lang.tasks')
 	</h3>
@@ -68,7 +68,7 @@
 		</div>
 	@endcomponent
 	@php
-		$tool = '<div class="btn-group btn-group-toggle pull-right m-5" data-toggle="buttons">
+		$tool = '<div class="btn btn-group btn-group-toggle pull-right m-5" data-toggle="buttons">
     			<label class="btn btn-info btn-sm active">
         			<input type="radio" name="task_view" value="list_view" class="my_task_view" checked>'
         			. __("project::lang.list_view").'

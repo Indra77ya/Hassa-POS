@@ -4,7 +4,7 @@
 	@include('crm::layouts.nav')
 	<!-- Content Header (Page header) -->
 	<section class="content-header no-print">
-	   <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">
+	   <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">
 	   	@lang('crm::lang.proposal_template')
 	   	<small class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold">@lang('messages.view')</small>
 	   </h1>
@@ -15,12 +15,12 @@
 			<div class="box-header with-border">
 				<div class="box-tools pull-right">
 					@if(auth()->user()->can('crm.add_proposal_template'))
-    					<a href="{{action([\Modules\Crm\Http\Controllers\ProposalTemplateController::class, 'getEdit'])}}" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm">
+					<a href="{{action([\Modules\Crm\Http\Controllers\ProposalTemplateController::class, 'getEdit'])}}" class="btn btn-primary btn-sm">
     						@lang('messages.edit')
     					</a>
     				@endif
     				@can('crm.access_proposal')
-    					<a href="{{action([\Modules\Crm\Http\Controllers\ProposalTemplateController::class, 'send'])}}" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-sm">
+					<a href="{{action([\Modules\Crm\Http\Controllers\ProposalTemplateController::class, 'send'])}}" class="btn btn-success btn-sm">
     						@lang('crm::lang.send')
     					</a>
     				@endcan

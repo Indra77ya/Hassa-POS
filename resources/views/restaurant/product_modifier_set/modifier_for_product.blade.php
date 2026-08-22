@@ -43,7 +43,7 @@
 
           <div id="{{$collapse_id}}" class="panel-collapse collapse @if($loop->index==0) in @endif" role="tabpanel" aria-labelledby="headingOne">
             <div class="panel-body">
-              <div class="btn-group" data-toggle="buttons">
+              <div class="btn btn-group" data-toggle="buttons">
                 @foreach($modifier_set->variations as $modifier)
                   <label class="btn btn-primary @if(!empty($edit_modifiers) && in_array($modifier->id, $product->modifiers_ids) ) active @endif">
                     <input type="checkbox" autocomplete="off" 
@@ -64,9 +64,9 @@
     </div>
 
     <div class="modal-footer">
-      <button data-url="{{action([\App\Http\Controllers\Restaurant\ProductModifierSetController::class, 'add_selected_modifiers'])}}" type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white add_modifier" data-dismiss="modal">
+      <button data-url="{{action([\App\Http\Controllers\Restaurant\ProductModifierSetController::class, 'add_selected_modifiers'])}}" type="button" class="btn btn-primary add_modifier" data-dismiss="modal">
         @lang( 'messages.add' )</button>
-      <button type="button" class="tw-dw-btn tw-dw-btn-neutral tw-text-white" data-dismiss="modal">@lang( 'messages.close' )</button>
+      <button type="button" class="btn btn-default" data-dismiss="modal">@lang( 'messages.close' )</button>
     </div>
 
     {!! Form::close() !!}

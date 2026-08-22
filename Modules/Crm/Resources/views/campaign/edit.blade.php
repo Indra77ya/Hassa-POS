@@ -6,7 +6,7 @@
 @include('crm::layouts.nav')
 <!-- Content Header (Page header) -->
 <section class="content-header no-print">
-   <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">
+   <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">
         @lang('crm::lang.campaigns')
         <small class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold">@lang('messages.edit')</small>
     </h1>
@@ -39,10 +39,10 @@
                     <div class="col-md-8 customer_div" style="display: none;">
                         <div class="form-group">
                             {!! Form::label('contact_id', __('lang_v1.customers') .':*') !!}
-                            <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary select-all">
+                            <button type="button" class="btn btn-xs btn-primary select-all">
                                 @lang('lang_v1.select_all')
                             </button>
-                            <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary deselect-all">
+                            <button type="button" class="btn btn-xs btn-primary deselect-all">
                                 @lang('lang_v1.deselect_all')
                             </button>
                             {!! Form::select('contact_id[]', $customers, $campaign->contact_ids, ['class' => 'form-control select2', 'multiple', 'id' => 'contact_id', 'style' => 'width: 100%;']); !!}
@@ -51,10 +51,10 @@
                     <div class="col-md-8 lead_div" style="display: none;">
                         <div class="form-group">
                             {!! Form::label('lead_id', __('crm::lang.leads') .':*') !!}
-                            <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary select-all">
+                            <button type="button" class="btn btn-xs btn-primary select-all">
                                 @lang('lang_v1.select_all')
                             </button>
-                            <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary deselect-all">
+                            <button type="button" class="btn btn-xs btn-primary deselect-all">
                                 @lang('lang_v1.deselect_all')
                             </button>
                             {!! Form::select('lead_id[]', $leads, $campaign->contact_ids, ['class' => 'form-control select2', 'multiple', 'id' => 'lead_id', 'style' => 'width: 100%;']); !!}
@@ -63,10 +63,10 @@
                     <div class="col-md-8 contact_div" style="display: none;">
                         <div class="form-group">
                             {!! Form::label('contact', __('contact.contact') .':*') !!}
-                            <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary select-all">
+                            <button type="button" class="btn btn-xs btn-primary select-all">
                                 @lang('lang_v1.select_all')
                             </button>
-                            <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary deselect-all">
+                            <button type="button" class="btn btn-xs btn-primary deselect-all">
                                 @lang('lang_v1.deselect_all')
                             </button>
                             {!! Form::select('contact[]', $contacts, $campaign->contact_ids, ['class' => 'form-control select2', 'multiple', 'id' => 'contact', 'style' => 'width: 100%;']); !!}
@@ -118,14 +118,14 @@
                     {{implode(', ', $tags)}}
                 </p>
 
-                <button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm submit-button pull-right draft tw-m-1" name="send_notification" value="0" data-style="expand-right">
+                <button type="submit" class="btn btn-primary btn-sm submit-button pull-right draft tw-m-1" name="send_notification" value="0" data-style="expand-right">
                     <span class="ladda-label">
                         <i class="fas fa-save"></i>
                         @lang('messages.update')
                     </span>
                 </button>
 
-                <button type="submit" class="tw-dw-btn tw-dw-btn-warning tw-text-white tw-dw-btn-sm pull-right submit-button notif tw-m-1" name="send_notification" value="1" data-style="expand-right">
+                <button type="submit" class="btn btn-warning btn-sm pull-right submit-button notif tw-m-1" name="send_notification" value="1" data-style="expand-right">
                     <span class="ladda-label">
                         <i class="fas fa-envelope-square"></i>
                         @lang('crm::lang.send_notification')

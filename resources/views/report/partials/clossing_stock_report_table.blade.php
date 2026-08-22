@@ -22,7 +22,7 @@
         @if(isset($stocks['closing_stock_by_sp']))
             <span class="display_currency" data-currency_symbol="true">{{ $stocks['closing_stock_by_sp'] }}</span>
         @else
-             <span id="closing_stock_by_sp"><i class="fa fa-sync fa-spin fa-fw "></i></span>
+             <span id="closing_stock_by_sp"><i class="fa fa-sync fa-spin fa-fw"></i></span>
         @endif
         </td>
     </tr>

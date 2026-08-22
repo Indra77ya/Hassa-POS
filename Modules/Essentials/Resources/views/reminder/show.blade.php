@@ -29,20 +29,20 @@
                       <!-- /btn-group -->
                       {!! Form::select('repeat', $repeat, $reminder->repeat, ['class' => 'form-control', 'required']) !!}
                       <div class="input-group-btn">
-                        <button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm change_reminder_repeat">@lang('messages.update')</button>
+                        <button type="submit" class="btn btn-primary btn-sm change_reminder_repeat">@lang('messages.update')</button>
                       </div>
                    </div>
                   {!! Form::close() !!}
               </div>
               <div class="col-md-3">
-                <button type="button" class="tw-dw-btn tw-dw-btn-error tw-text-white tw-dw-btn-sm" id="delete_reminder" data-href="{{action([\Modules\Essentials\Http\Controllers\ReminderController::class, 'destroy'], [$reminder->id])}}">
+                <button type="button" class="btn btn-danger btn-sm" id="delete_reminder" data-href="{{action([\Modules\Essentials\Http\Controllers\ReminderController::class, 'destroy'], [$reminder->id])}}">
                   @lang('essentials::lang.delete_reminder')
                 </button>
               </div>
           </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="tw-dw-btn tw-dw-btn-neutral tw-text-white" data-dismiss="modal">
+        <button type="button" class="btn btn-default" data-dismiss="modal">
           @lang( 'messages.close' )
         </button>
       </div>

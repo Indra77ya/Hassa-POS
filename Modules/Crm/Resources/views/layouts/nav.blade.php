@@ -13,7 +13,7 @@
             border-left: 0.3em solid transparent;
         }
     </style>
-    <nav class="navbar-default tw-transition-all tw-duration-5000 tw-shrink-0 tw-rounded-2xl tw-m-2 tw-border-2 !tw-bg-white">
+    <nav class="navbar-default tw-duration-5000 tw-shrink-0 tw-rounded-2xl tw-m-2 tw-border-2 !tw-bg-white">
         <div class="container-fluid">
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
@@ -40,7 +40,7 @@
                     @endif                    
 
                     @can('crm.access_contact_login')
-                        <li class="nav-item @if(request()->segment(2) == 'all-contacts-login' || request()->segment(2) == 'commissions') active @endif">
+                        <li class="nav-item @if(request()->segment(2) == 'all-contacts-login' || request()->segment(2) 'commissions') active @endif">
                             <a class="nav-link dropdown-toggle" href="#" id="contacts_login_dropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 @lang('crm::lang.contacts_login')
                             </a>

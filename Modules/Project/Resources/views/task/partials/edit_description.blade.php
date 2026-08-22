@@ -6,10 +6,10 @@
     <div class="form-group">
         {!! Form::textarea('description', $project_task->description, ['class' => 'form-control ', 'id' => 'edit_description_of_task']); !!}
     </div>
-    <button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm ladda-button save-description-btn" data-style="expand-right">
+    <button type="submit" class="btn btn-primary btn-sm ladda-button save-description-btn" data-style="expand-right">
         <span class="ladda-label">@lang('messages.update')</span>
     </button>
-     <button type="button" class="tw-dw-btn tw-dw-btn-neutral tw-text-white tw-dw-btn-sm close_update_task_description_form">
+     <button type="button" class="btn btn-default btn-sm close_update_task_description_form">
         @lang('messages.close')
     </button>
 {!! Form::close() !!}

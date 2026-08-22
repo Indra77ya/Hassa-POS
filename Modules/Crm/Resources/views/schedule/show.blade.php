@@ -6,7 +6,7 @@
 @include('crm::layouts.nav')
 <!-- Content Header (Page header) -->
 <section class="content-header no-print">
-	<h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">
+	<h1 class="tw-text-xl md:tw-text-3xl tw-text-black">
    		@lang('crm::lang.schedule') 
         <code>({{ $schedule->title }})</code>
 	</h1>

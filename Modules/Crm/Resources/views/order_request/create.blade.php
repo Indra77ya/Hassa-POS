@@ -9,7 +9,7 @@
 @section('content')
 <!-- Content Header (Page header) -->
 <section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">{{$title}}</h1>
+    <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">{{$title}}</h1>
 </section>
 <!-- Main content -->
 <section class="content no-print">
@@ -139,7 +139,7 @@
 	
 	<div class="row">
 		<div class="col-sm-12 text-center">
-			<button type="button" id="submit-sell" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-lg">@lang('messages.save')</button>
+			<button type="button" id="submit-sell" class="btn btn-primary btn-lg">@lang('messages.save')</button>
 		</div>
 	</div>
 	

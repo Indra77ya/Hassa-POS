@@ -4,7 +4,7 @@
 @section('content')
 <!-- Content Header (Page header) -->
 <section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">{{ __('assetmanagement::lang.asset_categories') }}</h1>
+    <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">{{ __('assetmanagement::lang.asset_categories') }}</h1>
 </section>
 
 <!-- Main content -->

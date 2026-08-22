@@ -50,12 +50,12 @@
                                             title="@lang( 'accounting::lang.ledger' )"
                                             href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'ledger'], $account->id)}}">
                                             <i class="fas fa-file-alt"></i></a>
-                                        <a class="btn-modal btn-xs btn-default text-primary" title="@lang('messages.edit')"
+                                        <a class="btn btn-modal btn-xs btn-default text-primary" title="@lang('messages.edit')"
                                             href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'edit'], $account->id)}}" 
                                             data-href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'edit'], $account->id)}}" 
                                             data-container="#create_account_modal">
                                         <i class="fas fa-edit"></i></a>
-                                        <a class="activate-deactivate-btn text-warning  btn-xs btn-default" 
+                                        <a class="btn activate-deactivate-btn text-warning btn-xs btn-default"
                                             title="@if($account->status=='active') @lang('messages.deactivate') @else 
                                             @lang('messages.activate') @endif"
                                             href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'activateDeactivate'], $account->id)}}">
@@ -81,12 +81,12 @@
                                                         title="@lang( 'accounting::lang.ledger' )"
                                                         href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'ledger'], $child_account->id)}}">
                                                         <i class="fas fa-file-alt"></i></a>
-                                                    <a class="btn-modal btn-xs btn-default text-primary" title="@lang('messages.edit')"
+                                                    <a class="btn btn-modal btn-xs btn-default text-primary" title="@lang('messages.edit')"
                                                         href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'edit'], $child_account->id)}}" 
                                                         data-href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'edit'], $child_account->id)}}" 
                                                         data-container="#create_account_modal">
                                                     <i class="fas fa-edit"></i></a>
-                                                    <a class="activate-deactivate-btn text-warning  btn-xs btn-default" 
+                                                    <a class="btn activate-deactivate-btn text-warning btn-xs btn-default"
                                                         title="@if($child_account->status=='active') @lang('messages.deactivate') @else 
                                                         @lang('messages.activate') @endif"
                                                         href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'activateDeactivate'], $child_account->id)}}">

@@ -23,7 +23,7 @@
         <div class="col-md-4">
             <div class="form-group">
                 <label>@lang('lang_v1.ledger_format')</label>
-            <div class="btn-group" data-toggle="buttons">
+            <div class="btn btn-group" data-toggle="buttons">
                 <label class="btn btn-default active">
                     <input type="radio" name="ledger_format" value="format_1" checked> @lang('lang_v1.format_1')
                 </label>

@@ -5,7 +5,7 @@
 
     <!-- Content Header (Page header) -->
     <section class="content-header">
-        <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('sale.discount')
+        <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">@lang('sale.discount')
         </h1>
 
     </section>
@@ -13,11 +13,11 @@
     <!-- Main content -->
     <section class="content">
         <div
-            class=" tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md  tw-ring-gray-200">
+            class="lg:tw-col-span-1 tw-bg-white tw-shadow-sm tw-ring-1 hover:tw-shadow-md tw-ring-gray-200">
             <div class="tw-p-4 sm:tw-p-5">
                 <div class="tw-flex tw-gap-2.5 tw-justify-end">
                     @can('brand.create')
-                            <a class="tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] btn-modal pull-right"
+                            <a class="btn btn-primary btn-modal pull-right"
                                 data-href="{{ action([\App\Http\Controllers\DiscountController::class, 'create']) }}"
                                 data-container=".discount_modal">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"

@@ -48,7 +48,7 @@
                 @endif
 
                 @if(in_array('kitchen', $enabled_modules) && empty($for_ledger))
-                    <br><span class="label @if($sell_line->res_line_order_status == 'cooked' ) bg-red @elseif($sell_line->res_line_order_status == 'served') bg-green @else bg-light-blue @endif">@lang('restaurant.order_statuses.' . $sell_line->res_line_order_status) </span>
+                    <br><span class="label @if($sell_line->res_line_order_status == 'cooked' ) bg-red @elseif($sell_line->res_line_order_status 'served') bg-green @else bg-light-blue @endif">@lang('restaurant.order_statuses.' . $sell_line->res_line_order_status) </span>
                 @endif
             </td>
             @if( session()->get('business.enable_lot_number') == 1 && empty($for_ledger))

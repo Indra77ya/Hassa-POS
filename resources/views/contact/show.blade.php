@@ -55,87 +55,41 @@
         <div class="col-md-12">
             <div class="nav-tabs-custom">
                 <ul class="nav nav-tabs nav-justified">
-                    <li class="
-                            @if(!empty($view_type) &&  $view_type == 'ledger')
-                                active
-                            @else
-                                ''
-                            @endif">
+                    <li class="@if(!empty($view_type) && $view_type == 'ledger') active @else '' @endif">
                         <a href="#ledger_tab" data-toggle="tab" aria-expanded="true"><i class="fas fa-scroll" aria-hidden="true"></i> @lang('lang_v1.ledger')</a>
                     </li>
                     @if(in_array($contact->type, ['both', 'supplier']))
-                        <li class="
-                            @if(!empty($view_type) &&  $view_type == 'purchase')
-                                active
-                            @else
-                                ''
-                            @endif">
+                        <li class="@if(!empty($view_type) && $view_type == 'purchase') active @else '' @endif">
                             <a href="#purchases_tab" data-toggle="tab" id="purchases-link" aria-expanded="true"><i class="fas fa-arrow-circle-down" aria-hidden="true"></i> @lang( 'purchase.purchases')</a>
                         </li>
-                        <li class="
-                            @if(!empty($view_type) &&  $view_type == 'stock_report')
-                                active
-                            @else
-                                ''
-                            @endif">
+                        <li class="@if(!empty($view_type) && $view_type == 'stock_report') active @else '' @endif">
                             <a href="#stock_report_tab" data-toggle="tab" aria-expanded="true"><i class="fas fa-hourglass-half" aria-hidden="true"></i> @lang( 'report.stock_report')</a>
                         </li>
                     @endif
                     @if(in_array($contact->type, ['both', 'customer']))
-                        <li class="
-                            @if(!empty($view_type) &&  $view_type == 'sales')
-                                active
-                            @else
-                                ''
-                            @endif">
+                        <li class="@if(!empty($view_type) && $view_type == 'sales') active @else '' @endif">
                             <a href="#sales_tab" data-toggle="tab" aria-expanded="true"><i class="fas fa-arrow-circle-up" aria-hidden="true"></i> @lang( 'sale.sells')</a>
                         </li>
                         @if(in_array('subscription', $enabled_modules))
-                            <li class="
-                                @if(!empty($view_type) &&  $view_type == 'subscriptions')
-                                    active
-                                @else
-                                    ''
-                                @endif">
+                            <li class="@if(!empty($view_type) && $view_type == 'subscriptions') active @else '' @endif">
                                 <a href="#subscriptions_tab" data-toggle="tab" aria-expanded="true"><i class="fas fa-recycle" aria-hidden="true"></i> @lang( 'lang_v1.subscriptions')</a>
                             </li>
                         @endif
                     @endif
-                    <li class="
-                            @if(!empty($view_type) &&  $view_type == 'documents_and_notes')
-                                active
-                            @else
-                                ''
-                            @endif
-                            ">
+                    <li class="@if(!empty($view_type) && $view_type == 'documents_and_notes') active @else '' @endif">
                         <a href="#documents_and_notes_tab" data-toggle="tab" aria-expanded="true"><i class="fas fa-paperclip" aria-hidden="true"></i> @lang('lang_v1.documents_and_notes')</a>
                     </li>
-                    <li class="
-                            @if(!empty($view_type) &&  $view_type == 'payments')
-                                active
-                            @else
-                                ''
-                            @endif">
+                    <li class="@if(!empty($view_type) && $view_type == 'payments') active @else '' @endif">
                         <a href="#payments_tab" data-toggle="tab" aria-expanded="true"><i class="fas fa-money-bill-alt" aria-hidden="true"></i> @lang('sale.payments')</a>
                     </li>
 
                     @if( in_array($contact->type, ['customer', 'both']) && session('business.enable_rp'))
-                        <li class="
-                            @if(!empty($view_type) &&  $view_type == 'reward_point')
-                                active
-                            @else
-                                ''
-                            @endif">
+                        <li class="@if(!empty($view_type) && $view_type == 'reward_point') active @else '' @endif">
                             <a href="#reward_point_tab" data-toggle="tab" aria-expanded="true"><i class="fas fa-gift" aria-hidden="true"></i> {{ session('business.rp_name') ?? __( 'lang_v1.reward_points')}}</a>
                         </li>
                     @endif
 
-                    <li class="
-                        @if(!empty($view_type) &&  $view_type == 'activities')
-                            active
-                        @else
-                            ''
-                        @endif">
+                    <li class="@if(!empty($view_type) && $view_type == 'activities') active @else '' @endif">
                         <a href="#activities_tab" data-toggle="tab" aria-expanded="true"><i class="fas fa-pen-square" aria-hidden="true"></i> @lang('lang_v1.activities')</a>
                         </li>
 
@@ -155,22 +109,12 @@
                 </ul>
 
                 <div class="tab-content">
-                    <div class="tab-pane
-                                @if(!empty($view_type) &&  $view_type == 'ledger')
-                                    active
-                                @else
-                                    ''
-                                @endif"
+                    <div class="tab-pane @if(!empty($view_type) && $view_type == 'ledger') active @else '' @endif"
                             id="ledger_tab">
                         @include('contact.partials.ledger_tab')
                     </div>
                     @if(in_array($contact->type, ['both', 'supplier']))
-                        <div class="tab-pane
-                            @if(!empty($view_type) &&  $view_type == 'purchase')
-                                active
-                            @else
-                                ''
-                            @endif"
+                        <div class="tab-pane @if(!empty($view_type) && $view_type == 'purchase') active @else '' @endif"
                         id="purchases_tab">
                             <div class="row">
                                 <div class="col-md-3">
@@ -184,22 +128,12 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="tab-pane 
-                            @if(!empty($view_type) &&  $view_type == 'stock_report')
-                                active
-                            @else
-                                ''
-                            @endif" id="stock_report_tab">
+                        <div class="tab-pane @if(!empty($view_type) && $view_type == 'stock_report') active @else '' @endif" id="stock_report_tab">
                             @include('contact.partials.stock_report_tab')
                         </div>
                     @endif
                     @if(in_array($contact->type, ['both', 'customer']))
-                        <div class="tab-pane 
-                            @if(!empty($view_type) &&  $view_type == 'sales')
-                                active
-                            @else
-                                ''
-                            @endif"
+                        <div class="tab-pane @if(!empty($view_type) && $view_type == 'sales') active @else '' @endif"
                         id="sales_tab">
                             <div class="row">
                                 <div class="col-md-12">
@@ -218,30 +152,15 @@
                             @include('contact.partials.subscriptions')
                         @endif
                     @endif
-                    <div class="tab-pane
-                            @if(!empty($view_type) &&  $view_type == 'documents_and_notes')
-                                active
-                            @else
-                                ''
-                            @endif"
+                    <div class="tab-pane @if(!empty($view_type) && $view_type == 'documents_and_notes') active @else '' @endif"
                         id="documents_and_notes_tab">
                         @include('contact.partials.documents_and_notes_tab')
                     </div>
-                    <div class="tab-pane 
-                        @if(!empty($view_type) &&  $view_type == 'payments')
-                            active
-                        @else
-                            ''
-                        @endif" id="payments_tab">
+                    <div class="tab-pane @if(!empty($view_type) && $view_type == 'payments') active @else '' @endif" id="payments_tab">
                         <div id="contact_payments_div" style="height: 500px;overflow-y: scroll;"></div>
                     </div>
                     @if( in_array($contact->type, ['customer', 'both']) && session('business.enable_rp'))
-                        <div class="tab-pane
-                            @if(!empty($view_type) &&  $view_type == 'reward_point')
-                                active
-                            @else
-                                ''
-                            @endif"
+                        <div class="tab-pane @if(!empty($view_type) && $view_type == 'reward_point') active @else '' @endif"
                         id="reward_point_tab">
                         <br>
                             <div class="row">

@@ -242,8 +242,8 @@ class RepairController extends Controller
                 ->addColumn(
                     'action',
                     function ($row) {
-                        $html = '<div class="btn-group">
-                                    <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info tw-w-max dropdown-toggle" 
+                        $html = '<div class="btn btn-group">
+                                    <button type="button" class="btn btn-xs btn-info tw-w-max dropdown-toggle"
                                         data-toggle="dropdown" aria-expanded="false">'.
                                         __('messages.actions').
                                         '<span class="caret"></span><span class="sr-only">Toggle Dropdown
@@ -252,7 +252,7 @@ class RepairController extends Controller
                                     <ul class="dropdown-menu dropdown-menu-left" role="menu">';
 
                         if (auth()->user()->can('repair.view') || auth()->user()->can('direct_sell.access')) {
-                            $html .= '<li><a href="#" data-href="'.action([\Modules\Repair\Http\Controllers\RepairController::class, 'show'], [$row->id]).'" class="btn-modal" data-container=".view_modal"><i class="fas fa-eye" aria-hidden="true"></i> '.__('messages.view').'</a></li>';
+                            $html .= '<li><a href="#" data-href="'.action([\Modules\Repair\Http\Controllers\RepairController::class, 'show'], [$row->id]).'" class="btn btn-modal" data-container=".view_modal"><i class="fas fa-eye" aria-hidden="true"></i> '.__('messages.view').'</a></li>';
                         }
 
                         if (auth()->user()->can('repair.update')) {
@@ -294,7 +294,7 @@ class RepairController extends Controller
                         $html .= '<li><a href="'.action([\App\Http\Controllers\TransactionPaymentController::class, 'show'], [$row->id]).'" class="view_payment_modal"><i class="fas fa-money-bill-alt"></i> '.__('purchase.view_payments').'</a></li>';
 
                         if (auth()->user()->can('send_notification')) {
-                            $html .= '<li><a href="#" data-href="'.action([\App\Http\Controllers\NotificationController::class, 'getTemplate'], ['transaction_id' => $row->id, 'template_for' => 'new_sale']).'" class="btn-modal" data-container=".view_modal"><i class="fa fa-envelope" aria-hidden="true"></i>'.__('lang_v1.new_sale_notification').'</a></li>';
+                            $html .= '<li><a href="#" data-href="'.action([\App\Http\Controllers\NotificationController::class, 'getTemplate'], ['transaction_id' => $row->id, 'template_for' => 'new_sale']).'" class="btn btn-modal" data-container=".view_modal"><i class="fa fa-envelope" aria-hidden="true"></i>'.__('lang_v1.new_sale_notification').'</a></li>';
                         }
 
                         $html .= '</ul></div>';
@@ -359,7 +359,7 @@ class RepairController extends Controller
                      'repair_status',
                      function ($row) {
                          $html = '<a data-href="'.action([\Modules\Repair\Http\Controllers\RepairController::class, 'editRepairStatus'], [$row->id]).'" class="edit_repair_status" data-orig-value="'.$row->repair_status.'" data-status-name="'.$row->repair_status.'">
-                                <span class="label " style="background-color:'.$row->status_color.';" >
+                                <span class="label" style="background-color:'.$row->status_color.';" >
                                     '.$row->repair_status.'
                                 </span>
                             </a>

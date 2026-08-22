@@ -13,7 +13,7 @@
 
                 <div class="row pos_sell tw-flex lg:tw-flex-row md:tw-flex-col sm:tw-flex-col tw-flex-col tw-items-start md:tw-gap-4">
 
-                    <div class="tw-px-3 lg:tw-px-0 lg:tw-pr-0 lg:tw-w-[60%] ">
+                    <div class="tw-px-3 lg:tw-px-0 lg:tw-pr-0 lg:tw-w-[60%]">
 
                         <div
                             class="tw-shadow-[rgba(17,_17,_26,_0.1)_0px_0px_16px] tw-rounded-2xl tw-bg-white tw-mb-2 md:tw-mb-8 tw-p-2 !tw-h-[80vh]">
@@ -37,26 +37,26 @@
                                             <thead>
                                                 <tr>
                                                     <th
-                                                        class="tex-center tw-text-sm md:!tw-text-base tw-font-bold @if (!empty($pos_settings['inline_service_staff'])) col-md-3 @else col-md-4 @endif">
+                                                        class="tex-center tw-text-sm md:!tw-text-base @if (!empty($pos_settings['inline_service_staff'])) col-md-3 @else col-md-4 @endif">
                                                         @lang('sale.product')
                                                         {{-- @show_tooltip(__('lang_v1.tooltip_sell_product_column')) --}}
                                                     </th>
                                                     <th
-                                                        class="text-center tw-text-sm md:!tw-text-base tw-font-bold col-md-3">
+                                                        class="text-center tw-text-sm md:!tw-text-base col-md-3">
                                                         @lang('sale.qty')
                                                     </th>
                                                     @if (!empty($pos_settings['inline_service_staff']))
                                                         <th
-                                                            class="text-center tw-text-sm md:!tw-text-base tw-font-bold col-md-2">
+                                                            class="text-center tw-text-sm md:!tw-text-base col-md-2">
                                                             @lang('restaurant.service_staff')
                                                         </th>
                                                     @endif
                                                     <th
-                                                        class="text-center tw-text-sm md:!tw-text-base tw-font-bold col-md-2">
+                                                        class="text-center tw-text-sm md:!tw-text-base col-md-2">
                                                         @lang('sale.price_inc_tax')
                                                     </th>
                                                     <th
-                                                        class="text-center tw-text-sm md:!tw-text-base tw-font-bold col-md-2">
+                                                        class="text-center tw-text-sm md:!tw-text-base col-md-2">
                                                         @lang('sale.subtotal')
                                                     </th>
                                                 </tr>
@@ -71,41 +71,41 @@
                                             <tr>
                                                 <td>
                                                     <b
-                                                        class="tw-text-base md:tw-text-lg tw-font-bold">@lang('sale.item'):</b>&nbsp;
+                                                        class="tw-text-base md:tw-text-lg">@lang('sale.item'):</b>&nbsp;
                                                     <span
                                                         class="total_quantity tw-text-base md:tw-text-lg tw-font-semibold">0</span>
                                                 </td>
                                                 <td>
                                                     <b
-                                                        class="tw-text-base md:tw-text-lg tw-font-bold">@lang('sale.total'):</b>&nbsp;
+                                                        class="tw-text-base md:tw-text-lg">@lang('sale.total'):</b>&nbsp;
                                                     <span
-                                                        class="price_total tw-text-base md:tw-text-lg tw-font-semibold ">0</span>
+                                                        class="price_total tw-text-base md:tw-text-lg tw-font-semibold">0</span>
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <td>
-                                                    <b class="tw-text-base md:tw-text-lg tw-font-bold">@lang('sale.discount')
+                                                    <b class="tw-text-base md:tw-text-lg">@lang('sale.discount')
                                                         (-):</b>
                                                     <span
                                                         class="tw-text-base md:tw-text-lg tw-font-semibold"
                                                         id="total_discount">0</span>
                                                 </td>
                                                 <td>
-                                                    <b class="tw-text-base md:tw-text-lg tw-font-bold">@lang('sale.order_tax')
+                                                    <b class="tw-text-base md:tw-text-lg">@lang('sale.order_tax')
                                                         (+):</b>
                                                     <span
                                                         class="tw-text-base md:tw-text-lg tw-font-semibold"
                                                          id="order_tax">0</span>
                                                 </td>
                                                 <td>
-                                                    <b class="tw-text-base md:tw-text-lg tw-font-bold ">@lang('sale.shipping')
+                                                    <b class="tw-text-base md:tw-text-lg">@lang('sale.shipping')
                                                         (+):</b>
                                                     <span
-                                                        class="tw-text-base md:tw-text-lg tw-font-semibold "id="shipping_charges_amount">0</span>
+                                                        class="tw-text-base md:tw-text-lg tw-font-semibold"id="shipping_charges_amount">0</span>
                                                 </td>
                                                 <td>
                                                     <b
-                                                        class="tw-text-base tw-text-green-900 tw-font-bold md:tw-text-2xl">@lang('sale.total_payable'):</b>
+                                                        class="tw-text-base tw-text-green-900 md:tw-text-2xl">@lang('sale.total_payable'):</b>
                                                     <span
                                                         class="tw-text-base tw-text-green-900 md:tw-text-2xl tw-font-semibold"
                                                         id="total_payable">0</span>
@@ -152,13 +152,13 @@
                         </div>
                     </div>
                     <div class="md:tw-no-padding lg:tw-w-[40%] tw-px-5 !tw-h-[80vh] tw-shadow-xl tw-border tw-border-gray-400/30 tw-rounded-lg tw-flex tw-items-center tw-justify-center">
-                        <div id="myCarousel" class="carousel slide !tw-h-full tw-w-full tw-transition-all tw-duration-500 tw-ease-in-out" data-ride="carousel">
+                        <div id="myCarousel" class="carousel slide !tw-h-full tw-w-full tw-duration-500 tw-ease-in-out" data-ride="carousel">
                             <!-- Indicators -->
                             <ol class="carousel-indicators">
                                 @foreach (range(1, 10) as $i)
                                     @if (isset($pos_settings['carousel_image_' . $i]))
                                         <li data-target="#myCarousel" data-slide-to="{{ $i - 1 }}" 
-                                            class="tw-inline-block tw-mx-1 tw-border-2 !tw-border-black tw-rounded-full tw-w-4 tw-h-4 !tw-bg-white tw-opacity-90 tw-shadow-lg tw-cursor-pointer tw-transition-all tw-duration-300 hover:tw-bg-white hover:tw-opacity-100 {{ $i == 1 ? 'tw-bg-white tw-opacity-100' : 'tw-bg-gray-500' }}">
+                                            class="tw-inline-block tw-mx-1 tw-border-2 !tw-border-black tw-rounded-full tw-w-4 tw-h-4 !tw-bg-white tw-opacity-90 tw-shadow-lg tw-cursor-pointer tw-duration-300 hover:tw-bg-white hover:tw-opacity-100 {{ $i == 1 ? 'tw-bg-white tw-opacity-100' : 'tw-bg-gray-500' }}">
                                         </li>
                                     @endif
                                 @endforeach
@@ -170,7 +170,7 @@
                                         <div class="item {{ $i == 1 ? 'active' : '' }} !tw-h-full tw-flex tw-items-center tw-justify-center">
                                             <div class="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
                                                 <img src="{{ url('uploads/carousel_images/' . $pos_settings['carousel_image_' . $i]) }}"
-                                                    class="!tw-h-full !tw-w-full tw-object-contain tw-rounded-lg tw-transition-all tw-duration-500">
+                                                    class="!tw-h-full !tw-w-full tw-object-contain tw-rounded-lg tw-duration-500">
                                             </div>
                                         </div>
                                     @endif

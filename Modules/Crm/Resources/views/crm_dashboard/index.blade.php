@@ -129,7 +129,7 @@
                     <!-- /.info-box -->
                 </div>
                 <!-- /.col -->
-                <div class="col-md-3 col-sm-6 col-xs-12 ">
+                <div class="col-md-3 col-sm-6 col-xs-12">
                     @component('components.static',
                        [
                         'svg_bg' => 'tw-bg-cyan-400',
@@ -266,7 +266,7 @@
                             <i class="fas fa fa-birthday-cake"></i>
                             <h3 class="box-title">@lang('crm::lang.birthdays')</h3>
                             <a data-href="{{ action([\Modules\Crm\Http\Controllers\CampaignController::class, 'create']) }}"
-                                class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent" id="wish_birthday">
+                                class="btn btn-xs btn-info" id="wish_birthday">
                                 <i class="fas fa-paper-plane"></i>
                                 @lang('crm::lang.send_wishes')
                             </a>

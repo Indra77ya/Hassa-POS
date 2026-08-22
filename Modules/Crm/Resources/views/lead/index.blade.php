@@ -6,7 +6,7 @@
 @include('crm::layouts.nav')
 <!-- Content Header (Page header) -->
 <section class="content-header no-print">
-   <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('crm::lang.leads')</h1>
+   <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">@lang('crm::lang.leads')</h1>
 </section>
 
 <section class="content no-print">
@@ -39,11 +39,11 @@
 	@component('components.widget', ['class' => 'box-primary', 'title' => __('crm::lang.all_leads')])
         @slot('tool')
             <div class="box-tools">
-                <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm btn-add-lead pull-right m-5" data-href="{{action([\Modules\Crm\Http\Controllers\LeadController::class, 'create'])}}">
+                <button type="button" class="btn btn-primary btn-sm btn-add-lead pull-right m-5" data-href="{{action([\Modules\Crm\Http\Controllers\LeadController::class, 'create'])}}">
                     <i class="fa fa-plus"></i> @lang('messages.add')
                 </button>
 
-                <div class="btn-group btn-group-toggle pull-right m-5" data-toggle="buttons">
+                <div class="btn btn-group btn-group-toggle pull-right m-5" data-toggle="buttons">
                     <label class="btn btn-info btn-sm active list">
                         <input type="radio" name="lead_view" value="list_view" class="lead_view" data-href="{{action([\Modules\Crm\Http\Controllers\LeadController::class, 'index']).'?lead_view=list_view'}}">
                         @lang('crm::lang.list_view')

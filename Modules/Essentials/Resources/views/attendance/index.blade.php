@@ -4,7 +4,7 @@
 @section('content')
 @include('essentials::layouts.nav_hrm')
 <section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('essentials::lang.attendance')
+    <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">@lang('essentials::lang.attendance')
     </h1>
 </section>
 <!-- Main content -->
@@ -28,11 +28,7 @@
             <div class="col-md-12 text-center">
                 <button 
                     type="button" 
-                    class="btn btn-app bg-blue clock_in_btn
-                        @if(!empty($clock_in))
-                            hide
-                        @endif
-                    "
+                    class="btn btn-app bg-blue clock_in_btn @if(!empty($clock_in)) hide @endif"
                     data-type="clock_in"
                     >
                     <i class="fas fa-arrow-circle-down"></i> @lang('essentials::lang.clock_in')
@@ -40,11 +36,7 @@
             &nbsp;&nbsp;&nbsp;
                 <button 
                     type="button" 
-                    class="btn btn-app bg-yellow clock_out_btn
-                        @if(empty($clock_in))
-                            hide
-                        @endif
-                    "  
+                    class="btn btn-app bg-yellow clock_out_btn @if(empty($clock_in)) hide @endif"
                     data-type="clock_out"
                     >
                     <i class="fas fa-hourglass-half fa-spin"></i> @lang('essentials::lang.clock_out')
@@ -87,7 +79,7 @@
                 <div class="tab-content">
                     @can('essentials.crud_all_attendance')
                         <div class="tab-pane active" id="shifts_tab">
-                            <button type="button" class="tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] pull-right"
+                            <button type="button" class="btn btn-primary pull-right"
                                 data-toggle="modal" data-target="#shift_modal">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -134,7 +126,7 @@
                             </div>
                             @can('essentials.crud_all_attendance')
                             <div class="col-md-6 spacer">
-                            <button type="button" class="tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] pull-right btn-modal"
+                            <button type="button" class="btn btn-primary pull-right btn-modal"
                                 data-href="{{action([\Modules\Essentials\Http\Controllers\AttendanceController::class, 'create'])}}" data-container="#attendance_modal">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round"

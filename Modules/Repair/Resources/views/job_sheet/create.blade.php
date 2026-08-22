@@ -6,7 +6,7 @@
 @include('repair::layouts.nav')
 <!-- Content Header (Page header) -->
 <section class="content-header no-print">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">
+    <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">
     	@lang('repair::lang.job_sheet')
         <small class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold" >@lang('repair::lang.create')</small>
         
@@ -316,13 +316,13 @@
         </div>
         <div class="col-sm-12 text-center">
             <input type="hidden" name="submit_type" id="submit_type">
-            <button type="submit" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-lg submit_button" value="save_and_add_parts" id="save_and_add_parts">
+            <button type="submit" class="btn btn-success btn-lg submit_button" value="save_and_add_parts" id="save_and_add_parts">
                 @lang('repair::lang.save_and_add_parts')
             </button>
-            <button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-lg submit_button" value="submit" id="save">
+            <button type="submit" class="btn btn-primary btn-lg submit_button" value="submit" id="save">
                 @lang('messages.save')
             </button>
-            <button type="submit" class="tw-dw-btn tw-dw-btn-info tw-text-white tw-dw-btn-lg submit_button" value="save_and_upload_docs" id="save_and_upload_docs">
+            <button type="submit" class="btn btn-info btn-lg submit_button" value="save_and_upload_docs" id="save_and_upload_docs">
                 @lang('repair::lang.save_and_upload_docs')
             </button>
         </div>

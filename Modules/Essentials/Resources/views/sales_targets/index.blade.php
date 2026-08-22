@@ -4,7 +4,7 @@
 @section('content')
 @include('essentials::layouts.nav_hrm')
 <section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black" >@lang('essentials::lang.sales_target')
+    <h1 class="tw-text-xl md:tw-text-3xl tw-text-black" >@lang('essentials::lang.sales_target')
     </h1>
 </section>
 <!-- Main content -->

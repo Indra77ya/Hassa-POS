@@ -61,7 +61,7 @@ class ProposalController extends Controller
                 ->addColumn(
                     'action',
                     function ($row) {
-                        $html = '<a href="#" data-href="'.action([\Modules\Crm\Http\Controllers\ProposalController::class, 'show'], [$row->id]).'" data-container=".view_modal" class="btn-modal tw-dw-btn tw-dw-btn-info tw-text-white tw-dw-btn-xs">
+                        $html = '<a href="#" data-href="'.action([\Modules\Crm\Http\Controllers\ProposalController::class, 'show'], [$row->id]).'" data-container=".view_modal" class="btn-modal btn btn-info btn-xs">
                             <i class="fa fa-eye" aria-hidden="true"></i> '
                             .__('messages.view').
                             '</a>';

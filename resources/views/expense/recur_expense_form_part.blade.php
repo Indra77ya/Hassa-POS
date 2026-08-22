@@ -32,7 +32,7 @@
 		    		$repetitions[$i] = str_ordinal($i);
 		        }
 		    @endphp
-		    <div class="recur_repeat_on_div col-md-4 @if(empty($expense->recur_interval_type)) hide @elseif(!empty($expense->recur_interval_type) && $expense->recur_interval_type != 'months') hide @endif">
+		    <div class="recur_repeat_on_div col-md-4 @if(empty($expense->recur_interval_type)) hide @elseif(!empty($expense->recur_interval_type) && $expense->recur_interval_type != 'months') @endif">
 		        <div class="form-group">
 		        	{!! Form::label('subscription_repeat_on', __('lang_v1.repeat_on') . ':' ) !!}
 		        	{!! Form::select('subscription_repeat_on', $repetitions, !empty($expense->subscription_repeat_on) ? $expense->subscription_repeat_on : null, ['class' => 'form-control', 'placeholder' => __('messages.please_select')]); !!}

@@ -8,7 +8,7 @@
 
 <!-- Content Header (Page header) -->
 <section class="content-header">
-	<h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang( 'messages.settings' )</h1>
+	<h1 class="tw-text-xl md:tw-text-3xl tw-text-black">@lang( 'messages.settings' )</h1>
 </section>
 <section class="content">
 	<div class="row">
@@ -39,11 +39,11 @@
 						'method' => 'post']) !!}
 						<div class="row mb-12">
 							<div class="col-md-8">
-								<button type="button" class="tw-dw-btn tw-dw-btn-error tw-text-white tw-dw-btn-sm tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] accounting_reset_data" data-href="{{action([\Modules\Accounting\Http\Controllers\SettingsController::class, 'resetData'])}}">
+								<button type="button" class="btn btn-danger btn-sm accounting_reset_data" data-href="{{action([\Modules\Accounting\Http\Controllers\SettingsController::class, 'resetData'])}}">
 									@lang('accounting::lang.reset_data')
 								</button>
 								@if($account_exist)
-									<a href="{{route('accounting.auto-map-settings')}}" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-sm tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] auto_map_default_accounts" style="margin-left: 10px;">
+									<a href="{{route('accounting.auto-map-settings')}}" class="btn btn-success btn-sm auto_map_default_accounts" style="margin-left: 10px;">
 										@lang('accounting::lang.auto_map_default_accounts')
 									</a>
 								@endif
@@ -75,7 +75,7 @@
 								<h4 style="margin-top: 0; font-weight: bold;"><i class="icon fas fa-ban"></i> @lang('accounting::lang.coa_not_available_title')</h4>
 								<p>@lang('accounting::lang.coa_not_available_text')</p>
 								<br>
-								<a href="{{route('accounting.create-default-accounts')}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-accent" style="border: 1px solid currentColor;">
+								<a href="{{route('accounting.create-default-accounts')}}" class="btn btn-xs btn-info" style="border: 1px solid currentColor;">
 									@lang( 'accounting::lang.add_default_accounts' ) <i class="fas fa-file-import"></i>
 								</a>
 							</div>
@@ -266,7 +266,7 @@
 					<div class="tab-pane" id="sub_type_tab">
 						<div class="row">
 							<div class="col-md-12">
-								<button class="tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] pull-right"id="add_account_sub_type" >
+								<button class="btn btn-primary pull-right"id="add_account_sub_type" >
 									<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
 										stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
 										class="icon icon-tabler icons-tabler-outline icon-tabler-plus">
@@ -301,7 +301,7 @@
 					<div class="tab-pane" id="detail_type_tab">
 						<div class="row">
 							<div class="col-md-12">
-								<button class="tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] pull-right"id="add_detail_type" >
+								<button class="btn btn-primary pull-right"id="add_detail_type" >
 									<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
 										stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
 										class="icon icon-tabler icons-tabler-outline icon-tabler-plus">

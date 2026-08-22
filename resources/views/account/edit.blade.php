@@ -64,7 +64,7 @@
                                 {!! Form::text('account_details['.$key.'][value]', !empty($account->account_details[$key]['value'])?$account->account_details[$key]['value']:null, ['class' => 'form-control']); !!}      
                             </td>
                             <td>
-                                <button type="button" class="tw-dw-btn tw-dw-btn-error tw-dw-btn-xs tw-text-white remove_account_detail_row"><i class="fas fa-trash"></i></button>
+                                <button type="button" class="btn btn-danger btn-xs remove_account_detail_row"><i class="fas fa-trash"></i></button>
                             </td>
                         </tr>
                     @endforeach
@@ -78,14 +78,14 @@
                                 {!! Form::text('account_details['.$i.'][value]', null, ['class' => 'form-control']); !!}      
                             </td>
                             <td>
-                                <button type="button" class="tw-dw-btn tw-dw-btn-error tw-dw-btn-xs tw-text-white remove_account_detail_row"><i class="fas fa-trash"></i></button>
+                                <button type="button" class="btn btn-danger btn-xs remove_account_detail_row"><i class="fas fa-trash"></i></button>
                             </td>
                         </tr>
                     @endfor
                 @endif
                 </tbody>
             </table>
-            <button type="button" class="tw-dw-btn tw-dw-btn-info tw-dw-btn-xs tw-text-white" id="add_account_detail_row" style="margin-bottom: 15px;"><i class="fas fa-plus"></i> Tambah Baris</button>
+            <button type="button" class="btn btn-info btn-xs" id="add_account_detail_row" style="margin-bottom: 15px;"><i class="fas fa-plus"></i> Tambah Baris</button>
             
             <div class="form-group">
                 {!! Form::label('note', __( 'brand.note' )) !!}
@@ -94,8 +94,8 @@
     </div>
 
     <div class="modal-footer">
-      <button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white">@lang( 'messages.update' )</button>
-      <button type="button" class="tw-dw-btn tw-dw-btn-neutral tw-text-white" data-dismiss="modal">@lang( 'messages.close' )</button>
+      <button type="submit" class="btn btn-primary">@lang( 'messages.update' )</button>
+      <button type="button" class="btn btn-default" data-dismiss="modal">@lang( 'messages.close' )</button>
     </div>
 
     {!! Form::close() !!}
@@ -122,7 +122,7 @@
             var html = '<tr>' +
                 '<td><input class="form-control" name="account_details[' + next_idx + '][label]" type="text"></td>' +
                 '<td><input class="form-control" name="account_details[' + next_idx + '][value]" type="text"></td>' +
-                '<td><button type="button" class="tw-dw-btn tw-dw-btn-error tw-dw-btn-xs tw-text-white remove_account_detail_row"><i class="fas fa-trash"></i></button></td>' +
+                '<td><button type="button" class="btn btn-danger btn-xs remove_account_detail_row"><i class="fas fa-trash"></i></button></td>' +
                 '</tr>';
             table.append(html);
         });

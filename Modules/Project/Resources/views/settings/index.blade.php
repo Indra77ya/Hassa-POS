@@ -4,7 +4,7 @@
 @section('content')
 @include('project::layouts.nav')
 <section class="content-header">
-	<h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black" >
+	<h1 class="tw-text-xl md:tw-text-3xl tw-text-black" >
     	@lang('project::lang.settings')
     </h1>
 </section>
@@ -60,7 +60,7 @@
                     </div>
                 </div>
                 <div class="col-md-12 text-center">
-                    <button type="submit" name="submit_action" value="save" class="tw-dw-btn tw-dw-btn-primary tw-dw-btn-lg tw-text-white submit_form">@lang('messages.save')</button>
+                    <button type="submit" name="submit_action" value="save" class="btn btn-primary btn-lg submit_form">@lang('messages.save')</button>
                 </div>
                 {!! Form::close() !!}
             </div>

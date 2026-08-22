@@ -4,7 +4,7 @@
 @section('content')
 @include('project::layouts.nav')
 <section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">
+    <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">
         @lang('report.reports')
         <small>
             @lang('project::lang.time_logs') @lang('project::lang.by_employees')

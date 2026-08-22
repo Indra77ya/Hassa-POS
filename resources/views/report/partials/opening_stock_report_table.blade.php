@@ -43,7 +43,7 @@
         <th>
             {{ __('report.total_expense') }}:
             @if(!empty($data['expenses_by_category']) && count($data['expenses_by_category']) > 0)
-                <a href="#" class="btn-link" style="font-size:11px; margin-left:5px;"
+                <a href="#" class="btn btn-link" style="font-size:11px; margin-left:5px;"
                    onclick="event.preventDefault(); $('.expense-category-row').toggle();">
                     <i class="fa fa-eye"></i> @lang('lang_v1.details')
                 </a>

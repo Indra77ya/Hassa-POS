@@ -44,7 +44,7 @@
 
 
         <div
-	class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md  tw-ring-gray-200">
+	class="lg:tw-col-span-1 tw-bg-white tw-shadow-sm tw-ring-1 hover:tw-shadow-md tw-ring-gray-200">
 	<div class="tw-p-4 sm:tw-p-5">
 		<div class="tw-flex tw-justify-start tw-gap-2.5">
 			<h3 class="box-title">@lang( 'superadmin::lang.add_new_business' ) <small>(@lang( 'superadmin::lang.add_business_help' ))</small></h3>

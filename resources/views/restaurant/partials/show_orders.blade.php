@@ -22,7 +22,7 @@
                                     }
                                     
                               @endphp
-                              <td><span class="label @if($order_status == 'cooked' ) bg-red @elseif($order_status == 'served') bg-green @elseif($order_status == 'partial_cooked') bg-orange @else bg-light-blue @endif">@lang('restaurant.order_statuses.' . $order_status) </span></td>
+                              <td><span class="label @if($order_status == 'cooked' ) bg-red @elseif($order_status 'served') bg-green 'partial_cooked') bg-orange @else bg-light-blue @endif">@lang('restaurant.order_statuses.' . $order_status) </span></td>
                         </tr>
             		<tr><th>@lang('contact.customer')</th><td>{{$order->customer_name}}</td></tr>
             		<tr><th>@lang('restaurant.table')</th><td>{{$order->table_name}}</td></tr>

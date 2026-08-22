@@ -93,8 +93,8 @@ class TransferController extends Controller
             return Datatables::of($transfers)
                 ->addColumn(
                     'action', function ($row) {
-                        $html = '<div class="btn-group">
-                                <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info tw-w-max dropdown-toggle" 
+                        $html = '<div class="btn btn-group">
+                                <button type="button" class="btn btn-xs btn-info tw-w-max dropdown-toggle"
                                     data-toggle="dropdown" aria-expanded="false">'.
                                     __('messages.actions').
                                     '<span class="caret"></span><span class="sr-only">Toggle Dropdown
@@ -104,7 +104,7 @@ class TransferController extends Controller
                         if (auth()->user()->can('accounting.edit_transfer')) {
                             $html .= '<li>
                                 <a href="#" data-href="'.action([\Modules\Accounting\Http\Controllers\TransferController::class, 'edit'],
-                                [$row->id]).'" class="btn-modal" data-container="#create_transfer_modal">
+                                [$row->id]).'" class="btn btn-modal" data-container="#create_transfer_modal">
                                     <i class="fas fa-edit"></i>'.__('messages.edit').'
                                 </a>
                             </li>';

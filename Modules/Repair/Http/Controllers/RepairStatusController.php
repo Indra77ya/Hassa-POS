@@ -59,7 +59,7 @@ class RepairStatusController extends Controller
                 ->editColumn('color', '{{$color}} <b><span style="color: {{$color}};" >&bull;</span></b>')
                 ->addColumn(
                     'action',
-                    '<button data-href="{{action(\'\Modules\Repair\Http\Controllers\RepairStatusController@edit\', [$id])}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-primary btn-modal" data-container=".view_modal"><i class="glyphicon glyphicon-edit"></i> @lang("messages.edit")</button>'
+                    '<button data-href="{{action(\'\Modules\Repair\Http\Controllers\RepairStatusController@edit\', [$id])}}" class="btn btn-xs btn-primary btn-modal" data-container=".view_modal"><i class="glyphicon glyphicon-edit"></i> @lang("messages.edit")</button>'
                 )
                 ->removeColumn(['id', 'is_completed_status'])
                 ->rawColumns([0, 1, 3])

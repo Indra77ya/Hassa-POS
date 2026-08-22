@@ -60,5 +60,5 @@
 		$price = $price * $ingredient->multiplier;
 	@endphp
 	<td><span class="ingredient_price">{{@num_format($price)}}</span></td>
-	<td><button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-error remove_ingredient"><i class="fas fa-times"></i></button></td>
+	<td><button type="button" class="btn btn-xs btn-danger remove_ingredient"><i class="fas fa-times"></i></button></td>
 </tr>

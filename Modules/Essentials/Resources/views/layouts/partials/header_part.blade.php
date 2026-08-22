@@ -2,7 +2,7 @@
 
 
     <button type="button" data-type="clock_in" data-toggle="tooltip" data-placement="bottom" title="@lang('essentials::lang.clock_in')"
-        class="@if (!empty($clock_in)) hide @endif clock_in_btn  tw-inline-flex tw-items-center tw-justify-center tw-text-sm tw-font-medium tw-text-white tw-transition-all tw-duration-200 tw-bg-@if(!empty(session('business.theme_color'))){{session('business.theme_color')}}@else{{'primary'}}@endif-800 hover:tw-bg-@if(!empty(session('business.theme_color'))){{session('business.theme_color')}}@else{{'primary'}}@endif-700 tw-p-1.5 tw-rounded-lg tw-ring-1 hover:tw-text-white tw-ring-white/10">
+        class="@if (!empty($clock_in)) hide @endif clock_in_btn tw-inline-flex tw-items-center tw-justify-center tw-text-sm tw-font-medium tw-bg-@if(!empty(session('business.theme_color'))){{session('business.theme_color')}}@else{{'primary'}}@endif-800 hover:tw-bg-@if(!empty(session('business.theme_color'))){{session('business.theme_color')}}@else{{'primary'}}@endif-700 tw-p-1.5 tw-rounded-lg tw-ring-1 hover:tw-text-white tw-ring-white/10">
         <span class="tw-sr-only">
             Clock In
         </span>
@@ -17,7 +17,7 @@
 
 
     <button type="button"
-        class="@if (empty($clock_in)) hide @endif clock_out_btn tw-inline-flex tw-items-center tw-justify-center tw-text-sm tw-font-medium tw-text-white tw-transition-all tw-duration-200 tw-bg-primary-800 hover:tw-bg-primary-700 tw-p-1.5 tw-rounded-lg tw-ring-1 tw-ring-white/10 hover:tw-text-white"
+        class="@if (empty($clock_in)) hide @endif clock_out_btn tw-inline-flex tw-items-center tw-justify-center tw-text-sm tw-font-medium tw-bg-primary-800 hover:tw-bg-primary-700 tw-p-1.5 tw-rounded-lg tw-ring-1 tw-ring-white/10 hover:tw-text-white"
         data-type="clock_out" data-toggle="popover" data-placement="bottom" data-html="true"
         title="@lang('essentials::lang.clock_out') @if (!empty($clock_in)) <br>
 				<small>

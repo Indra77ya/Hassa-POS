@@ -51,7 +51,7 @@
 
 <!-- Content Header (Page header) -->
 <section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang( 'report.tax_report' )
+    <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">@lang( 'report.tax_report' )
         <small class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold">@lang( 'report.tax_report_msg' )</small>
     </h1>
 </section>
@@ -146,7 +146,7 @@
     </div>
     <div class="row no-print">
         <div class="col-sm-12">
-            <button class="tw-dw-btn tw-dw-btn-primary tw-text-white pull-right tw-mb-2" aria-label="Print"
+            <button class="btn btn-primary pull-right tw-mb-2" aria-label="Print"
                 onclick="window.print();">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"

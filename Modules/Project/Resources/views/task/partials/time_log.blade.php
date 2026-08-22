@@ -7,7 +7,7 @@
         </h4>
         @if($can_crud_timelog || $is_lead_or_admin)
             <div class="box-tools pull-right">
-                <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm add_time_log pull-right" data-href="{{action([\Modules\Project\Http\Controllers\ProjectTimeLogController::class, 'create'], ['task_id' => $project_task->id, 'project_id' => $project_task->project_id])}}">
+                <button type="button" class="btn btn-primary btn-sm add_time_log pull-right" data-href="{{action([\Modules\Project\Http\Controllers\ProjectTimeLogController::class, 'create'], ['task_id' => $project_task->id, 'project_id' => $project_task->project_id])}}">
                     @lang('messages.add')&nbsp;
                     <i class="fa fa-plus"></i>
                 </button>

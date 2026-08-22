@@ -6,7 +6,7 @@
 
     <!-- Content Header (Page header) -->
     <section class="content-header">
-        <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('superadmin::lang.packages') <small>@lang('superadmin::lang.edit_package')</small></h1>
+        <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">@lang('superadmin::lang.packages') <small>@lang('superadmin::lang.edit_package')</small></h1>
         <!-- <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
             <li class="active">Here</li>
@@ -19,7 +19,7 @@
         {!! Form::open(['route' => ['packages.update', $packages->id], 'method' => 'put', 'id' => 'edit_package_form']) !!}
 
         <div
-            class="tw-transition-all  lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md  tw-ring-gray-200">
+            class="lg:tw-col-span-1 tw-bg-white tw-shadow-sm tw-ring-1 hover:tw-shadow-md tw-ring-gray-200">
             <div class="tw-p-4 sm:tw-p-5">
                 <div class="tw-flow-root tw-mt-5 tw-border-b tw-border-gray-200">
                     <div class="tw-mx-4 tw--my-2-auto sm:tw--mx-5">
@@ -205,7 +205,7 @@
                                 @endforeach
                             @endforeach
 
-                            <div class="col-sm-3 ">
+                            <div class="col-sm-3">
                                 <div class="checkbox">
                                     <label>
                                         {!! Form::checkbox('is_active', 1, $packages->is_active, ['class' => 'input-icheck']) !!}
@@ -213,7 +213,7 @@
                                     </label>
                                 </div>
                             </div>
-                            <div class="col-sm-3 ">
+                            <div class="col-sm-3">
                                 <div class="checkbox">
                                     <label>
                                         {!! Form::checkbox('mark_package_as_popular', 1, $packages->mark_package_as_popular, [

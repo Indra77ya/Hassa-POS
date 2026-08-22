@@ -4,7 +4,7 @@
 @section('content')
     @include('superadmin::layouts.nav')
     <section class="content-header">
-        <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">
+        <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">
             @lang('superadmin::lang.welcome_superadmin')
         </h1>
     </section>
@@ -15,7 +15,7 @@
 
         <div class="row">
             <div class="col-md-12 col-xs-12">
-                <div class="btn-group pull-right" data-toggle="buttons">
+                <div class="btn btn-group pull-right" data-toggle="buttons">
                     <label class="btn btn-info active">
                         <input type="radio" name="date-filter" data-start="{{ date('Y-m-d') }}"
                             data-end="{{ date('Y-m-d') }}" checked> {{ __('home.today') }}
@@ -106,7 +106,7 @@
         <div class="row">
             <div class="col-sm-12">
                 <div
-                    class="tw-transition-all lg:tw-col-span-2 xl:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md  tw-ring-gray-200">
+                    class="lg:tw-col-span-2 xl:tw-col-span-1 tw-bg-white tw-shadow-sm tw-ring-1 hover:tw-shadow-md tw-ring-gray-200">
                     <div class="tw-p-4 sm:tw-p-5">
                         <div class="tw-flex tw-items-center tw-gap-2.5">
                             <svg aria-hidden="true" class="tw-size-5 tw-text-sky-500 tw-shrink-0"

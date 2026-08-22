@@ -30,8 +30,8 @@
         <div class="tw-w-full md:tw-w-1/3">
             <div class="tw-flex tw-items-center tw-gap-3">
                 <div class="tw-flex tw-items-center tw-gap-2 tw-bg-slate-50 tw-border tw-border-slate-100 tw-py-1 tw-px-3 tw-rounded-full">
-                    <span class="tw-text-[10px] tw-font-bold tw-text-slate-400 tw-uppercase tw-tracking-wider">@lang('sale.location')</span>
-                    <span class="tw-text-xs tw-font-bold tw-text-slate-700">
+                    <span class="tw-text-[10px] tw-text-slate-400 tw-uppercase tw-tracking-wider">@lang('sale.location')</span>
+                    <span class="tw-text-xs tw-text-slate-700">
                         @if (empty($transaction->location_id))
                             @if (count($business_locations) > 1)
                                 {!! Form::select(
@@ -61,7 +61,7 @@
 
                 @if (empty($pos_settings['hide_product_suggestion']))
                     <button type="button" title="{{ __('lang_v1.view_products') }}" data-placement="bottom"
-                        class="tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-rounded-xl tw-w-9 tw-h-9 tw-text-gray-600 btn-modal pull-right tw-block md:tw-hidden"
+                        class="btn tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-text-gray-600 btn-modal pull-right tw-block md:tw-hidden"
                         data-toggle="modal" data-target="#mobile_product_suggestion_modal">
                         <strong><i class="fa fa-cubes fa-lg tw-text-emerald-500 !tw-text-sm"></i></strong>
                     </button>
@@ -78,7 +78,7 @@
         <div class="tw-w-full md:tw-w-2/3 !tw-p-0 tw-flex tw-items-center tw-justify-end tw-gap-2.5 tw-flex-wrap md:tw-flex-nowrap tw-hidden md:tw-flex"
             id="pos_header_more_options">
             <a href="{{ $go_back_url }}" title="{{ __('lang_v1.go_back') }}"
-                class="tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-rounded-xl tw-w-9 tw-h-9 tw-text-gray-600 tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95">
+                class="tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-text-gray-600 hover:-tw-translate-y-px active:tw-scale-95">
                 <strong>
                     <i class="fa fa-backward tw-text-blue-500 !tw-text-sm"></i>
                     <span class="tw-inline md:tw-hidden tw-ml-1">{{ __('lang_v1.go_back') }}</span>
@@ -87,7 +87,7 @@
 
             @if (!isset($pos_settings['hide_recent_trans']) || $pos_settings['hide_recent_trans'] == 0)
                 <button type="button"
-                    class="md:tw-hidden tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-rounded-xl tw-w-9 tw-h-9 tw-text-gray-600 tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95"
+                    class="md:tw-hidden tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-text-gray-600 hover:-tw-translate-y-px active:tw-scale-95"
                     data-toggle="modal" data-target="#recent_transactions_modal" id="recent-transactions">
                         <strong>
                             <i class="fa fa-clock tw-text-indigo-500 !tw-text-sm"></i>
@@ -99,7 +99,7 @@
             @if (!empty($pos_settings['inline_service_staff']))
                 <button type="button" id="show_service_staff_availability"
                     title="{{ __('lang_v1.service_staff_availability') }}"
-                    class="tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-rounded-xl tw-w-9 tw-h-9 tw-text-gray-600 tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95"
+                    class="tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-text-gray-600 hover:-tw-translate-y-px active:tw-scale-95"
                     data-container=".view_modal"
                     data-href="{{ action([\App\Http\Controllers\SellPosController::class, 'showServiceStaffAvailibility']) }}">
                     <strong>
@@ -111,7 +111,7 @@
 
             @can('close_cash_register')
                 <button type="button" id="close_register" title="{{ __('cash_register.close_register') }}"
-                    class="tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-rounded-xl tw-w-9 tw-h-9 tw-text-gray-600 btn-modal tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95"
+                    class="btn tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-text-gray-600 btn-modal hover:-tw-translate-y-px active:tw-scale-95"
                     data-container=".close_register_modal"
                     data-href="{{ action([\App\Http\Controllers\CashRegisterController::class, 'getCloseRegister']) }}">
                     <strong>
@@ -125,10 +125,10 @@
                 !empty($pos_settings['inline_service_staff']) ||
                     (in_array('tables', $enabled_modules) || in_array('service_staff', $enabled_modules)))
                 <button type="button"
-                    class="tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-rounded-xl tw-w-9 tw-h-9 tw-text-gray-600 popover-default tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95"
+                    class="tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-text-gray-600 popover-default hover:-tw-translate-y-px active:tw-scale-95"
                     id="service_staff_replacement" title="{{ __('restaurant.service_staff_replacement') }}"
                     data-toggle="popover" data-trigger="click"
-                    data-content='<div class="m-8"><input type="text" class="form-control" placeholder="@lang('sale.invoice_no')" id="send_for_sell_service_staff_invoice_no"></div><div class="w-100 text-center"><button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-error" id="send_for_sercice_staff_replacement">@lang('lang_v1.send')</button></div>'
+                    data-content='<div class="m-8"><input type="text" class="form-control" placeholder="@lang('sale.invoice_no')" id="send_for_sell_service_staff_invoice_no"></div><div class="w-100 text-center"><button type="button" class="btn btn-xs btn-danger" id="send_for_sercice_staff_replacement">@lang('lang_v1.send')</button></div>'
                     data-html="true" data-placement="bottom">
                     <strong>
                         <i class="fa fa-user-plus tw-text-violet-500 !tw-text-sm"></i>
@@ -139,7 +139,7 @@
 
             @can('view_cash_register')
                 <button type="button" id="register_details" title="{{ __('cash_register.register_details') }}"
-                    class="tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-rounded-xl tw-w-9 tw-h-9 tw-text-gray-600 btn-modal tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95"
+                    class="btn tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-text-gray-600 btn-modal hover:-tw-translate-y-px active:tw-scale-95"
                     data-container=".register_details_modal"
                     data-href="{{ action([\App\Http\Controllers\CashRegisterController::class, 'getRegisterDetails']) }}">
                     <strong>
@@ -150,7 +150,7 @@
             @endcan
 
             <button title="@lang('lang_v1.calculator')" id="btnCalculator" type="button"
-                class="tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-rounded-xl tw-w-9 tw-h-9 tw-text-gray-600 popover-default tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95"
+                class="tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-text-gray-600 popover-default hover:-tw-translate-y-px active:tw-scale-95"
                 data-toggle="popover" data-trigger="click" data-content='@include('layouts.partials.calculator')' data-html="true"
                 data-placement="bottom">
                 <strong>
@@ -160,9 +160,9 @@
             </button>
 
             <button type="button"
-                class="tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-rounded-xl tw-w-9 tw-h-9 tw-text-gray-600 popover-default tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95"
+                class="tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-text-gray-600 popover-default hover:-tw-translate-y-px active:tw-scale-95"
                 id="return_sale" title="@lang('lang_v1.sell_return')" data-toggle="popover" data-trigger="click"
-                data-content='<div class="m-8"><input type="text" class="form-control" placeholder="@lang('sale.invoice_no')" id="send_for_sell_return_invoice_no"></div><div class="w-100 text-center"><button type="button" class="tw-dw-btn tw-dw-btn-error tw-text-white tw-dw-btn-sm" id="send_for_sell_return">@lang('lang_v1.send')</button></div>'
+                data-content='<div class="m-8"><input type="text" class="form-control" placeholder="@lang('sale.invoice_no')" id="send_for_sell_return_invoice_no"></div><div class="w-100 text-center"><button type="button" class="btn btn-danger btn-sm" id="send_for_sell_return">@lang('lang_v1.send')</button></div>'
                 data-html="true" data-placement="bottom">
                 <strong>
                     <i class="fas fa-undo tw-text-rose-500 !tw-text-sm"></i>
@@ -171,7 +171,7 @@
             </button>
 
             <button type="button" title="{{ __('lang_v1.full_screen') }}"
-                class="tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-rounded-xl tw-w-9 tw-h-9 tw-text-gray-600 tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95"
+                class="tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-text-gray-600 hover:-tw-translate-y-px active:tw-scale-95"
                 id="full_screen">
                 <strong>
                     <i class="fa fa-window-maximize tw-text-slate-500 !tw-text-sm"></i>
@@ -180,7 +180,7 @@
             </button>
 
             <button type="button" id="view_suspended_sales" title="{{ __('lang_v1.view_suspended_sales') }}"
-                class="tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-rounded-xl tw-w-9 tw-h-9 tw-text-gray-600 btn-modal tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95"
+                class="btn tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-text-gray-600 btn-modal hover:-tw-translate-y-px active:tw-scale-95"
                 data-container=".view_modal" data-href="{{ $view_suspended_sell_url }}">
                 <strong>
                     <i class="fa fa-pause-circle tw-text-amber-500 !tw-text-sm"></i>
@@ -190,7 +190,7 @@
 
             @if (!empty($pos_settings['customer_display_screen']))
                 <a href="{{route('pos_display')}}" id="customer_display_screen" onclick="window.open(this.href, 'customer_display', 'width='+screen.width+',height='+screen.height+',top=0,left=0'); return false;" title="{{ __('lang_v1.customer_display_screen') }}"
-                    class="tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-rounded-xl tw-w-9 tw-h-9 tw-text-gray-600 tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95">
+                    class="tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-text-gray-600 hover:-tw-translate-y-px active:tw-scale-95">
                     <strong>
                         <i class="fa fa-tv tw-text-blue-500 !tw-text-sm"></i>
                         <span class="tw-inline md:tw-hidden tw-ml-1">{{ __('lang_v1.customer_display_screen') }}</span>
@@ -206,17 +206,17 @@
                 @can('sell.create')
                     <a href="{{ action([\App\Http\Controllers\SellPosController::class, 'create']) }}"
                         title="@lang('sale.pos_sale')"
-                        class="tw-shadow-sm tw-bg-emerald-50 hover:tw-bg-emerald-100 tw-border tw-border-emerald-100 tw-flex tw-items-center tw-justify-center tw-rounded-md tw-py-2 tw-px-4 tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95">
-                        <strong class="tw-text-xs tw-text-emerald-700 tw-font-bold"><i class="fa fa-th-large !tw-text-sm"></i> &nbsp;
+                        class="tw-shadow-sm tw-bg-emerald-50 hover:tw-bg-emerald-100 tw-border tw-border-emerald-100 tw-flex tw-items-center tw-justify-center tw-rounded-md tw-py-2 tw-px-4 hover:-tw-translate-y-px active:tw-scale-95">
+                        <strong class="tw-text-xs tw-text-emerald-700"><i class="fa fa-th-large !tw-text-sm"></i> &nbsp;
                             @lang('sale.pos_sale')</strong>
                     </a>
                 @endcan
             @endif
             @can('expense.add')
                 <button type="button" title="{{ __('expense.add_expense') }}" data-placement="bottom"
-                    class="tw-shadow-sm tw-bg-rose-50 hover:tw-bg-rose-100 tw-border tw-border-rose-100 tw-flex tw-items-center tw-justify-center tw-rounded-md tw-py-2 tw-px-4 btn-modal tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95"
+                    class="btn tw-shadow-sm tw-bg-rose-50 hover:tw-bg-rose-100 tw-border tw-border-rose-100 tw-flex tw-items-center tw-justify-center tw-rounded-md tw-py-2 tw-px-4 btn-modal hover:-tw-translate-y-px active:tw-scale-95"
                     id="add_expense">
-                    <strong class="tw-text-xs tw-text-rose-700 tw-font-bold"><i class="fa fas fa-minus-circle"></i> &nbsp;@lang('expense.add_expense')</strong>
+                    <strong class="tw-text-xs tw-text-rose-700"><i class="fa fas fa-minus-circle"></i> &nbsp;@lang('expense.add_expense')</strong>
                 </button>
             @endcan
 

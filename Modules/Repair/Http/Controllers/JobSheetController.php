@@ -169,8 +169,8 @@ class JobSheetController extends Controller
 
             return DataTables::of($job_sheets)
                 ->addColumn('action', function ($row) {
-                    $html = '<div class="btn-group">
-                                <button class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-info tw-w-max dropdown-toggle" type="button"  data-toggle="dropdown" aria-expanded="false">
+                    $html = '<div class="btn btn-group">
+                                <button class="btn btn-xs btn-info tw-w-max dropdown-toggle" type="button"  data-toggle="dropdown" aria-expanded="false">
                                     '.__('messages.action').'
                                     <span class="caret"></span>
                                     <span class="sr-only">
@@ -282,7 +282,7 @@ class JobSheetController extends Controller
                 })
                 ->editColumn('status', function ($row) {
                     $html = '<a data-href="'.action([\Modules\Repair\Http\Controllers\JobSheetController::class, 'editStatus'], [$row->id]).'" class="edit_job_sheet_status cursor-pointer" data-orig-value="'.$row->status.'" data-status-name="'.$row->status.'">
-                                <span class="label " style="background-color:'.$row->status_color.';" >
+                                <span class="label" style="background-color:'.$row->status_color.';" >
                                     '.$row->status.'
                                 </span>
                             </a>

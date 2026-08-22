@@ -5,7 +5,7 @@
 
 <!-- Content Header (Page header) -->
 <section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">
+    <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">
         @lang('lang_v1.manage_modules')
         <small class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold">@lang('lang_v1.only_superadmin_can_access_manage_modules')</small>
     </h1>
@@ -13,12 +13,12 @@
         <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
         <li class="active">Here</li>
     </ol> -->
-    <button class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm upload_module_btn tw-mt-4">
+    <button class="btn btn-primary btn-sm upload_module_btn tw-mt-4">
         <i class="fas fa-upload"></i>
         @lang('lang_v1.upload_module')
     </button>
 
-    <a class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm pull-right tw-mt-4" href="{{action([\App\Http\Controllers\Install\ModulesController::class, 'regenerate'])}}">
+    <a class="btn btn-primary btn-sm pull-right tw-mt-4" href="{{action([\App\Http\Controllers\Install\ModulesController::class, 'regenerate'])}}">
         <i class="fas fa-tools"></i>
         @lang('lang_v1.regenerate') @show_tooltip(__('lang_v1.regenerate_help'))
     </a>
@@ -43,11 +43,11 @@
                     </div>
                     <div class="clearfix"></div>
                     <div class="col-sm-4">
-                        <button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm">
+                        <button type="submit" class="btn btn-primary btn-sm">
                             @lang('lang_v1.upload')
                         </button>
                         &nbsp;
-                        <button type="button" class="tw-dw-btn tw-dw-btn-error tw-text-white tw-dw-btn-sm cancel_upload_btn">
+                        <button type="button" class="btn btn-danger btn-sm cancel_upload_btn">
                             @lang('messages.cancel')
                         </button>
                     </div>
@@ -74,7 +74,7 @@
 
                         @if($module['is_enabled'])
                             @if(!$module['is_installed'])
-                                <a class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent"
+                                <a class="btn btn-xs btn-info"
                                 @if($is_demo)
                                     href="#"
                                     title="@lang('lang_v1.disabled_in_demo')"
@@ -115,11 +115,11 @@
                                 @method('PUT')
                                 @csrf
                                 <input type="hidden" name="action_type" value="activate">
-                                <button class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-accent">@lang('lang_v1.activate')</button>
+                                <button class="btn btn-xs btn-info">@lang('lang_v1.activate')</button>
                             </form>
                         @endif
 
-                        <a class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info"
+                        <a class="btn btn-xs btn-info"
                             @if($is_demo)
                                 href="#"
                                 title="@lang('lang_v1.disabled_in_demo')"
@@ -137,7 +137,7 @@
                             >
                                 @method('DELETE')
                                 @csrf
-                                <button class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-error"
+                                <button class="btn btn-xs btn-danger"
                                     @if($is_demo)
                                     disabled="disabled" 
                                     title="@lang('lang_v1.disabled_in_demo')"
@@ -177,7 +177,7 @@
                         <td>
                             <strong>{{$mod->dn}}</strong> <br/>
                             <button onclick="window.open('{{$mod->u}}', '_blank')" 
-                            class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-accent"><i class="fas fa-money-bill"></i> @lang('lang_v1.buy')</button>
+                            class="btn btn-xs btn-info"><i class="fas fa-money-bill"></i> @lang('lang_v1.buy')</button>
                         </td>
                         <td>
                             {{$mod->d}}

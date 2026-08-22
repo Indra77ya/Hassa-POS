@@ -1,5 +1,5 @@
 @if(!empty($__subscription) && env('APP_ENV') != 'demo')
-<button type="button" class="tw-inline-flex tw-transition-all tw-ring-1 tw-ring-white/10 hover:tw-text-white tw-cursor-pointer tw-duration-200 tw-bg-@if(!empty(session('business.theme_color'))){{session('business.theme_color')}}@else{{'primary'}}@endif-800 hover:tw-bg-@if(!empty(session('business.theme_color'))){{session('business.theme_color')}}@else{{'primary'}}@endif-700 tw-p-2 tw-rounded-lg tw-items-center tw-justify-center tw-text-white" aria-hidden="true" data-toggle="popover" data-html="true" title="@lang('superadmin::lang.active_package_description')" data-placement="bottom" data-trigger="hover" data-content="
+<button type="button" class="tw-inline-flex tw-ring-1 tw-ring-white/10 hover:tw-text-white tw-cursor-pointer tw-bg-@if(!empty(session('business.theme_color'))){{session('business.theme_color')}}@else{{'primary'}}@endif-800 hover:tw-bg-@if(!empty(session('business.theme_color'))){{session('business.theme_color')}}@else{{'primary'}}@endif-700 tw-p-2 tw-rounded-lg tw-items-center tw-justify-center" aria-hidden="true" data-toggle="popover" data-html="true" title="@lang('superadmin::lang.active_package_description')" data-placement="bottom" data-trigger="hover" data-content="
     <table class='table table-condensed'>
      <tr class='text-center'> 
         <td colspan='2'>

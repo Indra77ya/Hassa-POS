@@ -4,7 +4,7 @@
 	@include('crm::layouts.nav')
 	<!-- Content Header (Page header) -->
 	<section class="content-header no-print">
-	   <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">
+	   <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">
 	   		@lang('crm::lang.proposal_template')
 	   		<small class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold">@lang('messages.edit')</small>
 	   </h1>
@@ -25,7 +25,7 @@
 						</div>
 					</div>
 				@endif
-				<button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white ladda-button pull-right" data-style="expand-right">
+				<button type="submit" class="btn btn-primary ladda-button pull-right" data-style="expand-right">
                     <span class="ladda-label">@lang('messages.update')</span>
                 </button>
 			{!! Form::close() !!}

@@ -4,7 +4,7 @@
 <div class="row">
 	<div class="col-md-12">
 		<hr>
-		<button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm more_btn" data-target="#add_contact_person_div_{{$index}}">@lang('crm::lang.add_contact_person', ['number' => $index + 1]) <i class="fa fa-chevron-down"></i></button>
+		<button type="button" class="btn btn-primary btn-sm more_btn" data-target="#add_contact_person_div_{{$index}}">@lang('crm::lang.add_contact_person', ['number' => $index + 1]) <i class="fa fa-chevron-down"></i></button>
 	</div>
 </div>
 <br>

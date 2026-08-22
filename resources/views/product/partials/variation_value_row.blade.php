@@ -84,7 +84,7 @@
             ]); !!}
             
             {{-- Upload button --}}
-            <label for="variation_img_{{$variation_index}}_{{$value_index}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-primary variation-upload-btn" style="cursor: pointer; margin: 0;">
+            <label for="variation_img_{{$variation_index}}_{{$value_index}}" class="btn btn-xs btn-primary variation-upload-btn" style="cursor: pointer; margin: 0;">
                 <i class="fas fa-camera"></i> 
                 <span class="image-count-badge" style="display: none;"></span>
             </label>
@@ -94,7 +94,7 @@
         </div>
     </td>
     <td>
-        <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-error remove_variation_value_row"><i class="fa fa-trash"></i></button>
+        <button type="button" class="btn btn-xs btn-danger remove_variation_value_row"><i class="fa fa-trash"></i></button>
         <input type="hidden" class="variation_row_index" value="{{$value_index}}">
     </td>
 </tr>

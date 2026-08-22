@@ -5,7 +5,7 @@
 
 <!-- Content Header (Page header) -->
 <section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('barcode.barcodes')
+    <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">@lang('barcode.barcodes')
         <small class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold">@lang('barcode.manage_your_barcodes')</small>
     </h1>
     <!-- <ol class="breadcrumb">

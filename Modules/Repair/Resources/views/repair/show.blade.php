@@ -270,8 +270,8 @@
                         @forelse($sell->media as $media)
                         <tr>
                             <td>{{$media->display_name}}</td>
-                            <td><a href="{{$media->display_url}}" target="_blank" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-info"><i class="fa fa-external-link"></i></a></td>
-                            <td><a href="{{action([\Modules\Repair\Http\Controllers\RepairController::class, 'deleteMedia'], $media->id)}}"" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-error delete_media"><i class="fa fa-trash"></i></a></td>
+                            <td><a href="{{$media->display_url}}" target="_blank" class="btn btn-xs btn-info"><i class="fa fa-external-link"></i></a></td>
+                            <td><a href="{{action([\Modules\Repair\Http\Controllers\RepairController::class, 'deleteMedia'], $media->id)}}"" class="btn btn-xs btn-danger delete_media"><i class="fa fa-trash"></i></a></td>
                         </tr>
                         @empty
                         <tr>
@@ -316,12 +316,12 @@
     </div>
   </div>
   <div class="modal-footer">
-    <a href="#" class="print-invoice tw-dw-btn tw-dw-btn-primary tw-text-white" data-href="{{route('repair.customerCopy', [$sell->id])}}">
+    <a href="#" class="print-invoice btn btn-primary" data-href="{{route('repair.customerCopy', [$sell->id])}}">
         <i class="fa fa-print" aria-hidden="true"></i>
         @lang("repair::lang.print_customer_copy")
     </a>
-    <a href="#" class="print-invoice tw-dw-btn tw-dw-btn-primary tw-text-white" data-href="{{route('sell.printInvoice', [$sell->id])}}"><i class="fa fa-print" aria-hidden="true"></i> @lang("messages.print")</a>
-      <button type="button" class="tw-dw-btn tw-dw-btn-neutral tw-text-white no-print" data-dismiss="modal">@lang( 'messages.close' )</button>
+    <a href="#" class="print-invoice btn btn-primary" data-href="{{route('sell.printInvoice', [$sell->id])}}"><i class="fa fa-print" aria-hidden="true"></i> @lang("messages.print")</a>
+      <button type="button" class="btn btn-default no-print" data-dismiss="modal">@lang( 'messages.close' )</button>
     </div>
   </div>
 </div>

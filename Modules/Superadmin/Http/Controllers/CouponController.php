@@ -37,11 +37,11 @@ class CouponController extends Controller
             return Datatables::of($coupons)
                 ->editColumn('created_at', '{{@format_datetime($created_at)}}')
                 ->addColumn('action', function ($row) {
-                    $html = '<a type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary " href="' . action([\Modules\Superadmin\Http\Controllers\CouponController::class, 'edit'], ['coupon' => $row->id]) . '">'
+                    $html = '<a type="button" class="btn btn-xs btn-primary" href="' . action([\Modules\Superadmin\Http\Controllers\CouponController::class, 'edit'], ['coupon' => $row->id]) . '">'
                         . __('superadmin::lang.edit_coupon') . '</a>';
 
                     $html .= ' <a href="' . action([\Modules\Superadmin\Http\Controllers\CouponController::class, 'destroy'], [$row->id]) . '"
-                class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-error delete_coupon_confirmation">' . __('messages.delete') . '</a>';
+                class="btn btn-xs btn-danger delete_coupon_confirmation">' . __('messages.delete') . '</a>';
                     return $html;
                 })
                 ->editColumn('applied_on_packages', function ($row) {

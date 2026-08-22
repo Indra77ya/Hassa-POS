@@ -8,7 +8,7 @@
 
   {{-- Custom title bar — replaces Bootstrap .popover-title so mouse events reach #calc-hist-btn --}}
   <div class="tw-flex tw-items-center tw-justify-between tw-bg-slate-50 tw-border-b tw-border-slate-200 tw--mx-2 tw--mt-2 tw-mb-2 tw-px-2.5 tw-py-1.5">
-    <span class="tw-text-[10px] tw-font-bold tw-tracking-[.12em] tw-uppercase tw-text-slate-500">@lang('lang_v1.calculator')</span>
+    <span class="tw-text-[10px] tw-tracking-[.12em] tw-uppercase tw-text-slate-500">@lang('lang_v1.calculator')</span>
     <button type="button" id="calc-hist-btn" title="History"
       class="tw-bg-transparent tw-border-0 tw-text-slate-400 tw-cursor-pointer tw-px-1.5 tw-py-0.5 tw-text-[13px] tw-leading-none tw-rounded tw-transition-colors tw-duration-100 hover:tw-text-blue-500 hover:tw-bg-blue-500/10">
       <i class="fa fa-history"></i>

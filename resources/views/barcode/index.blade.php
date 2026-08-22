@@ -5,7 +5,7 @@
 
 <!-- Content Header (Page header) -->
 <section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('barcode.barcodes')
+    <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">@lang('barcode.barcodes')
         <small class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold">@lang('barcode.manage_your_barcodes')</small>
     </h1>
     <!-- <ol class="breadcrumb">
@@ -19,7 +19,7 @@
     @component('components.widget', ['class' => 'box-primary', 'title' => __('barcode.all_your_barcode')])
         @slot('tool')
             <div class="box-tools">
-                <a class="tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] pull-right"
+                <a class="btn btn-primary pull-right"
                     href="{{action([\App\Http\Controllers\BarcodeController::class, 'create'])}}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round"

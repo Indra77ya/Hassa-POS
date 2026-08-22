@@ -71,11 +71,11 @@
         </div>
 
         <div class="modal-footer">
-            <button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white ladda-button update-leave-status"
+            <button type="submit" class="btn btn-primary ladda-button update-leave-status"
                 data-style="expand-right">
                 <span class="ladda-label">@lang('messages.update')</span>
             </button>
-            <button type="button" class="tw-dw-btn tw-dw-btn-neutral tw-text-white"
+            <button type="button" class="btn btn-default"
                 data-dismiss="modal">@lang('messages.close')</button>
         </div>
         {!! Form::close() !!}

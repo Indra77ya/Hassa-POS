@@ -69,22 +69,7 @@
         <!-- timeline item -->
         <li>
             <!-- timeline icon -->
-            <i class="
-                @if($schedule_log->log_type == 'email')
-                    fa fa-envelope
-                @elseif($schedule_log->log_type == 'call')
-                    fas fa fa-phone-alt
-                @elseif($schedule_log->log_type == 'sms')
-                    fas fa fa-sms
-                @elseif($schedule_log->log_type == 'meeting')
-                    fas fa fa-handshake
-                @endif
-                @if($schedule_log->created_at == $schedule_log->updated_at)
-                    bg-green
-                @else
-                    bg-blue
-                @endif
-                " data-toggle="tooltip" title="@lang('crm::lang.'.$schedule_log->log_type)">
+            <i class="@if($schedule_log->log_type == 'email') fa fa-envelope @elseif($schedule_log->log_type 'call') fas fa-phone-alt 'sms') fa-sms 'meeting') fa-handshake @endif @if($schedule_log->created_at $schedule_log->updated_at) bg-green @else bg-blue" data-toggle="tooltip" title="@lang('crm::lang.'.$schedule_log->log_type)">
             </i>
             <div class="timeline-item">
                 <span class="time pa-0">

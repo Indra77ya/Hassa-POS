@@ -6,7 +6,7 @@
 @include('crm::layouts.nav')
 <!-- Content Header (Page header) -->
 <section class="content-header no-print">
-   <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('crm::lang.campaigns')</h1>
+   <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">@lang('crm::lang.campaigns')</h1>
 </section>
 <section class="content no-print">
 	@component('components.filters', ['title' => __('report.filters')])
@@ -22,7 +22,7 @@
 	@component('components.widget', ['class' => 'box-primary', 'title' => __('crm::lang.all_campaigns')])
         @slot('tool')
         	<div class="box-tools">
-                <a  href="{{action([\Modules\Crm\Http\Controllers\CampaignController::class, 'create'])}}"class="tw-m-2 tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] pull-right btn-add-schedule">
+                <a  href="{{action([\Modules\Crm\Http\Controllers\CampaignController::class, 'create'])}}"class="tw-m-2 btn btn-primary pull-right btn-add-schedule">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         class="icon icon-tabler icons-tabler-outline icon-tabler-plus">

@@ -3,10 +3,10 @@
 
 @section('content')
 
-    <div class="tw-pb-6 theme-header-bg xl:tw-pb-0 ">
+    <div class="tw-pb-6 theme-header-bg xl:tw-pb-0">
         <div class="tw-px-5 tw-pt-3">
             {{-- <div class="sm:tw-flex sm:tw-items-center sm:tw-justify-between sm:tw-gap-12">
-                <h1 class="tw-text-2xl tw-font-medium tw-tracking-tight tw-text-white">
+                <h1 class="tw-text-2xl tw-font-medium tw-tracking-tight">
                     {{ __('home.welcome_message', ['name' => Session::get('user.first_name')]) }}
                 </h1>
             </div> --}}
@@ -20,7 +20,7 @@
     
                         @if (auth()->user()->can('dashboard.data'))
                             @if ($is_admin)
-                                <div class="tw-mt-2 sm:tw-w-1/3 md:tw-w-1/4 ">
+                                <div class="tw-mt-2 sm:tw-w-1/3 md:tw-w-1/4">
                                     @if (count($all_locations) > 1)
                                         {!! Form::select('dashboard_location', $all_locations, null, [
                                             'class' => 'form-control select2',
@@ -33,7 +33,7 @@
                                 <div class="tw-mt-2 sm:tw-w-1/3 md:tw-w-1/4 tw-text-right">
                                     @if ($is_admin)
                                         <button type="button" id="dashboard_date_filter"
-                                            class="tw-inline-flex tw-items-center tw-justify-center tw-w-full tw-gap-1 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-gray-900 tw-transition-all tw-duration-200 tw-bg-white tw-rounded-lg sm:tw-w-auto hover:tw-bg-primary-50">
+                                            class="tw-inline-flex tw-items-center tw-justify-center tw-w-full tw-gap-1 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-gray-900 tw-bg-white tw-rounded-lg sm:tw-w-auto hover:tw-bg-primary-50">
                                             <svg aria-hidden="true" class="tw-size-5" xmlns="http://www.w3.org/2000/svg"
                                                 viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none"
                                                 stroke-linecap="round" stroke-linejoin="round">
@@ -71,7 +71,7 @@
                             <div class="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-6 sm:tw-grid-cols-2 xl:tw-grid-cols-4 sm:tw-gap-5">
                             
                                 <div
-                                    class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm hover:tw-shadow-md tw-rounded-xl  tw-ring-1 tw-ring-gray-200">
+                                    class="tw-bg-white tw-shadow-sm hover:tw-shadow-md tw-ring-1 tw-ring-gray-200">
                                     <div class="tw-p-4 sm:tw-p-5">
                                         <div class="tw-flex tw-items-center tw-gap-4">
                                             <div
@@ -101,7 +101,7 @@
                                 </div>
 
                                 <div
-                                    class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm hover:tw-shadow-md tw-rounded-xl hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
+                                    class="tw-bg-white tw-shadow-sm hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
                                     <div class="tw-p-4 sm:tw-p-5">
                                         <div class="tw-flex tw-items-center tw-gap-4">
                                             <div
@@ -135,7 +135,7 @@
                                 </div>
 
                                 <div
-                                    class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm hover:tw-shadow-md tw-rounded-xl hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
+                                    class="tw-bg-white tw-shadow-sm hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
                                     <div class="tw-p-4 sm:tw-p-5">
                                         <div class="tw-flex tw-items-center tw-gap-4">
                                             <div
@@ -168,7 +168,7 @@
                                 </div>
 
                                 <div
-                                    class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm hover:tw-shadow-md tw-rounded-xl hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
+                                    class="tw-bg-white tw-shadow-sm hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
                                     <div class="tw-p-4 sm:tw-p-5">
                                         <div class="tw-flex tw-items-center tw-gap-4">
                                             <div
@@ -220,7 +220,7 @@
                         <div
                             class="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4 sm:tw-mt-6 sm:tw-grid-cols-2 xl:tw-grid-cols-4 sm:tw-gap-5">
                             <div
-                                class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
+                                class="tw-bg-white tw-shadow-sm hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
                                 <div class="tw-p-4 sm:tw-p-5">
                                     <div class="tw-flex tw-items-center tw-gap-4">
                                         <div
@@ -250,7 +250,7 @@
                                 </div>
                             </div>
                             <div
-                                class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
+                                class="tw-bg-white tw-shadow-sm hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
                                 <div class="tw-p-4 sm:tw-p-5">
                                     <div class="tw-flex tw-items-center tw-gap-4">
                                         <div
@@ -281,7 +281,7 @@
                             </div>
 
                             <div
-                                class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
+                                class="tw-bg-white tw-shadow-sm hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
                                 <div class="tw-p-4 sm:tw-p-5">
                                     <div class="tw-flex tw-items-center tw-gap-4">
                                         <div
@@ -320,7 +320,7 @@
                             </div>
 
                             <div
-                                class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
+                                class="tw-bg-white tw-shadow-sm hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
                                 <div class="tw-p-4 sm:tw-p-5">
                                     <div class="tw-flex tw-items-center tw-gap-4">
                                         <div
@@ -371,7 +371,7 @@
                 @if (auth()->user()->can('sell.view') || auth()->user()->can('direct_sell.view'))
                     @if (!empty($all_locations))
                         <div
-                            class="tw-transition-all lg:tw-col-span-2 xl:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
+                            class="lg:tw-col-span-2 xl:tw-col-span-2 tw-bg-white tw-shadow-sm tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
                             <div class="tw-p-4 sm:tw-p-5">
                                 <div class="tw-flex tw-items-center tw-gap-2.5">
                                     <div
@@ -388,13 +388,13 @@
                                         </svg>
                                     </div>
 
-                                    <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
+                                    <h3 class="tw-text-base lg:tw-text-xl">
                                         {{ __('home.sells_last_30_days') }}
                                     </h3>
                                 </div>
                                 <div class="tw-mt-5">
                                     <div
-                                        class="tw-grid tw-w-full tw-h-100 tw-border tw-border-gray-200 tw-border-dashed tw-rounded-xl tw-bg-gray-50 ">
+                                        class="tw-grid tw-w-full tw-h-100 tw-border tw-border-gray-200 tw-border-dashed tw-bg-gray-50">
                                         <p class="tw-text-sm tw-italic tw-font-normal tw-text-gray-400">
                                             {!! $sells_chart_1->container() !!}
                                         </p>
@@ -411,7 +411,7 @@
                     @endif --}}
                     @if (!empty($all_locations))
                         <div
-                            class="tw-transition-all lg:tw-col-span-2 xl:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
+                            class="lg:tw-col-span-2 xl:tw-col-span-2 tw-bg-white tw-shadow-sm tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
                             <div class="tw-p-4 sm:tw-p-5">
                                 <div class="tw-flex tw-items-center tw-gap-2.5">
                                     <div
@@ -427,13 +427,13 @@
                                             <path d="M6 5l14 1l-1 7h-13"></path>
                                         </svg>
                                     </div>
-                                    <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
+                                    <h3 class="tw-text-base lg:tw-text-xl">
                                         {{ __('home.sells_current_fy') }}
                                     </h3>
                                 </div>
                                 <div class="tw-mt-5">
                                     <div
-                                        class="tw-grid tw-w-full tw-h-100 tw-border tw-border-gray-200 tw-border-dashed tw-rounded-xl tw-bg-gray-50 ">
+                                        class="tw-grid tw-w-full tw-h-100 tw-border tw-border-gray-200 tw-border-dashed tw-bg-gray-50">
                                         <p class="tw-text-sm tw-italic tw-font-normal tw-text-gray-400">
                                             {!! $sells_chart_2->container() !!}
                                         </p>
@@ -450,7 +450,7 @@
                 @endif --}}
                 @if (auth()->user()->can('sell.view') || auth()->user()->can('direct_sell.view'))
                     <div
-                        class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
+                        class="lg:tw-col-span-1 tw-bg-white tw-shadow-sm tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
                         <div class="tw-p-4 sm:tw-p-5">
                             <div class="tw-flex tw-items-center tw-gap-2.5">
                                 <div
@@ -469,7 +469,7 @@
                                 </div>
                                 <div class="tw-flex tw-items-center tw-flex-1 tw-min-w-0 tw-gap-1">
                                     <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                        <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
+                                        <h3 class="tw-text-base lg:tw-text-xl">
                                             {{ __('lang_v1.sales_payment_dues') }}
                                             @show_tooltip(__('lang_v1.tooltip_sales_payment_dues'))
                                         </h3>
@@ -485,7 +485,7 @@
                             </div>
 
 
-                            <div class="tw-flow-root tw-mt-5  tw-border-gray-200">
+                            <div class="tw-flow-root tw-mt-5 tw-border-gray-200">
                                 <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
                                     <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
                                         <table class="table table-bordered table-striped" id="sales_payment_dues_table"
@@ -507,7 +507,7 @@
                 @endif
                 @can('purchase.view')
                     <div
-                        class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
+                        class="lg:tw-col-span-1 tw-bg-white tw-shadow-sm tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
                         <div class="tw-p-4 sm:tw-p-5">
                             <div class="tw-flex tw-items-center tw-gap-2.5">
                                 <div
@@ -525,7 +525,7 @@
                                 </div>
                                 <div class="tw-flex tw-items-center tw-flex-1 tw-min-w-0 tw-gap-1">
                                     <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                        <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
+                                        <h3 class="tw-text-base lg:tw-text-xl">
                                             {{ __('lang_v1.purchase_payment_dues') }}
                                             @show_tooltip(__('tooltip.payment_dues'))
                                         </h3>
@@ -542,7 +542,7 @@
                                 </div>
 
                             </div>
-                            <div class="tw-flow-root tw-mt-5  tw-border-gray-200">
+                            <div class="tw-flow-root tw-mt-5 tw-border-gray-200">
                                 <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
                                     <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
                                         <table class="table table-bordered table-striped" id="purchase_payment_dues_table"
@@ -564,7 +564,7 @@
                 @endcan
                 @can('stock_report.view')
                     <div
-                        class="tw-transition-all lg:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
+                        class="lg:tw-col-span-2 tw-bg-white tw-shadow-sm tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
                         <div class="tw-p-4 sm:tw-p-5">
                             <div class="tw-flex tw-items-center tw-gap-2.5">
                                 <div
@@ -580,7 +580,7 @@
                                 </div>
                                 <div class="tw-flex tw-items-center tw-flex-1 tw-min-w-0 tw-gap-1">
                                     <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                        <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
+                                        <h3 class="tw-text-base lg:tw-text-xl">
                                             {{ __('home.product_stock_alert') }}
                                             @show_tooltip(__('tooltip.product_stock_alert'))
                                         </h3>
@@ -596,7 +596,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="tw-flow-root tw-mt-5  tw-border-gray-200">
+                            <div class="tw-flow-root tw-mt-5 tw-border-gray-200">
                                 <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
                                     <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
                                         <table class="table table-bordered table-striped" id="stock_alert_table"
@@ -616,7 +616,7 @@
                     </div>
                     @if (session('business.enable_product_expiry') == 1)
                         <div
-                            class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
+                            class="lg:tw-col-span-1 tw-bg-white tw-shadow-sm tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
                             <div class="tw-p-4 sm:tw-p-5">
                                 <div class="tw-flex tw-items-center tw-gap-2.5">
                                     <div
@@ -635,7 +635,7 @@
                                     </div>
                                     <div class="tw-flex tw-items-center tw-flex-1 tw-min-w-0 tw-gap-1">
                                         <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                            <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
+                                            <h3 class="tw-text-base lg:tw-text-xl">
                                                 {{ __('home.stock_expiry_alert') }}
                                                 @show_tooltip(
                                                 __('tooltip.stock_expiry_alert', [
@@ -645,7 +645,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="tw-flow-root tw-mt-5  tw-border-gray-200">
+                                <div class="tw-flow-root tw-mt-5 tw-border-gray-200">
                                     <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
                                         <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
                                             <input type="hidden" id="stock_expiry_alert_days"
@@ -669,7 +669,7 @@
                 @endcan
                 @if (auth()->user()->can('so.view_all') || auth()->user()->can('so.view_own'))
                     <div
-                        class="tw-transition-all lg:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
+                        class="lg:tw-col-span-2 tw-bg-white tw-shadow-sm tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
                         <div class="tw-p-4 sm:tw-p-5">
                             <div class="tw-flex tw-items-center tw-gap-2.5">
                                 <div
@@ -686,7 +686,7 @@
                                 </div>
                                 <div class="tw-flex tw-items-center tw-flex-1 tw-min-w-0 tw-gap-1">
                                     <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                        <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
+                                        <h3 class="tw-text-base lg:tw-text-xl">
                                             {{ __('lang_v1.sales_order') }}
                                         </h3>
                                     </div>
@@ -701,7 +701,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="tw-flow-root tw-mt-5  tw-border-gray-200">
+                            <div class="tw-flow-root tw-mt-5 tw-border-gray-200">
                                 <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
                                     <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
                                         @php
@@ -738,7 +738,7 @@
                     !empty($common_settings['enable_purchase_requisition']) &&
                         (auth()->user()->can('purchase_requisition.view_all') || auth()->user()->can('purchase_requisition.view_own')))
                     <div
-                        class="tw-transition-all lg:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
+                        class="lg:tw-col-span-2 tw-bg-white tw-shadow-sm tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
                         <div class="tw-p-4 sm:tw-p-5">
                             <div class="tw-flex tw-items-center tw-gap-2.5">
                                 <div
@@ -759,7 +759,7 @@
                                 </div>
                                 <div class="tw-flex tw-items-center tw-flex-1 tw-min-w-0 tw-gap-1">
                                     <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                        <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
+                                        <h3 class="tw-text-base lg:tw-text-xl">
                                             @lang('lang_v1.purchase_requisition')
                                         </h3>
                                     </div>
@@ -776,7 +776,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="tw-flow-root tw-mt-5  tw-border-gray-200">
+                            <div class="tw-flow-root tw-mt-5 tw-border-gray-200">
                                 <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
                                     <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
                                         <table class="table table-bordered table-striped ajax_view"
@@ -805,7 +805,7 @@
                         (auth()->user()->can('purchase_order.view_all') || auth()->user()->can('purchase_order.view_own')))
 
                     <div
-                        class="tw-transition-all lg:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
+                        class="lg:tw-col-span-2 tw-bg-white tw-shadow-sm tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
                         <div class="tw-p-4 sm:tw-p-5">
                             <div class="tw-flex tw-items-center tw-gap-2.5">
                                 <div
@@ -823,7 +823,7 @@
                                 </div>
                                 <div class="tw-flex tw-items-center tw-flex-1 tw-min-w-0 tw-gap-1">
                                     <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                        <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
+                                        <h3 class="tw-text-base lg:tw-text-xl">
                                             @lang('lang_v1.purchase_order')
                                         </h3>
                                     </div>
@@ -838,7 +838,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="tw-flow-root tw-mt-5  tw-border-gray-200">
+                            <div class="tw-flow-root tw-mt-5 tw-border-gray-200">
                                 <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
                                     <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
                                         <table class="table table-bordered table-striped ajax_view"
@@ -867,7 +867,7 @@
                         auth()->user()->can('access_shipping') ||
                         auth()->user()->can('access_own_shipping'))
                     <div
-                        class="tw-transition-all lg:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
+                        class="lg:tw-col-span-2 tw-bg-white tw-shadow-sm tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
                         <div class="tw-p-4 sm:tw-p-5">
                             <div class="tw-flex tw-items-center tw-gap-2.5">
                                 <div
@@ -885,7 +885,7 @@
                                 </div>
                                 <div class="tw-flex tw-items-center tw-flex-1 tw-min-w-0 tw-gap-1">
                                     <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                        <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
+                                        <h3 class="tw-text-base lg:tw-text-xl">
                                             @lang('lang_v1.pending_shipments')
                                         </h3>
                                     </div>
@@ -900,7 +900,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="tw-flow-root tw-mt-5  tw-border-gray-200">
+                            <div class="tw-flow-root tw-mt-5 tw-border-gray-200">
                                 <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
                                     <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
                                         <table class="table table-bordered table-striped ajax_view" id="shipments_table" style="width: 100%;">
@@ -951,7 +951,7 @@
                 @endif
                 @if (auth()->user()->can('account.access') && config('constants.show_payments_recovered_today') == true)
                     <div
-                        class="tw-transition-all lg:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
+                        class="lg:tw-col-span-2 tw-bg-white tw-shadow-sm tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
                         <div class="tw-p-4 sm:tw-p-5">
                             <div class="tw-flex tw-items-center tw-gap-2.5">
                                 <div
@@ -970,14 +970,14 @@
                                 </div>
                                 <div class="tw-flex tw-items-center tw-flex-1 tw-min-w-0 tw-gap-1">
                                     <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                        <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
+                                        <h3 class="tw-text-base lg:tw-text-xl">
                                             @lang('lang_v1.payment_recovered_today')
                                         </h3>
                                     </div>
 
                                 </div>
                             </div>
-                            <div class="tw-flow-root tw-mt-5  tw-border-gray-200">
+                            <div class="tw-flow-root tw-mt-5 tw-border-gray-200">
                                 <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
                                     <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
                                         <table class="table table-bordered table-striped" id="cash_flow_table">

@@ -1,9 +1,4 @@
-<div class="tab-pane 
-    @if(!empty($view_type) &&  $view_type == 'subscriptions')
-        active
-    @else
-        ''
-    @endif"
+<div class="tab-pane @if(!empty($view_type) && $view_type == 'subscriptions') active @else '' @endif"
 id="subscriptions_tab">
     <div class="row">
         <div class="col-md-12">

@@ -30,7 +30,7 @@
 				</td>
 				<td class="col-md-6 tw-flex tw-flex-col md:tw-flex-row tw-space-x-0 md:tw-space-x-2 tw-space-y-1 md:tw-space-y-0">
 					@if(auth()->user()->can('sell.update') || auth()->user()->can('direct_sell.update'))
-					<a href="{{action([\App\Http\Controllers\SellPosController::class, 'edit'], [$transaction->id]).$subtype}}" class="tw-dw-btn tw-dw-btn-outline tw-dw-btn-info">
+					<a href="{{action([\App\Http\Controllers\SellPosController::class, 'edit'], [$transaction->id]).$subtype}}" class="btn btn-info">
 	    				<i class="fas fa-pen text-muted" aria-hidden="true" title="{{__('lang_v1.click_to_edit')}}"></i>
                         @lang('messages.edit')
 	    			</a>
@@ -38,18 +38,18 @@
 
 					@if(!auth()->user()->can('sell.update') && auth()->user()->can('edit_pos_payment'))
 						<a href="{{route('edit-pos-payment', ['id' => $transaction->id])}}" 
-						title="@lang('lang_v1.add_edit_payment')" class="tw-dw-btn tw-dw-btn-outline tw-dw-btn-info">
+						title="@lang('lang_v1.add_edit_payment')" class="btn btn-info">
 						    <i class="fas fa-money-bill-alt text-muted"></i>
 						</a>
 					@endif
 
-	    			<a href="{{action([\App\Http\Controllers\SellPosController::class, 'printInvoice'], [$transaction->id])}}" class="print-invoice-link tw-dw-btn tw-dw-btn-outline tw-dw-btn-success">
+				<a href="{{action([\App\Http\Controllers\SellPosController::class, 'printInvoice'], [$transaction->id])}}" class="print-invoice-link btn btn-success">
 	    				<i class="fa fa-print text-muted" aria-hidden="true" title="{{__('lang_v1.click_to_print')}}"></i>
                         @lang('messages.print')
 	    			</a>
 
                     @if(auth()->user()->can('sell.delete') || auth()->user()->can('direct_sell.delete'))
-	    			    <a href="{{action([\App\Http\Controllers\SellPosController::class, 'destroy'], [$transaction->id])}}" class="delete-sale tw-dw-btn tw-dw-btn-outline tw-dw-btn-error">
+				    <a href="{{action([\App\Http\Controllers\SellPosController::class, 'destroy'], [$transaction->id])}}" class="delete-sale btn btn-danger">
                             <i class="fa fa-trash text-danger" title="{{__('lang_v1.click_to_delete')}}"></i>
                             @lang('messages.delete')
                         </a>

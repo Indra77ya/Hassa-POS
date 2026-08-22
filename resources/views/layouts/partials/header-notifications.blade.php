@@ -18,7 +18,7 @@
         }
     </style>
     <a type="button"
-        class="dropdown-toggle load_notifications tw-inline-flex tw-items-center tw-ring-1 tw-ring-white/10 tw-justify-center tw-text-sm tw-font-medium tw-text-white hover:tw-text-white tw-transition-all tw-duration-200 theme-btn-bg tw-p-1.5 tw-rounded-lg"
+        class="btn dropdown-toggle load_notifications tw-inline-flex tw-items-center tw-ring-1 tw-ring-white/10 tw-justify-center tw-text-sm tw-font-medium hover:tw-text-white btn-primary tw-p-1.5 tw-rounded-lg"
         style="position: relative;"
         data-toggle="dropdown" id="show_unread_notifications" data-loaded="false">
         <span class="tw-sr-only">

@@ -65,7 +65,7 @@ class AssetController extends Controller
 
             return DataTables::of($assets)
                 ->addColumn('action', function ($row) {
-                    $html = '<div class="btn-group">
+                    $html = '<div class="btn btn-group">
                         <button type="button" class="btn btn-info dropdown-toggle btn-xs" data-toggle="dropdown" aria-expanded="false">' . __('messages.action') . ' <span class="caret"></span></button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu">';
 

@@ -2,7 +2,7 @@
 @section('title', __('project::lang.view_project'))
 @section('content')
 <section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black" >
+    <h1 class="tw-text-xl md:tw-text-3xl tw-text-black" >
         <i class="fas fa-check-circle"></i>
         {{ucFirst($project->name)}}
     </h1>
@@ -15,36 +15,21 @@
            	<input type="hidden" name="project_id" id="project_id" value="{{$project->id}}">
             <div class="nav-tabs-custom">
                 <ul class="nav nav-tabs">
-                    <li class="
-                        @if($tab_view == 'overview')
-                            active
-                        @else
-                            ''
-                        @endif">
+                    <li class="@if($tab_view == 'overview') active @else '' @endif">
                         <a href="#project_overview" data-toggle="tab" aria-expanded="true" data-url="{{action([\Modules\Project\Http\Controllers\ProjectController::class, 'show'], [$project->id]).'?view=overview'}}">
                         	<i class="fas fa-tachometer-alt"></i>
                         	@lang('project::lang.overview')
                         </a>
                     </li>
 
-                    <li class="
-                        @if($tab_view == 'activities')
-                            active
-                        @else
-                            ''
-                        @endif">
+                    <li class="@if($tab_view == 'activities') active @else '' @endif">
                         <a href="#activities" data-toggle="tab" aria-expanded="true">
                             <i class="fas fa-chart-line"></i>
                             @lang('lang_v1.activities')
                         </a>
                     </li>
 
-                    <li class="
-                        @if($tab_view == 'project_task')
-                            active
-                        @else
-                            ''
-                        @endif">
+                    <li class="@if($tab_view == 'project_task') active @else '' @endif">
                         <a href="#project_task" data-toggle="tab" aria-expanded="true">
                         	<i class="fa fa-tasks"></i>
                         	@lang('project::lang.task')
@@ -52,12 +37,7 @@
                     </li>
 
                     @if(isset($project->settings['enable_timelog']) && $project->settings['enable_timelog'])
-                        <li class="
-                            @if($tab_view == 'time_log')
-                                active
-                            @else
-                                ''
-                            @endif">
+                        <li class="@if($tab_view == 'time_log') active @else '' @endif">
                         	<a href="#time_log" data-toggle="tab" aria-expanded="true">
                         		<i class="fas fa-clock"></i>
                         		@lang('project::lang.time_logs')
@@ -66,12 +46,7 @@
                     @endif
 
                     @if(isset($project->settings['enable_notes_documents']) && $project->settings['enable_notes_documents'])
-                        <li class="
-                            @if($tab_view == 'documents_and_notes')
-                                active
-                            @else
-                                ''
-                            @endif">
+                        <li class="@if($tab_view == 'documents_and_notes') active @else '' @endif">
                             <a href="#documents_and_notes" data-toggle="tab" aria-expanded="true">
                                 <i class="fas fa-file-image"></i>
                                 @lang('project::lang.documents_and_notes')
@@ -80,12 +55,7 @@
                     @endif
                     
                     @if((isset($project->settings['enable_invoice']) && $project->settings['enable_invoice']) && $is_lead_or_admin)
-                    <li class="
-                        @if($tab_view == 'project_invoices')
-                            active
-                        @else
-                            ''
-                        @endif">
+                    <li class="@if($tab_view == 'project_invoices') active @else '' @endif">
                         <a href="#project_invoices" data-toggle="tab" aria-expanded="true">
                             <i class="fa fa-file"></i>
                             @lang('project::lang.invoices')
@@ -94,12 +64,7 @@
                     @endif
 
                     @if($is_lead_or_admin)
-                    <li class="
-                        @if($tab_view == 'project_settings')
-                            active
-                        @else
-                            ''
-                        @endif">
+                    <li class="@if($tab_view == 'project_settings') active @else '' @endif">
                         <a href="#project_settings" data-toggle="tab" aria-expanded="true">
                             <i class="fa fa-cogs"></i>
                             @lang('role.settings')
@@ -109,31 +74,16 @@
                 </ul>
 
                 <div class="tab-content">
-                    <div class="tab-pane
-                        @if($tab_view == 'overview')
-                            active
-                        @else
-                            ''
-                        @endif" id="project_overview"> 
+                    <div class="tab-pane @if($tab_view == 'overview') active @else '' @endif" id="project_overview">
                         @includeIf('project::project.partials.overview')
                     </div>
 
-                    <div class="tab-pane
-                        @if($tab_view == 'activities')
-                            active
-                        @else
-                            ''
-                        @endif" id="activities">
+                    <div class="tab-pane @if($tab_view == 'activities') active @else '' @endif" id="activities">
                         <ul class="timeline">
                         </ul>
                     </div>
 
-                    <div class="tab-pane
-                        @if($tab_view == 'project_task')
-                            active
-                        @else
-                            ''
-                        @endif" id="project_task">
+                    <div class="tab-pane @if($tab_view == 'project_task') active @else '' @endif" id="project_task">
                         <div class="row">
                             <div class="col-md-3">
                                 <div class="form-group">
@@ -146,11 +96,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-3 status_filter
-                                @if(isset($project->settings['task_view']) &&
-                                $project->settings['task_view'] == 'kanban')
-                                    hide
-                                @endif">
+                            <div class="col-md-3 status_filter @if(isset($project->settings['task_view']) && $project->settings['task_view'] == 'kanban') hide @endif">
                                 <div class="form-group">
                                     {!! Form::label('status_filter', __('sale.status') . ':') !!}
                                     {!! Form::select('status_filter', $statuses, null, ['class' => 'form-control select2', 'placeholder' => __('messages.all'), 'style' => 'width: 100%;']); !!}
@@ -173,12 +119,7 @@
                     </div>
 
                     @if(isset($project->settings['enable_timelog']) && $project->settings['enable_timelog'])
-                        <div class="tab-pane
-                            @if($tab_view == 'time_log')
-                                active
-                            @else
-                                ''
-                            @endif" id="time_log">
+                        <div class="tab-pane @if($tab_view == 'time_log') active @else '' @endif" id="time_log">
                         	@includeIf('project::time_logs.index')
                         </div>
                     @endif
@@ -188,32 +129,17 @@
                         <input type="hidden" name="notable_id" id="notable_id" value="{{$project->id}}">
                         <!-- model name like App\User -->
                         <input type="hidden" name="notable_type" id="notable_type" value="Modules\Project\Entities\Project">
-                        <div class="tab-pane document_note_body
-                            @if($tab_view == 'documents_and_notes')
-                                active
-                            @else
-                                ''
-                            @endif" id="documents_and_notes">
+                        <div class="tab-pane document_note_body @if($tab_view == 'documents_and_notes') active @else '' @endif" id="documents_and_notes">
                         </div>
                     @endif
 
                     @if((isset($project->settings['enable_invoice']) && $project->settings['enable_invoice']) && $is_lead_or_admin)
-                        <div class="tab-pane
-                            @if($tab_view == 'project_invoices')
-                                active
-                            @else
-                                ''
-                            @endif" id="project_invoices">
+                        <div class="tab-pane @if($tab_view == 'project_invoices') active @else '' @endif" id="project_invoices">
                             @includeif('project::invoice.index')
                         </div>
                     @endif
                     @if($is_lead_or_admin)
-                        <div class="tab-pane
-                            @if($tab_view == 'project_settings')
-                                active
-                            @else
-                                ''
-                            @endif" id="project_settings">
+                        <div class="tab-pane @if($tab_view == 'project_settings') active @else '' @endif" id="project_settings">
                             @includeIf('project::settings.create')
                         </div>
                     @endif

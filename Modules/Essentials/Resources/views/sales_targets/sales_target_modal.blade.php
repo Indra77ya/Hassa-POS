@@ -22,7 +22,7 @@
 	    					@lang( 'essentials::lang.commission_percent')
 	    				</th>
 	    				<th>
-	    					<button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm" id="add_target"><i class="fas fa-plus"></i></button>
+						<button type="button" class="btn btn-primary btn-sm" id="add_target"><i class="fas fa-plus"></i></button>
 	    				</th>
 	    			</tr>
 	    			</thead>
@@ -39,7 +39,7 @@
 			    					{!! Form::text('edit_target[' . $sales_target->id . '][commission_percent]', @num_format($sales_target->commission_percent), ['class' => 'form-control input-sm input_number', 'required']); !!}
 			    				</td>
 			    				<td>
-									<button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-error remove_target"><i class="fas fa-times"></i></button>
+									<button type="button" class="btn btn-xs btn-danger remove_target"><i class="fas fa-times"></i></button>
 								</td>
 			    			</tr>
 	    				@endforeach
@@ -58,8 +58,8 @@
 	    	</table>
 	    </div>
 	    <div class="modal-footer">
-	      	<button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white">@lang( 'messages.submit' )</button>
-	      	<button type="button" class="tw-dw-btn tw-dw-btn-neutral tw-text-white" data-dismiss="modal">@lang( 'messages.close' )</button>
+		<button type="submit" class="btn btn-primary">@lang( 'messages.submit' )</button>
+		<button type="button" class="btn btn-default" data-dismiss="modal">@lang( 'messages.close' )</button>
 	    </div>
 	    {!! Form::close() !!}
 	    <table class="hidden" id="sales_target_row_hidden">
@@ -74,7 +74,7 @@
 					{!! Form::number('commission[]', 0, ['class' => 'form-control input-sm', 'min' => 0, 'max' => 100, 'required']); !!}
 				</td>
 				<td>
-					<button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-error remove_target"><i class="fas fa-times"></i></button>
+					<button type="button" class="btn btn-xs btn-danger remove_target"><i class="fas fa-times"></i></button>
 				</td>
 			</tr>
 	    </table>

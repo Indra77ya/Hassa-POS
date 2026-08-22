@@ -16,17 +16,13 @@
     };
 </script>
 @if($can_crud_task || $is_lead_or_admin)
-<button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm task_btn pull-right m-5" data-href="{{action([\Modules\Project\Http\Controllers\TaskController::class, 'create'], ['project_id' => $project->id])}}">
+<button type="button" class="btn btn-primary btn-sm task_btn pull-right m-5" data-href="{{action([\Modules\Project\Http\Controllers\TaskController::class, 'create'], ['project_id' => $project->id])}}">
     @lang('messages.add')&nbsp;
     <i class="fa fa-plus"></i>
 </button>
 @endif
-<div class="btn-group btn-group-toggle pull-right m-5" data-toggle="buttons">
-    <label class="btn btn-info btn-sm 
-        @if((!empty($project->settings) && !isset($project->settings['task_view'])) || (isset($project->settings['task_view']) &&
-                $project->settings['task_view'] == 'list_view'))
-            active
-        @endif">
+<div class="btn btn-group btn-group-toggle pull-right m-5" data-toggle="buttons">
+    <label class="btn btn-info btn-sm @if((!empty($project->settings) && !isset($project->settings['task_view'])) || (isset($project->settings['task_view']) $project->settings['task_view'] == 'list_view')) active @endif">
         <input type="radio" name="task_view" value="list_view" class="task_view" 
            @if((!empty($project->settings) && !isset($project->settings['task_view'])) || (isset($project->settings['task_view']) &&
                 $project->settings['task_view'] == 'list_view'))
@@ -34,11 +30,7 @@
             @endif>
         @lang('project::lang.list_view')
     </label>
-    <label class="btn btn-info btn-sm
-        @if(isset($project->settings['task_view']) &&
-        $project->settings['task_view'] == 'kanban')
-            active
-        @endif">
+    <label class="btn btn-info btn-sm @if(isset($project->settings['task_view']) && $project->settings['task_view'] == 'kanban') active @endif">
         <input type="radio" name="task_view" value="kanban" class="task_view" 
             @if(isset($project->settings['task_view']) &&
             $project->settings['task_view'] == 'kanban')
@@ -48,11 +40,7 @@
     </label>
 </div>
 <br><br>
-<div class="table-responsive
-    @if(isset($project->settings['task_view']) &&
-        $project->settings['task_view'] != 'list_view')
-        hide
-    @endif">
+<div class="table-responsive @if(isset($project->settings['task_view']) && $project->settings['task_view'] != 'list_view') hide @endif">
     <table class="table table-bordered table-striped" id="project_task_table">
         <thead>
             <tr>
@@ -73,11 +61,7 @@
     </table>
 </div>
 
-<div class="custom-kanban-board
-    @if(isset($project->settings['task_view']) &&
-    $project->settings['task_view'] != 'kanban')
-        hide
-    @endif">
+<div class="custom-kanban-board @if(isset($project->settings['task_view']) && $project->settings['task_view'] != 'kanban') hide @endif">
     <div class="page">
         <div class="main">
             <div class="meta-tasks-wrapper">

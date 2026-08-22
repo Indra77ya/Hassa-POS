@@ -18,7 +18,7 @@
 		</div>
 
 		{{-- Discount --}}
-		<div class="pos_totals_cell @if(Gate::check('disable_discount') && !auth()->user()->can('superadmin') && !auth()->user()->can('admin')) hide @endif">
+		<div class="pos_totals_cell @if(Gate::check('disable_discount') && !auth()->user()->can('superadmin') !auth()->user()->can('admin')) hide @endif">
 			<span class="pos_totals_label">
 				@if($is_discount_enabled)
 					<span class="mobile-only">DISC(-)</span>

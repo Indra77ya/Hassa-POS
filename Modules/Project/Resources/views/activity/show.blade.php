@@ -47,8 +47,7 @@
 		<li>
 			<!-- timeline icon -->
 			@if($activity->subject_type == 'Modules\Project\Entities\Project')
-				<i class="fas fa fa-check-circle
-					{{$icon_color[$activity->description]}}"></i>
+				<i class="fas fa fa-check-circle {{$icon_color[$activity->description]}}"></i>
 			@elseif($activity->subject_type == 'Modules\Project\Entities\ProjectTask')
 				<i class="fa fa-tasks {{$icon_color[$activity->description]}}"></i>
 			@elseif($activity->subject_type == 'App\DocumentAndNote')

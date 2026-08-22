@@ -5,7 +5,7 @@
 
     <!-- Content Header (Page header) -->
     <section class="content-header">
-        <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('lang_v1.add_stock_transfer')</h1>
+        <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">@lang('lang_v1.add_stock_transfer')</h1>
     </section>
 
     <!-- Main content -->
@@ -158,7 +158,7 @@
                 <br>
                 <br>
                 <div class="col-sm-12 text-center">
-                    <button type="submit" id="save_stock_transfer" class="tw-dw-btn tw-dw-btn-primary tw-dw-btn-lg tw-text-white">@lang('messages.save')</button>
+                    <button type="submit" id="save_stock_transfer" class="btn btn-primary btn-lg">@lang('messages.save')</button>
                 </div>
             </div>
         @endcomponent

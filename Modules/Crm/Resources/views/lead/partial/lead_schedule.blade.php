@@ -1,5 +1,5 @@
 <div class="pull-right">
-    <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm btn-add-schedule pull-right">
+    <button type="button" class="btn btn-primary btn-sm btn-add-schedule pull-right">
         @lang('messages.add')&nbsp;
         <i class="fa fa-plus"></i>
     </button>

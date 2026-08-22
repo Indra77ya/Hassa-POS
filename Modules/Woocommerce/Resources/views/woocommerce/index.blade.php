@@ -5,7 +5,7 @@
     @include('woocommerce::layouts.nav')
     <!-- Content Header (Page header) -->
     <section class="content-header">
-        <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('woocommerce::lang.woocommerce')</h1>
+        <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">@lang('woocommerce::lang.woocommerce')</h1>
     </section>
 
     <!-- Main content -->
@@ -28,7 +28,7 @@
                 @if ($is_superadmin || auth()->user()->can('woocommerce.syc_categories'))
                     <div class="col-sm-12">
                         <div
-                            class="tw-transition-all lg:tw-col-span-1 tw-mb-4 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw-translate-y-0.5 tw-ring-gray-200">
+                            class="lg:tw-col-span-1 tw-mb-4 tw-bg-white tw-shadow-sm tw-ring-1 hover:tw-shadow-md hover:tw-translate-y-0.5 tw-ring-gray-200">
                             <div class="tw-p-4 sm:tw-p-5">
                                 <div class="tw-flex tw-items-center tw-gap-2.5">
                                     <div class="tw-flex tw-items-center tw-flex-1 tw-min-w-0 tw-gap-1">
@@ -60,14 +60,14 @@
                                                 </div>
                                             @endif
                                             <div class="col-sm-6">
-                                                <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm tw-dw-btn-wide"
+                                                <button type="button" class="btn btn-primary btn-sm"
                                                     id="sync_product_categories"> <i class="fa fa-refresh"></i>
                                                     @lang('woocommerce::lang.sync')</button>
                                                 <span class="last_sync_cat"></span>
                                             </div>
                                             <div class="col-sm-12">
                                                 <br>
-                                                <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-error" id="reset_categories">
+                                                <button type="button" class="btn btn-xs btn-danger" id="reset_categories">
                                                     <i class="fa fa-undo"></i> @lang('woocommerce::lang.reset_synced_cat')</button>
                                             </div>
                                         </div>
@@ -80,7 +80,7 @@
                 @if ($is_superadmin || auth()->user()->can('woocommerce.map_tax_rates'))
                     <div class="col-sm-12">
                         <div
-                            class="tw-transition-all lg:tw-col-span-1 tw-mb-4 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw-translate-y-0.5 tw-ring-gray-200">
+                            class="lg:tw-col-span-1 tw-mb-4 tw-bg-white tw-shadow-sm tw-ring-1 hover:tw-shadow-md hover:tw-translate-y-0.5 tw-ring-gray-200">
                             <div class="tw-p-4 sm:tw-p-5">
                                 <div class="tw-flex tw-items-center tw-gap-2.5">
                                     <div class="tw-flex tw-items-center tw-flex-1 tw-min-w-0 tw-gap-1">
@@ -124,7 +124,7 @@
                                                             <tr>
                                                                 <td colspan="2">
                                                                     <button type="submit"
-                                                                        class="tw-dw-btn tw-dw-btn-error tw-text-white pull-right">
+                                                                        class="btn btn-danger pull-right">
                                                                         @lang('messages.save')
                                                                     </button>
                                                                 </td>
@@ -168,7 +168,7 @@
                                 @endif
                                 <div class="col-sm-6">
                                     <div style="display: inline-flex; width: 100%;">
-                                        <button type="button" class="tw-dw-btn tw-dw-btn-warning tw-text-white tw-dw-btn-sm sync_products"
+                                        <button type="button" class="btn btn-warning btn-sm sync_products"
                                             data-sync-type="new"> <i class="fa fa-refresh"></i> @lang('woocommerce::lang.sync_only_new')</button>
                                         &nbsp;@show_tooltip(__('woocommerce::lang.sync_new_help'))
                                     </div>
@@ -176,7 +176,7 @@
                                 </div>
                                 <div class="col-sm-6">
                                     <div style="display: inline-flex; width: 100%;">
-                                        <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm sync_products"
+                                        <button type="button" class="btn btn-primary btn-sm sync_products"
                                             data-sync-type="all"> <i class="fa fa-refresh"></i> @lang('woocommerce::lang.sync_all')</button>
                                         &nbsp;@show_tooltip(__('woocommerce::lang.sync_all_help'))
                                     </div>
@@ -184,7 +184,7 @@
                                 </div>
                                 <div class="col-sm-12">
                                     <br>
-                                    <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-error" id="reset_products"> <i
+                                    <button type="button" class="btn btn-xs btn-danger" id="reset_products"> <i
                                             class="fa fa-undo"></i> @lang('woocommerce::lang.reset_synced_products')</button>
                                 </div>
                             </div>
@@ -195,7 +195,7 @@
                     <div class="col-sm-12">
                         @component('components.widget', ['class' => 'box-primary', 'title' => __('woocommerce::lang.sync_orders') . ':'])
                             <div class="col-sm-6">
-                                <button type="button" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-sm tw-dw-btn-wide" id="sync_orders"> <i
+                                <button type="button" class="btn btn-success btn-sm" id="sync_orders"> <i
                                         class="fa fa-refresh"></i> @lang('woocommerce::lang.sync')</button>
                                 <span class="last_sync_orders"></span>
                             </div>

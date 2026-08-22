@@ -12,7 +12,7 @@
 
     <div class="modal-footer">
       <a href="{{action([\Modules\Superadmin\Http\Controllers\SubscriptionController::class, 'index'])}}" class="btn btn-outline btn-default"><i class="fa fa-refresh"></i> @lang( 'superadmin::lang.subscribe')</a>
-      <button type="button" class="tw-dw-btn tw-dw-btn-neutral tw-text-white" data-dismiss="modal">@lang( 'messages.close' )</button>
+      <button type="button" class="btn btn-default" data-dismiss="modal">@lang( 'messages.close' )</button>
     </div>
   </div><!-- /.modal-content -->
 </div><!-- /.modal-dialog -->

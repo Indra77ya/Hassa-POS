@@ -5,7 +5,7 @@
 
 <!-- Content Header (Page header) -->
 <section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('lang_v1.configure_dashboard', ['name' => $dashboard->name])</h1>
+    <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">@lang('lang_v1.configure_dashboard', ['name' => $dashboard->name])</h1>
 </section>
 
 <section class="content">
@@ -121,7 +121,7 @@
 				row_html = '<div class="row border-1px-173" data-ratio="' + ratio + '"><div style="width:97% !important; float:left; display:flex">';
 				ratio.split('-').forEach(function(ratio){
 					//Explode through the ratio and create html divs.
-					row_html = row_html +'<div class="droppable cell col-md-' + ratio + '"><div class="add_a_widget">' + '{{__("lang_v1.add_widget_here")}}' + '</div></div>';
+					row_html = row_html +'<div class="droppable cell col-md-' + ratio '"><div class="add_a_widget">' + '{{__("lang_v1.add_widget_here")}}' + '</div></div>';
 				});
 				row_html = row_html + '</div><div style="width:3% !important; display:inline; float:right; text-align:center"><i class="fas fa-grip-horizontal handle cursor-pointer" title="' + '{{__("lang_v1.move_row")}}' +'"></i> <i class="fas fa-times remove_row text-danger cursor-pointer" title="'+ '{{__("lang_v1.delete")}}'+'"></i> </div></div>';
 

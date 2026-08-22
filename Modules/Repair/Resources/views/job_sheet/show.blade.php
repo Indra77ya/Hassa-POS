@@ -14,7 +14,7 @@ $jobsheet_settings['contact_custom_fields'] : [];
 @endphp
 <!-- Content Header (Page header) -->
 <section class="content-header no-print">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">
+    <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">
         @lang('repair::lang.job_sheet')
         (<code>{{$job_sheet->job_sheet_no}}</code>)
     </h1>
@@ -27,7 +27,7 @@ $jobsheet_settings['contact_custom_fields'] : [];
                 <div class="box-header no-print">
                     <div class="box-tools">
                         @if(auth()->user()->can("job_sheet.edit"))
-                        <a href="{{action([\Modules\Repair\Http\Controllers\JobSheetController::class, 'edit'], [$job_sheet->id])}}" class="tw-dw-btn tw-dw-btn-info tw-text-white tw-dw-btn-sm cursor-pointer">
+                        <a href="{{action([\Modules\Repair\Http\Controllers\JobSheetController::class, 'edit'], [$job_sheet->id])}}" class="btn btn-info btn-sm cursor-pointer">
                             <i class="fa fa-edit"></i>
                             @lang("messages.edit")
                         </a>
@@ -52,23 +52,23 @@ $jobsheet_settings['contact_custom_fields'] : [];
                                     'whatsapp_text' => $whatsapp_text
                                 ]);
                             @endphp
-                            <a href="{{$whatsapp_link}}" target="_blank" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-sm">
+                            <a href="{{$whatsapp_link}}" target="_blank" class="btn btn-success btn-sm">
                                 <i class="fab fa-whatsapp"></i>
                                 @lang("repair::lang.send_whatsapp")
                             </a>
                         @endif
 
-                        <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm" aria-label="Print" id="print_jobsheet">
+                        <button type="button" class="btn btn-primary btn-sm" aria-label="Print" id="print_jobsheet">
                             <i class="fa fa-print"></i>
                             @lang( 'repair::lang.print_format_1' )
                         </button>
 
-                        <a class="tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-sm" href="{{action([\Modules\Repair\Http\Controllers\JobSheetController::class, 'print'], [$job_sheet->id])}}" target="_blank">
+                        <a class="btn btn-success btn-sm" href="{{action([\Modules\Repair\Http\Controllers\JobSheetController::class, 'print'], [$job_sheet->id])}}" target="_blank">
                             <i class="fas fa-file-pdf"></i>
                             @lang( 'repair::lang.print_format_2' )
                         </a>
 
-                        <a class="tw-dw-btn tw-dw-btn-error tw-text-white tw-dw-btn-sm" href="{{action([\Modules\Repair\Http\Controllers\JobSheetController::class, 'printLabel'], [$job_sheet->id])}}" target="_blank">
+                        <a class="btn btn-danger btn-sm" href="{{action([\Modules\Repair\Http\Controllers\JobSheetController::class, 'printLabel'], [$job_sheet->id])}}" target="_blank">
                             <i class="fas fa-barcode"></i>
                             @lang( 'repair::lang.print_label' )
                         </a>
@@ -531,7 +531,7 @@ $jobsheet_settings['contact_custom_fields'] : [];
         </div>
         @endif
         <div class="col-md-6">
-            <div class="box box-solid box-solid no-print">
+            <div class="box box-solid no-print">
                 <div class="box-header with-border">
                     <h3 class="box-title">{{ __('repair::lang.activities') }}:</h3>
                 </div>

@@ -5,7 +5,7 @@
 
 <!-- Content Header (Page header) -->
 <section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang( 'user.roles' )
+    <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">@lang( 'user.roles' )
         <small  class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold">@lang( 'user.manage_roles' )</small>
     </h1>
     <!-- <ol class="breadcrumb">

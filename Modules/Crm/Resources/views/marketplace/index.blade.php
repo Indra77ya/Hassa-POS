@@ -7,7 +7,7 @@
 @include('crm::layouts.nav')
 
 <section class="content-header no-print">
-   <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('crm::lang.b2b_marketplace')</h1>
+   <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">@lang('crm::lang.b2b_marketplace')</h1>
 </section>
 
 <section class="content no-print">

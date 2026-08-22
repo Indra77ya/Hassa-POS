@@ -5,7 +5,7 @@
     @include('superadmin::layouts.nav')
     <!-- Content Header (Page header) -->
     <section class="content-header">
-        <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('superadmin::lang.packages') <small>@lang('superadmin::lang.all_packages')</small></h1>
+        <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">@lang('superadmin::lang.packages') <small>@lang('superadmin::lang.all_packages')</small></h1>
         <!-- <ol class="breadcrumb">
             <a href="#"><i class="fa fa-dashboard"></i> Level</a><br/>
             <li class="active">Here<br/>
@@ -158,7 +158,7 @@
     </div> --}}
 
         <div
-            class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md  tw-ring-gray-200">
+            class="lg:tw-col-span-1 tw-bg-white tw-shadow-sm tw-ring-1 hover:tw-shadow-md tw-ring-gray-200">
             <div class="tw-p-4 sm:tw-p-5">
                 <div class="tw-flex tw-justify-end tw-gap-2.5">
                     <a class="btn btn-primary btn-sm pull-right"
@@ -171,10 +171,10 @@
                         <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
                             @foreach ($packages as $package)
                                 <div class="col-md-4 tw-mt-4">
-                                    <div class="box box-primary tw-transition-all tw-duration-200 hover:tw-shadow-lg" style="border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                                    <div class="box box-primary hover:tw-shadow-lg" style="border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                                         <div class="box-header with-border" style="padding: 15px; background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; border-top-left-radius: 8px; border-top-right-radius: 8px;">
                                             <div class="tw-flex tw-justify-between tw-items-center">
-                                                <h3 class="box-title tw-text-lg tw-font-bold tw-text-gray-800" style="margin: 0;">{{ $package->name }}</h3>
+                                                <h3 class="box-title tw-text-lg tw-text-gray-800" style="margin: 0;">{{ $package->name }}</h3>
                                                 <div class="box-tools pull-right" style="margin: 0;">
                                                     <a href="{{ action([\Modules\Superadmin\Http\Controllers\PackagesController::class, 'edit'], [$package->id]) }}"
                                                         class="btn btn-box-tool text-primary" title="edit" style="font-size: 14px; padding: 2px 5px;"><i class="fa fa-edit"></i></a>
@@ -245,7 +245,7 @@
                                             </ul>
 
                                             <div class="well well-sm text-center" style="margin-bottom: 0; background-color: #f8fafc; border-color: #e2e8f0;">
-                                                <h3 class="tw-font-bold text-primary" style="margin: 5px 0;">
+                                                <h3 class="text-primary" style="margin: 5px 0;">
                                                     @if ($package->price != 0)
                                                         <span class="display_currency" data-currency_symbol="true">
                                                             {{ $package->price }}

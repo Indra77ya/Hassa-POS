@@ -5,7 +5,7 @@
     @include('superadmin::layouts.nav')
     <!-- Content Header (Page header) -->
     <section class="content-header">
-        <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('superadmin::lang.view_business')
+        <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">@lang('superadmin::lang.view_business')
             <small class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold"> {{ $business->name }} </small>
         </h1>
         <!-- <ol class="breadcrumb">
@@ -17,13 +17,13 @@
     <!-- Main content -->
     <section class="content">
         <div
-            class=" tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md  tw-ring-gray-200">
+            class="lg:tw-col-span-1 tw-bg-white tw-shadow-sm tw-ring-1 hover:tw-shadow-md tw-ring-gray-200">
             <div class="tw-p-4 sm:tw-p-5">
                 <div class="tw-flex tw-justify-between tw-items-center tw-gap-2.5">
                     <strong><i class="fa fa-briefcase margin-r-5"></i>
                         {{ $business->name }}</strong>
 
-                    <button type="button" class="tw-dw-btn tw-dw-btn-error tw-text-white tw-font-bold tw-rounded-full btn-modal" data-href="{{ action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'getResetModal'], [$business->id]) }}" data-container=".view_modal">
+                    <button type="button" class="btn btn-danger tw-rounded-full btn-modal" data-href="{{ action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'getResetModal'], [$business->id]) }}" data-container=".view_modal">
                         <i class="fa fa-undo"></i> @lang('superadmin::lang.reset_business_data')
                     </button>
                 </div>
@@ -140,7 +140,7 @@
         </div>
 
         <div
-            class="tw-mt-5 tw-transition-all  lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md  tw-ring-gray-200">
+            class="tw-mt-5 lg:tw-col-span-1 tw-bg-white tw-shadow-sm tw-ring-1 hover:tw-shadow-md tw-ring-gray-200">
             <div class="tw-p-4 sm:tw-p-5">
                 <div class="tw-flex tw-gap-2.5">
                     <strong><i class="fa fa-map-marker margin-r-5"></i>
@@ -184,7 +184,7 @@
         </div>
 
         <div
-            class="tw-mt-5 tw-transition-all  lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md  tw-ring-gray-200">
+            class="tw-mt-5 lg:tw-col-span-1 tw-bg-white tw-shadow-sm tw-ring-1 hover:tw-shadow-md tw-ring-gray-200">
             <div class="tw-p-4 sm:tw-p-5">
                 <div class="tw-flex tw-gap-2.5">
                     <strong><i class="fa fa-refresh margin-r-5"></i>
@@ -247,7 +247,7 @@
         </div>
 
         <div
-            class="tw-mt-5 tw-transition-all  lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md  tw-ring-gray-200">
+            class="tw-mt-5 lg:tw-col-span-1 tw-bg-white tw-shadow-sm tw-ring-1 hover:tw-shadow-md tw-ring-gray-200">
             <div class="tw-p-4 sm:tw-p-5">
                 <div class="tw-flex tw-gap-2.5">
                     <strong>{{ __('user.all_users') }}</strong>

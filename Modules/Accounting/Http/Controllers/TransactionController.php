@@ -94,7 +94,7 @@ class TransactionController extends Controller
                         $html = '';
 
                         if (auth()->user()->can('sell.view') || auth()->user()->can('direct_sell.view') || auth()->user()->can('view_own_sell_only')) {
-                            $html .= '<a href="#" data-href="'.action([\App\Http\Controllers\SellController::class, 'show'], [$row->id]).'" class="btn-modal tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-info" data-container=".view_modal"><i class="fas fa-eye" aria-hidden="true"></i> '.__('messages.view').'</a>';
+                            $html .= '<a href="#" data-href="'.action([\App\Http\Controllers\SellController::class, 'show'], [$row->id]).'" class="btn-modal btn btn-xs btn-info" data-container=".view_modal"><i class="fas fa-eye" aria-hidden="true"></i> '.__('messages.view').'</a>';
                         }
 
                         if (auth()->user()->can('accounting.map_transactions')) {
@@ -103,7 +103,7 @@ class TransactionController extends Controller
 
                             if (! $is_mapped) {
                                 $html .= '<a href="#" 
-                                    data-href="'.action([\Modules\Accounting\Http\Controllers\TransactionController::class, 'map']).'?id='.$row->id.'&type=sell'.'" class="btn-modal tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary tw-w-max mt-10" data-container=".view_modal"><i class="fas fa-link"></i> '.__('accounting::lang.map_transaction').'</a>';
+                                    data-href="'.action([\Modules\Accounting\Http\Controllers\TransactionController::class, 'map']).'?id='.$row->id.'&type=sell'.'" class="btn-modal btn btn-xs btn-primary tw-w-max mt-10" data-container=".view_modal"><i class="fas fa-link"></i> '.__('accounting::lang.map_transaction').'</a>';
                             } else {
                                 $html .= '<a href="#" 
                                     data-href="'.action([\Modules\Accounting\Http\Controllers\TransactionController::class, 'map']).'?id='.$row->id.'&type=sell'.'" class="btn-modal btn btn-warning btn-xs tw-w-max mt-10" data-container=".view_modal"><i class="fas fa-link"></i> '.__('accounting::lang.edit_mapping').'</a>';
@@ -292,10 +292,10 @@ class TransactionController extends Controller
 
                         if (! $is_mapped) {
                             $html .= '<a href="#" 
-                                data-href="'.action([\Modules\Accounting\Http\Controllers\TransactionController::class, 'map']).'?id='.$row->transaction_payment_id.'&type='.$type_parameter.'" class="btn-modal tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary tw-w-max mt-10" data-container=".view_modal"><i class="fas fa-link"></i> '.__('accounting::lang.map_transaction').'</a>';
+                                data-href="'.action([\Modules\Accounting\Http\Controllers\TransactionController::class, 'map']).'?id='.$row->transaction_payment_id.'&type='.$type_parameter.'" class="btn-modal btn btn-xs btn-primary tw-w-max mt-10" data-container=".view_modal"><i class="fas fa-link"></i> '.__('accounting::lang.map_transaction').'</a>';
                         } else {
                             $html .= '<a href="#" 
-                                data-href="'.action([\Modules\Accounting\Http\Controllers\TransactionController::class, 'map']).'?id='.$row->transaction_payment_id.'&type='.$type_parameter.'" class="btn-modal tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-warning tw-dw-btn-xs mt-10" data-container=".view_modal"><i class="fas fa-link"></i> '.__('accounting::lang.edit_mapping').'</a>';
+                                data-href="'.action([\Modules\Accounting\Http\Controllers\TransactionController::class, 'map']).'?id='.$row->transaction_payment_id.'&type='.$type_parameter.'" class="btn-modal btn btn-xs btn-warning mt-10" data-container=".view_modal"><i class="fas fa-link"></i> '.__('accounting::lang.edit_mapping').'</a>';
                         }
                     }
 
@@ -349,7 +349,7 @@ class TransactionController extends Controller
                     $html = '';
 
                     if (auth()->user()->can('purchase.view')) {
-                        $html .= '<a href="#" data-href="'.action([\App\Http\Controllers\PurchaseController::class, 'show'], [$row->id]).'" class="btn-modal tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-info tw-w-max" data-container=".view_modal"><i class="fas fa-eye" aria-hidden="true"></i> '.__('messages.view').'</a>';
+                        $html .= '<a href="#" data-href="'.action([\App\Http\Controllers\PurchaseController::class, 'show'], [$row->id]).'" class="btn-modal btn btn-xs btn-info tw-w-max" data-container=".view_modal"><i class="fas fa-eye" aria-hidden="true"></i> '.__('messages.view').'</a>';
                     }
                     if (auth()->user()->can('accounting.map_transactions')) {
                         //check if mapping already present
@@ -357,7 +357,7 @@ class TransactionController extends Controller
 
                         if (! $is_mapped) {
                             $html .= '<a href="#" 
-                                data-href="'.action([\Modules\Accounting\Http\Controllers\TransactionController::class, 'map']).'?id='.$row->id.'&type=purchase'.'" class="btn-modal tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary tw-w-max mt-10" data-container=".view_modal"><i class="fas fa-link"></i> '.__('accounting::lang.map_transaction').'</a>';
+                                data-href="'.action([\Modules\Accounting\Http\Controllers\TransactionController::class, 'map']).'?id='.$row->id.'&type=purchase'.'" class="btn-modal btn btn-xs btn-primary tw-w-max mt-10" data-container=".view_modal"><i class="fas fa-link"></i> '.__('accounting::lang.map_transaction').'</a>';
                         } else {
                             $html .= '<a href="#" 
                                 data-href="'.action([\Modules\Accounting\Http\Controllers\TransactionController::class, 'map']).'?id='.$row->id.'&type=purchase'.'" class="btn-modal btn btn-warning btn-xs tw-w-max mt-10" data-container=".view_modal"><i class="fas fa-link"></i> '.__('accounting::lang.edit_mapping').'</a>';
@@ -420,10 +420,10 @@ class TransactionController extends Controller
 
                     if (! $is_mapped) {
                         $html .= '<a href="#" 
-                            data-href="'.action([\Modules\Accounting\Http\Controllers\TransactionController::class, 'map']).'?id='.$row->id.'&type=expense'.'" class="btn-modal tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary tw-w-max mt-10" data-container=".view_modal"><i class="fas fa-link"></i> '.__('accounting::lang.map_transaction').'</a>';
+                            data-href="'.action([\Modules\Accounting\Http\Controllers\TransactionController::class, 'map']).'?id='.$row->id.'&type=expense'.'" class="btn-modal btn btn-xs btn-primary tw-w-max mt-10" data-container=".view_modal"><i class="fas fa-link"></i> '.__('accounting::lang.map_transaction').'</a>';
                     } else {
                         $html .= '<a href="#" 
-                            data-href="'.action([\Modules\Accounting\Http\Controllers\TransactionController::class, 'map']).'?id='.$row->id.'&type=expense'.'" class="btn-modal tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-warning btn-xs tw-w-max mt-10" data-container=".view_modal"><i class="fas fa-link"></i> '.__('accounting::lang.edit_mapping').'</a>';
+                            data-href="'.action([\Modules\Accounting\Http\Controllers\TransactionController::class, 'map']).'?id='.$row->id.'&type=expense'.'" class="btn-modal btn btn-xs btn-warning tw-w-max mt-10" data-container=".view_modal"><i class="fas fa-link"></i> '.__('accounting::lang.edit_mapping').'</a>';
                     }
                 }
 

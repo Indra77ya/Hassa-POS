@@ -5,7 +5,7 @@
 @include('manufacturing::layouts.nav')
 <!-- Content Header (Page header) -->
 <section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black" >@lang('manufacturing::lang.add_ingredients')</h1>
+    <h1 class="tw-text-xl md:tw-text-3xl tw-text-black" >@lang('manufacturing::lang.add_ingredients')</h1>
 </section>
 
 <!-- Main content -->
@@ -19,7 +19,7 @@
 		<div class="box-body">
 			<div class="row">
 				<div class="col-md-12">
-					<button type="button" class="tw-dw-btn tw-dw-btn-success tw-text-white pull-right" id="add_ingredient_group">@lang('manufacturing::lang.add_ingredient_group') @show_tooltip(__('manufacturing::lang.ingredient_group_tooltip'))</button>
+					<button type="button" class="btn btn-success pull-right" id="add_ingredient_group">@lang('manufacturing::lang.add_ingredient_group') @show_tooltip(__('manufacturing::lang.ingredient_group_tooltip'))</button>
 				</div>
 				<div class="col-md-10 col-md-offset-1">
 					<div class="form-group">
@@ -188,7 +188,7 @@
 			<br>
 			<div class="row">
 				<div class="col-sm-12">
-					<button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white pull-right">@lang('messages.save')</button>
+					<button type="submit" class="btn btn-primary pull-right">@lang('messages.save')</button>
 				</div>
 			</div>
 		</div>

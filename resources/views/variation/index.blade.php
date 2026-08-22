@@ -5,7 +5,7 @@
 
     <!-- Content Header (Page header) -->
     <section class="content-header">
-        <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('product.variations')
+        <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">@lang('product.variations')
             <small class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold">@lang('lang_v1.manage_product_variations')</small>
         </h1>
         <!-- <ol class="breadcrumb">
@@ -19,7 +19,7 @@
         @component('components.widget', ['class' => 'box-primary', 'title' => __('lang_v1.all_variations')])
             @slot('tool')
                 <div class="box-tools">
-                    <a class="tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] btn-modal"
+                    <a class="btn btn-primary btn-modal"
                     data-href="{{action([\App\Http\Controllers\VariationTemplateController::class, 'create'])}}" 
                     data-container=".variation_modal">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"

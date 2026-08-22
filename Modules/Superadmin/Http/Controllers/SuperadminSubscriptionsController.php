@@ -62,7 +62,7 @@ class SuperadminSubscriptionsController extends BaseController
                         ->addColumn(
                             'action',
                             function ($row) {
-                                $html = '<div class="btn-group">
+                                $html = '<div class="btn btn-group">
                                     <button type="button" class="btn btn-info btn-xs dropdown-toggle" data-toggle="dropdown" aria-expanded="false">'
                                         . __('messages.actions') . ' <span class="caret"></span><span class="sr-only">Toggle Dropdown</span>
                                     </button>
@@ -70,7 +70,7 @@ class SuperadminSubscriptionsController extends BaseController
 
                                 $html .= '<li><a href="#" data-href="' . action([\Modules\Superadmin\Http\Controllers\SuperadminSubscriptionsController::class, 'edit'], [$row->id]) . '" class="change_status" data-toggle="modal" data-target="#statusModal"><i class="fa fa-power-off"></i> ' . __('superadmin::lang.status') . '</a></li>';
 
-                                $html .= '<li><a href="#" data-href="' . action([\Modules\Superadmin\Http\Controllers\SuperadminSubscriptionsController::class, 'editSubscription'], ['id' => $row->id]) . '" class="btn-modal" data-container=".view_modal"><i class="glyphicon glyphicon-edit"></i> ' . __('messages.edit') . '</a></li>';
+                                $html .= '<li><a href="#" data-href="' . action([\Modules\Superadmin\Http\Controllers\SuperadminSubscriptionsController::class, 'editSubscription'], ['id' => $row->id]) . '" class="btn btn-modal" data-container=".view_modal"><i class="glyphicon glyphicon-edit"></i> ' . __('messages.edit') . '</a></li>';
 
                                 $html .= '</ul></div>';
 

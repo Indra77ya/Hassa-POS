@@ -5,7 +5,7 @@
             	<h4 class="text-center">#{{$order->invoice_no}}</h4>
             	<table class="table no-margin no-border table-slim">
             		<tr><th>@lang('restaurant.placed_at')</th><td>{{@format_date($order->created_at)}} {{ @format_time($order->created_at)}}</td></tr>
-            		<tr><th>@lang('restaurant.order_status')</th><td><span class="label @if($order->res_order_status == 'cooked' ) bg-red @elseif($order->res_order_status == 'served') bg-green @else bg-light-blue @endif">@lang('restaurant.order_statuses.' . $order->res_line_order_status) </span></td></tr>
+			<tr><th>@lang('restaurant.order_status')</th><td><span class="label @if($order->res_order_status == 'cooked' ) bg-red @elseif($order->res_order_status 'served') bg-green @else bg-light-blue @endif">@lang('restaurant.order_statuses.' . $order->res_line_order_status) </span></td></tr>
             		<tr><th>@lang('contact.customer')</th><td>{{$order->customer_name}}</td></tr>
             		<tr><th>@lang('restaurant.table')</th><td>{{$order->table_name}}</td></tr>
                         <tr><th>@lang('restaurant.service_staff')</th><td>{{$order->service_staff_name ?? ''}}</td></tr>

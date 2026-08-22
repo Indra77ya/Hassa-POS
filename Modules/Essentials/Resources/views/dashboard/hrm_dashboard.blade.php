@@ -5,7 +5,7 @@
     @include('essentials::layouts.nav_hrm')
     <!-- Main content -->
     <section class="content">
-        <div class="row ">
+        <div class="row">
             <div class="col-md-4 col-sm-6 col-xs-12 col-custom">
                 @component('components.widget', [
                     'class' => '',
@@ -92,7 +92,7 @@
             @endif
             <div class="col-md-4 col-sm-6 col-xs-12 text-center">
                 <a href="{{ action([\Modules\Essentials\Http\Controllers\PayrollController::class, 'getMyPayrolls']) }}"
-                    class="tw-dw-btn tw-dw-btn-success tw-text-white tw-dw-btn-lg">
+                    class="btn btn-success btn-lg">
                     <i class="fas fa-coins"></i>
                     @lang('essentials::lang.my_payrolls')
                 </a>

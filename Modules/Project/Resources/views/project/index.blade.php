@@ -4,7 +4,7 @@
 @section('content')
     @include('project::layouts.nav')
     <section class="content-header">
-        <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black" >
+        <h1 class="tw-text-xl md:tw-text-3xl tw-text-black" >
             @lang('project::lang.projects')
             <small> @lang('project::lang.all_projects')</small>
         </h1>
@@ -58,7 +58,7 @@
             <div class="box-header with-border">
                 <h3 class="box-title">@lang('project::lang.projects')</h3>
                 <div class="box-tools pull-right">
-                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    <div class="btn btn-group btn-group-toggle" data-toggle="buttons">
                         <label class="btn btn-info btn-sm active list">
                             <input type="radio" name="project_view" value="list_view" class="project_view"
                                 data-href="{{ action([\Modules\Project\Http\Controllers\ProjectController::class, 'index']) . '?project_view=list_view' }}">
@@ -71,7 +71,7 @@
                         </label>
                     </div>
                     @can('project.create_project')
-                        <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm add_new_project"
+                        <button type="button" class="btn btn-primary btn-sm add_new_project"
                             data-href="{{ action([\Modules\Project\Http\Controllers\ProjectController::class, 'create']) }}">
                             @lang('project::lang.new_project')&nbsp;
                             <i class="fa fa-plus"></i>

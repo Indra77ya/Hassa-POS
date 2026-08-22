@@ -5,14 +5,14 @@
     @include('superadmin::layouts.nav')
     <!-- Content Header (Page header) -->
     <section class="content-header">
-        <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black"> @lang('superadmin::lang.all_coupon')
+        <h1 class="tw-text-xl md:tw-text-3xl tw-text-black"> @lang('superadmin::lang.all_coupon')
         </h1>
     </section>
 
     <!-- Main content -->
     <section class="content">
     <div
-        class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md  tw-ring-gray-200">
+        class="lg:tw-col-span-1 tw-bg-white tw-shadow-sm tw-ring-1 hover:tw-shadow-md tw-ring-gray-200">
         <div class="tw-p-4 sm:tw-p-5">
             <div class="tw-flex tw-justify-end tw-gap-2.5">
                 <a class="btn btn-primary btn-sm pull-right"

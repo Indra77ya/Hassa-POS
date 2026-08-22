@@ -309,10 +309,10 @@
 	      	</div>
 	    </div>
 	    <div class="modal-footer no-print">
-	      	<button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white" aria-label="Print" onclick="$(this).closest('div.modal-content').find('.modal-body').printThis();">
+		<button type="button" class="btn btn-primary" aria-label="Print" onclick="$(this).closest('div.modal-content').find('.modal-body').printThis();">
 	      		<i class="fa fa-print"></i> @lang( 'messages.print' )
       		</button>
-	      	<button type="button" class="tw-dw-btn tw-dw-btn-neutral tw-text-white" data-dismiss="modal">@lang( 'messages.close' )</button>
+		<button type="button" class="btn btn-default" data-dismiss="modal">@lang( 'messages.close' )</button>
 	    </div>
   	</div><!-- /.modal-content -->
 </div><!-- /.modal-dialog -->

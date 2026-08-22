@@ -79,9 +79,9 @@ class AccountTypeController extends Controller
                 })
                 ->addColumn(
                     'action',
-                    '@if(!empty($business_id))<button data-href="{{action(\'\Modules\Accounting\Http\Controllers\AccountTypeController@edit\', [$id])}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-primary btn-modal" data-container="#edit_account_type_modal"><i class="glyphicon glyphicon-edit"></i> @lang("messages.edit")</button>
+                    '@if(!empty($business_id))<button data-href="{{action(\'\Modules\Accounting\Http\Controllers\AccountTypeController@edit\', [$id])}}" class="btn btn-xs btn-primary btn-modal" data-container="#edit_account_type_modal"><i class="glyphicon glyphicon-edit"></i> @lang("messages.edit")</button>
                         &nbsp;
-                        <button data-href="{{action(\'\Modules\Accounting\Http\Controllers\AccountTypeController@destroy\', [$id])}}" class="tw-dw-btn tw-dw-btn-outline tw-dw-btn-xs tw-dw-btn-error delete_account_type_button"><i class="glyphicon glyphicon-trash"></i> @lang("messages.delete")</button>
+                        <button data-href="{{action(\'\Modules\Accounting\Http\Controllers\AccountTypeController@destroy\', [$id])}}" class="btn btn-xs btn-danger delete_account_type_button"><i class="glyphicon glyphicon-trash"></i> @lang("messages.delete")</button>
                     @endif'
                 )
                 ->removeColumn('id')

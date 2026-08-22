@@ -5,7 +5,7 @@
 @include('repair::layouts.nav')
 <!-- Content Header (Page header) -->
 <section class="content-header">
-    <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('repair::lang.upload_job_sheet_docs')</h1>
+    <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">@lang('repair::lang.upload_job_sheet_docs')</h1>
 </section>
 <!-- Main content -->
 <section class="content">
@@ -37,7 +37,7 @@
 			</div>
 			@if($job_sheet->media->count() > 0)
 				<div class="col-md-6">
-					<div class="row ">
+					<div class="row">
 						<div class="col-md-12">
 							<h4>
 							@lang('repair::lang.uploaded_image_for', ['job_sheet_no' => $job_sheet->job_sheet_no])
@@ -71,7 +71,7 @@
 		            <input type="hidden" id="images" name="images" value="">
 		        </div>
 		    </div>
-		    <button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-w-full pull-right">
+		    <button type="submit" class="btn btn-primary tw-w-full pull-right">
                 @lang('messages.save')
             </button>
 	    {!! Form::close() !!}

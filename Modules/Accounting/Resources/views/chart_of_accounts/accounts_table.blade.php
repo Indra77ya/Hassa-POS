@@ -17,7 +17,7 @@
         @foreach($accounts as $account)
             <tr style="background-color: #f8fafc;" class="tw-font-semibold">
                 <td>
-                    <div class="btn-group"><button type="button" class="btn btn-info btn-xs dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{{__("messages.actions")}} <span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button>
+                    <div class="btn btn-group"><button type="button" class="btn btn-info btn-xs dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{{__("messages.actions")}} <span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button>
                         <ul class="dropdown-menu" style="left: 40px !important; right: auto !important; min-width: 120px !important;" role="menu">
                             <li>
                                 <a
@@ -26,7 +26,7 @@
                             </li>
 
                             <li>
-                                <a class="btn-modal" 
+                                <a class="btn btn-modal"
                                 href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'edit'], $account->id)}}" 
                                 data-href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'edit'], $account->id)}}" 
                                 data-container="#create_account_modal">
@@ -71,7 +71,7 @@
                 @foreach($account->child_accounts as $child_account)
                     <tr>
                         <td>
-                        <div class="btn-group"><button type="button" class="btn btn-info btn-xs dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{{__("messages.actions")}} <span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button>
+                        <div class="btn btn-group"><button type="button" class="btn btn-info btn-xs dropdown-toggle" data-toggle="dropdown" aria-expanded="false">{{__("messages.actions")}} <span class="caret"></span><span class="sr-only">Toggle Dropdown</span></button>
                             <ul class="dropdown-menu" style="left: 40px !important; right: auto !important; min-width: 120px !important;" role="menu">
                                 <li>
                                     <a
@@ -80,7 +80,7 @@
                                 </li>
 
                                 <li>
-                                <a class="btn-modal" 
+                                <a class="btn btn-modal"
                                     href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'edit'], $child_account->id)}}" 
                                     data-href="{{action([\Modules\Accounting\Http\Controllers\CoaController::class, 'edit'], $child_account->id)}}" 
                                     data-container="#create_account_modal">

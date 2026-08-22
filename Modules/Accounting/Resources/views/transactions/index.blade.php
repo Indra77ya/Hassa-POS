@@ -8,7 +8,7 @@
 
     <!-- Content Header (Page header) -->
     <section class="content-header">
-        <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('accounting::lang.transactions')</h1>
+        <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">@lang('accounting::lang.transactions')</h1>
     </section>
 
     <!-- Main content -->
@@ -18,27 +18,27 @@
                 <div class="nav-tabs-custom" style="border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);">
                     <ul class="nav nav-tabs nav-justified" style="border-radius: 12px 12px 0 0; border-bottom: 1px solid #e5e7eb;">
                         <li class="active">
-                            <a href="#sales_tab" data-toggle="tab" aria-expanded="true" class="tw-font-bold tw-text-sm md:tw-text-base">
+                            <a href="#sales_tab" data-toggle="tab" aria-expanded="true" class="tw-text-sm md:tw-text-base">
                                 <i class="fas fa-shopping-cart text-primary"></i> @lang('sale.sale')
                             </a>
                         </li>
                         <li>
-                            <a href="#sales_payments_tab" data-toggle="tab" aria-expanded="true" class="tw-font-bold tw-text-sm md:tw-text-base">
+                            <a href="#sales_payments_tab" data-toggle="tab" aria-expanded="true" class="tw-text-sm md:tw-text-base">
                                 <i class="fas fa-money-bill-alt text-success"></i> @lang('accounting::lang.sales_payments')
                             </a>
                         </li>
                         <li>
-                            <a href="#purchases_tab" data-toggle="tab" aria-expanded="true" class="tw-font-bold tw-text-sm md:tw-text-base">
+                            <a href="#purchases_tab" data-toggle="tab" aria-expanded="true" class="tw-text-sm md:tw-text-base">
                                 <i class="fas fa-shopping-bag text-warning"></i> @lang('purchase.purchases')
                             </a>
                         </li>
                         <li>
-                            <a href="#purchase_payments_tab" data-toggle="tab" aria-expanded="true" class="tw-font-bold tw-text-sm md:tw-text-base">
+                            <a href="#purchase_payments_tab" data-toggle="tab" aria-expanded="true" class="tw-text-sm md:tw-text-base">
                                 <i class="fas fa-credit-card text-info"></i> @lang('accounting::lang.purchase_payments')
                             </a>
                         </li>
                         <li>
-                            <a href="#expenses_tab" data-toggle="tab" aria-expanded="true" class="tw-font-bold tw-text-sm md:tw-text-base">
+                            <a href="#expenses_tab" data-toggle="tab" aria-expanded="true" class="tw-text-sm md:tw-text-base">
                                 <i class="fas fa-minus-circle text-danger"></i> @lang('accounting::lang.expenses')
                             </a>
                         </li>

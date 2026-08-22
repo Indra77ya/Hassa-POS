@@ -4,7 +4,7 @@
         <span class="username" style="margin-left: 0;">
           <span class="text-primary">{{$message->sender->user_full_name}}</span>
           @if($message->user_id == auth()->user()->id)
-          	<a href="{{action([\Modules\Essentials\Http\Controllers\EssentialsMessageController::class, 'destroy'], [$message->id])}}" class="pull-right btn-box-tool chat-delete" title="@lang('messages.delete')"><i class="fa fa-times text-danger"></i></a>
+		<a href="{{action([\Modules\Essentials\Http\Controllers\EssentialsMessageController::class, 'destroy'], [$message->id])}}" class="btn pull-right btn-box-tool chat-delete" title="@lang('messages.delete')"><i class="fa fa-times text-danger"></i></a>
           @endif
         </span>
     	<span class="description" style="margin-left: 0;"><small><i class="fas fa-clock"></i> {{$message->created_at->diffForHumans()}}</small></span>

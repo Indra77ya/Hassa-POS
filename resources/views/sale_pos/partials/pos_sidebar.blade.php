@@ -7,9 +7,9 @@
                 <div class="tw-dw-drawer-content">
                     <!-- Page content here -->
                     <label for="my-drawer-4{{ $drawer_id_suffix ?? '' }}"
-                        class="tw-dw-btn tw-dw-btn-sm tw-group tw-w-full tw-h-9 tw-min-h-[2.25rem] tw-rounded-xl tw-flex tw-flex-row tw-items-center tw-flex-nowrap tw-gap-1.5 tw-px-3 tw-text-xs tw-font-bold tw-normal-case tw-bg-slate-50 tw-border tw-border-slate-100 tw-text-slate-600 tw-shadow-none tw-transition-all tw-duration-200 hover:tw-bg-indigo-50 hover:tw-border-indigo-200 hover:tw-text-indigo-700 hover:tw-shadow-sm focus:tw-ring-2 focus:tw-ring-indigo-400 focus:tw-ring-offset-1" style="margin: 0;">
+                        class="btn btn-sm tw-group tw-w-full tw-h-9 tw-min-h-[2.25rem] tw-flex tw-flex-row tw-items-center tw-flex-nowrap tw-gap-1.5 tw-px-3 tw-text-xs tw-normal-case tw-bg-slate-50 tw-border tw-border-slate-100 tw-text-slate-600 tw-shadow-none hover:tw-bg-indigo-50 hover:tw-border-indigo-200 hover:tw-text-indigo-700 hover:tw-shadow-sm focus:tw-ring-2 focus:tw-ring-indigo-400 focus:tw-ring-offset-1" style="margin: 0;">
                         <svg xmlns="http://www.w3.org/2000/svg"
-                            class="tw-w-4 tw-flex-shrink-0 tw-text-indigo-500 tw-transition-transform tw-duration-200 group-hover:tw-scale-110 icon icon-tabler icon-tabler-category-plus" width="24" height="24"
+                            class="tw-w-4 tw-flex-shrink-0 tw-text-indigo-500 tw-transition-transform group-hover:tw-scale-110 icon icon-tabler icon-tabler-category-plus" width="24" height="24"
                             viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
                             stroke-linecap="round" stroke-linejoin="round">
                             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -17,14 +17,14 @@
                         </svg>
                         <span class="tw-truncate tw-flex-1 tw-text-left">@lang('category.category')</span>
                         {{-- Active filter badge: shown by JS when a category is selected --}}
-                        <span class="pos-active-filter-badge pos-filter-badge-cat tw-dw-badge tw-dw-badge-md tw-bg-indigo-100 tw-border tw-border-indigo-200 tw-text-indigo-700 tw-gap-1 tw-max-w-[100px] tw-flex-shrink-0 tw-font-bold tw-text-[10px] tw-px-1.5 tw-rounded-lg">
+                        <span class="pos-active-filter-badge pos-filter-badge-cat tw-dw-badge tw-dw-badge-md tw-bg-indigo-100 tw-border tw-border-indigo-200 tw-text-indigo-700 tw-gap-1 tw-max-w-[100px] tw-flex-shrink-0 tw-text-[10px] tw-px-1.5 tw-rounded-lg">
                             <span class="pos-active-filter-name tw-truncate"></span>
                             <button type="button" class="pos-filter-chip-clear tw-text-indigo-500" data-clear="category" aria-label="Clear">
                                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                             </button>
                         </span>
                         {{-- Count badge: hidden when filter is active --}}
-                        <span class="pos-count-badge tw-dw-badge tw-dw-badge-sm tw-bg-white tw-border tw-border-slate-200 tw-text-slate-400 tw-font-bold tw-text-[10px] tw-flex-shrink-0 group-hover:tw-bg-indigo-100 group-hover:tw-border-indigo-200 group-hover:tw-text-indigo-700 tw-transition-colors tw-rounded-lg">{{ count($categories) }}</span>
+                        <span class="pos-count-badge tw-dw-badge tw-dw-badge-sm tw-bg-white tw-border tw-border-slate-200 tw-text-slate-400 tw-text-[10px] tw-flex-shrink-0 group-hover:tw-bg-indigo-100 group-hover:tw-border-indigo-200 group-hover:tw-text-indigo-700 tw-transition-colors tw-rounded-lg">{{ count($categories) }}</span>
                     </label>
                 </div>
                 <div class="tw-dw-drawer-side" style="z-index: 4000">
@@ -35,10 +35,10 @@
                         {{-- Header: title + count + close --}}
                         <div class="tw-flex tw-items-start tw-justify-between tw-gap-3 tw-px-6 tw-pt-[22px] tw-pb-4 tw-border-b tw-border-slate-100">
                             <div class="tw-flex-1 tw-min-w-0">
-                                <h3 class="tw-text-lg tw-font-bold tw-text-slate-900 tw-m-0 tw-leading-tight tw-tracking-tight">@lang('category.category')</h3>
+                                <h3 class="tw-text-lg tw-text-slate-900 tw-m-0 tw-leading-tight tw-tracking-tight">@lang('category.category')</h3>
                                 <div class="tw-font-mono tw-text-[10px] tw-tracking-[0.08em] tw-uppercase tw-text-slate-400 tw-mt-1.5"><span>{{ count($categories) }}</span> @lang('category.category')</div>
                             </div>
-                            <button type="button" class="tw-w-8 tw-h-8 tw-rounded-xl tw-bg-slate-100 tw-text-slate-500 tw-border-0 tw-cursor-pointer tw-inline-flex tw-items-center tw-justify-center tw-transition-all tw-duration-[160ms] tw-flex-shrink-0 hover:tw-bg-slate-200 hover:tw-text-slate-900 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-indigo-500 focus-visible:tw-outline-offset-2 close-side-bar-category" aria-label="Close">
+                            <button type="button" class="tw-w-8 tw-h-8 tw-bg-slate-100 tw-text-slate-500 tw-border-0 tw-cursor-pointer tw-inline-flex tw-items-center tw-justify-center tw-duration-[160ms] tw-flex-shrink-0 hover:tw-bg-slate-200 hover:tw-text-slate-900 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-indigo-500 focus-visible:tw-outline-offset-2 close-side-bar-category" aria-label="Close">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                             </button>
                         </div>
@@ -48,16 +48,16 @@
                             <div class="row pos-card-grid pos-card-grid-categories" data-label-all="@lang('messages.all')" style="margin-right: 0; margin-left: -8px;">
                                 <div class="col-md-4 col-xs-6 tw-mb-3 tw-cursor-pointer main-category-div main-category no-print"
                                     data-value="all" data-parent="0" style="padding-left: 4px; padding-right: 4px;">
-                                    <div class="pos-card cat tw-rounded-xl tw-border tw-border-slate-150 tw-p-3 tw-bg-slate-50 hover:tw-bg-indigo-50 hover:tw-border-indigo-200 tw-transition-all">
-                                        <h4 class="pos-card-name tw-text-xs tw-font-bold tw-text-slate-700 text-center m-0">@lang('lang_v1.all_category')</h4>
+                                    <div class="pos-card cat tw-border tw-border-slate-150 tw-p-3 tw-bg-slate-50 hover:tw-bg-indigo-50 hover:tw-border-indigo-200">
+                                        <h4 class="pos-card-name tw-text-xs tw-text-slate-700 text-center m-0">@lang('lang_v1.all_category')</h4>
                                     </div>
                                 </div>
                                 @foreach ($categories as $category)
                                     <div class="col-md-4 col-xs-6 tw-mb-3 tw-cursor-pointer main-category-div main-category no-print"
                                         data-value="{{ $category['id'] }}" data-name="{{ $category['name'] }}" data-parent="0"
                                         style="padding-left: 4px; padding-right: 4px;">
-                                        <div class="pos-card cat tw-rounded-xl tw-border tw-border-slate-150 tw-p-3 tw-bg-slate-50 hover:tw-bg-indigo-50 hover:tw-border-indigo-200 tw-transition-all">
-                                            <h4 class="pos-card-name tw-text-xs tw-font-bold tw-text-slate-700 text-center m-0 tw-line-clamp-2">{{ $category['name'] }}</h4>
+                                        <div class="pos-card cat tw-border tw-border-slate-150 tw-p-3 tw-bg-slate-50 hover:tw-bg-indigo-50 hover:tw-border-indigo-200">
+                                            <h4 class="pos-card-name tw-text-xs tw-text-slate-700 text-center m-0 tw-line-clamp-2">{{ $category['name'] }}</h4>
                                             @if (!empty($category['sub_categories']))
                                                 <span class="pos-card-subcat-dot tw-block tw-w-1.5 tw-h-1.5 tw-rounded-full tw-bg-indigo-500 tw-mx-auto tw-mt-1.5"></span>
                                             @endif
@@ -72,8 +72,8 @@
                                                     <div class="col-md-4 col-xs-6 tw-mb-3 tw-cursor-pointer product_category no-print"
                                                         data-value="{{ $sc['id'] }}" data-name="{{ $sc['name'] }}"
                                                         style="padding-left: 4px; padding-right: 4px;">
-                                                        <div class="pos-card cat tw-rounded-xl tw-border tw-border-slate-150 tw-p-3 tw-bg-slate-50 hover:tw-bg-indigo-50 hover:tw-border-indigo-200 tw-transition-all">
-                                                            <h4 class="pos-card-name tw-text-xs tw-font-bold tw-text-slate-700 text-center m-0 tw-line-clamp-2">{{ $sc['name'] }}</h4>
+                                                        <div class="pos-card cat tw-border tw-border-slate-150 tw-p-3 tw-bg-slate-50 hover:tw-bg-indigo-50 hover:tw-border-indigo-200">
+                                                            <h4 class="pos-card-name tw-text-xs tw-text-slate-700 text-center m-0 tw-line-clamp-2">{{ $sc['name'] }}</h4>
                                                         </div>
                                                     </div>
                                                 @endif
@@ -96,8 +96,8 @@
                 <div class="tw-dw-drawer-content">
                     <!-- Page content here -->
                     <label for="my-drawer-brand{{ $drawer_id_suffix ?? '' }}"
-                        class="tw-dw-btn tw-dw-btn-sm tw-group tw-w-full tw-h-9 tw-min-h-[2.25rem] tw-rounded-xl tw-flex tw-flex-row tw-items-center tw-flex-nowrap tw-gap-1.5 tw-px-3 tw-text-xs tw-font-bold tw-normal-case tw-bg-slate-50 tw-border tw-border-slate-100 tw-text-slate-600 tw-shadow-none tw-transition-all tw-duration-200 hover:tw-bg-violet-50 hover:tw-border-violet-200 hover:tw-text-violet-700 hover:tw-shadow-sm focus:tw-ring-2 focus:tw-ring-violet-400 focus:tw-ring-offset-1" style="margin: 0;">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="tw-w-4 tw-flex-shrink-0 tw-text-violet-500 tw-transition-transform tw-duration-200 group-hover:tw-scale-110 icon icon-tabler icon-tabler-brand-beats"
+                        class="btn btn-sm tw-group tw-w-full tw-h-9 tw-min-h-[2.25rem] tw-flex tw-flex-row tw-items-center tw-flex-nowrap tw-gap-1.5 tw-px-3 tw-text-xs tw-normal-case tw-bg-slate-50 tw-border tw-border-slate-100 tw-text-slate-600 tw-shadow-none hover:tw-bg-violet-50 hover:tw-border-violet-200 hover:tw-text-violet-700 hover:tw-shadow-sm focus:tw-ring-2 focus:tw-ring-violet-400 focus:tw-ring-offset-1" style="margin: 0;">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="tw-w-4 tw-flex-shrink-0 tw-text-violet-500 tw-transition-transform group-hover:tw-scale-110 icon icon-tabler icon-tabler-brand-beats"
                             width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
                             fill="none" stroke-linecap="round" stroke-linejoin="round">
                             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -107,14 +107,14 @@
                         </svg>
                         <span class="tw-truncate tw-flex-1 tw-text-left">@lang('brand.brands')</span>
                         {{-- Active filter badge: shown by JS when a brand is selected --}}
-                        <span class="pos-active-filter-badge pos-filter-badge-brand tw-dw-badge tw-dw-badge-md tw-bg-violet-100 tw-border tw-border-violet-200 tw-text-violet-700 tw-gap-1 tw-max-w-[100px] tw-flex-shrink-0 tw-font-bold tw-text-[10px] tw-px-1.5 tw-rounded-lg">
+                        <span class="pos-active-filter-badge pos-filter-badge-brand tw-dw-badge tw-dw-badge-md tw-bg-violet-100 tw-border tw-border-violet-200 tw-text-violet-700 tw-gap-1 tw-max-w-[100px] tw-flex-shrink-0 tw-text-[10px] tw-px-1.5 tw-rounded-lg">
                             <span class="pos-active-filter-name tw-truncate"></span>
                             <button type="button" class="pos-filter-chip-clear tw-text-violet-500" data-clear="brand" aria-label="Clear">
                                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                             </button>
                         </span>
                         {{-- Count badge: hidden when filter is active --}}
-                        <span class="pos-count-badge tw-dw-badge tw-dw-badge-sm tw-bg-white tw-border tw-border-slate-200 tw-text-slate-400 tw-font-bold tw-text-[10px] tw-flex-shrink-0 group-hover:tw-bg-violet-100 group-hover:tw-border-violet-200 group-hover:tw-text-violet-700 tw-transition-colors tw-rounded-lg">{{ count($brands) }}</span>
+                        <span class="pos-count-badge tw-dw-badge tw-dw-badge-sm tw-bg-white tw-border tw-border-slate-200 tw-text-slate-400 tw-text-[10px] tw-flex-shrink-0 group-hover:tw-bg-violet-100 group-hover:tw-border-violet-200 group-hover:tw-text-violet-700 tw-transition-colors tw-rounded-lg">{{ count($brands) }}</span>
                     </label>
                 </div>
                 <div class="tw-dw-drawer-side" style="z-index: 4000">
@@ -124,10 +124,10 @@
 
                         <div class="tw-flex tw-items-start tw-justify-between tw-gap-3 tw-px-6 tw-pt-[22px] tw-pb-4 tw-border-b tw-border-slate-100">
                             <div class="tw-flex-1 tw-min-w-0">
-                                <h3 class="tw-text-lg tw-font-bold tw-text-slate-900 tw-m-0 tw-leading-tight tw-tracking-tight">@lang('brand.brands')</h3>
+                                <h3 class="tw-text-lg tw-text-slate-900 tw-m-0 tw-leading-tight tw-tracking-tight">@lang('brand.brands')</h3>
                                 <div class="tw-font-mono tw-text-[10px] tw-tracking-[0.08em] tw-uppercase tw-text-slate-400 tw-mt-1.5"><span>{{ count($brands) }}</span> @lang('brand.brands')</div>
                             </div>
-                            <button type="button" class="tw-w-8 tw-h-8 tw-rounded-xl tw-bg-slate-100 tw-text-slate-500 tw-border-0 tw-cursor-pointer tw-inline-flex tw-items-center tw-justify-center tw-transition-all tw-duration-[160ms] tw-flex-shrink-0 hover:tw-bg-slate-200 hover:tw-text-slate-900 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-violet-500 focus-visible:tw-outline-offset-2 close-side-bar-brand" aria-label="Close">
+                            <button type="button" class="tw-w-8 tw-h-8 tw-bg-slate-100 tw-text-slate-500 tw-border-0 tw-cursor-pointer tw-inline-flex tw-items-center tw-justify-center tw-duration-[160ms] tw-flex-shrink-0 hover:tw-bg-slate-200 hover:tw-text-slate-900 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-violet-500 focus-visible:tw-outline-offset-2 close-side-bar-brand" aria-label="Close">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                             </button>
                         </div>
@@ -138,8 +138,8 @@
                                     <div class="col-md-4 col-xs-6 tw-mb-3 tw-cursor-pointer product_brand no-print"
                                         data-value="{{ $key }}" data-name="{{ $brand }}"
                                         style="padding-left: 4px; padding-right: 4px;">
-                                        <div class="pos-card brand tw-rounded-xl tw-border tw-border-slate-150 tw-p-3 tw-bg-slate-50 hover:tw-bg-violet-50 hover:tw-border-violet-200 tw-transition-all">
-                                            <h4 class="pos-card-name tw-text-xs tw-font-bold tw-text-slate-700 text-center m-0 tw-line-clamp-2">{{ $brand }}</h4>
+                                        <div class="pos-card brand tw-border tw-border-slate-150 tw-p-3 tw-bg-slate-50 hover:tw-bg-violet-50 hover:tw-border-violet-200">
+                                            <h4 class="pos-card-name tw-text-xs tw-text-slate-700 text-center m-0 tw-line-clamp-2">{{ $brand }}</h4>
                                         </div>
                                     </div>
                                 @endforeach
@@ -163,9 +163,9 @@
 
     <div class="tw-flex-1 tw-w-0" id="feature_product_div">
         <label id="show_featured_products"
-            class="tw-dw-btn tw-dw-btn-sm tw-group tw-w-full tw-h-9 tw-min-h-[2.25rem] tw-rounded-xl tw-flex tw-flex-row tw-items-center tw-flex-nowrap tw-gap-1.5 tw-px-3 tw-text-xs tw-font-bold tw-normal-case tw-bg-slate-50 tw-border tw-border-slate-100 tw-text-slate-600 tw-shadow-none tw-transition-all tw-duration-200 hover:tw-bg-amber-50 hover:tw-border-amber-200 hover:tw-text-amber-700 hover:tw-shadow-sm focus:tw-ring-2 focus:tw-ring-amber-400 focus:tw-ring-offset-1 tw-cursor-pointer" style="margin: 0;">
+            class="btn btn-sm tw-group tw-w-full tw-h-9 tw-min-h-[2.25rem] tw-flex tw-flex-row tw-items-center tw-flex-nowrap tw-gap-1.5 tw-px-3 tw-text-xs tw-normal-case tw-bg-slate-50 tw-border tw-border-slate-100 tw-text-slate-600 tw-shadow-none hover:tw-bg-amber-50 hover:tw-border-amber-200 hover:tw-text-amber-700 hover:tw-shadow-sm focus:tw-ring-2 focus:tw-ring-amber-400 focus:tw-ring-offset-1 tw-cursor-pointer" style="margin: 0;">
             <svg xmlns="http://www.w3.org/2000/svg"
-                class="tw-w-4 tw-flex-shrink-0 tw-text-amber-500 tw-transition-transform tw-duration-200 group-hover:tw-scale-110 group-hover:tw-rotate-12 icon icon-tabler icon-tabler-star" width="24" height="24"
+                class="tw-w-4 tw-flex-shrink-0 tw-text-amber-500 tw-transition-transform group-hover:tw-scale-110 group-hover:tw-rotate-12 icon icon-tabler icon-tabler-star" width="24" height="24"
                 viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
                 stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -173,7 +173,7 @@
             </svg>
             <span class="tw-truncate tw-flex-1 tw-text-left">@lang('lang_v1.featured_products')</span>
             @if (!empty($featured_products) && count($featured_products) > 0)
-                <span class="tw-dw-badge tw-dw-badge-sm tw-bg-white tw-border tw-border-slate-200 tw-text-slate-400 tw-font-bold tw-text-[10px] group-hover:tw-bg-amber-100 group-hover:tw-border-amber-200 group-hover:tw-text-amber-700 tw-transition-colors tw-rounded-lg">{{ count($featured_products) }}</span>
+                <span class="tw-dw-badge tw-dw-badge-sm tw-bg-white tw-border tw-border-slate-200 tw-text-slate-400 tw-text-[10px] group-hover:tw-bg-amber-100 group-hover:tw-border-amber-200 group-hover:tw-text-amber-700 tw-transition-colors tw-rounded-lg">{{ count($featured_products) }}</span>
             @endif
         </label>
     </div>

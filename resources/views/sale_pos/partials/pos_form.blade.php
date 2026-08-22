@@ -1,7 +1,7 @@
 <div class="row">
 	<div class="col-md-4">
 		<div class="form-group tw-mb-3">
-			<div class="input-group tw-border tw-border-slate-200 tw-rounded-xl tw-overflow-hidden tw-shadow-sm tw-transition-all focus-within:tw-border-indigo-400 focus-within:tw-ring-1 focus-within:tw-ring-indigo-400/20" style="display: table; width: 100% !important;">
+			<div class="input-group tw-border tw-border-slate-200 tw-overflow-hidden tw-shadow-sm focus-within:tw-border-indigo-400 focus-within:tw-ring-1 focus-within:tw-ring-indigo-400/20" style="display: table; width: 100% !important;">
 				<span class="input-group-addon !tw-bg-slate-50 !tw-border-0 !tw-text-slate-400 !tw-px-3" style="border: 0; vertical-align: middle;">
 					<i class="fa fa-user"></i>
 				</span>
@@ -26,12 +26,12 @@
 					@endcan
 				</span>
 			</div>
-			<small class="text-danger hide contact_due_text tw-text-[11px] tw-font-bold tw-mt-1 tw-block"><strong>@lang('account.customer_due'):</strong> <span></span></small>
+			<small class="text-danger hide contact_due_text tw-text-[11px] tw-mt-1 tw-block"><strong>@lang('account.customer_due'):</strong> <span></span></small>
 		</div>
 	</div>
 	<div class="col-md-8">
 		<div class="form-group tw-mb-3">
-			<div class="input-group tw-border tw-border-slate-200 tw-rounded-xl tw-overflow-hidden tw-shadow-sm tw-transition-all focus-within:tw-border-indigo-400 focus-within:tw-ring-1 focus-within:tw-ring-indigo-400/20" style="display: table; width: 100% !important;">
+			<div class="input-group tw-border tw-border-slate-200 tw-overflow-hidden tw-shadow-sm focus-within:tw-border-indigo-400 focus-within:tw-ring-1 focus-within:tw-ring-indigo-400/20" style="display: table; width: 100% !important;">
 				<span class="input-group-btn" style="border: 0; vertical-align: middle;">
 					<button type="button" class="btn btn-default bg-white btn-flat !tw-border-0 !tw-h-9 !tw-text-slate-400 hover:!tw-bg-slate-50" style="border: 0; background: transparent; height: 36px;" data-toggle="modal" data-target="#configure_search_modal" title="{{__('lang_v1.configure_product_search')}}"><i class="fas fa-search-plus"></i></button>
 				</span>
@@ -80,7 +80,7 @@
 	@if(!empty($pos_settings['enable_transaction_date']))
 		<div class="col-md-4 col-sm-6">
 			<div class="form-group tw-mb-3">
-				<div class="input-group tw-border tw-border-slate-200 tw-rounded-xl tw-overflow-hidden tw-shadow-sm tw-transition-all focus-within:tw-border-indigo-400" style="display: table; width: 100%;">
+				<div class="input-group tw-border tw-border-slate-200 tw-overflow-hidden tw-shadow-sm focus-within:tw-border-indigo-400" style="display: table; width: 100%;">
 					<span class="input-group-addon !tw-bg-slate-50 !tw-border-0 !tw-text-slate-400 !tw-px-3">
 						<i class="fa fa-calendar"></i>
 					</span>
@@ -92,7 +92,7 @@
 	@if(config('constants.enable_sell_in_diff_currency') == true)
 		<div class="col-md-4 col-sm-6">
 			<div class="form-group tw-mb-3">
-				<div class="input-group tw-border tw-border-slate-200 tw-rounded-xl tw-overflow-hidden tw-shadow-sm" style="display: table; width: 100%;">
+				<div class="input-group tw-border tw-border-slate-200 tw-overflow-hidden tw-shadow-sm" style="display: table; width: 100%;">
 					<span class="input-group-addon !tw-bg-slate-50 !tw-border-0 !tw-text-slate-400 !tw-px-3">
 						<i class="fas fa-exchange-alt"></i>
 					</span>
@@ -172,7 +172,7 @@
 	@endif
 	@if(in_array('subscription', $enabled_modules))
 		<div class="col-md-4 col-sm-6">
-			<label class="tw-text-xs tw-text-slate-600 tw-font-bold tw-cursor-pointer">
+			<label class="tw-text-xs tw-text-slate-600 tw-cursor-pointer">
               {!! Form::checkbox('is_recurring', 1, false, ['class' => 'input-icheck', 'id' => 'is_recurring']); !!} &nbsp;@lang('lang_v1.subscribe')?
             </label><button type="button" data-toggle="modal" data-target="#recurringInvoiceModal" class="btn btn-link !tw-p-0 tw-ml-1"><i class="fa fa-external-link-square-alt tw-text-indigo-500"></i></button>@show_tooltip(__('lang_v1.recurring_invoice_help'))
 		</div>
@@ -189,7 +189,7 @@
 		<div class="col-md-3">
 			<div class="form-group tw-mb-3">
 				<div class="checkbox">
-				<label class="tw-text-xs tw-text-slate-600 tw-font-bold tw-cursor-pointer">
+				<label class="tw-text-xs tw-text-slate-600 tw-cursor-pointer">
 						{!! Form::checkbox('is_kitchen_order', 1, false, ['class' => 'input-icheck status', 'id' => 'is_kitchen_order']); !!} &nbsp;{{ __('lang_v1.kitchen_order') }}
 				</label>
 				@show_tooltip(__('lang_v1.kitchen_order_tooltip'))
@@ -223,24 +223,24 @@
 		<table class="table table-condensed table-responsive tw-border-0 tw-table-fixed" id="pos_table">
 			<thead>
 				<tr>
-					<th class="text-left pos-th-product tw-sticky tw-top-0 tw-z-10 !tw-bg-[#f8fafc] !tw-text-[#64748b] !tw-border-b !tw-border-[#e2e8f0] !tw-border-t-0 !tw-border-l-0 !tw-border-r-0 !tw-px-4 !tw-py-2 !tw-text-[11px] tw-font-bold tw-uppercase tw-tracking-[0.4px] !tw-leading-[1.2] tw-whitespace-nowrap tw-overflow-hidden !tw-align-middle tw-w-[40%]">
+					<th class="text-left pos-th-product tw-sticky tw-top-0 tw-z-10 !tw-bg-[#f8fafc] !tw-text-[#64748b] !tw-border-b !tw-border-[#e2e8f0] !tw-border-t-0 !tw-border-l-0 !tw-border-r-0 !tw-px-4 !tw-py-2 !tw-text-[11px] tw-uppercase tw-tracking-[0.4px] !tw-leading-[1.2] tw-whitespace-nowrap tw-overflow-hidden !tw-align-middle tw-w-[40%]">
 						@lang('sale.product') @show_tooltip(__('lang_v1.tooltip_sell_product_column'))
 					</th>
-					<th class="text-center pos-th-qty tw-sticky tw-top-0 tw-z-10 !tw-bg-[#f8fafc] !tw-text-[#64748b] !tw-border-b !tw-border-[#e2e8f0] !tw-border-t-0 !tw-border-l-0 !tw-border-r-0 !tw-px-4 !tw-py-2 !tw-text-[11px] tw-font-bold tw-uppercase tw-tracking-[0.4px] !tw-leading-[1.2] tw-whitespace-nowrap tw-overflow-hidden !tw-align-middle tw-w-[22%]">
+					<th class="text-center pos-th-qty tw-sticky tw-top-0 tw-z-10 !tw-bg-[#f8fafc] !tw-text-[#64748b] !tw-border-b !tw-border-[#e2e8f0] !tw-border-t-0 !tw-border-l-0 !tw-border-r-0 !tw-px-4 !tw-py-2 !tw-text-[11px] tw-uppercase tw-tracking-[0.4px] !tw-leading-[1.2] tw-whitespace-nowrap tw-overflow-hidden !tw-align-middle tw-w-[22%]">
 						@lang('sale.qty')
 					</th>
 					@if(!empty($pos_settings['inline_service_staff']))
-						<th class="text-center pos-th-staff tw-sticky tw-top-0 tw-z-10 !tw-bg-[#f8fafc] !tw-text-[#64748b] !tw-border-b !tw-border-[#e2e8f0] !tw-border-t-0 !tw-border-l-0 !tw-border-r-0 !tw-px-4 !tw-py-2 !tw-text-[11px] tw-font-bold tw-uppercase tw-tracking-[0.4px] !tw-leading-[1.2] tw-whitespace-nowrap tw-overflow-hidden !tw-align-middle">
+						<th class="text-center pos-th-staff tw-sticky tw-top-0 tw-z-10 !tw-bg-[#f8fafc] !tw-text-[#64748b] !tw-border-b !tw-border-[#e2e8f0] !tw-border-t-0 !tw-border-l-0 !tw-border-r-0 !tw-px-4 !tw-py-2 !tw-text-[11px] tw-uppercase tw-tracking-[0.4px] !tw-leading-[1.2] tw-whitespace-nowrap tw-overflow-hidden !tw-align-middle">
 							@lang('restaurant.service_staff')
 						</th>
 					@endif
-					<th class="text-center pos-th-price tw-sticky tw-top-0 tw-z-10 !tw-bg-[#f8fafc] !tw-text-[#64748b] !tw-border-b !tw-border-[#e2e8f0] !tw-border-t-0 !tw-border-l-0 !tw-border-r-0 !tw-px-4 !tw-py-2 !tw-text-[11px] tw-font-bold tw-uppercase tw-tracking-[0.4px] !tw-leading-[1.2] tw-whitespace-nowrap tw-overflow-hidden !tw-align-middle tw-w-auto tw-min-w-[15%] {{$hide_tax}}">
+					<th class="text-center pos-th-price tw-sticky tw-top-0 tw-z-10 !tw-bg-[#f8fafc] !tw-text-[#64748b] !tw-border-b !tw-border-[#e2e8f0] !tw-border-t-0 !tw-border-l-0 !tw-border-r-0 !tw-px-4 !tw-py-2 !tw-text-[11px] tw-uppercase tw-tracking-[0.4px] !tw-leading-[1.2] tw-whitespace-nowrap tw-overflow-hidden !tw-align-middle tw-w-auto tw-min-w-[15%] {{$hide_tax}}">
 						@lang('sale.price_inc_tax')
 					</th>
-					<th class="text-right pos-th-subtotal tw-sticky tw-top-0 tw-z-10 !tw-bg-[#f8fafc] !tw-text-[#64748b] !tw-border-b !tw-border-[#e2e8f0] !tw-border-t-0 !tw-border-l-0 !tw-border-r-0 !tw-px-4 !tw-py-2 !tw-text-[11px] tw-font-bold tw-uppercase tw-tracking-[0.4px] !tw-leading-[1.2] tw-whitespace-nowrap tw-overflow-hidden !tw-align-middle tw-w-auto tw-min-w-[15%]">
+					<th class="text-right pos-th-subtotal tw-sticky tw-top-0 tw-z-10 !tw-bg-[#f8fafc] !tw-text-[#64748b] !tw-border-b !tw-border-[#e2e8f0] !tw-border-t-0 !tw-border-l-0 !tw-border-r-0 !tw-px-4 !tw-py-2 !tw-text-[11px] tw-uppercase tw-tracking-[0.4px] !tw-leading-[1.2] tw-whitespace-nowrap tw-overflow-hidden !tw-align-middle tw-w-auto tw-min-w-[15%]">
 						@lang('sale.subtotal')
 					</th>
-					<th class="pos-th-action tw-sticky tw-top-0 tw-z-10 !tw-bg-[#f8fafc] !tw-border-b !tw-border-[#e2e8f0] !tw-border-t-0 !tw-border-l-0 !tw-border-r-0 !tw-py-2 !tw-pr-4 !tw-pl-0 !tw-text-[11px] tw-font-bold tw-uppercase tw-tracking-[0.4px] !tw-leading-[1.2] tw-whitespace-nowrap tw-overflow-hidden !tw-align-middle tw-w-[56px] !tw-text-center"></th>
+					<th class="pos-th-action tw-sticky tw-top-0 tw-z-10 !tw-bg-[#f8fafc] !tw-border-b !tw-border-[#e2e8f0] !tw-border-t-0 !tw-border-l-0 !tw-border-r-0 !tw-py-2 !tw-pr-4 !tw-pl-0 !tw-text-[11px] tw-uppercase tw-tracking-[0.4px] !tw-leading-[1.2] tw-whitespace-nowrap tw-overflow-hidden !tw-align-middle tw-w-[56px] !tw-text-center"></th>
 				</tr>
 			</thead>
 			<tbody>

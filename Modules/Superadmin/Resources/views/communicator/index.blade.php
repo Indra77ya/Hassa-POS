@@ -5,7 +5,7 @@
     @include('superadmin::layouts.nav')
     <!-- Content Header (Page header) -->
     <section class="content-header">
-        <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('superadmin::lang.communicator')</h1>
+        <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">@lang('superadmin::lang.communicator')</h1>
     </section>
 
     <!-- Main content -->
@@ -13,14 +13,14 @@
         <div class="row">
             <div class="col-sm-12">
                 <div
-                    class="tw-transition-all tw-mb-4 lg:tw-col-span-2 xl:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md  tw-ring-gray-200">
+                    class="tw-mb-4 lg:tw-col-span-2 xl:tw-col-span-2 tw-bg-white tw-shadow-sm tw-ring-1 hover:tw-shadow-md tw-ring-gray-200">
                     <div class="tw-p-4 sm:tw-p-5">
                         <div class="tw-flex tw-items-center tw-gap-2.5">
                             <h3 class="box-title">@lang('superadmin::lang.compose_message')</h3>
                         </div>
                         <div class="tw-mt-5">
                             <div
-                                class="tw-grid tw-w-full tw-h-100 tw-border tw-border-gray-200 tw-border-dashed tw-rounded-xl tw-bg-gray-50 ">
+                                class="tw-grid tw-w-full tw-h-100 tw-border tw-border-gray-200 tw-border-dashed tw-bg-gray-50">
                                 <div class="">
                                     {!! Form::open([
                                         'url' => action([\Modules\Superadmin\Http\Controllers\CommunicatorController::class, 'send']),
@@ -59,7 +59,7 @@
             </div>
             <div class="col-sm-12">
                 <div
-                    class="tw-transition-all tw-mb-4 lg:tw-col-span-2 xl:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md  tw-ring-gray-200">
+                    class="tw-mb-4 lg:tw-col-span-2 xl:tw-col-span-2 tw-bg-white tw-shadow-sm tw-ring-1 hover:tw-shadow-md tw-ring-gray-200">
                     <div class="tw-p-4 sm:tw-p-5">
                         <div class="tw-flex tw-items-center tw-gap-2.5">
 							<svg xmlns="http://www.w3.org/2000/svg" class="tw-size-5 tw-text-sky-500 tw-shrink-0"  version="1.1" width="256" height="256" viewBox="0 0 256 256" xml:space="preserve">

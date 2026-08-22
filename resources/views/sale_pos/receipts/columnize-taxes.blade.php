@@ -96,14 +96,14 @@
 		
 		<!-- Total Paid-->
 		@if(!empty($receipt_details->total_paid))
-			<div class="text-right font-23 ">
+			<div class="text-right font-23">
 				<span class="pull-left">{!! $receipt_details->total_paid_label !!}</span>
 				{{$receipt_details->total_paid}}
 			</div>
 		@endif
 		<!-- Date-->
 		@if(!empty($receipt_details->date_label))
-			<div class="text-right font-23 ">
+			<div class="text-right font-23">
 				<span class="pull-left">
 					{{$receipt_details->date_label}}
 				</span>
@@ -112,7 +112,7 @@
 			</div>
 		@endif
 		@if(!empty($receipt_details->due_date_label))
-			<div class="text-right font-23 ">
+			<div class="text-right font-23">
 				<span class="pull-left">
 					{{$receipt_details->due_date_label}}
 				</span>
@@ -122,7 +122,7 @@
 		@endif
 
 		@if(!empty($receipt_details->sell_custom_field_1_value))
-			<div class="text-right font-23 ">
+			<div class="text-right font-23">
 				<span class="pull-left">
 					{{$receipt_details->sell_custom_field_1_label}}
 				</span>
@@ -131,7 +131,7 @@
 			</div>
 		@endif
 		@if(!empty($receipt_details->sell_custom_field_2_value))
-			<div class="text-right font-23 ">
+			<div class="text-right font-23">
 				<span class="pull-left">
 					{{$receipt_details->sell_custom_field_2_label}}
 				</span>
@@ -140,7 +140,7 @@
 			</div>
 		@endif
 		@if(!empty($receipt_details->sell_custom_field_3_value))
-			<div class="text-right font-23 ">
+			<div class="text-right font-23">
 				<span class="pull-left">
 					{{$receipt_details->sell_custom_field_3_label}}
 				</span>
@@ -149,7 +149,7 @@
 			</div>
 		@endif
 		@if(!empty($receipt_details->sell_custom_field_4_value))
-			<div class="text-right font-23 ">
+			<div class="text-right font-23">
 				<span class="pull-left">
 					{{$receipt_details->sell_custom_field_4_label}}
 				</span>
@@ -213,7 +213,7 @@
 
 	</div>
 
-	<div class="col-md-6 invoice-col width-50 ">
+	<div class="col-md-6 invoice-col width-50">
 		@if(empty($receipt_details->letter_head))
 			<!-- Logo -->
 			@if(!empty($receipt_details->logo))
@@ -277,7 +277,7 @@
 
         <div class="word-wrap">
 
-			<p class="text-right ">
+			<p class="text-right">
 
 			@if(!empty($receipt_details->brand_label) || !empty($receipt_details->repair_brand))
 				@if(!empty($receipt_details->brand_label))
@@ -387,7 +387,7 @@
 <div class="row">
 	@includeIf('sale_pos.receipts.partial.common_repair_invoice')
 </div>
-<div class="row ">
+<div class="row">
 	<div class="col-xs-12">
 		<br/>
 		<table class="table table-bordered table-no-top-cell-border table-slim">
@@ -707,7 +707,7 @@
 	</div>
 </div>
 
-<div class="row invoice-info " style="page-break-inside: avoid !important">
+<div class="row invoice-info" style="page-break-inside: avoid !important">
 	<div class="col-md-6 invoice-col width-50">
 		<table class="table table-slim">
 			@if(!empty($receipt_details->payments))
@@ -906,7 +906,7 @@
 </div>
 
 @if(!empty($receipt_details->additional_notes))
-	<div class="row ">
+	<div class="row">
 		<div class="col-xs-12">
 			<br>
 			<p>{!! nl2br($receipt_details->additional_notes) !!}</p>

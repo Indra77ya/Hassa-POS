@@ -5,7 +5,7 @@
     @include('essentials::layouts.nav_hrm')
     <!-- Content Header (Page header) -->
     <section class="content-header">
-        <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('essentials::lang.essentials_n_hrm_settings')</h1>
+        <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">@lang('essentials::lang.essentials_n_hrm_settings')</h1>
     </section>
 
     <!-- Main content -->
@@ -22,11 +22,11 @@
                 @component('components.widget', ['class' => 'pos-tab-container'])
                     <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 pos-tab-menu">
                         <div class="list-group">
-                            <a href="#" class="list-group-item text-center tw-font-bold tw-text-sm md:tw-text-base active">@lang('essentials::lang.leave')</a>
-                            <a href="#" class="list-group-item text-center tw-font-bold tw-text-sm md:tw-text-base">@lang('essentials::lang.payroll')</a>
-                            <a href="#" class="list-group-item text-center tw-font-bold tw-text-sm md:tw-text-base">@lang('essentials::lang.attendance')</a>
-                            <a href="#" class="list-group-item text-center tw-font-bold tw-text-sm md:tw-text-base">@lang('essentials::lang.sales_target')</a>
-                            <a href="#" class="list-group-item text-center tw-font-bold tw-text-sm md:tw-text-base">@lang('essentials::lang.essentials')</a>
+                            <a href="#" class="list-group-item text-center tw-text-sm md:tw-text-base active">@lang('essentials::lang.leave')</a>
+                            <a href="#" class="list-group-item text-center tw-text-sm md:tw-text-base">@lang('essentials::lang.payroll')</a>
+                            <a href="#" class="list-group-item text-center tw-text-sm md:tw-text-base">@lang('essentials::lang.attendance')</a>
+                            <a href="#" class="list-group-item text-center tw-text-sm md:tw-text-base">@lang('essentials::lang.sales_target')</a>
+                            <a href="#" class="list-group-item text-center tw-text-sm md:tw-text-base">@lang('essentials::lang.essentials')</a>
                         </div>
                     </div>
                     <div class="col-lg-10 col-md-10 col-sm-10 col-xs-10 pos-tab">

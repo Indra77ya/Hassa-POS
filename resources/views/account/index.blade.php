@@ -4,7 +4,7 @@
 @section('content')
     <!-- Content Header (Page header) -->
     <section class="content-header">
-        <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('lang_v1.payment_accounts')
+        <h1 class="tw-text-xl md:tw-text-3xl tw-text-black">@lang('lang_v1.payment_accounts')
             <small class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold">@lang('account.manage_your_account')</small>
         </h1>
     </section>
@@ -60,7 +60,7 @@
                                                 ) !!}
                                             </div>
                                             <div class="col-md-8">
-                                                    <button type="button" class="tw-dw-btn theme-btn-bg tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] btn-modal pull-right"
+                                                    <button type="button" class="btn btn-primary btn-modal pull-right"
                                                         data-container=".account_model"
                                                         data-href="{{ action([\App\Http\Controllers\AccountController::class, 'create']) }}">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -73,7 +73,7 @@
                                                     </button>
 
                                                     {!! Form::open(['url' => action([\App\Http\Controllers\AccountTypeController::class, 'seedDefault']), 'method' => 'post', 'class' => 'pull-right', 'id' => 'add_default_accounts_form', 'style' => 'margin-right: 10px;']) !!}
-                                                        <button type="submit" class="tw-dw-btn tw-dw-btn-success tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98]">
+                                                        <button type="submit" class="btn btn-success">
                                                             @lang('account.add_default_account_types')
                                                         </button>
                                                     {!! Form::close() !!}

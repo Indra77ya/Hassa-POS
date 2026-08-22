@@ -2,7 +2,7 @@
 	<div class="box-body">
 		<div class="row">
 			<div class="col-md-12">
-				<button class="tw-dw-btn tw-dw-btn-error tw-dw-btn-outline tw-dw-btn-xs pull-right remove_ingredient_group"><i class="fas fa-times"></i></button>
+				<button class="btn btn-danger btn-xs pull-right remove_ingredient_group"><i class="fas fa-times"></i></button>
 			</div>
 		</div>
 		<div class="row">

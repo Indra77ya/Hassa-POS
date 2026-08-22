@@ -59,9 +59,9 @@ class EssentialsAllowanceAndDeductionController extends Controller
                     function ($row) {
                         $html = '';
                         if (auth()->user()->can('essentials.add_allowance_and_deduction')) {
-                            $html .= '<button data-href="'.action([\Modules\Essentials\Http\Controllers\EssentialsAllowanceAndDeductionController::class, 'edit'], [$row->id]).'" data-container="#add_allowance_deduction_modal" class="btn-modal tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary"><i class="fa fa-edit" aria-hidden="true"></i> '.__('messages.edit').'</button>';
+                            $html .= '<button data-href="'.action([\Modules\Essentials\Http\Controllers\EssentialsAllowanceAndDeductionController::class, 'edit'], [$row->id]).'" data-container="#add_allowance_deduction_modal" class="btn-modal btn btn-xs btn-primary"><i class="fa fa-edit" aria-hidden="true"></i> '.__('messages.edit').'</button>';
 
-                            $html .= '&nbsp; <button data-href="'.action([\Modules\Essentials\Http\Controllers\EssentialsAllowanceAndDeductionController::class, 'destroy'], [$row->id]).'" class="delete-allowance tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-error"><i class="fa fa-trash" aria-hidden="true"></i> '.__('messages.delete').'</button>';
+                            $html .= '&nbsp; <button data-href="'.action([\Modules\Essentials\Http\Controllers\EssentialsAllowanceAndDeductionController::class, 'destroy'], [$row->id]).'" class="delete-allowance btn btn-xs btn-danger"><i class="fa fa-trash" aria-hidden="true"></i> '.__('messages.delete').'</button>';
                         }
 
                         return $html;

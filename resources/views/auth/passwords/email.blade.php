@@ -8,7 +8,7 @@
     </div>
     <div class="col-md-4 col-xs-12">
         <div
-            class=" tw-p-2 sm:tw-p-3 tw-mb-4 tw-transition-all tw-duration-200  tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 tw-ring-gray-200">
+            class="tw-p-2 sm:tw-p-3 tw-mb-4 tw-bg-white tw-shadow-sm tw-ring-1 tw-ring-gray-200">
             <div class="tw-flex tw-flex-col tw-gap-4 tw-dw-rounded-box tw-dw-p-6 tw-dw-max-w-md">
 
                 <h3 class="tw-text-sm tw-font-medium tw-text-gray-500 tw-self-center">@lang('lang_v1.send_password_reset_link')</h3>
@@ -35,7 +35,7 @@
                         </label>
                     </div>
 
-                    <button type="submit" class="tw-bg-gradient-to-r tw-from-indigo-500 tw-to-blue-500 tw-h-12 tw-rounded-xl tw-text-sm md:tw-text-base tw-text-white tw-font-semibold tw-w-full tw-max-w-full mt-2 hover:tw-from-indigo-600 hover:tw-to-blue-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-ring-offset-2 active:tw-from-indigo-700 active:tw-to-blue-700">
+                    <button type="submit" class="tw-bg-gradient-to-r tw-from-indigo-500 tw-to-blue-500 tw-h-12 tw-text-sm md:tw-text-base tw-font-semibold tw-w-full tw-max-w-full mt-2 hover:tw-from-indigo-600 hover:tw-to-blue-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-ring-offset-2 active:tw-from-indigo-700 active:tw-to-blue-700">
                         @lang('lang_v1.send_password_reset_link')
                     </button>
                 </form>
