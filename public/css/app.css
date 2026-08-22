@@ -410,74 +410,76 @@ div.pos-tab-container{
   background-color: #ffffff;
   padding: 0 !important;
   border-radius: 4px;
-  -moz-border-radius: 4px;
-  border:1px solid #ddd;
-    margin-bottom: 28px;
-  -webkit-box-shadow: 0 6px 12px rgba(0,0,0,.175);
-  box-shadow: 0 6px 12px rgba(0,0,0,.175);
-  -moz-box-shadow: 0 6px 12px rgba(0,0,0,.175);
+  border: 1px solid #e2e8f0;
+  margin-bottom: 28px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.05);
   background-clip: padding-box;
+  overflow: hidden;
 }
 div.pos-tab-menu{
   padding-right: 0;
   padding-left: 0;
   padding-bottom: 0;
+  border-right: 1px solid #e2e8f0;
+  background-color: #f8fafc;
 }
 div.pos-tab-menu div.list-group{
   margin-bottom: 0;
 }
-div.pos-tab-menu div.list-group>a{
+div.pos-tab-menu div.list-group > a {
   margin-bottom: 0;
+  border-radius: 0 !important;
+  border-left: 3px solid transparent;
+  border-right: none;
+  border-top: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f1f5f9;
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  padding: 14px 16px;
+  transition: all 0.15s ease-in-out;
 }
-div.pos-tab-menu div.list-group>a .glyphicon,
-div.pos-tab-menu div.list-group>a .fa {
-  color: var(--theme-800, #5A55A3);
+div.pos-tab-menu div.list-group > a:first-child {
+  border-top: none;
 }
-div.pos-tab-menu div.list-group>a:first-child{
-  border-top-right-radius: 0;
-  -moz-border-top-right-radius: 0;
+div.pos-tab-menu div.list-group > a .glyphicon,
+div.pos-tab-menu div.list-group > a .fa {
+  color: #64748b;
+  margin-right: 8px;
+  transition: color 0.15s ease-in-out;
 }
-div.pos-tab-menu div.list-group>a:last-child{
-  border-bottom-right-radius: 0;
-  -moz-border-bottom-right-radius: 0;
+div.pos-tab-menu div.list-group > a:hover {
+  background-color: #f1f5f9;
+  color: #1e293b;
 }
-
-
-/* div.pos-tab-menu div.list-group>a.active,
-div.pos-tab-menu div.list-group>a.active .glyphicon,
-div.pos-tab-menu div.list-group>a.active .fa{
-  background-color: #3c8dbc;
-  color: #ffffff;
-    border-color: #3c8dbc;
-} */
+div.pos-tab-menu div.list-group > a:hover .glyphicon,
+div.pos-tab-menu div.list-group > a:hover .fa {
+  color: #3c8dbc;
+}
 
 div.pos-tab-menu div.list-group > a.active,
-div.pos-tab-menu div.list-group > a.active .glyphicon,
-div.pos-tab-menu div.list-group > a.active .fa {
-  background: #3c8dbc;
-  background-color: #3c8dbc;
-  color: #ffffff;
-  border-color: #3c8dbc;
+div.pos-tab-menu div.list-group > a.active:hover,
+div.pos-tab-menu div.list-group > a.active:focus {
+  background-color: #ffffff !important;
+  color: #3c8dbc !important;
+  border-left: 4px solid #3c8dbc !important;
+  border-right: 1px solid #ffffff !important;
+  margin-right: -1px;
+  position: relative;
+  z-index: 2;
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgba(0,0,0,.03);
 }
 
-
-div.pos-tab-menu div.list-group>a.active:after{
-  /* content: ''; */
-  position: absolute;
-  left: 100%;
-  top: 50%;
-  margin-top: -13px;
-  border-left: 0;
-  border-bottom: 13px solid transparent;
-  border-top: 13px solid transparent;
-  border-left: 10px solid var(--theme-800, #3c8dbc);
+div.pos-tab-menu div.list-group > a.active .glyphicon,
+div.pos-tab-menu div.list-group > a.active .fa {
+  color: #3c8dbc !important;
 }
 
 div.pos-tab-content{
   background-color: #ffffff;
-  /* border: 1px solid #eeeeee; */
-  padding-left: 20px;
-  padding-top: 20px;
+  padding: 24px 28px;
+  min-height: 400px;
 }
 
 div.pos-tab div.pos-tab-content:not(.active){
