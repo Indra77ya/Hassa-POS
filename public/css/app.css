@@ -454,9 +454,10 @@ div.pos-tab-menu div.list-group>a.active .fa{
 div.pos-tab-menu div.list-group > a.active,
 div.pos-tab-menu div.list-group > a.active .glyphicon,
 div.pos-tab-menu div.list-group > a.active .fa {
-  background: linear-gradient(to right, var(--theme-700, #6366f1), var(--theme-900, #3b82f6));
+  background: #3c8dbc;
+  background-color: #3c8dbc;
   color: #ffffff;
-  border-color: transparent;
+  border-color: #3c8dbc;
 }
 
 
