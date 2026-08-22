@@ -32,7 +32,7 @@
 
 <div class="row">
     <div class="col-md-12">
-        <div id="accounts_tree_container" style="padding: 15px; border: 1px solid #e2e8f0; border-radius: 6px; background-color: #ffffff;">
+        <div id="accounts_tree_container" style="padding: 10px 0;">
             <ul>
             @foreach($account_types as $key => $value)
                 <li @if($loop->index==0) data-jstree='{ "opened" : true }' @endif>
