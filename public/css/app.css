@@ -1687,7 +1687,68 @@ body.dark-mode aside.main-sidebar a:hover {
     background-color: #334155 !important;
 }
 
-/* Cards & Boxes */
+/* Header Overrides */
+body.dark-mode .main-header-nav,
+body.dark-mode .main-header-nav [class*="tw-bg-"] {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .main-header-nav button,
+body.dark-mode .main-header-nav a,
+body.dark-mode .main-header-nav details > summary {
+    background-color: #334155 !important;
+    border-color: #475569 !important;
+    color: #f1f5f9 !important;
+}
+
+body.dark-mode .main-header-nav button:hover,
+body.dark-mode .main-header-nav a:hover,
+body.dark-mode .main-header-nav details > summary:hover {
+    background-color: #475569 !important;
+}
+
+/* Highcharts & SVG Charts */
+body.dark-mode .highcharts-container,
+body.dark-mode .highcharts-container svg,
+body.dark-mode .highcharts-background {
+    fill: #1e293b !important;
+    background-color: #1e293b !important;
+}
+
+body.dark-mode .highcharts-title,
+body.dark-mode .highcharts-subtitle,
+body.dark-mode .highcharts-axis-title,
+body.dark-mode .highcharts-axis-labels text,
+body.dark-mode .highcharts-legend-item text,
+body.dark-mode .highcharts-data-label text {
+    fill: #cbd5e1 !important;
+    color: #cbd5e1 !important;
+}
+
+body.dark-mode .highcharts-grid-line,
+body.dark-mode .highcharts-axis-line,
+body.dark-mode .highcharts-tick {
+    stroke: #334155 !important;
+}
+
+body.dark-mode .highcharts-plot-background,
+body.dark-mode .highcharts-plot-border {
+    fill: #1e293b !important;
+    stroke: #334155 !important;
+}
+
+body.dark-mode .highcharts-tooltip path,
+body.dark-mode .highcharts-tooltip-box {
+    fill: #0f172a !important;
+    stroke: #334155 !important;
+}
+
+body.dark-mode .highcharts-tooltip text {
+    fill: #f1f5f9 !important;
+}
+
+/* Cards, Widgets & Dashboard Summary Boxes */
 body.dark-mode .box,
 body.dark-mode .box-header,
 body.dark-mode .box-body,
@@ -1695,10 +1756,20 @@ body.dark-mode .box-footer,
 body.dark-mode .tw-dw-dropdown-content,
 body.dark-mode .dropdown-menu,
 body.dark-mode .pos-tab-container,
-body.dark-mode .pos-tab-content {
+body.dark-mode .pos-tab-content,
+body.dark-mode .info-box {
     background-color: #1e293b !important;
     color: #f1f5f9 !important;
     border-color: #334155 !important;
+}
+
+body.dark-mode .info-box {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-mode .info-box-icon {
+    background-color: #334155 !important;
+    color: #38bdf8 !important;
 }
 
 body.dark-mode .box {

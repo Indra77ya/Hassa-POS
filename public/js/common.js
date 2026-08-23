@@ -885,6 +885,54 @@ $(function () {
     });
 
     // --- Dark Mode Toggle Handler ---
+    function applyHighchartsDarkTheme(isDark) {
+        if (typeof Highcharts !== 'undefined' && Highcharts.charts) {
+            var themeOptions = isDark ? {
+                chart: { backgroundColor: '#1e293b', plotBackgroundColor: '#1e293b' },
+                title: { style: { color: '#f1f5f9' } },
+                subtitle: { style: { color: '#cbd5e1' } },
+                xAxis: {
+                    labels: { style: { color: '#cbd5e1' } },
+                    title: { style: { color: '#cbd5e1' } },
+                    lineColor: '#334155',
+                    tickColor: '#334155'
+                },
+                yAxis: {
+                    labels: { style: { color: '#cbd5e1' } },
+                    title: { style: { color: '#cbd5e1' } },
+                    gridLineColor: '#334155',
+                    lineColor: '#334155'
+                },
+                legend: { itemStyle: { color: '#cbd5e1' }, itemHoverStyle: { color: '#ffffff' } },
+                tooltip: { backgroundColor: '#0f172a', style: { color: '#f1f5f9' }, borderColor: '#334155' }
+            } : {
+                chart: { backgroundColor: '#ffffff', plotBackgroundColor: '#ffffff' },
+                title: { style: { color: '#333333' } },
+                subtitle: { style: { color: '#666666' } },
+                xAxis: {
+                    labels: { style: { color: '#666666' } },
+                    title: { style: { color: '#666666' } },
+                    lineColor: '#ccd6eb',
+                    tickColor: '#ccd6eb'
+                },
+                yAxis: {
+                    labels: { style: { color: '#666666' } },
+                    title: { style: { color: '#666666' } },
+                    gridLineColor: '#e6e6e6',
+                    lineColor: '#ccd6eb'
+                },
+                legend: { itemStyle: { color: '#333333' }, itemHoverStyle: { color: '#000000' } },
+                tooltip: { backgroundColor: 'rgba(247,247,247,0.85)', style: { color: '#333333' }, borderColor: '#333333' }
+            };
+
+            Highcharts.charts.forEach(function (chart) {
+                if (chart) {
+                    chart.update(themeOptions, true);
+                }
+            });
+        }
+    }
+
     function updateDarkModeIcons(isDark) {
         if (isDark) {
             $('#dark-mode-icon-moon').addClass('tw-hidden');
@@ -893,6 +941,7 @@ $(function () {
             $('#dark-mode-icon-sun').addClass('tw-hidden');
             $('#dark-mode-icon-moon').removeClass('tw-hidden');
         }
+        applyHighchartsDarkTheme(isDark);
     }
 
     // Initialize icons on page load if dark mode active
