@@ -1687,12 +1687,16 @@ body.dark-mode aside.main-sidebar a:hover {
     background-color: #334155 !important;
 }
 
-/* Header Overrides & Theme Header Background */
+/* Header Overrides, Theme Header & Logo Background */
 body.dark-mode .main-header-nav,
 body.dark-mode .main-header-nav [class*="tw-bg-"],
 body.dark-mode .theme-header-bg,
-body.dark-mode div.theme-header-bg {
+body.dark-mode div.theme-header-bg,
+body.dark-mode .theme-logo-bg,
+body.dark-mode a.theme-logo-bg,
+body.dark-mode div.theme-logo-bg {
     background: #1e293b !important;
+    background-color: #1e293b !important;
     background-image: none !important;
     border-color: #334155 !important;
 }
