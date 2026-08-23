@@ -1687,11 +1687,21 @@ body.dark-mode aside.main-sidebar a:hover {
     background-color: #334155 !important;
 }
 
-/* Header Overrides */
+/* Header Overrides & Theme Header Background */
 body.dark-mode .main-header-nav,
-body.dark-mode .main-header-nav [class*="tw-bg-"] {
+body.dark-mode .main-header-nav [class*="tw-bg-"],
+body.dark-mode .theme-header-bg,
+body.dark-mode div.theme-header-bg {
     background: #1e293b !important;
+    background-image: none !important;
     border-color: #334155 !important;
+}
+
+body.dark-mode .theme-header-bg + div,
+body.dark-mode .tw-absolute.tw-inset-0 .theme-header-bg,
+body.dark-mode .tw-absolute.tw-inset-0 .tw-bg-gray-100 {
+    background-color: #0f172a !important;
+    background: #0f172a !important;
 }
 
 body.dark-mode .main-header-nav button,
