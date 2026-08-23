@@ -1868,6 +1868,7 @@ body.dark-mode .select2-container--default .select2-results__option--highlighted
 /* Tables & DataTables */
 body.dark-mode table,
 body.dark-mode table.dataTable,
+body.dark-mode .table,
 body.dark-mode .table-striped > tbody > tr:nth-of-type(odd),
 body.dark-mode .table-hover > tbody > tr:hover {
     background-color: #1e293b !important;
@@ -1879,12 +1880,21 @@ body.dark-mode table.dataTable thead td,
 body.dark-mode table.dataTable tbody td,
 body.dark-mode table.dataTable tfoot th,
 body.dark-mode table.dataTable tfoot td,
+body.dark-mode table.table-bordered,
+body.dark-mode table.table-bordered > tbody > tr > td,
+body.dark-mode table.table-bordered > tbody > tr > th,
+body.dark-mode table.table-bordered > tfoot > tr > td,
+body.dark-mode table.table-bordered > tfoot > tr > th,
+body.dark-mode table.table-bordered > thead > tr > td,
+body.dark-mode table.table-bordered > thead > tr > th,
+body.dark-mode .table-bordered,
 body.dark-mode .table-bordered > tbody > tr > td,
 body.dark-mode .table-bordered > tbody > tr > th,
 body.dark-mode .table-bordered > tfoot > tr > td,
 body.dark-mode .table-bordered > tfoot > tr > th,
 body.dark-mode .table-bordered > thead > tr > td,
 body.dark-mode .table-bordered > thead > tr > th {
+    border: 1px solid #334155 !important;
     border-color: #334155 !important;
     color: #f1f5f9 !important;
 }
