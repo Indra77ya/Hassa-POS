@@ -883,4 +883,36 @@ $(function () {
     $(document).on('click', '.side-bar-collapse', function () {
         $('.side-bar').toggle('slow');
     });
+
+    // --- Dark Mode Toggle Handler ---
+    function updateDarkModeIcons(isDark) {
+        if (isDark) {
+            $('#dark-mode-icon-moon').addClass('tw-hidden');
+            $('#dark-mode-icon-sun').removeClass('tw-hidden');
+        } else {
+            $('#dark-mode-icon-sun').addClass('tw-hidden');
+            $('#dark-mode-icon-moon').removeClass('tw-hidden');
+        }
+    }
+
+    // Initialize icons on page load if dark mode active
+    if (localStorage.getItem("upos_dark_mode") === "true") {
+        updateDarkModeIcons(true);
+    }
+
+    $(document).on('click', '#toggle-dark-mode', function (e) {
+        e.preventDefault();
+        var isDark = $('body').hasClass('dark-mode');
+        if (isDark) {
+            $('body').removeClass('dark-mode');
+            $('html').removeClass('dark-mode');
+            localStorage.setItem("upos_dark_mode", "false");
+            updateDarkModeIcons(false);
+        } else {
+            $('body').addClass('dark-mode');
+            $('html').addClass('dark-mode');
+            localStorage.setItem("upos_dark_mode", "true");
+            updateDarkModeIcons(true);
+        }
+    });
 });
