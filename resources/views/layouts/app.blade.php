@@ -29,6 +29,12 @@
     
     <title>@yield('title') - {{ Session::get('business.name') }}</title>
 
+    <script type="text/javascript">
+        if (localStorage.getItem("upos_dark_mode") === "true") {
+            document.documentElement.classList.add("dark-mode");
+        }
+    </script>
+
     @include('layouts.partials.css')
     
 
@@ -44,6 +50,9 @@
             if (localStorage.getItem("upos_sidebar_collapse") == 'true') {
                 var body = document.getElementsByTagName("body")[0];
                 body.className += " sidebar-collapse";
+            }
+            if (localStorage.getItem("upos_dark_mode") === "true") {
+                document.body.classList.add("dark-mode");
             }
         </script>
         @if (!$pos_layout && $request->segment(1) != 'customer-display')
