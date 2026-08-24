@@ -69,6 +69,15 @@ class BiayaPenyusutanDefaultAccountTest extends TestCase
             $table->timestamps();
         });
 
+        // Create permissions table
+        Schema::dropIfExists('permissions');
+        Schema::create('permissions', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->string('guard_name');
+            $table->timestamps();
+        });
+
         // Create expense_categories table
         Schema::dropIfExists('expense_categories');
         Schema::create('expense_categories', function (Blueprint $table) {
@@ -180,6 +189,25 @@ class BiayaPenyusutanDefaultAccountTest extends TestCase
             ->where('name', 'Akumulasi Penyusutan')
             ->first();
         $this->assertNull($akumulasiPenyusutanPos);
+    }
+
+    public function test_chart_of_accounts_view_contains_create_default_accounts_button()
+    {
+        $business = Business::create(['name' => 'Toko Sampel View', 'owner_id' => 1]);
+
+        $user = \Mockery::mock(User::class)->makePartial();
+        $user->shouldReceive('can')->andReturn(true);
+        $user->shouldReceive('hasAnyPermission')->andReturn(true);
+        $user->id = 1;
+        $user->business_id = $business->id;
+
+        $this->actingAs($user);
+        session(['user' => ['id' => 1, 'business_id' => $business->id]]);
+
+        $viewFile = file_get_contents(base_path('Modules/Accounting/Resources/views/chart_of_accounts/index.blade.php'));
+
+        $this->assertStringContainsString("route('accounting.create-default-accounts')", $viewFile);
+        $this->assertStringContainsString('btn-success', $viewFile);
     }
 
     public function test_migration_removes_biaya_penyusutan_and_akumulasi_penyusutan_records()
