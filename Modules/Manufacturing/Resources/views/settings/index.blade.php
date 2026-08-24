@@ -19,6 +19,7 @@
                 <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 pos-tab-menu tw-rounded-lg">
                     <div class="list-group">
                         <a href="#" class="list-group-item text-center tw-font-bold tw-text-sm md:tw-text-base active">@lang('messages.settings')</a>
+                        <a href="#" class="list-group-item text-center tw-font-bold tw-text-sm md:tw-text-base">@lang('accounting::lang.accounting') &amp; Account</a>
                     </div>
                 </div>
                 <div class="col-lg-10 col-md-10 col-sm-10 col-xs-10 pos-tab">
@@ -51,7 +52,37 @@
                                 </div>
                             </div>
                         </div>
-                        
+                    </div>
+
+                    <div class="pos-tab-content">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {!! Form::label('mfg_raw_material_account_id', 'Akun Persediaan Bahan Baku (Raw Material Inventory):') !!}
+                                    {!! Form::select('mfg_raw_material_account_id', $accounting_accounts, !empty($manufacturing_settings['mfg_raw_material_account_id']) ? $manufacturing_settings['mfg_raw_material_account_id'] : null, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select'), 'style' => 'width: 100%;']); !!}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {!! Form::label('mfg_finished_goods_account_id', 'Akun Persediaan Barang Jadi (Finished Goods Inventory):') !!}
+                                    {!! Form::select('mfg_finished_goods_account_id', $accounting_accounts, !empty($manufacturing_settings['mfg_finished_goods_account_id']) ? $manufacturing_settings['mfg_finished_goods_account_id'] : null, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select'), 'style' => 'width: 100%;']); !!}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {!! Form::label('mfg_production_cost_account_id', 'Akun Biaya Produksi / Overhead:') !!}
+                                    {!! Form::select('mfg_production_cost_account_id', $accounting_accounts, !empty($manufacturing_settings['mfg_production_cost_account_id']) ? $manufacturing_settings['mfg_production_cost_account_id'] : null, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select'), 'style' => 'width: 100%;']); !!}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {!! Form::label('mfg_payment_account_id', 'Akun Pembayaran Kas/Bank Default:') !!}
+                                    {!! Form::select('mfg_payment_account_id', $payment_accounts, !empty($manufacturing_settings['mfg_payment_account_id']) ? $manufacturing_settings['mfg_payment_account_id'] : null, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select'), 'style' => 'width: 100%;']); !!}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 @endcomponent

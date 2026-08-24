@@ -377,6 +377,9 @@ class ProductionController extends Controller
                 $this->transactionUtil->mapPurchaseSell($business, $production_sell->sell_lines, 'production_purchase');
             }
 
+            // Sync Accounting Journal & Payment Account
+            $this->mfgUtil->syncAccountingJournal($transaction);
+
             DB::commit();
 
             $output = ['success' => 1,
@@ -515,7 +518,32 @@ class ProductionController extends Controller
             }
         }
 
-        return view('manufacturing::production.show')->with(compact('production_purchase', 'production_sell', 'purchase_line', 'ingredients', 'unit_name', 'quantity', 'quantity_wasted', 'actual_quantity', 'total_production_cost', 'ingredient_groups'));
+        // Fetch accounting double-entry journal mappings if available
+        $refNo = 'MFG-JOURNAL-' . $production_purchase->ref_no;
+        $accounting_mapping = \Modules\Accounting\Entities\AccountingAccTransMapping::where('business_id', $business_id)
+            ->where('ref_no', $refNo)
+            ->with(['transactions', 'transactions.account'])
+            ->first();
+
+        // Fetch payment account transaction if available
+        $payment_transaction = \App\TransactionPayment::where('transaction_id', $production_purchase->id)
+            ->with('payment_account')
+            ->first();
+
+        return view('manufacturing::production.show')->with(compact(
+            'production_purchase',
+            'production_sell',
+            'purchase_line',
+            'ingredients',
+            'unit_name',
+            'quantity',
+            'quantity_wasted',
+            'actual_quantity',
+            'total_production_cost',
+            'ingredient_groups',
+            'accounting_mapping',
+            'payment_transaction'
+        ));
     }
 
     /**
@@ -838,6 +866,9 @@ class ProductionController extends Controller
                 $this->transactionUtil->mapPurchaseSell($business, $production_sell->sell_lines, 'production_purchase');
             }
 
+            // Sync Accounting Journal & Payment Account
+            $this->mfgUtil->syncAccountingJournal($transaction);
+
             DB::commit();
 
             $output = ['success' => 1,
@@ -874,7 +905,13 @@ class ProductionController extends Controller
                             ->where('business_id', $business_id)
                             ->where('type', 'production_purchase')
                             ->where('mfg_is_final', 0)
-                            ->delete();
+                            ->first();
+
+                if ($transaction) {
+                    $this->mfgUtil->deleteAccountingJournal($transaction);
+                    $transaction->delete();
+                }
+
                 $output = [
                     'success' => true,
                     'msg' => __('lang_v1.deleted_success'),

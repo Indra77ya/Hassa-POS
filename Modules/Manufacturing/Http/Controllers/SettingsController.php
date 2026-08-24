@@ -2,12 +2,14 @@
 
 namespace Modules\Manufacturing\Http\Controllers;
 
+use App\Account;
 use App\Business;
 use App\System;
 use App\Utils\ModuleUtil;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
+use Modules\Accounting\Entities\AccountingAccount;
 use Modules\Manufacturing\Utils\ManufacturingUtil;
 
 class SettingsController extends Controller
@@ -46,7 +48,14 @@ class SettingsController extends Controller
 
         $version = System::getProperty('manufacturing_version');
 
-        return view('manufacturing::settings.index')->with(compact('manufacturing_settings', 'version'));
+        $accounting_accounts = [];
+        if ($this->moduleUtil->isModuleEnabled('Accounting')) {
+            $accounting_accounts = AccountingAccount::forDropdown($business_id);
+        }
+
+        $payment_accounts = Account::forDropdown($business_id, true, false);
+
+        return view('manufacturing::settings.index')->with(compact('manufacturing_settings', 'version', 'accounting_accounts', 'payment_accounts'));
     }
 
     /**
@@ -63,7 +72,13 @@ class SettingsController extends Controller
         }
 
         try {
-            $settings = $request->only(['ref_no_prefix']);
+            $settings = $request->only([
+                'ref_no_prefix',
+                'mfg_raw_material_account_id',
+                'mfg_finished_goods_account_id',
+                'mfg_production_cost_account_id',
+                'mfg_payment_account_id',
+            ]);
 
             $settings['disable_editing_ingredient_qty'] = ! empty($request->input('disable_editing_ingredient_qty')) ? true : false;
 

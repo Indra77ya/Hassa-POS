@@ -176,6 +176,63 @@
                     </table>
                 </div>
             </div>
+
+            <!-- Accounting & Payment Account Sync Details -->
+            <div class="row">
+                <div class="col-md-12">
+                    <hr>
+                    <h4>
+                        Status Sinkronisasi Akuntansi &amp; Pembayaran:
+                        @if($production_purchase->mfg_is_final == 1 && (!empty($accounting_mapping) || !empty($payment_transaction)))
+                            <span class="label bg-green">Tersinkronisasi</span>
+                        @elseif($production_purchase->mfg_is_final == 1)
+                            <span class="label bg-yellow">Final (Belum Ada Akun Terhubung)</span>
+                        @else
+                            <span class="label bg-red">Belum Final</span>
+                        @endif
+                    </h4>
+                </div>
+
+                @if(!empty($accounting_mapping) && count($accounting_mapping->transactions))
+                    <div class="col-md-12">
+                        <h5><strong>Jurnal Akuntansi (Double-Entry Journal)</strong></h5>
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Akun</th>
+                                    <th>Tipe (Debit/Kredit)</th>
+                                    <th>Jumlah</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($accounting_mapping->transactions as $acc_trans)
+                                    <tr>
+                                        <td>{{ $acc_trans->account->name ?? '-' }} (GL: {{ $acc_trans->account->gl_code ?? '-' }})</td>
+                                        <td>
+                                            @if($acc_trans->type == 'debit')
+                                                <span class="label bg-blue">Debit</span>
+                                            @else
+                                                <span class="label bg-orange">Kredit</span>
+                                            @endif
+                                        </td>
+                                        <td><span class="display_currency" data-currency_symbol="true">{{ $acc_trans->amount }}</span></td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+
+                @if(!empty($payment_transaction))
+                    <div class="col-md-12">
+                        <h5><strong>Potongan Saldo Kas &amp; Bank (Payment Account)</strong></h5>
+                        <p>
+                            <strong>Akun Pembayaran:</strong> {{ $payment_transaction->payment_account->name ?? '-' }}<br>
+                            <strong>Jumlah Potongan Biaya:</strong> <span class="display_currency" data-currency_symbol="true">{{ $payment_transaction->amount }}</span>
+                        </p>
+                    </div>
+                @endif
+            </div>
         </div>
 
         <div class="modal-footer">
