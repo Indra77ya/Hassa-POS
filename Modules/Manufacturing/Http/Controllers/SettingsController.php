@@ -48,10 +48,7 @@ class SettingsController extends Controller
 
         $version = System::getProperty('manufacturing_version');
 
-        $accounting_accounts = [];
-        if ($this->moduleUtil->isModuleEnabled('Accounting') || $this->moduleUtil->isModuleEnabled('accounting')) {
-            $accounting_accounts = AccountingAccount::forDropdown($business_id);
-        }
+        $accounting_accounts = AccountingAccount::forDropdown($business_id);
 
         $payment_accounts = Account::forDropdown($business_id, true, false);
 
@@ -120,18 +117,24 @@ class SettingsController extends Controller
             $raw_mat_acc = AccountingAccount::where('business_id', $business_id)
                 ->where(function($q) {
                     $q->where('name', 'like', '%Persediaan Bahan Baku%')
+                      ->orWhere('name', 'like', '%Bahan Baku%')
                       ->orWhere('name', 'like', '%Raw Material%');
                 })
                 ->where('status', 'active')
                 ->first();
 
             if (!$raw_mat_acc) {
+                // Check for fallback inventory sub_type
+                $sub_type_id = \Modules\Accounting\Entities\AccountingAccountType::where('account_primary_type', 'asset')
+                    ->where('name', 'persediaan')
+                    ->value('id') ?? 2;
+
                 $raw_mat_acc = AccountingAccount::create([
                     'name' => 'Persediaan Bahan Baku',
-                    'gl_code' => '1130',
+                    'gl_code' => '1302',
                     'business_id' => $business_id,
                     'account_primary_type' => 'asset',
-                    'account_sub_type_id' => 2, // Inventory Asset
+                    'account_sub_type_id' => $sub_type_id,
                     'status' => 'active',
                     'created_by' => $user_id,
                 ]);
@@ -141,18 +144,23 @@ class SettingsController extends Controller
             $finished_acc = AccountingAccount::where('business_id', $business_id)
                 ->where(function($q) {
                     $q->where('name', 'like', '%Persediaan Barang Jadi%')
+                      ->orWhere('name', 'like', '%Barang Jadi%')
                       ->orWhere('name', 'like', '%Finished Goods%');
                 })
                 ->where('status', 'active')
                 ->first();
 
             if (!$finished_acc) {
+                $sub_type_id = \Modules\Accounting\Entities\AccountingAccountType::where('account_primary_type', 'asset')
+                    ->where('name', 'persediaan')
+                    ->value('id') ?? 2;
+
                 $finished_acc = AccountingAccount::create([
                     'name' => 'Persediaan Barang Jadi',
-                    'gl_code' => '1140',
+                    'gl_code' => '1303',
                     'business_id' => $business_id,
                     'account_primary_type' => 'asset',
-                    'account_sub_type_id' => 2, // Inventory Asset
+                    'account_sub_type_id' => $sub_type_id,
                     'status' => 'active',
                     'created_by' => $user_id,
                 ]);
@@ -169,12 +177,16 @@ class SettingsController extends Controller
                 ->first();
 
             if (!$prod_cost_acc) {
+                $sub_type_id = \Modules\Accounting\Entities\AccountingAccountType::where('account_primary_type', 'expenses')
+                    ->where('name', 'beban_operasional')
+                    ->value('id') ?? 14;
+
                 $prod_cost_acc = AccountingAccount::create([
                     'name' => 'Biaya Produksi / Overhead',
-                    'gl_code' => '5100',
+                    'gl_code' => '6100',
                     'business_id' => $business_id,
                     'account_primary_type' => 'expenses',
-                    'account_sub_type_id' => 14, // Operating Expense
+                    'account_sub_type_id' => $sub_type_id,
                     'status' => 'active',
                     'created_by' => $user_id,
                 ]);
@@ -213,9 +225,13 @@ class SettingsController extends Controller
                 'msg' => 'Auto Mapping Akun Manufaktur berhasil disinkronkan!',
                 'data' => [
                     'mfg_raw_material_account_id' => $raw_mat_acc->id,
+                    'mfg_raw_material_account_name' => $raw_mat_acc->name,
                     'mfg_finished_goods_account_id' => $finished_acc->id,
+                    'mfg_finished_goods_account_name' => $finished_acc->name,
                     'mfg_production_cost_account_id' => $prod_cost_acc->id,
+                    'mfg_production_cost_account_name' => $prod_cost_acc->name,
                     'mfg_payment_account_id' => $payment_acc->id,
+                    'mfg_payment_account_name' => $payment_acc->name,
                 ]
             ];
         } catch (\Exception $e) {

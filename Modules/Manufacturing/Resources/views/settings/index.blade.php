@@ -132,16 +132,36 @@
                         toastr.success(result.msg);
                         if (result.data) {
                             if (result.data.mfg_raw_material_account_id) {
-                                $('#mfg_raw_material_account_id').val(result.data.mfg_raw_material_account_id).trigger('change');
+                                if ($('#mfg_raw_material_account_id option[value="' + result.data.mfg_raw_material_account_id + '"]').length === 0) {
+                                    var newOption = new Option(result.data.mfg_raw_material_account_name, result.data.mfg_raw_material_account_id, true, true);
+                                    $('#mfg_raw_material_account_id').append(newOption).trigger('change');
+                                } else {
+                                    $('#mfg_raw_material_account_id').val(result.data.mfg_raw_material_account_id).trigger('change');
+                                }
                             }
                             if (result.data.mfg_finished_goods_account_id) {
-                                $('#mfg_finished_goods_account_id').val(result.data.mfg_finished_goods_account_id).trigger('change');
+                                if ($('#mfg_finished_goods_account_id option[value="' + result.data.mfg_finished_goods_account_id + '"]').length === 0) {
+                                    var newOption = new Option(result.data.mfg_finished_goods_account_name, result.data.mfg_finished_goods_account_id, true, true);
+                                    $('#mfg_finished_goods_account_id').append(newOption).trigger('change');
+                                } else {
+                                    $('#mfg_finished_goods_account_id').val(result.data.mfg_finished_goods_account_id).trigger('change');
+                                }
                             }
                             if (result.data.mfg_production_cost_account_id) {
-                                $('#mfg_production_cost_account_id').val(result.data.mfg_production_cost_account_id).trigger('change');
+                                if ($('#mfg_production_cost_account_id option[value="' + result.data.mfg_production_cost_account_id + '"]').length === 0) {
+                                    var newOption = new Option(result.data.mfg_production_cost_account_name, result.data.mfg_production_cost_account_id, true, true);
+                                    $('#mfg_production_cost_account_id').append(newOption).trigger('change');
+                                } else {
+                                    $('#mfg_production_cost_account_id').val(result.data.mfg_production_cost_account_id).trigger('change');
+                                }
                             }
                             if (result.data.mfg_payment_account_id) {
-                                $('#mfg_payment_account_id').val(result.data.mfg_payment_account_id).trigger('change');
+                                if ($('#mfg_payment_account_id option[value="' + result.data.mfg_payment_account_id + '"]').length === 0) {
+                                    var newOption = new Option(result.data.mfg_payment_account_name, result.data.mfg_payment_account_id, true, true);
+                                    $('#mfg_payment_account_id').append(newOption).trigger('change');
+                                } else {
+                                    $('#mfg_payment_account_id').val(result.data.mfg_payment_account_id).trigger('change');
+                                }
                             }
                         }
                     } else {
