@@ -39,6 +39,9 @@
                         data-container="#create_account_modal">
                         <i class="fa fa-plus"></i> @lang('messages.add')
                     </a>
+                    <a href="{{route('accounting.create-default-accounts')}}" class="btn btn-success btn-sm pull-right" style="margin-right: 10px;">
+                        <i class="fas fa-file-import"></i> @lang('accounting::lang.add_default_accounts')
+                    </a>
                 </div>
             @endslot
                 <div id="accounts_tree"></div>
