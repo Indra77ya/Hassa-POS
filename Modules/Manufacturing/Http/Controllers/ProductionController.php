@@ -176,8 +176,13 @@ class ProductionController extends Controller
 
         $recipe_dropdown = MfgRecipe::forDropdown($business_id);
 
+        $payment_accounts = [];
+        if ($this->moduleUtil->isModuleEnabled('account')) {
+            $payment_accounts = \App\Account::forDropdown($business_id, true, false, false, true);
+        }
+
         return view('manufacturing::production.create')
-                ->with(compact('business_locations', 'recipe_dropdown'));
+                ->with(compact('business_locations', 'recipe_dropdown', 'payment_accounts'));
     }
 
     /**
@@ -285,6 +290,21 @@ class ProductionController extends Controller
 
             $transaction = Transaction::create($transaction_data);
 
+            // Create or update payment lines if payment account is selected
+            if ($request->has('payment_account_id') && ! empty($request->input('payment_account_id')) && ! empty($transaction->final_total) && $transaction->final_total > 0) {
+                $payment = [
+                    [
+                        'amount' => $transaction->final_total,
+                        'method' => 'cash',
+                        'account_id' => $request->input('payment_account_id'),
+                        'paid_on' => $transaction->transaction_date,
+                    ],
+                ];
+                $this->transactionUtil->createOrUpdatePaymentLines($transaction, $payment, $business_id, $user_id, false);
+            }
+
+            $this->mfgUtil->syncAccountingJournal($transaction);
+
             Media::uploadMedia($business_id, $transaction, $request, 'documents', false);
 
             $currency_details = $this->transactionUtil->purchaseCurrencyDetails($business_id);
@@ -351,6 +371,8 @@ class ProductionController extends Controller
             if (! empty($sell_lines)) {
                 $this->transactionUtil->createOrUpdateSellLines($production_sell, $sell_lines, $transaction_sell_data['location_id'], null, null, ['mfg_waste_percent' => 'mfg_waste_percent', 'mfg_ingredient_group_id' => 'mfg_ingredient_group_id']);
             }
+
+            $this->mfgUtil->syncAccountingJournal($transaction);
 
             if ($production_sell->status == 'final') {
                 foreach ($sell_lines as $sell_line) {
@@ -649,7 +671,12 @@ class ProductionController extends Controller
 
         $manufacturing_settings = $this->mfgUtil->getSettings($business_id);
 
-        return view('manufacturing::production.edit')->with(compact('production_purchase', 'production_sell', 'business_locations', 'recipe_dropdown', 'ingredients', 'business_details', 'pos_settings', 'sub_units', 'quantity', 'quantity_wasted', 'actual_quantity', 'recipe', 'unit_name', 'sub_unit_id', 'total_production_cost', 'manufacturing_settings'));
+        $payment_accounts = [];
+        if ($this->moduleUtil->isModuleEnabled('account')) {
+            $payment_accounts = \App\Account::forDropdown($business_id, true, false, false, true);
+        }
+
+        return view('manufacturing::production.edit')->with(compact('production_purchase', 'production_sell', 'business_locations', 'recipe_dropdown', 'ingredients', 'business_details', 'pos_settings', 'sub_units', 'quantity', 'quantity_wasted', 'actual_quantity', 'recipe', 'unit_name', 'sub_unit_id', 'total_production_cost', 'manufacturing_settings', 'payment_accounts'));
     }
 
     /**
@@ -750,6 +777,19 @@ class ProductionController extends Controller
 
             $transaction->update($transaction_data);
 
+            // Handle Payment Lines for Production Cost
+            if ($request->has('payment_account_id') && ! empty($request->input('payment_account_id')) && ! empty($transaction->final_total) && $transaction->final_total > 0) {
+                $payment = [
+                    [
+                        'amount' => $transaction->final_total,
+                        'method' => 'cash',
+                        'account_id' => $request->input('payment_account_id'),
+                        'paid_on' => $transaction->transaction_date,
+                    ],
+                ];
+                $this->transactionUtil->createOrUpdatePaymentLines($transaction, $payment, $business_id, null, false);
+            }
+
             Media::uploadMedia($business_id, $transaction, $request, 'documents', false);
 
             $currency_details = $this->transactionUtil->purchaseCurrencyDetails($business_id);
@@ -816,6 +856,8 @@ class ProductionController extends Controller
                 $this->transactionUtil->createOrUpdateSellLines($production_sell, $sell_lines, $transaction->location_id, false, 'draft', ['mfg_waste_percent' => 'mfg_waste_percent', 'mfg_ingredient_group_id' => 'mfg_ingredient_group_id']);
             }
 
+            $this->mfgUtil->syncAccountingJournal($transaction);
+
             if ($transaction_sell_data['status'] == 'final') {
                 foreach ($sell_lines as $sell_line) {
                     if ($sell_line['enable_stock']) {
@@ -874,7 +916,13 @@ class ProductionController extends Controller
                             ->where('business_id', $business_id)
                             ->where('type', 'production_purchase')
                             ->where('mfg_is_final', 0)
-                            ->delete();
+                            ->first();
+
+                if (! empty($transaction)) {
+                    $this->mfgUtil->deleteAccountingJournal($transaction);
+                    $transaction->delete();
+                }
+
                 $output = [
                     'success' => true,
                     'msg' => __('lang_v1.deleted_success'),

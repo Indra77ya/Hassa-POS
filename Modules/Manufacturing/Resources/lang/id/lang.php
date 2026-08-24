@@ -66,4 +66,9 @@ return [
     'production_cost_tooltip' => 'Jika sudah diperbaiki akan langsung ditambahkan ke total biaya bahan, jika persentase persentase dari total biaya bahan akan ditambahkan dan jika per unit total unit akan dikalikan dengan biaya produksi',
     'estimated_quantity' => 'Estimasi Jumlah',
     'use_max_quantity' => 'Gunakan Maksimal',
+    'accounting_settings' => 'Pengaturan Akuntansi',
+    'raw_material_account' => 'Akun Persediaan Bahan Baku',
+    'finished_goods_account' => 'Akun Persediaan Barang Jadi',
+    'production_cost_account' => 'Akun Beban Produksi / Overhead',
+    'payment_account' => 'Akun Pembayaran',
 ];

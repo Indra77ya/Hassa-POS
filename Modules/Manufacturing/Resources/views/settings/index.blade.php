@@ -51,6 +51,31 @@
                                 </div>
                             </div>
                         </div>
+
+                        @if(!empty($accounting_accounts))
+                            <hr>
+                            <h4 class="tw-font-bold tw-mb-4">@lang('manufacturing::lang.accounting_settings')</h4>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        {!! Form::label('mfg_raw_material_account_id', __('manufacturing::lang.raw_material_account') . ':' ) !!}
+                                        {!! Form::select('mfg_raw_material_account_id', $accounting_accounts, !empty($manufacturing_settings['mfg_raw_material_account_id']) ? $manufacturing_settings['mfg_raw_material_account_id'] : null, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select')]); !!}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        {!! Form::label('mfg_finished_goods_account_id', __('manufacturing::lang.finished_goods_account') . ':' ) !!}
+                                        {!! Form::select('mfg_finished_goods_account_id', $accounting_accounts, !empty($manufacturing_settings['mfg_finished_goods_account_id']) ? $manufacturing_settings['mfg_finished_goods_account_id'] : null, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select')]); !!}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        {!! Form::label('mfg_production_cost_account_id', __('manufacturing::lang.production_cost_account') . ':' ) !!}
+                                        {!! Form::select('mfg_production_cost_account_id', $accounting_accounts, !empty($manufacturing_settings['mfg_production_cost_account_id']) ? $manufacturing_settings['mfg_production_cost_account_id'] : null, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select')]); !!}
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                         
                     </div>
                 </div>

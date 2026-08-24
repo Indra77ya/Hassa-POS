@@ -271,4 +271,134 @@ class ManufacturingUtil extends Util
 
         return $total_production_cost;
     }
+
+    /**
+     * Synchronizes accounting journal entry for a manufacturing transaction.
+     *
+     * @param Transaction $transaction
+     * @return void
+     */
+    public function syncAccountingJournal($transaction)
+    {
+        if (! class_exists(\Modules\Accounting\Entities\AccountingAccTransMapping::class)) {
+            return;
+        }
+
+        $business_id = $transaction->business_id;
+        $mfg_settings = $this->getSettings($business_id);
+
+        $raw_material_account_id = ! empty($mfg_settings['mfg_raw_material_account_id']) ? $mfg_settings['mfg_raw_material_account_id'] : null;
+        $finished_goods_account_id = ! empty($mfg_settings['mfg_finished_goods_account_id']) ? $mfg_settings['mfg_finished_goods_account_id'] : null;
+        $production_cost_account_id = ! empty($mfg_settings['mfg_production_cost_account_id']) ? $mfg_settings['mfg_production_cost_account_id'] : null;
+
+        // If no accounts are configured or transaction is not final, delete any existing journal mapping
+        if ($transaction->mfg_is_final != 1 || (empty($raw_material_account_id) && empty($finished_goods_account_id))) {
+            $this->deleteAccountingJournal($transaction);
+            return;
+        }
+
+        // Get production sell transaction to calculate raw material costs
+        $production_sell = Transaction::where('business_id', $business_id)
+            ->where('type', 'production_sell')
+            ->where('mfg_parent_production_purchase_id', $transaction->id)
+            ->with(['sell_lines', 'sell_lines.variations'])
+            ->first();
+
+        $raw_materials_cost = 0;
+        if (! empty($production_sell) && ! empty($production_sell->sell_lines)) {
+            foreach ($production_sell->sell_lines as $sell_line) {
+                $variation = $sell_line->variations;
+                $unit_price = ! empty($variation) ? $variation->dpp_inc_tax : 0;
+                $line_price = $unit_price * $sell_line->quantity;
+                $raw_materials_cost += $line_price;
+            }
+        }
+
+        $total_cost = $transaction->final_total;
+        $production_overhead = max(0, $total_cost - $raw_materials_cost);
+
+        $refNo = 'MFG-' . $transaction->ref_no;
+
+        $mapping = \Modules\Accounting\Entities\AccountingAccTransMapping::where('business_id', $business_id)
+            ->where('ref_no', $refNo)
+            ->first();
+
+        if (! $mapping) {
+            $mapping = new \Modules\Accounting\Entities\AccountingAccTransMapping();
+            $mapping->business_id = $business_id;
+            $mapping->ref_no = $refNo;
+            $mapping->type = 'journal_entry';
+            $mapping->created_by = $transaction->created_by;
+        }
+
+        $mapping->location_id = $transaction->location_id;
+        $mapping->note = "Jurnal Produksi: Ref No. {$transaction->ref_no}";
+        $mapping->operation_date = $transaction->transaction_date;
+        $mapping->save();
+
+        // Remove old accounting transaction entries for this mapping
+        \Modules\Accounting\Entities\AccountingAccountsTransaction::where('acc_trans_mapping_id', $mapping->id)->delete();
+
+        // 1. Debit Finished Goods Inventory Account for Total Cost
+        if (! empty($finished_goods_account_id) && $total_cost > 0) {
+            $debitTrans = new \Modules\Accounting\Entities\AccountingAccountsTransaction();
+            $debitTrans->accounting_account_id = $finished_goods_account_id;
+            $debitTrans->amount = $total_cost;
+            $debitTrans->type = 'debit';
+            $debitTrans->created_by = $transaction->created_by;
+            $debitTrans->operation_date = $transaction->transaction_date;
+            $debitTrans->sub_type = 'journal_entry';
+            $debitTrans->acc_trans_mapping_id = $mapping->id;
+            $debitTrans->save();
+        }
+
+        // 2. Credit Raw Material Inventory Account for Raw Materials Cost
+        if (! empty($raw_material_account_id) && $raw_materials_cost > 0) {
+            $creditTrans = new \Modules\Accounting\Entities\AccountingAccountsTransaction();
+            $creditTrans->accounting_account_id = $raw_material_account_id;
+            $creditTrans->amount = $raw_materials_cost;
+            $creditTrans->type = 'credit';
+            $creditTrans->created_by = $transaction->created_by;
+            $creditTrans->operation_date = $transaction->transaction_date;
+            $creditTrans->sub_type = 'journal_entry';
+            $creditTrans->acc_trans_mapping_id = $mapping->id;
+            $creditTrans->save();
+        }
+
+        // 3. Credit Production Cost / Overhead Account for Production Overhead Cost (if configured)
+        if (! empty($production_cost_account_id) && $production_overhead > 0) {
+            $overheadCredit = new \Modules\Accounting\Entities\AccountingAccountsTransaction();
+            $overheadCredit->accounting_account_id = $production_cost_account_id;
+            $overheadCredit->amount = $production_overhead;
+            $overheadCredit->type = 'credit';
+            $overheadCredit->created_by = $transaction->created_by;
+            $overheadCredit->operation_date = $transaction->transaction_date;
+            $overheadCredit->sub_type = 'journal_entry';
+            $overheadCredit->acc_trans_mapping_id = $mapping->id;
+            $overheadCredit->save();
+        }
+    }
+
+    /**
+     * Deletes accounting journal entry for a manufacturing transaction.
+     *
+     * @param Transaction $transaction
+     * @return void
+     */
+    public function deleteAccountingJournal($transaction)
+    {
+        if (! class_exists(\Modules\Accounting\Entities\AccountingAccTransMapping::class)) {
+            return;
+        }
+
+        $refNo = 'MFG-' . $transaction->ref_no;
+        $mapping = \Modules\Accounting\Entities\AccountingAccTransMapping::where('business_id', $transaction->business_id)
+            ->where('ref_no', $refNo)
+            ->first();
+
+        if ($mapping) {
+            \Modules\Accounting\Entities\AccountingAccountsTransaction::where('acc_trans_mapping_id', $mapping->id)->delete();
+            $mapping->delete();
+        }
+    }
 }

@@ -46,7 +46,12 @@ class SettingsController extends Controller
 
         $version = System::getProperty('manufacturing_version');
 
-        return view('manufacturing::settings.index')->with(compact('manufacturing_settings', 'version'));
+        $accounting_accounts = [];
+        if ($this->moduleUtil->isModuleEnabled('Accounting')) {
+            $accounting_accounts = \Modules\Accounting\Entities\AccountingAccount::forDropdown($business_id, true);
+        }
+
+        return view('manufacturing::settings.index')->with(compact('manufacturing_settings', 'version', 'accounting_accounts'));
     }
 
     /**
@@ -63,7 +68,12 @@ class SettingsController extends Controller
         }
 
         try {
-            $settings = $request->only(['ref_no_prefix']);
+            $settings = $request->only([
+                'ref_no_prefix',
+                'mfg_raw_material_account_id',
+                'mfg_finished_goods_account_id',
+                'mfg_production_cost_account_id',
+            ]);
 
             $settings['disable_editing_ingredient_qty'] = ! empty($request->input('disable_editing_ingredient_qty')) ? true : false;
 

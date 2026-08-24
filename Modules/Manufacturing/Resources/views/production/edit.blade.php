@@ -156,6 +156,20 @@
 					<span id="total_production_cost" class="display_currency" data-currency_symbol="true">{{$total_production_cost}}</span></p>
 				</div>
 			</div>
+			@if(!empty($payment_accounts))
+				@php
+					$payment_account_id = null;
+					if(!empty($production_purchase->payment_lines) && count($production_purchase->payment_lines) > 0) {
+						$payment_account_id = $production_purchase->payment_lines[0]->account_id;
+					}
+				@endphp
+				<div class="col-md-3">
+					<div class="form-group">
+						{!! Form::label('payment_account_id', __('manufacturing::lang.payment_account').':') !!}
+						{!! Form::select('payment_account_id', $payment_accounts, $payment_account_id, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select')]); !!}
+					</div>
+				</div>
+			@endif
 		</div>
 		<div class="row">
 			<div class="col-md-3 col-md-offset-9">

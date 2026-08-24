@@ -67,4 +67,9 @@ return [
     'manufactured' => 'Manufactured',
     'estimated_quantity' => 'Estimated Quantity',
     'use_max_quantity' => 'Use Max',
+    'accounting_settings' => 'Accounting Settings',
+    'raw_material_account' => 'Raw Materials Inventory Account',
+    'finished_goods_account' => 'Finished Goods Inventory Account',
+    'production_cost_account' => 'Production Cost / Overhead Account',
+    'payment_account' => 'Payment Account',
 ];
