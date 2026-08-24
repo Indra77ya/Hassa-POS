@@ -81,7 +81,7 @@ class DataController extends Controller
                         <path d="M14 17h1"></path>
                       </svg>', 'style' => config('app.env') == 'demo' ? 'background-color: #ff851b;color:white' : '', 'active' => request()->segment(1) == 'manufacturing']
                     )
-                ->order(21);
+                ->order(22);
             });
         }
     }

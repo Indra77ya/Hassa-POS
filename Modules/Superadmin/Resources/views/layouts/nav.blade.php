@@ -1,5 +1,5 @@
 <section class="no-print">
-    <nav class="navbar-default tw-transition-all tw-duration-5000 tw-shrink-0 tw-rounded-2xl tw-m-[16px] tw-border-2 !tw-bg-white">
+    <nav class="navbar navbar-default tw-transition-all tw-duration-200 tw-shrink-0 tw-rounded-2xl tw-m-[16px] tw-border-2 !tw-bg-white">
         <div class="container-fluid">
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
@@ -27,7 +27,6 @@
 
                     <li @if(request()->segment(1) == 'superadmin' && request()->segment(2) == 'communicator') class="active" @endif><a href="{{action([\Modules\Superadmin\Http\Controllers\CommunicatorController::class, 'index'])}}">@lang('superadmin::lang.communicator')</a></li>
                 </ul>
-
             </div><!-- /.navbar-collapse -->
         </div><!-- /.container-fluid -->
     </nav>

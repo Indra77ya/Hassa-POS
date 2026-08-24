@@ -40,7 +40,7 @@ class DataController extends Controller
                         __('productcatalogue::lang.catalogue_qr'),
                         ['icon' => 'fa fas fa-qrcode', 'active' => request()->segment(1) == 'product-catalogue', 'style' => config('app.env') == 'demo' ? 'background-color: #ff851b;' : '']
                     )
-                ->order(95);
+                ->order(90);
             });
         }
     }
