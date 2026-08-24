@@ -100,4 +100,137 @@ class SettingsController extends Controller
 
         return redirect()->back()->with('status', $output);
     }
+
+    /**
+     * Auto map or create required manufacturing accounts.
+     *
+     * @return Response
+     */
+    public function autoMapAccounts(Request $request)
+    {
+        $business_id = request()->session()->get('user.business_id');
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'manufacturing_module'))) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+            $user_id = auth()->user()->id;
+
+            // 1. Raw Materials Inventory Account
+            $raw_mat_acc = AccountingAccount::where('business_id', $business_id)
+                ->where(function($q) {
+                    $q->where('name', 'like', '%Persediaan Bahan Baku%')
+                      ->orWhere('name', 'like', '%Raw Material%');
+                })
+                ->where('status', 'active')
+                ->first();
+
+            if (!$raw_mat_acc) {
+                $raw_mat_acc = AccountingAccount::create([
+                    'name' => 'Persediaan Bahan Baku',
+                    'gl_code' => '1130',
+                    'business_id' => $business_id,
+                    'account_primary_type' => 'asset',
+                    'account_sub_type_id' => 2, // Inventory Asset
+                    'status' => 'active',
+                    'created_by' => $user_id,
+                ]);
+            }
+
+            // 2. Finished Goods Inventory Account
+            $finished_acc = AccountingAccount::where('business_id', $business_id)
+                ->where(function($q) {
+                    $q->where('name', 'like', '%Persediaan Barang Jadi%')
+                      ->orWhere('name', 'like', '%Finished Goods%');
+                })
+                ->where('status', 'active')
+                ->first();
+
+            if (!$finished_acc) {
+                $finished_acc = AccountingAccount::create([
+                    'name' => 'Persediaan Barang Jadi',
+                    'gl_code' => '1140',
+                    'business_id' => $business_id,
+                    'account_primary_type' => 'asset',
+                    'account_sub_type_id' => 2, // Inventory Asset
+                    'status' => 'active',
+                    'created_by' => $user_id,
+                ]);
+            }
+
+            // 3. Production Cost / Overhead Account
+            $prod_cost_acc = AccountingAccount::where('business_id', $business_id)
+                ->where(function($q) {
+                    $q->where('name', 'like', '%Biaya Produksi%')
+                      ->orWhere('name', 'like', '%Overhead%')
+                      ->orWhere('name', 'like', '%Production Cost%');
+                })
+                ->where('status', 'active')
+                ->first();
+
+            if (!$prod_cost_acc) {
+                $prod_cost_acc = AccountingAccount::create([
+                    'name' => 'Biaya Produksi / Overhead',
+                    'gl_code' => '5100',
+                    'business_id' => $business_id,
+                    'account_primary_type' => 'expenses',
+                    'account_sub_type_id' => 14, // Operating Expense
+                    'status' => 'active',
+                    'created_by' => $user_id,
+                ]);
+            }
+
+            // 4. Default Payment Account (Kas / Bank)
+            $payment_acc = Account::where('business_id', $business_id)
+                ->where('is_closed', 0)
+                ->where(function($q) {
+                    $q->where('name', 'like', '%Kas%')
+                      ->orWhere('name', 'like', '%Bank%');
+                })
+                ->first();
+
+            if (!$payment_acc) {
+                $payment_acc = Account::create([
+                    'name' => 'Kas Operasional Produksi',
+                    'business_id' => $business_id,
+                    'created_by' => $user_id,
+                    'is_closed' => 0,
+                ]);
+            }
+
+            // Save auto mapped accounts in settings
+            $manufacturing_settings = $this->mfgUtil->getSettings($business_id);
+            $manufacturing_settings['mfg_raw_material_account_id'] = $raw_mat_acc->id;
+            $manufacturing_settings['mfg_finished_goods_account_id'] = $finished_acc->id;
+            $manufacturing_settings['mfg_production_cost_account_id'] = $prod_cost_acc->id;
+            $manufacturing_settings['mfg_payment_account_id'] = $payment_acc->id;
+
+            Business::where('id', $business_id)
+                ->update(['manufacturing_settings' => json_encode($manufacturing_settings)]);
+
+            $output = [
+                'success' => true,
+                'msg' => 'Auto Mapping Akun Manufaktur berhasil disinkronkan!',
+                'data' => [
+                    'mfg_raw_material_account_id' => $raw_mat_acc->id,
+                    'mfg_finished_goods_account_id' => $finished_acc->id,
+                    'mfg_production_cost_account_id' => $prod_cost_acc->id,
+                    'mfg_payment_account_id' => $payment_acc->id,
+                ]
+            ];
+        } catch (\Exception $e) {
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+
+            $output = [
+                'success' => false,
+                'msg' => __('messages.something_went_wrong'),
+            ];
+        }
+
+        if ($request->ajax()) {
+            return response()->json($output);
+        }
+
+        return redirect()->back()->with('status', $output);
+    }
 }

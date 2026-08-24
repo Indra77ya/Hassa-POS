@@ -211,4 +211,27 @@ class ManufacturingAccountingSyncTest extends TestCase
         $this->assertDatabaseMissing('accounting_acc_trans_mappings', ['ref_no' => 'MFG-JOURNAL-PROD-TEST-002']);
         $this->assertDatabaseMissing('transaction_payments', ['transaction_id' => $transaction->id]);
     }
+
+    public function test_auto_map_accounts_creates_or_links_accounts()
+    {
+        $response = $this->postJson('/manufacturing/settings/auto-map');
+
+        $response->assertStatus(200);
+        $response->assertJson(['success' => true]);
+
+        $this->assertDatabaseHas('accounting_accounts', [
+            'business_id' => $this->business->id,
+            'name' => 'Persediaan Bahan Baku',
+        ]);
+
+        $this->assertDatabaseHas('accounting_accounts', [
+            'business_id' => $this->business->id,
+            'name' => 'Persediaan Barang Jadi',
+        ]);
+
+        $this->assertDatabaseHas('accounting_accounts', [
+            'business_id' => $this->business->id,
+            'name' => 'Biaya Produksi / Overhead',
+        ]);
+    }
 }

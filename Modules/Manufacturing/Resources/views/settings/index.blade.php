@@ -55,17 +55,25 @@
                     </div>
 
                     <div class="pos-tab-content">
+                        <div class="row tw-mb-4">
+                            <div class="col-md-12">
+                                <button type="button" class="btn btn-success btn-sm pull-right" id="auto_map_accounts_btn">
+                                    <i class="fas fa-magic"></i> Auto Mapping Akun
+                                </button>
+                                <p class="help-block">Klik <strong>Auto Mapping Akun</strong> untuk secara otomatis mendeteksi atau membuat akun yang sesuai di Modul Accounting &amp; Payment Account.</p>
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     {!! Form::label('mfg_raw_material_account_id', 'Akun Persediaan Bahan Baku (Raw Material Inventory):') !!}
-                                    {!! Form::select('mfg_raw_material_account_id', $accounting_accounts, !empty($manufacturing_settings['mfg_raw_material_account_id']) ? $manufacturing_settings['mfg_raw_material_account_id'] : null, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select'), 'style' => 'width: 100%;']); !!}
+                                    {!! Form::select('mfg_raw_material_account_id', $accounting_accounts, !empty($manufacturing_settings['mfg_raw_material_account_id']) ? $manufacturing_settings['mfg_raw_material_account_id'] : null, ['class' => 'form-control select2', 'id' => 'mfg_raw_material_account_id', 'placeholder' => __('messages.please_select'), 'style' => 'width: 100%;']); !!}
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     {!! Form::label('mfg_finished_goods_account_id', 'Akun Persediaan Barang Jadi (Finished Goods Inventory):') !!}
-                                    {!! Form::select('mfg_finished_goods_account_id', $accounting_accounts, !empty($manufacturing_settings['mfg_finished_goods_account_id']) ? $manufacturing_settings['mfg_finished_goods_account_id'] : null, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select'), 'style' => 'width: 100%;']); !!}
+                                    {!! Form::select('mfg_finished_goods_account_id', $accounting_accounts, !empty($manufacturing_settings['mfg_finished_goods_account_id']) ? $manufacturing_settings['mfg_finished_goods_account_id'] : null, ['class' => 'form-control select2', 'id' => 'mfg_finished_goods_account_id', 'placeholder' => __('messages.please_select'), 'style' => 'width: 100%;']); !!}
                                 </div>
                             </div>
                         </div>
@@ -73,13 +81,13 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     {!! Form::label('mfg_production_cost_account_id', 'Akun Biaya Produksi / Overhead:') !!}
-                                    {!! Form::select('mfg_production_cost_account_id', $accounting_accounts, !empty($manufacturing_settings['mfg_production_cost_account_id']) ? $manufacturing_settings['mfg_production_cost_account_id'] : null, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select'), 'style' => 'width: 100%;']); !!}
+                                    {!! Form::select('mfg_production_cost_account_id', $accounting_accounts, !empty($manufacturing_settings['mfg_production_cost_account_id']) ? $manufacturing_settings['mfg_production_cost_account_id'] : null, ['class' => 'form-control select2', 'id' => 'mfg_production_cost_account_id', 'placeholder' => __('messages.please_select'), 'style' => 'width: 100%;']); !!}
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     {!! Form::label('mfg_payment_account_id', 'Akun Pembayaran Kas/Bank Default:') !!}
-                                    {!! Form::select('mfg_payment_account_id', $payment_accounts, !empty($manufacturing_settings['mfg_payment_account_id']) ? $manufacturing_settings['mfg_payment_account_id'] : null, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select'), 'style' => 'width: 100%;']); !!}
+                                    {!! Form::select('mfg_payment_account_id', $payment_accounts, !empty($manufacturing_settings['mfg_payment_account_id']) ? $manufacturing_settings['mfg_payment_account_id'] : null, ['class' => 'form-control select2', 'id' => 'mfg_payment_account_id', 'placeholder' => __('messages.please_select'), 'style' => 'width: 100%;']); !!}
                                 </div>
                             </div>
                         </div>
@@ -107,6 +115,45 @@
 <script type="text/javascript">
     $(document).ready( function () {
         $(".file-input").fileinput(fileinput_setting);
+
+        $(document).on('click', '#auto_map_accounts_btn', function(e) {
+            e.preventDefault();
+            var btn = $(this);
+            btn.attr('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Memproses...');
+
+            $.ajax({
+                url: "{{ action([\Modules\Manufacturing\Http\Controllers\SettingsController::class, 'autoMapAccounts']) }}",
+                type: 'POST',
+                dataType: 'json',
+                data: { _token: "{{ csrf_token() }}" },
+                success: function(result) {
+                    btn.attr('disabled', false).html('<i class="fas fa-magic"></i> Auto Mapping Akun');
+                    if (result.success) {
+                        toastr.success(result.msg);
+                        if (result.data) {
+                            if (result.data.mfg_raw_material_account_id) {
+                                $('#mfg_raw_material_account_id').val(result.data.mfg_raw_material_account_id).trigger('change');
+                            }
+                            if (result.data.mfg_finished_goods_account_id) {
+                                $('#mfg_finished_goods_account_id').val(result.data.mfg_finished_goods_account_id).trigger('change');
+                            }
+                            if (result.data.mfg_production_cost_account_id) {
+                                $('#mfg_production_cost_account_id').val(result.data.mfg_production_cost_account_id).trigger('change');
+                            }
+                            if (result.data.mfg_payment_account_id) {
+                                $('#mfg_payment_account_id').val(result.data.mfg_payment_account_id).trigger('change');
+                            }
+                        }
+                    } else {
+                        toastr.error(result.msg);
+                    }
+                },
+                error: function() {
+                    btn.attr('disabled', false).html('<i class="fas fa-magic"></i> Auto Mapping Akun');
+                    toastr.error("{{ __('messages.something_went_wrong') }}");
+                }
+            });
+        });
     });
 </script>
 
