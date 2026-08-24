@@ -49,7 +49,7 @@ class SettingsController extends Controller
         $version = System::getProperty('manufacturing_version');
 
         $accounting_accounts = [];
-        if ($this->moduleUtil->isModuleEnabled('Accounting')) {
+        if ($this->moduleUtil->isModuleEnabled('Accounting') || $this->moduleUtil->isModuleEnabled('accounting')) {
             $accounting_accounts = AccountingAccount::forDropdown($business_id);
         }
 
