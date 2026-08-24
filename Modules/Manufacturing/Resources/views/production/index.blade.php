@@ -62,6 +62,7 @@
                         <th>@lang('purchase.location')</th>
                         <th>@lang('sale.product')</th>
                         <th>@lang('lang_v1.quantity')</th>
+                        <th>@lang('manufacturing::lang.estimated_quantity')</th>
                         <th>@lang('manufacturing::lang.total_cost')</th>
                         <th>@lang('messages.action')</th>
                     </tr>

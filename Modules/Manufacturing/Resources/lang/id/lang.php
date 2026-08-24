@@ -64,4 +64,6 @@ return [
     'price_updated_live' => 'Harga diperbarui berdasarkan biaya pembelian bahan',
     'per_unit' => 'Per Unit',
     'production_cost_tooltip' => 'Jika sudah diperbaiki akan langsung ditambahkan ke total biaya bahan, jika persentase persentase dari total biaya bahan akan ditambahkan dan jika per unit total unit akan dikalikan dengan biaya produksi',
+    'estimated_quantity' => 'Estimasi Jumlah',
+    'use_max_quantity' => 'Gunakan Maksimal',
 ];

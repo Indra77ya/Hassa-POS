@@ -64,6 +64,18 @@
 				</div>
 			</div>
 			<div class="col-sm-3">
+				<div class="form-group">
+					{!! Form::label('mfg_estimated_quantity', __('manufacturing::lang.estimated_quantity').':') !!}
+					<button type="button" class="btn btn-xs btn-primary pull-right" id="use_max_qty_btn" style="margin-bottom: 2px;">
+						<i class="fa fa-arrow-left"></i> @lang('manufacturing::lang.use_max_quantity')
+					</button>
+					<div class="input-group">
+						{!! Form::text('mfg_estimated_quantity', null, ['class' => 'form-control input_number', 'id' => 'mfg_estimated_quantity']); !!}
+						<span class="input-group-addon mfg_unit_span"></span>
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-3">
                 <div class="form-group">
                     {!! Form::label('upload_document', __('purchase.attach_document') . ':') !!}
                     {!! Form::file('documents[]', ['id' => 'upload_document', 'multiple', 'accept' => implode(',', array_keys(config('constants.document_upload_mimes_types')))]); !!}

@@ -466,12 +466,52 @@ class RecipeController extends Controller
             $is_sub_unit = 1;
         }
 
+        $max_estimated_qty = null;
+        if (! empty($ingredients)) {
+            foreach ($ingredients as $ingredient) {
+                if (! empty($ingredient['enable_stock']) && $ingredient['enable_stock'] == 1) {
+                    $variation = $ingredient['variation'];
+                    $vld = null;
+                    if (! empty($variation->variation_location_details)) {
+                        foreach ($variation->variation_location_details as $details) {
+                            if ($details->location_id == $location_id) {
+                                $vld = $details;
+                                break;
+                            }
+                        }
+                    }
+                    $qty_available = ! empty($vld->qty_available) ? (float) $vld->qty_available : 0;
+                    if ($qty_available < 0) {
+                        $qty_available = 0;
+                    }
+                    $unit_qty = ! empty($ingredient['unit_quantity']) ? (float) $ingredient['unit_quantity'] : 0;
+                    if ($unit_qty > 0) {
+                        $possible = $qty_available / $unit_qty;
+                        if (is_null($max_estimated_qty) || $possible < $max_estimated_qty) {
+                            $max_estimated_qty = $possible;
+                        }
+                    }
+                }
+            }
+        }
+        if (is_null($max_estimated_qty)) {
+            $max_estimated_qty = 0;
+        }
+
+        if (! empty($recipe) && ! empty($recipe->sub_unit_id)) {
+            $recipe_sub_units = $this->moduleUtil->getSubUnits($business_id, $recipe->variation->product->unit->id);
+            if (! empty($recipe_sub_units[$recipe->sub_unit_id]['multiplier'])) {
+                $max_estimated_qty = $max_estimated_qty / $recipe_sub_units[$recipe->sub_unit_id]['multiplier'];
+            }
+        }
+
         return json_encode([
             'ingredient_table' => $ingredient_table,
             'recipe' => $recipe,
             'unit_html' => $unit_html,
             'is_sub_unit' => $is_sub_unit,
             'unit_name' => $unit_name,
+            'max_estimated_qty' => $max_estimated_qty,
         ]);
     }
 

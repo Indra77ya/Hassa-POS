@@ -89,7 +89,8 @@ class ProductionController extends Controller
                     'su.short_name as sub_unit_name',
                     'su.base_unit_multiplier',
                     'u.short_name as unit_name',
-                    'mfg_is_final'
+                    'mfg_is_final',
+                    'transactions.mfg_estimated_quantity'
                 )->groupBy('transactions.id');
 
             if (! empty(request()->start_date) && ! empty(request()->end_date)) {
@@ -134,8 +135,20 @@ class ProductionController extends Controller
                         return "<span class='display_currency' data-currency_symbol='false' data-orig-value='$qty' data-is_quantity='true'>$qty</span> $unit";
                     }
                 )
+                ->editColumn(
+                    'mfg_estimated_quantity',
+                    function ($row) {
+                        if (is_null($row->mfg_estimated_quantity)) {
+                            return '-';
+                        }
+                        $qty = empty($row->base_unit_multiplier) ? $row->mfg_estimated_quantity : $row->mfg_estimated_quantity / $row->base_unit_multiplier;
+                        $unit = empty($row->sub_unit_name) ? $row->unit_name : $row->sub_unit_name;
+
+                        return "<span class='display_currency' data-currency_symbol='false' data-orig-value='$qty' data-is_quantity='true'>$qty</span> $unit";
+                    }
+                )
                 ->editColumn('transaction_date', '{{@format_datetime($transaction_date)}}')
-                ->rawColumns(['final_total', 'action', 'quantity'])
+                ->rawColumns(['final_total', 'action', 'quantity', 'mfg_estimated_quantity'])
                 ->filterColumn('product_name', function ($query, $keyword) {
                     $query->whereRaw("CONCAT(p.name, ' - ', pv.name, ' - ', v.name, ' (', v.sub_sku, ')') like ?", ["%{$keyword}%"]);
                 })
@@ -230,6 +243,16 @@ class ProductionController extends Controller
             $unit_purchase_line_total_f = $this->productUtil->num_f($unit_purchase_line_total);
 
             $transaction_data['mfg_wasted_units'] = $waste_units;
+            $est_qty_input = $request->input('mfg_estimated_quantity');
+            if ($request->has('mfg_estimated_quantity') && ! is_null($est_qty_input) && $est_qty_input !== '') {
+                $uf_est_qty = $this->productUtil->num_uf($est_qty_input);
+                if (! empty($request->input('sub_unit_id'))) {
+                    $sub_units = $this->productUtil->getSubUnits($business_id, $variation->product->unit_id);
+                    $sub_unit_multiplier = ! empty($sub_units[$request->input('sub_unit_id')]['multiplier']) ? $sub_units[$request->input('sub_unit_id')]['multiplier'] : 1;
+                    $uf_est_qty = $uf_est_qty * $sub_unit_multiplier;
+                }
+                $transaction_data['mfg_estimated_quantity'] = $uf_est_qty;
+            }
             $transaction_data['mfg_production_cost'] = $this->productUtil->num_uf($request->input('production_cost'));
             $transaction_data['mfg_production_cost_type'] = $request->input('mfg_production_cost_type');
             $transaction_data['mfg_is_final'] = $is_final;

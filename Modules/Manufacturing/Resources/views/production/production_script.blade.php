@@ -44,6 +44,10 @@
 	                __write_number($('#recipe_quantity'), result.recipe.total_quantity);
 	                $('#unit_html').html(result.unit_html);
 	                $('#wasted_units_text').text(result.unit_name);
+	                $('.mfg_unit_span').text(result.unit_name);
+	                if ($('#mfg_estimated_quantity').length) {
+	                    __write_number($('#mfg_estimated_quantity'), result.max_estimated_qty);
+	                }
 
                     var mfg_wasted_units = __calculate_amount('percentage', $('#waste_percent').val(), result.recipe.total_quantity);
                     __write_number($('#mfg_wasted_units'), mfg_wasted_units);
@@ -93,6 +97,15 @@
                 .find(':selected')
                 .data('unit_name');
             $('#wasted_units_text').text(unit_name);
+            $('.mfg_unit_span').text(unit_name);
+	});
+
+	$(document).on('click', '#use_max_qty_btn', function() {
+		var est_qty = __read_number($('#mfg_estimated_quantity'));
+		if (est_qty >= 0) {
+			__write_number($('#recipe_quantity'), est_qty);
+			$('#recipe_quantity').trigger('change');
+		}
 	});
 
 	$(document).on('change', '.total_quantities', function(){

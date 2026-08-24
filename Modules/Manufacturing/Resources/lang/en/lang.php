@@ -65,4 +65,6 @@ return [
     'per_unit' => 'Per Unit',
     'production_cost_tooltip' => 'If fixed it will be directly added to total ingredient cost, if percentage percentage of total ingredient cost will be added and if per unit total unit will be multiplied to production cost',
     'manufactured' => 'Manufactured',
+    'estimated_quantity' => 'Estimated Quantity',
+    'use_max_quantity' => 'Use Max',
 ];

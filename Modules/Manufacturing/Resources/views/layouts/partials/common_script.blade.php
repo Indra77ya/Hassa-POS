@@ -35,7 +35,7 @@
 	        },
 	        columnDefs: [
 	            {
-	                targets: [6],
+	                targets: [7],
 	                orderable: false,
 	                searchable: false,
 	            },
@@ -46,6 +46,7 @@
 	            { data: 'location_name', name: 'bl.name' },
 	            { data: 'product_name', name: 'product_name' },
 	            { data: 'quantity', searchable: false },
+	            { data: 'mfg_estimated_quantity', searchable: false },
 	            { data: 'final_total', name: 'final_total' },
 	            { data: 'action', name: 'action' },
 	        ],

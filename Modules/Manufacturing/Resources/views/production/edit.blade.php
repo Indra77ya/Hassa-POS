@@ -78,6 +78,16 @@
 				</div>
 			</div>
 
+			<div class="col-sm-3">
+				<div class="form-group">
+					{!! Form::label('mfg_estimated_quantity', __('manufacturing::lang.estimated_quantity').':') !!}
+					<div class="input-group">
+						{!! Form::text('mfg_estimated_quantity_display', !is_null($production_purchase->mfg_estimated_quantity) ? @format_quantity($production_purchase->mfg_estimated_quantity / (!empty($base_unit_multiplier) ? $base_unit_multiplier : 1)) : '', ['class' => 'form-control', 'readonly', 'id' => 'mfg_estimated_quantity_display']); !!}
+						<span class="input-group-addon mfg_unit_span">{{ $unit_name }}</span>
+					</div>
+				</div>
+			</div>
+
 			<div class="col-md-4">
                 <div class="form-group">
                     {!! Form::label('upload_document', __('purchase.attach_document') . ':') !!}
