@@ -311,8 +311,20 @@ class ManufacturingUtil extends Util
 
         $ingredients_cost = max(0, $final_total - $production_cost);
 
+        // Determine credit account for production cost (Payment account Kas/Bank if selected, else Overhead account)
+        $cost_credit_account_id = $production_cost_account_id;
+        if ($payment_account_id) {
+            $pos_account = \App\Account::find($payment_account_id);
+            if ($pos_account) {
+                $acc_id = $pos_account->accounting_account_id ?? \Modules\Accounting\Entities\AccountingAccount::where('account_id', $pos_account->id)->value('id');
+                if ($acc_id) {
+                    $cost_credit_account_id = $acc_id;
+                }
+            }
+        }
+
         // 1. Double-Entry Accounting Sync if Accounting Module Accounts exist
-        if ($finished_goods_account_id || $raw_material_account_id || $production_cost_account_id) {
+        if ($finished_goods_account_id || $raw_material_account_id || $cost_credit_account_id) {
             $refNo = 'MFG-JOURNAL-' . $transaction->ref_no;
 
             $accTransMapping = new AccountingAccTransMapping();
@@ -353,10 +365,10 @@ class ManufacturingUtil extends Util
                 $creditRawMat->save();
             }
 
-            // Credit: Production Cost / Overhead Account (Production Cost Value)
-            if ($production_cost_account_id && $production_cost > 0) {
+            // Credit: Payment Account (Kas/Bank) or Overhead Account (Production Cost Value)
+            if ($cost_credit_account_id && $production_cost > 0) {
                 $creditCost = new AccountingAccountsTransaction();
-                $creditCost->accounting_account_id = $production_cost_account_id;
+                $creditCost->accounting_account_id = $cost_credit_account_id;
                 $creditCost->amount = $production_cost;
                 $creditCost->type = 'credit';
                 $creditCost->created_by = $transaction->created_by ?? auth()->user()->id;

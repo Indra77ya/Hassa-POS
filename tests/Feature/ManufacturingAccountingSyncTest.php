@@ -95,11 +95,24 @@ class ManufacturingAccountingSyncTest extends TestCase
             'account_sub_type_id' => 14,
         ]);
 
+        $kasAccountingAccount = AccountingAccount::create([
+            'name' => 'Kas Operasional Produksi',
+            'gl_code' => '1101-TEST',
+            'business_id' => $this->business->id,
+            'status' => 'active',
+            'account_primary_type' => 'asset',
+            'account_sub_type_id' => 1,
+        ]);
+
         $this->paymentAccount = Account::create([
             'name' => 'Kas Operasional Produksi',
             'business_id' => $this->business->id,
             'created_by' => $this->user->id,
+            'accounting_account_id' => $kasAccountingAccount->id,
         ]);
+
+        $kasAccountingAccount->account_id = $this->paymentAccount->id;
+        $kasAccountingAccount->save();
 
         // Set manufacturing settings
         $settings = [
@@ -159,14 +172,14 @@ class ManufacturingAccountingSyncTest extends TestCase
         $this->assertNotNull($creditRawMat);
         $this->assertEquals(100000, $creditRawMat->amount);
 
-        // Verify Production Cost Credit Entry (50,000)
-        $creditCost = AccountingAccountsTransaction::where('acc_trans_mapping_id', $accTransMapping->id)
-            ->where('accounting_account_id', $this->prodCostAccount->id)
+        // Verify Kas Payment Account Credit Entry (50,000) under Scenario A
+        $creditKas = AccountingAccountsTransaction::where('acc_trans_mapping_id', $accTransMapping->id)
+            ->where('accounting_account_id', $this->paymentAccount->accounting_account_id)
             ->where('type', 'credit')
             ->first();
 
-        $this->assertNotNull($creditCost);
-        $this->assertEquals(50000, $creditCost->amount);
+        $this->assertNotNull($creditKas);
+        $this->assertEquals(50000, $creditKas->amount);
 
         // Verify Transaction Payment Created for Payment Account (50,000)
         $payment = TransactionPayment::where('transaction_id', $transaction->id)->first();
