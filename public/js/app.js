@@ -46,6 +46,15 @@ $(document).ready(function() {
                     .html(result)
                     .modal('show');
             },
+            error: function(xhr, status, error) {
+                if (typeof toastr !== 'undefined') {
+                    toastr.error(LANG.something_went_wrong || 'Something went wrong');
+                } else if (typeof LANG !== 'undefined' && LANG.something_went_wrong) {
+                    alert(LANG.something_went_wrong);
+                } else {
+                    alert('Something went wrong');
+                }
+            },
         });
     });
 

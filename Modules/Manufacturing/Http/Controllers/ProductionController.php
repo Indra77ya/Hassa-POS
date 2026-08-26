@@ -429,11 +429,14 @@ class ProductionController extends Controller
                                     ])
                                     ->first();
 
-        $purchase_line = $production_purchase->purchase_lines[0];
-        $base_unit_multiplier = ! empty($purchase_line->sub_unit) ? $purchase_line->sub_unit->base_unit_multiplier : 1;
-        $quantity = $purchase_line->quantity / $base_unit_multiplier;
+        $purchase_line = (! empty($production_purchase->purchase_lines) && count($production_purchase->purchase_lines) > 0) ? $production_purchase->purchase_lines[0] : null;
+        $base_unit_multiplier = (! empty($purchase_line) && ! empty($purchase_line->sub_unit)) ? $purchase_line->sub_unit->base_unit_multiplier : 1;
+        if (empty($base_unit_multiplier)) {
+            $base_unit_multiplier = 1;
+        }
+        $quantity = ! empty($purchase_line) ? ($purchase_line->quantity / $base_unit_multiplier) : 0;
         $quantity_wasted = 0;
-        $unit_name = ! empty($purchase_line->sub_unit) ? $purchase_line->sub_unit->short_name : $purchase_line->variations->product->unit->short_name;
+        $unit_name = (! empty($purchase_line) && ! empty($purchase_line->sub_unit)) ? $purchase_line->sub_unit->short_name : ((! empty($purchase_line) && ! empty($purchase_line->variations) && ! empty($purchase_line->variations->product) && ! empty($purchase_line->variations->product->unit)) ? $purchase_line->variations->product->unit->short_name : '');
         if (! empty($production_purchase->mfg_wasted_units)) {
             $quantity_wasted = $production_purchase->mfg_wasted_units;
             $quantity += $quantity_wasted;
@@ -448,10 +451,14 @@ class ProductionController extends Controller
         //Format sell lines
         foreach ($production_sell->sell_lines as $sell_line) {
             $variation = $sell_line->variations;
-            $sell_line_qty = empty($sell_line->sub_unit) ? $sell_line->quantity : $sell_line->quantity / $sell_line->sub_unit->base_unit_multiplier;
-            $unit = empty($sell_line->sub_unit) ? $variation->product->unit->short_name : $sell_line->sub_unit->short_name;
+            if (empty($variation)) {
+                continue;
+            }
+            $sell_line_multiplier = (! empty($sell_line->sub_unit) && ! empty($sell_line->sub_unit->base_unit_multiplier)) ? $sell_line->sub_unit->base_unit_multiplier : 1;
+            $sell_line_qty = empty($sell_line->sub_unit) ? $sell_line->quantity : ($sell_line->quantity / $sell_line_multiplier);
+            $unit = empty($sell_line->sub_unit) ? (! empty($variation->product) && ! empty($variation->product->unit) ? $variation->product->unit->short_name : '') : $sell_line->sub_unit->short_name;
 
-            $line_total_price = $variation->dpp_inc_tax * $sell_line->quantity;
+            $line_total_price = ($variation->dpp_inc_tax ?? 0) * $sell_line->quantity;
             $total_ingredients_price += $line_total_price;
 
             $waste_percent = ! empty($sell_line->mfg_waste_percent) ? $sell_line->mfg_waste_percent : 0;
@@ -460,27 +467,35 @@ class ProductionController extends Controller
 
             $lot_numbers = [];
 
-            foreach ($sell_line->sell_line_purchase_lines as $slpl) {
-                $lot_number = ! empty($slpl->purchase_line->lot_number) ? $slpl->purchase_line->lot_number : '';
-                if (! empty($slpl->purchase_line->exp_date)) {
-                    $lot_number .= ' - '.$this->moduleUtil->format_date($slpl->purchase_line->exp_date);
-                }
+            if (! empty($sell_line->sell_line_purchase_lines)) {
+                foreach ($sell_line->sell_line_purchase_lines as $slpl) {
+                    if (! empty($slpl->purchase_line)) {
+                        $lot_number = ! empty($slpl->purchase_line->lot_number) ? $slpl->purchase_line->lot_number : '';
+                        if (! empty($slpl->purchase_line->exp_date)) {
+                            $lot_number .= ' - '.$this->moduleUtil->format_date($slpl->purchase_line->exp_date);
+                        }
 
-                if ($lot_number != '') {
-                    $lot_numbers[] = $lot_number;
+                        if ($lot_number != '') {
+                            $lot_numbers[] = $lot_number;
+                        }
+                    }
                 }
             }
 
+            $allow_decimal = (! empty($variation->product) && ! empty($variation->product->unit)) ? $variation->product->unit->allow_decimal : 0;
+            $enable_stock = ! empty($variation->product) ? $variation->product->enable_stock : 0;
+            $full_name = ! empty($variation->full_name) ? $variation->full_name : '';
+
             if (empty($sell_line->mfg_ingredient_group_id)) {
                 $ingredients[] = [
-                    'dpp_inc_tax' => $variation->dpp_inc_tax,
+                    'dpp_inc_tax' => $variation->dpp_inc_tax ?? 0,
                     'quantity' => $sell_line_qty,
-                    'full_name' => $variation->full_name,
+                    'full_name' => $full_name,
                     'id' => $variation->id,
                     'unit' => $unit,
-                    'allow_decimal' => $variation->product->unit->allow_decimal,
+                    'allow_decimal' => $allow_decimal,
                     'variation' => $variation,
-                    'enable_stock' => $variation->product->enable_stock,
+                    'enable_stock' => $enable_stock,
                     'total_price' => $line_total_price,
                     'waste_percent' => $waste_percent,
                     'final_quantity' => $final_quantity,
@@ -489,18 +504,18 @@ class ProductionController extends Controller
             } else {
                 if (! isset($ingredient_groups[$sell_line->mfg_ingredient_group_id]['ig_name'])) {
                     $i_group = MfgIngredientGroup::find($sell_line->mfg_ingredient_group_id);
-                    $ingredient_groups[$sell_line->mfg_ingredient_group_id]['ig_name'] = $i_group->name;
-                    $ingredient_groups[$sell_line->mfg_ingredient_group_id]['ig_description'] = $i_group->description;
+                    $ingredient_groups[$sell_line->mfg_ingredient_group_id]['ig_name'] = ! empty($i_group) ? $i_group->name : '';
+                    $ingredient_groups[$sell_line->mfg_ingredient_group_id]['ig_description'] = ! empty($i_group) ? $i_group->description : '';
                 }
                 $ingredient_groups[$sell_line->mfg_ingredient_group_id]['ig_ingredients'][] = [
-                    'dpp_inc_tax' => $variation->dpp_inc_tax,
+                    'dpp_inc_tax' => $variation->dpp_inc_tax ?? 0,
                     'quantity' => $sell_line_qty,
-                    'full_name' => $variation->full_name,
+                    'full_name' => $full_name,
                     'id' => $variation->id,
                     'unit' => $unit,
-                    'allow_decimal' => $variation->product->unit->allow_decimal,
+                    'allow_decimal' => $allow_decimal,
                     'variation' => $variation,
-                    'enable_stock' => $variation->product->enable_stock,
+                    'enable_stock' => $enable_stock,
                     'total_price' => $line_total_price,
                     'waste_percent' => $waste_percent,
                     'final_quantity' => $final_quantity,

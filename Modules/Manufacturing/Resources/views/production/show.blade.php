@@ -15,27 +15,27 @@
                 <div class="col-sm-6 invoice-col">
                     @lang('business.business'):
                     <address>
-                        <strong>{{ $production_purchase->business->name }}</strong>
-                        {{ $production_purchase->location->name }}
-                        @if(!empty($production_purchase->location->landmark))
+                        <strong>{{ $production_purchase->business->name ?? '' }}</strong>
+                        {{ $production_purchase->location->name ?? '' }}
+                        @if(!empty($production_purchase->location) && !empty($production_purchase->location->landmark))
                           <br>{{$production_purchase->location->landmark}}
                         @endif
-                        @if(!empty($production_purchase->location->city) || !empty($production_purchase->location->state) || !empty($production_purchase->location->country))
+                        @if(!empty($production_purchase->location) && (!empty($production_purchase->location->city) || !empty($production_purchase->location->state) || !empty($production_purchase->location->country)))
                           <br>{{implode(',', array_filter([$production_purchase->location->city, $production_purchase->location->state, $production_purchase->location->country]))}}
                         @endif
                         
-                        @if(!empty($production_purchase->business->tax_number_1))
+                        @if(!empty($production_purchase->business) && !empty($production_purchase->business->tax_number_1))
                           <br>{{$production_purchase->business->tax_label_1}}: {{$production_purchase->business->tax_number_1}}
                         @endif
 
-                        @if(!empty($production_purchase->business->tax_number_2))
+                        @if(!empty($production_purchase->business) && !empty($production_purchase->business->tax_number_2))
                           <br>{{$production_purchase->business->tax_label_2}}: {{$production_purchase->business->tax_number_2}}
                         @endif
 
-                        @if(!empty($production_purchase->location->mobile))
+                        @if(!empty($production_purchase->location) && !empty($production_purchase->location->mobile))
                           <br>@lang('contact.mobile'): {{$production_purchase->location->mobile}}
                         @endif
-                        @if(!empty($production_purchase->location->email))
+                        @if(!empty($production_purchase->location) && !empty($production_purchase->location->email))
                           <br>@lang('business.email'): {{$production_purchase->location->email}}
                         @endif
                     </address>
@@ -48,7 +48,7 @@
                 </div>
                 <div class="col-sm-12">
                 @php
-                    $medias = $production_purchase->media;
+                    $medias = $production_purchase->media ?? [];
                 @endphp
                 @if(count($medias))
                     @include('sell.partials.media_table', ['medias' => $medias])
@@ -61,12 +61,12 @@
                 </div>
                 <div class="col-md-6">
                     <strong>@lang('sale.product'):</strong>
-                    {{$purchase_line->variations->full_name}}
-                    @if(request()->session()->get('business.enable_lot_number') == 1)
+                    {{ !empty($purchase_line) && !empty($purchase_line->variations) ? $purchase_line->variations->full_name : '-' }}
+                    @if(request()->session()->get('business.enable_lot_number') == 1 && !empty($purchase_line))
                         <br><strong>@lang('lang_v1.lot_number'):</strong>
                         {{$purchase_line->lot_number}}
                     @endif
-                    @if(session('business.enable_product_expiry'))
+                    @if(session('business.enable_product_expiry') && !empty($purchase_line))
                         <br><strong>@lang('product.exp_date'):</strong>
                         @if(!empty($purchase_line->exp_date))       
                             {{@format_date($purchase_line->exp_date)}} 
