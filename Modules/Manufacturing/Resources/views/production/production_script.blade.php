@@ -36,13 +36,18 @@
 	                	$('#recipe_quantity_input').removeClass('input-group');
 	                	$('#recipe_quantity_input').addClass('input_inline');
 	                	$('#unit_html').removeClass('input-group-addon');
+				$('#mfg_estimated_quantity_input').removeClass('input-group').addClass('input_inline');
+				$('.estimated_unit_html').removeClass('input-group-addon');
 	                } else {
 	                	$('#recipe_quantity_input').addClass('input-group');
 	                	$('#recipe_quantity_input').removeClass('input_inline');
 	                	$('#unit_html').addClass('input-group-addon');
+				$('#mfg_estimated_quantity_input').addClass('input-group').removeClass('input_inline');
+				$('.estimated_unit_html').addClass('input-group-addon');
 	                }
 	                __write_number($('#recipe_quantity'), result.recipe.total_quantity);
 	                $('#unit_html').html(result.unit_html);
+	                $('.estimated_unit_html').html(result.unit_name);
 	                $('#wasted_units_text').text(result.unit_name);
 
                     var mfg_wasted_units = __calculate_amount('percentage', $('#waste_percent').val(), result.recipe.total_quantity);
@@ -53,7 +58,7 @@
 	                if (result.max_estimated_qty !== null && result.max_estimated_qty !== undefined) {
 				$('#max_estimated_qty_span').text(result.max_estimated_qty);
 				$('#max_estimated_qty_container').show();
-				$('#mfg_estimated_quantity').val(result.max_estimated_qty);
+				__write_number($('#mfg_estimated_quantity'), result.max_estimated_qty);
 	                } else {
 				$('#max_estimated_qty_container').hide();
 				$('#mfg_estimated_quantity').val('');
@@ -74,6 +79,7 @@
 	$(document).on('click', '#use_max_qty_btn', function() {
 		var max_qty = $('#max_estimated_qty_span').text();
 		if (max_qty && parseFloat(max_qty) > 0) {
+			__write_number($('#mfg_estimated_quantity'), max_qty);
 			__write_number($('#recipe_quantity'), max_qty);
 			$('#recipe_quantity').trigger('change');
 		}
