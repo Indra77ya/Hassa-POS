@@ -413,7 +413,11 @@ class ProductionController extends Controller
                                     ->where('type', 'production_purchase')
                                     ->with(['purchase_lines', 'purchase_lines.variations', 'purchase_lines.variations.product_variation', 'purchase_lines.variations.product',
                                         'purchase_lines.sub_unit', 'purchase_lines.variations.product.unit', 'media', ])
-                                    ->findOrFail($id);
+                                    ->find($id);
+
+        if (empty($production_purchase)) {
+            abort(404);
+        }
 
         $production_sell = Transaction::where('business_id', $business_id)
                                     ->where('type', 'production_sell')
@@ -434,11 +438,11 @@ class ProductionController extends Controller
         if (empty($base_unit_multiplier)) {
             $base_unit_multiplier = 1;
         }
-        $quantity = ! empty($purchase_line) ? ($purchase_line->quantity / $base_unit_multiplier) : 0;
-        $quantity_wasted = 0;
+        $quantity = ! empty($purchase_line) ? (float) ($purchase_line->quantity / $base_unit_multiplier) : 0.0;
+        $quantity_wasted = 0.0;
         $unit_name = (! empty($purchase_line) && ! empty($purchase_line->sub_unit)) ? $purchase_line->sub_unit->short_name : ((! empty($purchase_line) && ! empty($purchase_line->variations) && ! empty($purchase_line->variations->product) && ! empty($purchase_line->variations->product->unit)) ? $purchase_line->variations->product->unit->short_name : '');
         if (! empty($production_purchase->mfg_wasted_units)) {
-            $quantity_wasted = $production_purchase->mfg_wasted_units;
+            $quantity_wasted = (float) $production_purchase->mfg_wasted_units;
             $quantity += $quantity_wasted;
         }
 

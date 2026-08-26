@@ -66,11 +66,14 @@ class Variation extends Model
 
     public function getFullNameAttribute()
     {
-        $name = $this->product->name;
-        if ($this->product->type == 'variable') {
-            $name .= ' - '.$this->product_variation->name.' - '.$this->name;
+        $name = ! empty($this->product) ? $this->product->name : '';
+        if (! empty($this->product) && $this->product->type == 'variable') {
+            $product_variation_name = ! empty($this->product_variation) ? $this->product_variation->name : '';
+            $name .= ' - '.$product_variation_name.' - '.$this->name;
         }
-        $name .= ' ('.$this->sub_sku.')';
+        if (! empty($this->sub_sku)) {
+            $name .= ' ('.$this->sub_sku.')';
+        }
 
         return $name;
     }
