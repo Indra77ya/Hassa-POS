@@ -36,15 +36,13 @@
 	                	$('#recipe_quantity_input').removeClass('input-group');
 	                	$('#recipe_quantity_input').addClass('input_inline');
 	                	$('#unit_html').removeClass('input-group-addon');
-				$('#mfg_estimated_quantity_input').removeClass('input-group').addClass('input_inline');
-				$('.estimated_unit_html').removeClass('input-group-addon');
 	                } else {
 	                	$('#recipe_quantity_input').addClass('input-group');
 	                	$('#recipe_quantity_input').removeClass('input_inline');
 	                	$('#unit_html').addClass('input-group-addon');
-				$('#mfg_estimated_quantity_input').addClass('input-group').removeClass('input_inline');
-				$('.estimated_unit_html').addClass('input-group-addon');
 	                }
+	                $('#mfg_estimated_quantity_input').addClass('input-group');
+	                $('.estimated_unit_html').addClass('input-group-addon');
 	                __write_number($('#recipe_quantity'), result.recipe.total_quantity);
 	                $('#unit_html').html(result.unit_html);
 	                $('.estimated_unit_html').html(result.unit_name);
