@@ -219,7 +219,8 @@ class ManufacturingAccountingSyncTest extends TestCase
 
         $this->assertEquals('Persediaan Bahan Baku', $rawAcc->name);
         $this->assertEquals('Persediaan Barang Jadi', $fgAcc->name);
-        $this->assertEquals('Biaya Produksi / Overhead', $pcAcc->name);
+        $this->assertEquals('Hutang Biaya Produksi', $pcAcc->name);
+        $this->assertEquals('liability', $pcAcc->account_primary_type);
     }
 
     public function test_auto_mapping_ignores_hpp_expense_account()

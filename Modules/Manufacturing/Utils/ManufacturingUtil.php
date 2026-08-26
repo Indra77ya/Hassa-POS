@@ -336,24 +336,26 @@ class ManufacturingUtil extends Util
             ]);
         }
 
-        // 3. Production Cost / Overhead Account (Biaya Produksi / Overhead)
+        // 3. Production Cost / Overhead Liability Account (Hutang Biaya Produksi / Hutang Overhead)
         $production_cost_account = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
             ->where('status', 'active')
+            ->where('account_primary_type', 'liability')
             ->where(function($q) {
-                $q->where('name', 'like', '%Biaya Produksi%')
-                  ->orWhere('name', 'like', '%Overhead%')
-                  ->orWhere('name', 'like', '%Beban Produksi%');
+                $q->where('name', 'like', '%Hutang Biaya Produksi%')
+                  ->orWhere('name', 'like', '%Hutang Overhead%')
+                  ->orWhere('name', 'like', '%Biaya Produksi%')
+                  ->orWhere('name', 'like', '%Overhead%');
             })
             ->first();
 
         if (! $production_cost_account) {
             $production_cost_account = \Modules\Accounting\Entities\AccountingAccount::create([
-                'name' => 'Biaya Produksi / Overhead',
+                'name' => 'Hutang Biaya Produksi',
                 'business_id' => $business_id,
-                'account_primary_type' => 'expenses',
-                'account_sub_type_id' => 14,
-                'detail_type_id' => 138,
-                'gl_code' => '6105',
+                'account_primary_type' => 'liability',
+                'account_sub_type_id' => 8,
+                'detail_type_id' => 60,
+                'gl_code' => '2102',
                 'status' => 'active',
                 'created_by' => $user_id,
             ]);
@@ -412,6 +414,14 @@ class ManufacturingUtil extends Util
             $fg_acc = \Modules\Accounting\Entities\AccountingAccount::find($finished_goods_account_id);
             if ($fg_acc && $fg_acc->account_primary_type !== 'asset') {
                 $finished_goods_account_id = null;
+            }
+        }
+
+        // Verify that production cost / overhead account is a Liability account
+        if ($production_cost_account_id) {
+            $pc_acc = \Modules\Accounting\Entities\AccountingAccount::find($production_cost_account_id);
+            if ($pc_acc && $pc_acc->account_primary_type !== 'liability') {
+                $production_cost_account_id = null;
             }
         }
 
