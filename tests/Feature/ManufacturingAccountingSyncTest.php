@@ -222,6 +222,27 @@ class ManufacturingAccountingSyncTest extends TestCase
         $this->assertEquals('Biaya Produksi / Overhead', $pcAcc->name);
     }
 
+    public function test_auto_mapping_ignores_hpp_expense_account()
+    {
+        // Seed an expense account with "Bahan Baku - HPP"
+        AccountingAccount::create([
+            'name' => 'Bahan Baku - HPP',
+            'business_id' => 1,
+            'account_primary_type' => 'expenses',
+            'account_sub_type_id' => 13,
+            'status' => 'active',
+        ]);
+
+        $mfgUtil = new ManufacturingUtil();
+        $settings = $mfgUtil->autoMapManufacturingAccounts(1);
+
+        $rawAcc = AccountingAccount::find($settings['mfg_raw_material_account_id']);
+
+        // Must select/create an Asset account, NOT the expense account
+        $this->assertEquals('asset', $rawAcc->account_primary_type);
+        $this->assertNotEquals('Bahan Baku - HPP', $rawAcc->name);
+    }
+
     public function test_sync_accounting_journal_on_finalized_production()
     {
         $mfgUtil = new ManufacturingUtil();

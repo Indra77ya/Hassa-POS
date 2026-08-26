@@ -286,12 +286,15 @@ class ManufacturingUtil extends Util
 
         $user_id = auth()->user()->id ?? 1;
 
-        // 1. Raw Materials Account (Persediaan Bahan Baku)
+        // 1. Raw Materials Asset Account (Persediaan Bahan Baku / Persediaan Barang)
         $raw_material_account = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
             ->where('status', 'active')
+            ->where('account_primary_type', 'asset')
             ->where(function($q) {
-                $q->where('name', 'like', '%Bahan Baku%')
-                  ->orWhere('name', 'like', '%Raw Material%');
+                $q->where('name', 'like', '%Persediaan Bahan Baku%')
+                  ->orWhere('name', 'like', '%Bahan Baku%')
+                  ->orWhere('name', 'like', '%Raw Material%')
+                  ->orWhere('name', 'like', '%Persediaan Barang%');
             })
             ->first();
 
@@ -308,11 +311,13 @@ class ManufacturingUtil extends Util
             ]);
         }
 
-        // 2. Finished Goods Account (Persediaan Barang Jadi)
+        // 2. Finished Goods Asset Account (Persediaan Barang Jadi / Persediaan Barang)
         $finished_goods_account = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
             ->where('status', 'active')
+            ->where('account_primary_type', 'asset')
             ->where(function($q) {
-                $q->where('name', 'like', '%Barang Jadi%')
+                $q->where('name', 'like', '%Persediaan Barang Jadi%')
+                  ->orWhere('name', 'like', '%Barang Jadi%')
                   ->orWhere('name', 'like', '%Finished Goods%')
                   ->orWhere('name', 'like', '%Persediaan Barang%');
             })
@@ -393,6 +398,29 @@ class ManufacturingUtil extends Util
         $finished_goods_account_id = $settings['mfg_finished_goods_account_id'] ?? null;
         $raw_material_account_id = $settings['mfg_raw_material_account_id'] ?? null;
         $production_cost_account_id = $settings['mfg_production_cost_account_id'] ?? null;
+
+        // Verify that raw material account is an Asset account
+        if ($raw_material_account_id) {
+            $raw_acc = \Modules\Accounting\Entities\AccountingAccount::find($raw_material_account_id);
+            if ($raw_acc && $raw_acc->account_primary_type !== 'asset') {
+                $raw_material_account_id = null;
+            }
+        }
+
+        // Verify that finished goods account is an Asset account
+        if ($finished_goods_account_id) {
+            $fg_acc = \Modules\Accounting\Entities\AccountingAccount::find($finished_goods_account_id);
+            if ($fg_acc && $fg_acc->account_primary_type !== 'asset') {
+                $finished_goods_account_id = null;
+            }
+        }
+
+        if (! $finished_goods_account_id || ! $raw_material_account_id || ! $production_cost_account_id) {
+            $settings = $this->autoMapManufacturingAccounts($business_id);
+            $finished_goods_account_id = $settings['mfg_finished_goods_account_id'] ?? null;
+            $raw_material_account_id = $settings['mfg_raw_material_account_id'] ?? null;
+            $production_cost_account_id = $settings['mfg_production_cost_account_id'] ?? null;
+        }
 
         if (! $finished_goods_account_id || ! $raw_material_account_id || ! $production_cost_account_id) {
             return;
