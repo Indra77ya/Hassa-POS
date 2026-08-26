@@ -75,6 +75,9 @@
 						{!! Form::text('quantity', 1, ['class' => 'form-control input_number', 'id' => 'recipe_quantity', 'required', 'data-rule-notEmpty' => 'true', 'data-rule-notEqualToWastedQuantity' => 'true']); !!}
 						<span class="input-group-addon" id="unit_html"></span>
 					</div>
+					<div style="margin-top: 5px;">
+						<button type="button" class="btn btn-xs btn-primary" id="use_estimated_qty_btn">Gunakan Estimasi</button>
+					</div>
 				</div>
 			</div>
 			<div class="col-sm-3">

@@ -83,6 +83,14 @@
 		}
 	});
 
+	$(document).on('click', '#use_estimated_qty_btn', function() {
+		var estimated_qty = __read_number($('#mfg_estimated_quantity'));
+		if (estimated_qty && parseFloat(estimated_qty) > 0) {
+			__write_number($('#recipe_quantity'), estimated_qty);
+			$('#recipe_quantity').trigger('change');
+		}
+	});
+
 	$(document).on('change', '#production_cost, select.sub_unit, input.mfg_waste_percent, #mfg_production_cost_type', function(){
 		calculateRecipeTotal();
 	});
