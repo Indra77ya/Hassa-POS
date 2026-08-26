@@ -63,7 +63,7 @@
 					</div>
 					<div id="max_estimated_qty_container" style="margin-top: 5px; display: none;">
 						<span class="label label-info tw-text-xs">Maksimal Stok: <span id="max_estimated_qty_span">0</span></span>
-						<button type="button" class="btn btn-xs btn-default" id="use_max_qty_btn" style="margin-left: 5px;">Gunakan Max</button>
+						<button type="button" class="btn btn-xs btn-primary" id="use_max_qty_btn" style="margin-left: 5px;">Gunakan Max</button>
 					</div>
 				</div>
 			</div>
