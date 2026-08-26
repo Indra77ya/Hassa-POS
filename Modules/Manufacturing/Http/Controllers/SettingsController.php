@@ -46,7 +46,14 @@ class SettingsController extends Controller
 
         $version = System::getProperty('manufacturing_version');
 
-        return view('manufacturing::settings.index')->with(compact('manufacturing_settings', 'version'));
+        $accounting_accounts = [];
+        if (class_exists(\Modules\Accounting\Entities\AccountingAccount::class)) {
+            $accounting_accounts = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                ->where('status', 'active')
+                ->pluck('name', 'id');
+        }
+
+        return view('manufacturing::settings.index')->with(compact('manufacturing_settings', 'version', 'accounting_accounts'));
     }
 
     /**
@@ -63,7 +70,7 @@ class SettingsController extends Controller
         }
 
         try {
-            $settings = $request->only(['ref_no_prefix']);
+            $settings = $request->only(['ref_no_prefix', 'mfg_raw_material_account_id', 'mfg_finished_goods_account_id', 'mfg_production_cost_account_id']);
 
             $settings['disable_editing_ingredient_qty'] = ! empty($request->input('disable_editing_ingredient_qty')) ? true : false;
 
@@ -71,6 +78,35 @@ class SettingsController extends Controller
 
             $business = Business::where('id', $business_id)
                                 ->update(['manufacturing_settings' => json_encode($settings)]);
+
+            $output = ['success' => 1,
+                'msg' => __('lang_v1.updated_success'),
+            ];
+        } catch (\Exception $e) {
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+
+            $output = ['success' => 0,
+                'msg' => __('messages.something_went_wrong'),
+            ];
+        }
+
+        return redirect()->back()->with('status', $output);
+    }
+
+    /**
+     * Auto map default manufacturing accounts.
+     *
+     * @return Response
+     */
+    public function autoMapAccounts()
+    {
+        $business_id = request()->session()->get('user.business_id');
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'manufacturing_module'))) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+            $this->mfgUtil->autoMapManufacturingAccounts($business_id);
 
             $output = ['success' => 1,
                 'msg' => __('lang_v1.updated_success'),

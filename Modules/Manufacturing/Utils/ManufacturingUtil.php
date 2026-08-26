@@ -271,4 +271,261 @@ class ManufacturingUtil extends Util
 
         return $total_production_cost;
     }
+
+    /**
+     * Auto map default manufacturing accounts for a business.
+     *
+     * @param int $business_id
+     * @return array
+     */
+    public function autoMapManufacturingAccounts($business_id)
+    {
+        if (! class_exists(\Modules\Accounting\Entities\AccountingAccount::class)) {
+            return [];
+        }
+
+        $user_id = auth()->user()->id ?? 1;
+
+        // 1. Raw Materials Asset Account (Persediaan Bahan Baku / Persediaan Barang)
+        $raw_material_account = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+            ->where('status', 'active')
+            ->where('account_primary_type', 'asset')
+            ->where(function($q) {
+                $q->where('name', 'like', '%Persediaan Bahan Baku%')
+                  ->orWhere('name', 'like', '%Bahan Baku%')
+                  ->orWhere('name', 'like', '%Raw Material%')
+                  ->orWhere('name', 'like', '%Persediaan Barang%');
+            })
+            ->first();
+
+        if (! $raw_material_account) {
+            $raw_material_account = \Modules\Accounting\Entities\AccountingAccount::create([
+                'name' => 'Persediaan Bahan Baku',
+                'business_id' => $business_id,
+                'account_primary_type' => 'asset',
+                'account_sub_type_id' => 2,
+                'detail_type_id' => 21,
+                'gl_code' => '1302',
+                'status' => 'active',
+                'created_by' => $user_id,
+            ]);
+        }
+
+        // 2. Finished Goods Asset Account (Persediaan Barang Jadi / Persediaan Barang)
+        $finished_goods_account = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+            ->where('status', 'active')
+            ->where('account_primary_type', 'asset')
+            ->where(function($q) {
+                $q->where('name', 'like', '%Persediaan Barang Jadi%')
+                  ->orWhere('name', 'like', '%Barang Jadi%')
+                  ->orWhere('name', 'like', '%Finished Goods%')
+                  ->orWhere('name', 'like', '%Persediaan Barang%');
+            })
+            ->first();
+
+        if (! $finished_goods_account) {
+            $finished_goods_account = \Modules\Accounting\Entities\AccountingAccount::create([
+                'name' => 'Persediaan Barang Jadi',
+                'business_id' => $business_id,
+                'account_primary_type' => 'asset',
+                'account_sub_type_id' => 2,
+                'detail_type_id' => 21,
+                'gl_code' => '1301',
+                'status' => 'active',
+                'created_by' => $user_id,
+            ]);
+        }
+
+        // 3. Production Cost / Overhead Liability Account (Hutang Biaya Produksi / Hutang Overhead)
+        $production_cost_account = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+            ->where('status', 'active')
+            ->where('account_primary_type', 'liability')
+            ->where(function($q) {
+                $q->where('name', 'like', '%Hutang Biaya Produksi%')
+                  ->orWhere('name', 'like', '%Hutang Overhead%')
+                  ->orWhere('name', 'like', '%Biaya Produksi%')
+                  ->orWhere('name', 'like', '%Overhead%');
+            })
+            ->first();
+
+        if (! $production_cost_account) {
+            $production_cost_account = \Modules\Accounting\Entities\AccountingAccount::create([
+                'name' => 'Hutang Biaya Produksi',
+                'business_id' => $business_id,
+                'account_primary_type' => 'liability',
+                'account_sub_type_id' => 8,
+                'detail_type_id' => 60,
+                'gl_code' => '2102',
+                'status' => 'active',
+                'created_by' => $user_id,
+            ]);
+        }
+
+        $settings = $this->getSettings($business_id);
+        $settings['mfg_raw_material_account_id'] = $raw_material_account->id;
+        $settings['mfg_finished_goods_account_id'] = $finished_goods_account->id;
+        $settings['mfg_production_cost_account_id'] = $production_cost_account->id;
+
+        Business::where('id', $business_id)
+            ->update(['manufacturing_settings' => json_encode($settings)]);
+
+        return $settings;
+    }
+
+    /**
+     * Synchronize double-entry accounting journal entries for a production purchase transaction.
+     *
+     * @param \App\Transaction $transaction
+     * @return void
+     */
+    public function syncAccountingJournal($transaction)
+    {
+        if (! class_exists(\Modules\Accounting\Entities\AccountingAccountsTransaction::class)) {
+            return;
+        }
+
+        $business_id = $transaction->business_id;
+
+        // If not final or deleted, delete journal mappings and return
+        if ($transaction->mfg_is_final != 1) {
+            $this->deleteAccountingJournal($transaction->id);
+            return;
+        }
+
+        $settings = $this->getSettings($business_id);
+        if (empty($settings['mfg_raw_material_account_id']) || empty($settings['mfg_finished_goods_account_id']) || empty($settings['mfg_production_cost_account_id'])) {
+            $settings = $this->autoMapManufacturingAccounts($business_id);
+        }
+
+        $finished_goods_account_id = $settings['mfg_finished_goods_account_id'] ?? null;
+        $raw_material_account_id = $settings['mfg_raw_material_account_id'] ?? null;
+        $production_cost_account_id = $settings['mfg_production_cost_account_id'] ?? null;
+
+        // Verify that raw material account is an Asset account
+        if ($raw_material_account_id) {
+            $raw_acc = \Modules\Accounting\Entities\AccountingAccount::find($raw_material_account_id);
+            if ($raw_acc && $raw_acc->account_primary_type !== 'asset') {
+                $raw_material_account_id = null;
+            }
+        }
+
+        // Verify that finished goods account is an Asset account
+        if ($finished_goods_account_id) {
+            $fg_acc = \Modules\Accounting\Entities\AccountingAccount::find($finished_goods_account_id);
+            if ($fg_acc && $fg_acc->account_primary_type !== 'asset') {
+                $finished_goods_account_id = null;
+            }
+        }
+
+        // Verify that production cost / overhead account is a Liability account
+        if ($production_cost_account_id) {
+            $pc_acc = \Modules\Accounting\Entities\AccountingAccount::find($production_cost_account_id);
+            if ($pc_acc && $pc_acc->account_primary_type !== 'liability') {
+                $production_cost_account_id = null;
+            }
+        }
+
+        if (! $finished_goods_account_id || ! $raw_material_account_id || ! $production_cost_account_id) {
+            $settings = $this->autoMapManufacturingAccounts($business_id);
+            $finished_goods_account_id = $settings['mfg_finished_goods_account_id'] ?? null;
+            $raw_material_account_id = $settings['mfg_raw_material_account_id'] ?? null;
+            $production_cost_account_id = $settings['mfg_production_cost_account_id'] ?? null;
+        }
+
+        if (! $finished_goods_account_id || ! $raw_material_account_id || ! $production_cost_account_id) {
+            return;
+        }
+
+        $user_id = $transaction->created_by ?? (auth()->user()->id ?? 1);
+        $final_total = (float) $transaction->final_total;
+
+        // Get extra production cost
+        $extra_cost = 0;
+        if (! empty($transaction->mfg_production_cost)) {
+            $extra_cost = (float) $transaction->mfg_production_cost;
+            if ($transaction->mfg_production_cost_type == 'percentage') {
+                $raw_ingredient_total = $final_total - (($final_total * 100) / ($extra_cost + 100));
+                $extra_cost = $raw_ingredient_total;
+            } elseif ($transaction->mfg_production_cost_type == 'per_unit') {
+                $purchase_line = \App\PurchaseLine::where('transaction_id', $transaction->id)->first();
+                $quantity = $purchase_line ? (float) $purchase_line->quantity : 1;
+                $extra_cost = $extra_cost * $quantity;
+            }
+        }
+
+        $raw_ingredient_cost = $final_total - $extra_cost;
+        if ($raw_ingredient_cost < 0) {
+            $raw_ingredient_cost = 0;
+        }
+
+        // 1. Delete existing journal mappings for this production purchase transaction
+        $this->deleteAccountingJournal($transaction->id);
+
+        // 2. Debit: Finished Goods Inventory Account (Persediaan Barang Jadi)
+        $finished_goods_data = [
+            'accounting_account_id' => $finished_goods_account_id,
+            'transaction_id' => $transaction->id,
+            'transaction_payment_id' => null,
+            'amount' => $final_total,
+            'type' => 'debit',
+            'sub_type' => 'production',
+            'note' => 'Produksi Barang Jadi - ' . $transaction->ref_no,
+            'map_type' => 'mfg_finished_goods',
+            'created_by' => $user_id,
+            'operation_date' => $transaction->transaction_date ?? \Carbon::now(),
+        ];
+        \Modules\Accounting\Entities\AccountingAccountsTransaction::updateOrCreateMapTransaction($finished_goods_data);
+
+        // 3. Credit: Raw Materials Inventory Account (Persediaan Bahan Baku)
+        if ($raw_ingredient_cost > 0) {
+            $raw_material_data = [
+                'accounting_account_id' => $raw_material_account_id,
+                'transaction_id' => $transaction->id,
+                'transaction_payment_id' => null,
+                'amount' => $raw_ingredient_cost,
+                'type' => 'credit',
+                'sub_type' => 'production',
+                'note' => 'Penggunaan Bahan Baku Produksi - ' . $transaction->ref_no,
+                'map_type' => 'mfg_raw_materials',
+                'created_by' => $user_id,
+                'operation_date' => $transaction->transaction_date ?? \Carbon::now(),
+            ];
+            \Modules\Accounting\Entities\AccountingAccountsTransaction::updateOrCreateMapTransaction($raw_material_data);
+        }
+
+        // 4. Credit: Production/Overhead Cost Account (Biaya Produksi / Overhead)
+        if ($extra_cost > 0) {
+            $production_cost_data = [
+                'accounting_account_id' => $production_cost_account_id,
+                'transaction_id' => $transaction->id,
+                'transaction_payment_id' => null,
+                'amount' => $extra_cost,
+                'type' => 'credit',
+                'sub_type' => 'production',
+                'note' => 'Biaya Produksi / Overhead - ' . $transaction->ref_no,
+                'map_type' => 'mfg_production_cost',
+                'created_by' => $user_id,
+                'operation_date' => $transaction->transaction_date ?? \Carbon::now(),
+            ];
+            \Modules\Accounting\Entities\AccountingAccountsTransaction::updateOrCreateMapTransaction($production_cost_data);
+        }
+
+        // Validate journal balance (Total Debit == Total Credit)
+        \Modules\Accounting\Entities\AccountingAccountsTransaction::validateTransactionBalance($transaction->id);
+    }
+
+    /**
+     * Delete double-entry accounting journal entries for a production purchase transaction.
+     *
+     * @param int $transaction_id
+     * @return void
+     */
+    public function deleteAccountingJournal($transaction_id)
+    {
+        if (class_exists(\Modules\Accounting\Entities\AccountingAccountsTransaction::class)) {
+            \Modules\Accounting\Entities\AccountingAccountsTransaction::where('transaction_id', $transaction_id)
+                ->whereIn('map_type', ['mfg_finished_goods', 'mfg_raw_materials', 'mfg_production_cost'])
+                ->delete();
+        }
+    }
 }

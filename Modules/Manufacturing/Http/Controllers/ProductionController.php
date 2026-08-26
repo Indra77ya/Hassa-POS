@@ -354,6 +354,9 @@ class ProductionController extends Controller
                 $this->transactionUtil->mapPurchaseSell($business, $production_sell->sell_lines, 'production_purchase');
             }
 
+            // Sync accounting journal
+            $this->mfgUtil->syncAccountingJournal($transaction);
+
             DB::commit();
 
             $output = ['success' => 1,
@@ -815,6 +818,9 @@ class ProductionController extends Controller
                 $this->transactionUtil->mapPurchaseSell($business, $production_sell->sell_lines, 'production_purchase');
             }
 
+            // Sync accounting journal
+            $this->mfgUtil->syncAccountingJournal($transaction);
+
             DB::commit();
 
             $output = ['success' => 1,
@@ -847,6 +853,8 @@ class ProductionController extends Controller
 
         if (request()->ajax()) {
             try {
+                $this->mfgUtil->deleteAccountingJournal($id);
+
                 $transaction = Transaction::where('id', $id)
                             ->where('business_id', $business_id)
                             ->where('type', 'production_purchase')

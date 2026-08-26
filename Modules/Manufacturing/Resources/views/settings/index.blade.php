@@ -51,7 +51,30 @@
                                 </div>
                             </div>
                         </div>
-                        
+                        <hr>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <h4 class="tw-font-bold tw-mb-4">Pemetaan Akun Akuntansi</h4>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {!! Form::label('mfg_raw_material_account_id', 'Akun Persediaan Bahan Baku:' ) !!}
+                                    {!! Form::select('mfg_raw_material_account_id', $accounting_accounts, !empty($manufacturing_settings['mfg_raw_material_account_id']) ? $manufacturing_settings['mfg_raw_material_account_id'] : null, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select')]); !!}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {!! Form::label('mfg_finished_goods_account_id', 'Akun Persediaan Barang Jadi:' ) !!}
+                                    {!! Form::select('mfg_finished_goods_account_id', $accounting_accounts, !empty($manufacturing_settings['mfg_finished_goods_account_id']) ? $manufacturing_settings['mfg_finished_goods_account_id'] : null, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select')]); !!}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {!! Form::label('mfg_production_cost_account_id', 'Akun Biaya Produksi / Overhead:' ) !!}
+                                    {!! Form::select('mfg_production_cost_account_id', $accounting_accounts, !empty($manufacturing_settings['mfg_production_cost_account_id']) ? $manufacturing_settings['mfg_production_cost_account_id'] : null, ['class' => 'form-control select2', 'placeholder' => __('messages.please_select')]); !!}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 @endcomponent
@@ -62,7 +85,8 @@
     </div>
     <div class="row">
         <div class="col-md-12">
-            <button type="submit" class="tw-dw-btn tw-dw-btn-primary tw-text-white pull-right">@lang('messages.update')</button>
+            <a href="{{ action([\Modules\Manufacturing\Http\Controllers\SettingsController::class, 'autoMapAccounts']) }}" class="btn btn-success pull-left"><i class="fa fa-magic"></i> Auto Mapping Akun</a>
+            <button type="submit" class="btn btn-primary pull-right">@lang('messages.update')</button>
         </div>
     </div>
 
