@@ -77,7 +77,7 @@
 					</div>
 					@if(!empty($production_purchase->mfg_estimated_quantity))
 						<div style="margin-top: 5px;">
-							<span class="label label-info tw-text-xs">Estimasi Awal: {{@format_quantity($production_purchase->mfg_estimated_quantity)}}</span>
+							<span class="label label-primary tw-text-xs">Estimasi Awal: {{@format_quantity($production_purchase->mfg_estimated_quantity)}}</span>
 						</div>
 					@endif
 				</div>
