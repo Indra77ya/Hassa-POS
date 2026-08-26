@@ -41,8 +41,11 @@
 	                	$('#recipe_quantity_input').removeClass('input_inline');
 	                	$('#unit_html').addClass('input-group-addon');
 	                }
+	                $('#mfg_estimated_quantity_input').addClass('input-group');
+	                $('.estimated_unit_html').addClass('input-group-addon');
 	                __write_number($('#recipe_quantity'), result.recipe.total_quantity);
 	                $('#unit_html').html(result.unit_html);
+	                $('.estimated_unit_html').html(result.unit_name);
 	                $('#wasted_units_text').text(result.unit_name);
 
                     var mfg_wasted_units = __calculate_amount('percentage', $('#waste_percent').val(), result.recipe.total_quantity);
@@ -50,13 +53,41 @@
                     __write_number($('#production_cost'), result.recipe.extra_cost);
                     $('#mfg_production_cost_type').val(result.recipe.production_cost_type);
 
+	                if (result.max_estimated_qty !== null && result.max_estimated_qty !== undefined) {
+				$('#max_estimated_qty_span').text(result.max_estimated_qty);
+				$('#max_estimated_qty_container').show();
+				__write_number($('#mfg_estimated_quantity'), result.max_estimated_qty);
+	                } else {
+				$('#max_estimated_qty_container').hide();
+				$('#mfg_estimated_quantity').val('');
+	                }
+
 	                __currency_convert_recursively($('#enter_ingredients_table'));
                     calculateRecipeTotal();
 	            },
 	        });
 		} else {
 			$('#enter_ingredients_table').html('');
+	        $('#max_estimated_qty_container').hide();
+	        $('#mfg_estimated_quantity').val('');
 	        calculateRecipeTotal();
+		}
+	});
+
+	$(document).on('click', '#use_max_qty_btn', function() {
+		var max_qty = $('#max_estimated_qty_span').text();
+		if (max_qty && parseFloat(max_qty) > 0) {
+			__write_number($('#mfg_estimated_quantity'), max_qty);
+			__write_number($('#recipe_quantity'), max_qty);
+			$('#recipe_quantity').trigger('change');
+		}
+	});
+
+	$(document).on('click', '#use_estimated_qty_btn', function() {
+		var estimated_qty = __read_number($('#mfg_estimated_quantity'));
+		if (estimated_qty && parseFloat(estimated_qty) > 0) {
+			__write_number($('#recipe_quantity'), estimated_qty);
+			$('#recipe_quantity').trigger('change');
 		}
 	});
 

@@ -56,10 +56,27 @@
 			
 			<div class="col-sm-3">
 				<div class="form-group">
+					{!! Form::label('mfg_estimated_quantity', 'Estimasi Jumlah:') !!}
+					<div class="input-group" id="mfg_estimated_quantity_input">
+						{!! Form::text('mfg_estimated_quantity', null, ['class' => 'form-control input_number', 'id' => 'mfg_estimated_quantity', 'placeholder' => 'Estimasi Jumlah']); !!}
+						<span class="input-group-addon estimated_unit_html"></span>
+					</div>
+					<div id="max_estimated_qty_container" style="margin-top: 5px; display: none;">
+						<span class="label label-primary tw-text-xs">Maksimal Stok: <span id="max_estimated_qty_span">0</span></span>
+						<button type="button" class="btn btn-xs btn-primary" id="use_max_qty_btn" style="margin-left: 5px;">Gunakan Max</button>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-sm-3">
+				<div class="form-group">
 					{!! Form::label('recipe_quantity', __('lang_v1.quantity').':*') !!}
 					<div class="input-group" id="recipe_quantity_input">
 						{!! Form::text('quantity', 1, ['class' => 'form-control input_number', 'id' => 'recipe_quantity', 'required', 'data-rule-notEmpty' => 'true', 'data-rule-notEqualToWastedQuantity' => 'true']); !!}
 						<span class="input-group-addon" id="unit_html"></span>
+					</div>
+					<div style="margin-top: 5px;">
+						<button type="button" class="btn btn-xs btn-primary" id="use_estimated_qty_btn">Gunakan Estimasi</button>
 					</div>
 				</div>
 			</div>
