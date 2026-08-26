@@ -230,6 +230,7 @@ class ProductionController extends Controller
             $unit_purchase_line_total_f = $this->productUtil->num_f($unit_purchase_line_total);
 
             $transaction_data['mfg_wasted_units'] = $waste_units;
+            $transaction_data['mfg_estimated_quantity'] = ! empty($request->input('mfg_estimated_quantity')) ? $this->productUtil->num_uf($request->input('mfg_estimated_quantity')) : null;
             $transaction_data['mfg_production_cost'] = $this->productUtil->num_uf($request->input('production_cost'));
             $transaction_data['mfg_production_cost_type'] = $request->input('mfg_production_cost_type');
             $transaction_data['mfg_is_final'] = $is_final;

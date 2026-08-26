@@ -445,6 +445,29 @@ class RecipeController extends Controller
 
         $manufacturing_settings = $this->mfgUtil->getSettings($business_id);
 
+        // Calculate max producible quantity based on ingredient stock at selected location
+        $max_estimated_qty = null;
+        if (! empty($location_id) && ! empty($ingredients)) {
+            $possible_qtys = [];
+            foreach ($ingredients as $ingredient) {
+                if ($ingredient['enable_stock'] && $ingredient['unit_quantity'] > 0) {
+                    $available_stock = 0;
+                    if (! empty($ingredient['variation']->variation_location_details)) {
+                        $loc_detail = $ingredient['variation']->variation_location_details->where('location_id', $location_id)->first();
+                        if (! empty($loc_detail)) {
+                            $available_stock = (float) $loc_detail->qty_available;
+                        }
+                    }
+                    // unit_quantity is required per 1 unit of final recipe output
+                    $possible_qty = floor($available_stock / $ingredient['unit_quantity']);
+                    $possible_qtys[] = max(0, $possible_qty);
+                }
+            }
+            if (! empty($possible_qtys)) {
+                $max_estimated_qty = min($possible_qtys);
+            }
+        }
+
         $ingredient_table = view('manufacturing::recipe.ingredients_for_production', compact('ingredients', 'recipe', 'pos_settings', 'manufacturing_settings'))->render();
 
         $sub_units = $this->moduleUtil->getSubUnits($business_id, $recipe->variation->product->unit->id);
@@ -472,6 +495,7 @@ class RecipeController extends Controller
             'unit_html' => $unit_html,
             'is_sub_unit' => $is_sub_unit,
             'unit_name' => $unit_name,
+            'max_estimated_qty' => $max_estimated_qty,
         ]);
     }
 

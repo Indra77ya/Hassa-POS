@@ -76,6 +76,10 @@
                 <div class="col-md-6">
                     <strong>@lang('lang_v1.quantity'):</strong>
                     {{@format_quantity($quantity)}} {{$unit_name}}<br>
+                    @if(!empty($production_purchase->mfg_estimated_quantity))
+                        <strong>Estimasi Jumlah:</strong>
+                        {{@format_quantity($production_purchase->mfg_estimated_quantity)}} {{$unit_name}}<br>
+                    @endif
                     <strong>@lang('manufacturing::lang.waste_units'):</strong>
                     {{@format_quantity($quantity_wasted)}} {{$unit_name}}
                 </div>
