@@ -444,6 +444,7 @@ class ProductionController extends Controller
         $ingredients = [];
         $ingredient_groups = [];
         $total_ingredients_price = 0;
+        if (! empty($production_sell) && ! empty($production_sell->sell_lines)) {
         //Format sell lines
         foreach ($production_sell->sell_lines as $sell_line) {
             $variation = $sell_line->variations;
@@ -506,6 +507,7 @@ class ProductionController extends Controller
                     'lot_numbers' => implode(', ', $lot_numbers),
                 ];
             }
+        }
         }
 
         $total_production_cost = 0;
