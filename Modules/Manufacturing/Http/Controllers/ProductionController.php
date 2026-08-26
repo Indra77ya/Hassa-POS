@@ -536,16 +536,22 @@ class ProductionController extends Controller
         }
 
         // Fetch accounting double-entry journal mappings if available
-        $refNo = 'MFG-JOURNAL-' . $production_purchase->ref_no;
-        $accounting_mapping = \Modules\Accounting\Entities\AccountingAccTransMapping::where('business_id', $business_id)
-            ->where('ref_no', $refNo)
-            ->with(['transactions', 'transactions.account'])
-            ->first();
+        $accounting_mapping = null;
+        if (class_exists('\Modules\Accounting\Entities\AccountingAccTransMapping')) {
+            $refNo = 'MFG-JOURNAL-' . $production_purchase->ref_no;
+            $accounting_mapping = \Modules\Accounting\Entities\AccountingAccTransMapping::where('business_id', $business_id)
+                ->where('ref_no', $refNo)
+                ->with(['transactions', 'transactions.account'])
+                ->first();
+        }
 
         // Fetch payment account transaction if available
-        $payment_transaction = \App\TransactionPayment::where('transaction_id', $production_purchase->id)
-            ->with('payment_account')
-            ->first();
+        $payment_transaction = null;
+        if (class_exists('\App\TransactionPayment')) {
+            $payment_transaction = \App\TransactionPayment::where('transaction_id', $production_purchase->id)
+                ->with('payment_account')
+                ->first();
+        }
 
         return view('manufacturing::production.show')->with(compact(
             'production_purchase',
