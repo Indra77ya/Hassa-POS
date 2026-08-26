@@ -38,6 +38,11 @@ class MapPaymentTransaction
             return;
         }
 
+        // Bypass mapping for production transactions as ManufacturingUtil manages accounting journal directly
+        if (in_array($transaction->type, ['production_purchase', 'production_sell'])) {
+            return;
+        }
+
         // Bypass mapping inside MapPaymentTransaction if the transaction was created/updated recently (e.g., within 30 seconds),
         // as the core mapping has already been or is being processed by MapSellTransaction, MapPurchaseTransaction, or MapExpenseTransactions.
         // It is only allowed to trigger for past transactions (Pay Due).

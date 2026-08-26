@@ -9,6 +9,11 @@ use App\Utils\Util;
 use App\Variation;
 use DB;
 use Modules\Manufacturing\Entities\MfgRecipeIngredient;
+use Modules\Accounting\Entities\AccountingAccount;
+use Modules\Accounting\Entities\AccountingAccountsTransaction;
+use Modules\Accounting\Entities\AccountingAccTransMapping;
+use App\TransactionPayment;
+use App\AccountTransaction;
 
 class ManufacturingUtil extends Util
 {
@@ -270,5 +275,198 @@ class ManufacturingUtil extends Util
         }
 
         return $total_production_cost;
+    }
+
+    /**
+     * Syncs accounting journal & payment line for production transaction.
+     *
+     * @param Transaction $production_purchase
+     * @param Transaction $production_sell
+     * @return void
+     */
+    public function syncAccountingJournal($production_purchase, $production_sell)
+    {
+        if ($production_purchase->mfg_is_final != 1) {
+            $this->deleteAccountingJournal($production_purchase);
+            return;
+        }
+
+        $business_id = $production_purchase->business_id;
+        $settings = $this->getSettings($business_id);
+
+        $raw_account_id = !empty($settings['mfg_raw_material_account_id']) ? $settings['mfg_raw_material_account_id'] : null;
+        $finished_account_id = !empty($settings['mfg_finished_goods_account_id']) ? $settings['mfg_finished_goods_account_id'] : null;
+        $cost_account_id = !empty($settings['mfg_production_cost_account_id']) ? $settings['mfg_production_cost_account_id'] : null;
+        $payment_account_id = !empty($settings['mfg_payment_account_id']) ? $settings['mfg_payment_account_id'] : null;
+
+        // Auto-find default accounts if not set in settings
+        if (class_exists('Modules\Accounting\Entities\AccountingAccount')) {
+            if (empty($raw_account_id)) {
+                $raw_account_id = AccountingAccount::where('business_id', $business_id)->where('name', 'like', '%Persediaan Bahan Baku%')->value('id');
+            }
+            if (empty($finished_account_id)) {
+                $finished_account_id = AccountingAccount::where('business_id', $business_id)->where('name', 'like', '%Persediaan Barang Jadi%')->value('id');
+            }
+            if (empty($cost_account_id)) {
+                $cost_account_id = AccountingAccount::where('business_id', $business_id)->where('name', 'like', '%Biaya Produksi%')->value('id');
+            }
+        }
+
+        $final_total = (float) $production_purchase->final_total;
+        $production_cost = 0;
+        if (!empty($production_purchase->mfg_production_cost)) {
+            $production_cost = (float) $production_purchase->mfg_production_cost;
+            if ($production_purchase->mfg_production_cost_type == 'percentage') {
+                $ingredients_cost = $final_total - $production_cost; // fallback calculation
+                $production_cost = ($ingredients_cost * $production_cost) / 100;
+            } elseif ($production_purchase->mfg_production_cost_type == 'per_unit') {
+                $purchase_line = $production_purchase->purchase_lines->first();
+                $qty = !empty($purchase_line) ? $purchase_line->quantity : 1;
+                $production_cost = $production_cost * $qty;
+            }
+        }
+
+        $raw_materials_cost = max(0, $final_total - $production_cost);
+
+        // 1. Manage POS Payment Line & Payment Account Transaction for Extra Production Cost
+        if (!empty($payment_account_id) && $production_cost > 0) {
+            $payment = TransactionPayment::where('transaction_id', $production_purchase->id)->first();
+            if (!$payment) {
+                $payment = new TransactionPayment();
+                $payment->transaction_id = $production_purchase->id;
+                $payment->business_id = $business_id;
+                $payment->payment_ref_no = 'MFG-PAY-' . $production_purchase->id;
+            }
+            $payment->amount = $production_cost;
+            $payment->method = 'cash';
+            $payment->account_id = $payment_account_id;
+            $payment->paid_on = $production_purchase->transaction_date;
+            $payment->created_by = $production_purchase->created_by;
+            $payment->save();
+
+            // Link AccountTransaction
+            AccountTransaction::updateOrCreateRecord($payment, 'debit', $payment_account_id);
+            $production_purchase->payment_status = 'paid';
+            $production_purchase->save();
+        } else {
+            // If no payment account or zero extra cost, delete old payment line if exists
+            $payment = TransactionPayment::where('transaction_id', $production_purchase->id)->first();
+            if ($payment) {
+                AccountTransaction::where('transaction_payment_id', $payment->id)->delete();
+                $payment->delete();
+            }
+            $production_purchase->payment_status = 'due';
+            $production_purchase->save();
+        }
+
+        // 2. Manage Double-Entry Accounting Journal
+        if (class_exists('Modules\Accounting\Entities\AccountingAccTransMapping') && !empty($raw_account_id) && !empty($finished_account_id)) {
+            $mapping = AccountingAccTransMapping::where('business_id', $business_id)
+                ->where('ref_no', 'MFG-' . $production_purchase->id)
+                ->first();
+
+            if (!$mapping) {
+                $mapping = new AccountingAccTransMapping();
+                $mapping->business_id = $business_id;
+                $mapping->ref_no = 'MFG-' . $production_purchase->id;
+                $mapping->type = 'journal_entry';
+                $mapping->created_by = $production_purchase->created_by;
+            }
+
+            $mapping->location_id = $production_purchase->location_id;
+            $mapping->note = "Jurnal Produksi Manufaktur Ref: {$production_purchase->ref_no}";
+            $mapping->operation_date = $production_purchase->transaction_date;
+            $mapping->save();
+
+            // Delete existing transactions for re-sync
+            AccountingAccountsTransaction::where('acc_trans_mapping_id', $mapping->id)->delete();
+
+            // Leg 1: Debit Finished Goods Inventory (Total Hasil Produksi)
+            $debitFinished = new AccountingAccountsTransaction();
+            $debitFinished->accounting_account_id = $finished_account_id;
+            $debitFinished->amount = $final_total;
+            $debitFinished->type = 'debit';
+            $debitFinished->created_by = $production_purchase->created_by;
+            $debitFinished->operation_date = $production_purchase->transaction_date;
+            $debitFinished->sub_type = 'journal_entry';
+            $debitFinished->acc_trans_mapping_id = $mapping->id;
+            $debitFinished->transaction_id = $production_purchase->id;
+            $debitFinished->save();
+
+            // Leg 2: Credit Raw Materials Inventory (Nilai Bahan Baku)
+            if ($raw_materials_cost > 0) {
+                $creditRaw = new AccountingAccountsTransaction();
+                $creditRaw->accounting_account_id = $raw_account_id;
+                $creditRaw->amount = $raw_materials_cost;
+                $creditRaw->type = 'credit';
+                $creditRaw->created_by = $production_purchase->created_by;
+                $creditRaw->operation_date = $production_purchase->transaction_date;
+                $creditRaw->sub_type = 'journal_entry';
+                $creditRaw->acc_trans_mapping_id = $mapping->id;
+                $creditRaw->transaction_id = $production_purchase->id;
+                $creditRaw->save();
+            }
+
+            // Leg 3: Credit Kas/Bank Payment Account or Production Cost Account (Extra Production Cost)
+            if ($production_cost > 0) {
+                $credit_cost_acc_id = null;
+                if (!empty($payment_account_id)) {
+                    $credit_cost_acc_id = AccountingAccount::where('business_id', $business_id)
+                        ->where('status', 'active')
+                        ->where(function($q) use ($payment_account_id) {
+                            $q->where('name', 'like', '%Kas%')
+                              ->orWhere('name', 'like', '%Bank%')
+                              ->orWhere('account_sub_type_id', 3);
+                        })
+                        ->value('id');
+                }
+                if (empty($credit_cost_acc_id)) {
+                    $credit_cost_acc_id = $cost_account_id;
+                }
+
+                if (!empty($credit_cost_acc_id)) {
+                    $creditCost = new AccountingAccountsTransaction();
+                    $creditCost->accounting_account_id = $credit_cost_acc_id;
+                    $creditCost->amount = $production_cost;
+                    $creditCost->type = 'credit';
+                    $creditCost->created_by = $production_purchase->created_by;
+                    $creditCost->operation_date = $production_purchase->transaction_date;
+                    $creditCost->sub_type = 'journal_entry';
+                    $creditCost->acc_trans_mapping_id = $mapping->id;
+                    $creditCost->transaction_id = $production_purchase->id;
+                    $creditCost->save();
+                }
+            }
+        }
+    }
+
+    /**
+     * Deletes accounting journal & payment line for production transaction.
+     *
+     * @param Transaction $production_purchase
+     * @return void
+     */
+    public function deleteAccountingJournal($production_purchase)
+    {
+        $business_id = $production_purchase->business_id;
+
+        // Delete payment lines & account transactions
+        $payments = TransactionPayment::where('transaction_id', $production_purchase->id)->get();
+        foreach ($payments as $payment) {
+            AccountTransaction::where('transaction_payment_id', $payment->id)->delete();
+            $payment->delete();
+        }
+
+        // Delete double-entry journal mappings & transactions
+        if (class_exists('Modules\Accounting\Entities\AccountingAccTransMapping')) {
+            $mapping = AccountingAccTransMapping::where('business_id', $business_id)
+                ->where('ref_no', 'MFG-' . $production_purchase->id)
+                ->first();
+
+            if ($mapping) {
+                AccountingAccountsTransaction::where('acc_trans_mapping_id', $mapping->id)->delete();
+                $mapping->delete();
+            }
+        }
     }
 }

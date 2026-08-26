@@ -14,6 +14,7 @@ Route::middleware('web', 'authh', 'SetSessionData', 'auth', 'language', 'timezon
     Route::resource('/recipe', 'Modules\Manufacturing\Http\Controllers\RecipeController')->except('edit', 'update');
     Route::resource('/production', 'Modules\Manufacturing\Http\Controllers\ProductionController');
     Route::resource('/settings', 'Modules\Manufacturing\Http\Controllers\SettingsController')->only('index', 'store');
+    Route::post('/settings/auto-map', [Modules\Manufacturing\Http\Controllers\SettingsController::class, 'autoMapAccounts']);
 
     Route::get('/report', [Modules\Manufacturing\Http\Controllers\ProductionController::class, 'getManufacturingReport']);
 

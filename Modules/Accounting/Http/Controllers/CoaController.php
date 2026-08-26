@@ -1095,6 +1095,39 @@ class CoaController extends Controller
                 'created_at' => \Carbon::now(),
                 'updated_at' => \Carbon::now(),
             ],
+            88 => [
+                'name' => 'Raw Materials Inventory',
+                'business_id' => $business_id,
+                'account_primary_type' => 'asset',
+                'account_sub_type_id' => 2,
+                'detail_type_id' => 21,
+                'status' => 'active',
+                'created_by' => $user_id,
+                'created_at' => \Carbon::now(),
+                'updated_at' => \Carbon::now(),
+            ],
+            89 => [
+                'name' => 'Finished Goods Inventory',
+                'business_id' => $business_id,
+                'account_primary_type' => 'asset',
+                'account_sub_type_id' => 2,
+                'detail_type_id' => 21,
+                'status' => 'active',
+                'created_by' => $user_id,
+                'created_at' => \Carbon::now(),
+                'updated_at' => \Carbon::now(),
+            ],
+            90 => [
+                'name' => 'Manufacturing Overhead Expenses',
+                'business_id' => $business_id,
+                'account_primary_type' => 'expenses',
+                'account_sub_type_id' => 14,
+                'detail_type_id' => 138,
+                'status' => 'active',
+                'created_by' => $user_id,
+                'created_at' => \Carbon::now(),
+                'updated_at' => \Carbon::now(),
+            ],
         ];
 
         // 1. Seed POS Account Types and Accounts
@@ -1158,6 +1191,9 @@ class CoaController extends Controller
                     ['name' => 'Peralatan', 'type' => 'aktiva_tetap', 'number' => '1401', 'balance' => 'debit'],
                     ['name' => 'Kendaraan', 'type' => 'aktiva_tetap', 'number' => '1402', 'balance' => 'debit'],
                     ['name' => 'Hutang Jangka Panjang', 'type' => 'hutang_jangka_panjang', 'number' => '2201', 'balance' => 'credit'],
+                    ['name' => 'Persediaan Bahan Baku', 'type' => 'persediaan', 'number' => '1302', 'balance' => 'debit'],
+                    ['name' => 'Persediaan Barang Jadi', 'type' => 'persediaan', 'number' => '1303', 'balance' => 'debit'],
+                    ['name' => 'Biaya Produksi / Overhead', 'type' => 'beban_operasional', 'number' => '6105', 'balance' => 'debit'],
                 ];
 
                 foreach ($default_pos_accounts as $da) {
@@ -1268,6 +1304,9 @@ class CoaController extends Controller
                 'Accrued holiday payable' => 'Hutang Cuti Akrual',
                 'Accounts Receivable (A/R)' => 'Piutang Usaha',
                 'Inventory Loss/Damage' => 'Beban Kerusakan/Kehilangan',
+                'Raw Materials Inventory' => 'Persediaan Bahan Baku',
+                'Finished Goods Inventory' => 'Persediaan Barang Jadi',
+                'Manufacturing Overhead Expenses' => 'Biaya Produksi / Overhead',
             ];
 
             $counters = [
