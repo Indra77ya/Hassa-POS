@@ -409,168 +409,174 @@ class ProductionController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $production_purchase = Transaction::where('business_id', $business_id)
-                                    ->where('type', 'production_purchase')
-                                    ->with(['purchase_lines', 'purchase_lines.variations', 'purchase_lines.variations.product_variation', 'purchase_lines.variations.product',
-                                        'purchase_lines.sub_unit', 'purchase_lines.variations.product.unit', 'media', ])
-                                    ->find($id);
+        try {
+            $production_purchase = Transaction::where('business_id', $business_id)
+                                        ->where('type', 'production_purchase')
+                                        ->with(['purchase_lines', 'purchase_lines.variations', 'purchase_lines.variations.product_variation', 'purchase_lines.variations.product',
+                                            'purchase_lines.sub_unit', 'purchase_lines.variations.product.unit', 'media', ])
+                                        ->find($id);
 
-        if (empty($production_purchase)) {
-            abort(404);
-        }
-
-        $production_sell = Transaction::where('business_id', $business_id)
-                                    ->where('type', 'production_sell')
-                                    ->where('mfg_parent_production_purchase_id', $production_purchase->id)
-                                    ->with([
-                                        'sell_lines',
-                                        'sell_lines.variations',
-                                        'sell_lines.variations.product_variation',
-                                        'sell_lines.variations.product',
-                                        'sell_lines.sub_unit',
-                                        'sell_lines.sell_line_purchase_lines',
-                                        'sell_lines.sell_line_purchase_lines.purchase_line',
-                                    ])
-                                    ->first();
-
-        $purchase_line = (! empty($production_purchase->purchase_lines) && count($production_purchase->purchase_lines) > 0) ? $production_purchase->purchase_lines[0] : null;
-        $base_unit_multiplier = (! empty($purchase_line) && ! empty($purchase_line->sub_unit)) ? $purchase_line->sub_unit->base_unit_multiplier : 1;
-        if (empty($base_unit_multiplier)) {
-            $base_unit_multiplier = 1;
-        }
-        $quantity = ! empty($purchase_line) ? (float) ($purchase_line->quantity / $base_unit_multiplier) : 0.0;
-        $quantity_wasted = 0.0;
-        $unit_name = (! empty($purchase_line) && ! empty($purchase_line->sub_unit)) ? $purchase_line->sub_unit->short_name : ((! empty($purchase_line) && ! empty($purchase_line->variations) && ! empty($purchase_line->variations->product) && ! empty($purchase_line->variations->product->unit)) ? $purchase_line->variations->product->unit->short_name : '');
-        if (! empty($production_purchase->mfg_wasted_units)) {
-            $quantity_wasted = (float) $production_purchase->mfg_wasted_units;
-            $quantity += $quantity_wasted;
-        }
-
-        $actual_quantity = $quantity * $base_unit_multiplier;
-
-        $ingredients = [];
-        $ingredient_groups = [];
-        $total_ingredients_price = 0;
-        if (! empty($production_sell) && ! empty($production_sell->sell_lines)) {
-        //Format sell lines
-        foreach ($production_sell->sell_lines as $sell_line) {
-            $variation = $sell_line->variations;
-            if (empty($variation)) {
-                continue;
+            if (empty($production_purchase)) {
+                abort(404);
             }
-            $sell_line_multiplier = (! empty($sell_line->sub_unit) && ! empty($sell_line->sub_unit->base_unit_multiplier)) ? $sell_line->sub_unit->base_unit_multiplier : 1;
-            $sell_line_qty = empty($sell_line->sub_unit) ? $sell_line->quantity : ($sell_line->quantity / $sell_line_multiplier);
-            $unit = empty($sell_line->sub_unit) ? (! empty($variation->product) && ! empty($variation->product->unit) ? $variation->product->unit->short_name : '') : $sell_line->sub_unit->short_name;
 
-            $line_total_price = ($variation->dpp_inc_tax ?? 0) * $sell_line->quantity;
-            $total_ingredients_price += $line_total_price;
+            $production_sell = Transaction::where('business_id', $business_id)
+                                        ->where('type', 'production_sell')
+                                        ->where('mfg_parent_production_purchase_id', $production_purchase->id)
+                                        ->with([
+                                            'sell_lines',
+                                            'sell_lines.variations',
+                                            'sell_lines.variations.product_variation',
+                                            'sell_lines.variations.product',
+                                            'sell_lines.sub_unit',
+                                            'sell_lines.sell_line_purchase_lines',
+                                            'sell_lines.sell_line_purchase_lines.purchase_line',
+                                        ])
+                                        ->first();
 
-            $waste_percent = ! empty($sell_line->mfg_waste_percent) ? $sell_line->mfg_waste_percent : 0;
-            $wasted_qty = $this->moduleUtil->calc_percentage($sell_line_qty, $waste_percent);
-            $final_quantity = $sell_line_qty - $wasted_qty;
+            $purchase_line = (! empty($production_purchase->purchase_lines) && count($production_purchase->purchase_lines) > 0) ? $production_purchase->purchase_lines[0] : null;
+            $base_unit_multiplier = (! empty($purchase_line) && ! empty($purchase_line->sub_unit)) ? $purchase_line->sub_unit->base_unit_multiplier : 1;
+            if (empty($base_unit_multiplier)) {
+                $base_unit_multiplier = 1;
+            }
+            $quantity = ! empty($purchase_line) ? (float) ($purchase_line->quantity / $base_unit_multiplier) : 0.0;
+            $quantity_wasted = 0.0;
+            $unit_name = (! empty($purchase_line) && ! empty($purchase_line->sub_unit)) ? $purchase_line->sub_unit->short_name : ((! empty($purchase_line) && ! empty($purchase_line->variations) && ! empty($purchase_line->variations->product) && ! empty($purchase_line->variations->product->unit)) ? $purchase_line->variations->product->unit->short_name : '');
+            if (! empty($production_purchase->mfg_wasted_units)) {
+                $quantity_wasted = (float) $production_purchase->mfg_wasted_units;
+                $quantity += $quantity_wasted;
+            }
 
-            $lot_numbers = [];
+            $actual_quantity = $quantity * $base_unit_multiplier;
 
-            if (! empty($sell_line->sell_line_purchase_lines)) {
-                foreach ($sell_line->sell_line_purchase_lines as $slpl) {
-                    if (! empty($slpl->purchase_line)) {
-                        $lot_number = ! empty($slpl->purchase_line->lot_number) ? $slpl->purchase_line->lot_number : '';
-                        if (! empty($slpl->purchase_line->exp_date)) {
-                            $lot_number .= ' - '.$this->moduleUtil->format_date($slpl->purchase_line->exp_date);
-                        }
+            $ingredients = [];
+            $ingredient_groups = [];
+            $total_ingredients_price = 0;
+            if (! empty($production_sell) && ! empty($production_sell->sell_lines)) {
+            //Format sell lines
+            foreach ($production_sell->sell_lines as $sell_line) {
+                $variation = $sell_line->variations;
+                if (empty($variation)) {
+                    continue;
+                }
+                $sell_line_multiplier = (! empty($sell_line->sub_unit) && ! empty($sell_line->sub_unit->base_unit_multiplier)) ? $sell_line->sub_unit->base_unit_multiplier : 1;
+                $sell_line_qty = empty($sell_line->sub_unit) ? $sell_line->quantity : ($sell_line->quantity / $sell_line_multiplier);
+                $unit = empty($sell_line->sub_unit) ? (! empty($variation->product) && ! empty($variation->product->unit) ? $variation->product->unit->short_name : '') : $sell_line->sub_unit->short_name;
 
-                        if ($lot_number != '') {
-                            $lot_numbers[] = $lot_number;
+                $line_total_price = ($variation->dpp_inc_tax ?? 0) * $sell_line->quantity;
+                $total_ingredients_price += $line_total_price;
+
+                $waste_percent = ! empty($sell_line->mfg_waste_percent) ? $sell_line->mfg_waste_percent : 0;
+                $wasted_qty = $this->moduleUtil->calc_percentage($sell_line_qty, $waste_percent);
+                $final_quantity = $sell_line_qty - $wasted_qty;
+
+                $lot_numbers = [];
+
+                if (! empty($sell_line->sell_line_purchase_lines)) {
+                    foreach ($sell_line->sell_line_purchase_lines as $slpl) {
+                        if (! empty($slpl->purchase_line)) {
+                            $lot_number = ! empty($slpl->purchase_line->lot_number) ? $slpl->purchase_line->lot_number : '';
+                            if (! empty($slpl->purchase_line->exp_date)) {
+                                $lot_number .= ' - '.$this->moduleUtil->format_date($slpl->purchase_line->exp_date);
+                            }
+
+                            if ($lot_number != '') {
+                                $lot_numbers[] = $lot_number;
+                            }
                         }
                     }
                 }
-            }
 
-            $allow_decimal = (! empty($variation->product) && ! empty($variation->product->unit)) ? $variation->product->unit->allow_decimal : 0;
-            $enable_stock = ! empty($variation->product) ? $variation->product->enable_stock : 0;
-            $full_name = ! empty($variation->full_name) ? $variation->full_name : '';
+                $allow_decimal = (! empty($variation->product) && ! empty($variation->product->unit)) ? $variation->product->unit->allow_decimal : 0;
+                $enable_stock = ! empty($variation->product) ? $variation->product->enable_stock : 0;
+                $full_name = ! empty($variation->full_name) ? $variation->full_name : '';
 
-            if (empty($sell_line->mfg_ingredient_group_id)) {
-                $ingredients[] = [
-                    'dpp_inc_tax' => $variation->dpp_inc_tax ?? 0,
-                    'quantity' => $sell_line_qty,
-                    'full_name' => $full_name,
-                    'id' => $variation->id,
-                    'unit' => $unit,
-                    'allow_decimal' => $allow_decimal,
-                    'variation' => $variation,
-                    'enable_stock' => $enable_stock,
-                    'total_price' => $line_total_price,
-                    'waste_percent' => $waste_percent,
-                    'final_quantity' => $final_quantity,
-                    'lot_numbers' => implode(', ', $lot_numbers),
-                ];
-            } else {
-                if (! isset($ingredient_groups[$sell_line->mfg_ingredient_group_id]['ig_name'])) {
-                    $i_group = MfgIngredientGroup::find($sell_line->mfg_ingredient_group_id);
-                    $ingredient_groups[$sell_line->mfg_ingredient_group_id]['ig_name'] = ! empty($i_group) ? $i_group->name : '';
-                    $ingredient_groups[$sell_line->mfg_ingredient_group_id]['ig_description'] = ! empty($i_group) ? $i_group->description : '';
+                if (empty($sell_line->mfg_ingredient_group_id)) {
+                    $ingredients[] = [
+                        'dpp_inc_tax' => $variation->dpp_inc_tax ?? 0,
+                        'quantity' => $sell_line_qty,
+                        'full_name' => $full_name,
+                        'id' => $variation->id,
+                        'unit' => $unit,
+                        'allow_decimal' => $allow_decimal,
+                        'variation' => $variation,
+                        'enable_stock' => $enable_stock,
+                        'total_price' => $line_total_price,
+                        'waste_percent' => $waste_percent,
+                        'final_quantity' => $final_quantity,
+                        'lot_numbers' => implode(', ', $lot_numbers),
+                    ];
+                } else {
+                    if (! isset($ingredient_groups[$sell_line->mfg_ingredient_group_id]['ig_name'])) {
+                        $i_group = MfgIngredientGroup::find($sell_line->mfg_ingredient_group_id);
+                        $ingredient_groups[$sell_line->mfg_ingredient_group_id]['ig_name'] = ! empty($i_group) ? $i_group->name : '';
+                        $ingredient_groups[$sell_line->mfg_ingredient_group_id]['ig_description'] = ! empty($i_group) ? $i_group->description : '';
+                    }
+                    $ingredient_groups[$sell_line->mfg_ingredient_group_id]['ig_ingredients'][] = [
+                        'dpp_inc_tax' => $variation->dpp_inc_tax ?? 0,
+                        'quantity' => $sell_line_qty,
+                        'full_name' => $full_name,
+                        'id' => $variation->id,
+                        'unit' => $unit,
+                        'allow_decimal' => $allow_decimal,
+                        'variation' => $variation,
+                        'enable_stock' => $enable_stock,
+                        'total_price' => $line_total_price,
+                        'waste_percent' => $waste_percent,
+                        'final_quantity' => $final_quantity,
+                        'lot_numbers' => implode(', ', $lot_numbers),
+                    ];
                 }
-                $ingredient_groups[$sell_line->mfg_ingredient_group_id]['ig_ingredients'][] = [
-                    'dpp_inc_tax' => $variation->dpp_inc_tax ?? 0,
-                    'quantity' => $sell_line_qty,
-                    'full_name' => $full_name,
-                    'id' => $variation->id,
-                    'unit' => $unit,
-                    'allow_decimal' => $allow_decimal,
-                    'variation' => $variation,
-                    'enable_stock' => $enable_stock,
-                    'total_price' => $line_total_price,
-                    'waste_percent' => $waste_percent,
-                    'final_quantity' => $final_quantity,
-                    'lot_numbers' => implode(', ', $lot_numbers),
-                ];
             }
-        }
-        }
-
-        $total_production_cost = 0;
-        if (! empty($production_purchase->mfg_production_cost)) {
-            $total_production_cost = $production_purchase->mfg_production_cost;
-            if ($production_purchase->mfg_production_cost_type == 'percentage') {
-                $total_production_cost = $this->transactionUtil->calc_percentage($total_ingredients_price, $production_purchase->mfg_production_cost);
-            } elseif ($production_purchase->mfg_production_cost_type == 'per_unit') {
-                $total_production_cost = $production_purchase->mfg_production_cost * $quantity;
             }
-        }
 
-        // Fetch accounting double-entry journal mappings if available
-        $accounting_mapping = null;
-        if (class_exists('\Modules\Accounting\Entities\AccountingAccTransMapping')) {
-            $refNo = 'MFG-JOURNAL-' . $production_purchase->ref_no;
-            $accounting_mapping = \Modules\Accounting\Entities\AccountingAccTransMapping::where('business_id', $business_id)
-                ->where('ref_no', $refNo)
-                ->with(['transactions', 'transactions.account'])
-                ->first();
-        }
+            $total_production_cost = 0;
+            if (! empty($production_purchase->mfg_production_cost)) {
+                $total_production_cost = $production_purchase->mfg_production_cost;
+                if ($production_purchase->mfg_production_cost_type == 'percentage') {
+                    $total_production_cost = $this->transactionUtil->calc_percentage($total_ingredients_price, $production_purchase->mfg_production_cost);
+                } elseif ($production_purchase->mfg_production_cost_type == 'per_unit') {
+                    $total_production_cost = $production_purchase->mfg_production_cost * $quantity;
+                }
+            }
 
-        // Fetch payment account transaction if available
-        $payment_transaction = null;
-        if (class_exists('\App\TransactionPayment')) {
-            $payment_transaction = \App\TransactionPayment::where('transaction_id', $production_purchase->id)
-                ->with('payment_account')
-                ->first();
-        }
+            // Fetch accounting double-entry journal mappings if available
+            $accounting_mapping = null;
+            if (class_exists('\Modules\Accounting\Entities\AccountingAccTransMapping')) {
+                $refNo = 'MFG-JOURNAL-' . $production_purchase->ref_no;
+                $accounting_mapping = \Modules\Accounting\Entities\AccountingAccTransMapping::where('business_id', $business_id)
+                    ->where('ref_no', $refNo)
+                    ->with(['transactions', 'transactions.account'])
+                    ->first();
+            }
 
-        return view('manufacturing::production.show')->with(compact(
-            'production_purchase',
-            'production_sell',
-            'purchase_line',
-            'ingredients',
-            'unit_name',
-            'quantity',
-            'quantity_wasted',
-            'actual_quantity',
-            'total_production_cost',
-            'ingredient_groups',
-            'accounting_mapping',
-            'payment_transaction'
-        ));
+            // Fetch payment account transaction if available
+            $payment_transaction = null;
+            if (class_exists('\App\TransactionPayment')) {
+                $payment_transaction = \App\TransactionPayment::where('transaction_id', $production_purchase->id)
+                    ->with('payment_account')
+                    ->first();
+            }
+
+            return view('manufacturing::production.show')->with(compact(
+                'production_purchase',
+                'production_sell',
+                'purchase_line',
+                'ingredients',
+                'unit_name',
+                'quantity',
+                'quantity_wasted',
+                'actual_quantity',
+                'total_production_cost',
+                'ingredient_groups',
+                'accounting_mapping',
+                'payment_transaction'
+            ));
+        } catch (\Exception $e) {
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+
+            return response('<div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal">&times;</button><h4 class="modal-title">Error</h4></div><div class="modal-body"><div class="alert alert-danger">An error occurred while loading production details: '.$e->getMessage().'</div></div></div></div>', 500);
+        }
     }
 
     /**
