@@ -1,5 +1,5 @@
 <!-- Main Footer -->
-  <footer class="no-print text-center text-info tw-clear-both clearfix">
+  <footer class="no-print text-center text-info clearfix" style="clear: both;">
     <!-- To the right -->
     <!-- <div class="pull-right hidden-xs">
       Anything you want
