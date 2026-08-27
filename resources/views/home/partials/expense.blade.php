@@ -13,8 +13,8 @@
                                                 </path>
                                                 <path d="M12 6v10"></path>
                                             </svg>' ,
-    'svg_bg' => 'tw-text-red-500',
-    'svg_text' => 'tw-bg-red-100',
+    'svg_bg' => 'tw-bg-red-100',
+    'svg_text' => 'tw-text-red-500',
 ])
     <p class="tw-text-sm tw-font-medium tw-text-gray-500 tw-truncate tw-whitespace-nowrap">
         {{ $dashboard_detail->heading }}
