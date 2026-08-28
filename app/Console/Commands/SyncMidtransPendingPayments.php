@@ -40,8 +40,15 @@ class SyncMidtransPendingPayments extends Command
 
         $query = Transaction::with(['business', 'sell_lines.product'])
             ->where('type', 'sell')
-            ->where('payment_status', '!=', 'paid')
-            ->where('id', $transactionId);
+            ->where(function ($q) {
+                $q->whereNull('payment_status')
+                  ->orWhere('payment_status', '!=', 'paid');
+            })
+            ->where(function ($q) use ($transactionId) {
+                $q->where('id', $transactionId)
+                  ->orWhere('invoice_no', $transactionId)
+                  ->orWhere('invoice_no', sprintf('%04d', $transactionId));
+            });
 
         if ($businessId) {
             $query->where('business_id', $businessId);
