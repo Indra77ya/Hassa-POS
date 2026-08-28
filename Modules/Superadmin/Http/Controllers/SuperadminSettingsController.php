@@ -92,6 +92,10 @@ class SuperadminSettingsController extends Controller
             'MY_FATOORAH_COUNTRY_ISO' => $is_demo ? null : env('MY_FATOORAH_COUNTRY_ISO'),
             'MY_FATOORAH_IS_TEST' => $is_demo ? null : (env('MY_FATOORAH_IS_TEST') ? 'true' : 'false'),
 
+            'MIDTRANS_SERVER_KEY' => $is_demo ? null : env('MIDTRANS_SERVER_KEY'),
+            'MIDTRANS_CLIENT_KEY' => $is_demo ? null : env('MIDTRANS_CLIENT_KEY'),
+            'MIDTRANS_MODE' => env('MIDTRANS_MODE', 'sandbox'),
+
             // Captcha settings
             'ENABLE_RECAPTCHA' => $is_demo ? null : env('ENABLE_RECAPTCHA'),
             'GOOGLE_RECAPTCHA_KEY' => $is_demo ? null : env('GOOGLE_RECAPTCHA_KEY'),
@@ -175,6 +179,7 @@ class SuperadminSettingsController extends Controller
                 'PUSHER_APP_CLUSTER', 'GOOGLE_MAP_API_KEY', 'PAYSTACK_SECRET_KEY',
                 'PAYSTACK_PUBLIC_KEY', 'FLUTTERWAVE_PUBLIC_KEY',
                 'FLUTTERWAVE_SECRET_KEY', 'FLUTTERWAVE_ENCRYPTION_KEY', 'MAPBOX_ACCESS_TOKEN', 'MY_FATOORAH_API_KEY', 'MY_FATOORAH_IS_TEST', 'MY_FATOORAH_COUNTRY_ISO',
+                'MIDTRANS_SERVER_KEY', 'MIDTRANS_CLIENT_KEY', 'MIDTRANS_MODE',
                 'ENABLE_RECAPTCHA', 'GOOGLE_RECAPTCHA_KEY', 'GOOGLE_RECAPTCHA_SECRET', 'DO_NOT_ALLOW_DISPOSABLE_EMAIL'
             ]);
 

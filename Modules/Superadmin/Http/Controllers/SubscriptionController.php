@@ -889,4 +889,89 @@ class SubscriptionController extends BaseController
 
         return $end_date;
     }
+
+    /**
+     * Create Midtrans Snap Token for Superadmin Package Subscription
+     */
+    public function midtransCreateSnapToken(Request $request, $package_id)
+    {
+        try {
+            $serverKey = env('MIDTRANS_SERVER_KEY');
+            $clientKey = env('MIDTRANS_CLIENT_KEY');
+            $isProduction = (env('MIDTRANS_MODE') === 'production');
+
+            if (empty($serverKey) || empty($clientKey)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Superadmin Midtrans gateway is not configured.',
+                ], 400);
+            }
+
+            $package = Package::active()->findOrFail($package_id);
+            $business_id = request()->session()->get('user.business_id');
+            $user_id = request()->session()->get('user.id');
+            $business = Business::find($business_id);
+            $user = request()->session()->get('user');
+
+            $price = $package->price;
+            $code = $request->input('code');
+
+            if (!empty($code)) {
+                $coupon = SuperadminCoupon::where('coupon_code', $code)->first();
+                if ($coupon && $coupon->is_active == 1) {
+                    if ($coupon->discount_type == 'fixed') {
+                        $price = max(0, $package->price - $coupon->discount);
+                    } elseif ($coupon->discount_type == 'percentage') {
+                        $price = max(0, $package->price - ($package->price * ($coupon->discount / 100)));
+                    }
+                }
+            }
+
+            $grossAmount = (int) round($price);
+            $orderId = 'MID-SUB-' . $business_id . '-' . $package_id . '-' . time();
+            $baseUrl = $isProduction
+                ? 'https://app.midtrans.com/snap/v1/transactions'
+                : 'https://app.sandbox.midtrans.com/snap/v1/transactions';
+
+            $payload = [
+                'transaction_details' => [
+                    'order_id' => $orderId,
+                    'gross_amount' => $grossAmount,
+                ],
+                'customer_details' => [
+                    'first_name' => $user->first_name ?? $business->name ?? 'User',
+                    'email' => $user->email ?? $business->email ?? 'user@example.com',
+                ],
+                'custom_field1' => (string) $business_id,
+                'custom_field2' => (string) $package_id,
+                'custom_field3' => (string) $code,
+            ];
+
+            $response = Http::withHeaders([
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Basic ' . base64_encode(trim($serverKey) . ':'),
+            ])->post($baseUrl, $payload);
+
+            if ($response->successful()) {
+                $data = $response->json();
+
+                return response()->json([
+                    'success' => true,
+                    'token' => $data['token'] ?? null,
+                    'redirect_url' => $data['redirect_url'] ?? null,
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to create Snap token: ' . ($response->json()['error_messages'][0] ?? $response->status()),
+                ], 500);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

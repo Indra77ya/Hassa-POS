@@ -105,7 +105,34 @@ class MidtransController extends Controller
                 return response()->json(['message' => 'Order ID missing'], 400);
             }
 
-            // Extract transaction ID from order_id format (MID-POS-{id}-{timestamp}) or custom_field1
+            // Check if Superadmin Subscription order (MID-SUB-{business_id}-{package_id}-{timestamp})
+            if (strpos($orderId, 'MID-SUB-') === 0) {
+                $serverKey = env('MIDTRANS_SERVER_KEY');
+                if ($serverKey) {
+                    if (!isset($notification['signature_key']) || !isset($notification['status_code'])) {
+                        return response()->json(['message' => 'Missing signature key'], 400);
+                    }
+                    $signatureKey = hash('sha512', $orderId . $notification['status_code'] . $grossAmount . $serverKey);
+                    if ($signatureKey !== $notification['signature_key']) {
+                        return response()->json(['message' => 'Invalid signature'], 403);
+                    }
+                }
+
+                if ($transactionStatus == 'settlement' || ($transactionStatus == 'capture' && $fraudStatus == 'accept')) {
+                    if (preg_match('/MID-SUB-(\d+)-(\d+)-\d+/', $orderId, $matches)) {
+                        $businessId = $matches[1];
+                        $packageId = $matches[2];
+                        $couponCode = $notification['custom_field3'] ?? null;
+
+                        $subController = new \Modules\Superadmin\Http\Controllers\SubscriptionController();
+                        $subController->_add_subscription($couponCode, $grossAmount, $businessId, $packageId, 'midtrans', $orderId, 1);
+                    }
+                }
+
+                return response()->json(['status' => 'success']);
+            }
+
+            // Extract POS transaction ID from order_id format (MID-POS-{id}-{timestamp}) or custom_field1
             $transactionId = $transactionIdCustom;
             if (!$transactionId && preg_match('/MID-POS-(\d+)-\d+/', $orderId, $matches)) {
                 $transactionId = $matches[1];

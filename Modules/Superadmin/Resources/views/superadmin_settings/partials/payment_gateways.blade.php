@@ -183,6 +183,27 @@
             @lang('superadmin::lang.fatoorah_step_4')<br/>
             @lang('superadmin::lang.fatoorah_step_5')<br/>
         </div>
+        <div class="clearfix"></div>
+        <h4>Midtrans: <small>(Payment Gateway Indonesia)</small></h4>
+        <div class="col-xs-4">
+            <div class="form-group">
+                {!! Form::label('MIDTRANS_SERVER_KEY', 'Server Key:') !!}
+                {!! Form::text('MIDTRANS_SERVER_KEY', $default_values['MIDTRANS_SERVER_KEY'] ?? '', ['class' => 'form-control']); !!}
+            </div>
+        </div>
+        <div class="col-xs-4">
+            <div class="form-group">
+                {!! Form::label('MIDTRANS_CLIENT_KEY', 'Client Key:') !!}
+                {!! Form::text('MIDTRANS_CLIENT_KEY', $default_values['MIDTRANS_CLIENT_KEY'] ?? '', ['class' => 'form-control']); !!}
+            </div>
+        </div>
+        <div class="col-xs-4">
+            <div class="form-group">
+                {!! Form::label('MIDTRANS_MODE', 'Mode / Environment:') !!}
+                {!! Form::select('MIDTRANS_MODE', ['sandbox' => 'Sandbox (Testing)', 'production' => 'Production (Live)'], $default_values['MIDTRANS_MODE'] ?? 'sandbox', ['class' => 'form-control']); !!}
+            </div>
+        </div>
+
         <div class="col-xs-12">
             <br/>
             <p class="help-block"><i>@lang('superadmin::lang.payment_gateway_help')</i></p>

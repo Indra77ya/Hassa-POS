@@ -67,6 +67,7 @@ Route::middleware('web', 'SetSessionData', 'auth', 'language', 'timezone', 'Admi
 
     Route::get('/subscription/{package_id}/register-pay', [Modules\Superadmin\Http\Controllers\SubscriptionController::class, 'registerPay'])->name('register-pay');
 
+    Route::post('/subscription/{package_id}/midtrans-create-snap-token', [Modules\Superadmin\Http\Controllers\SubscriptionController::class, 'midtransCreateSnapToken']);
     Route::resource('/subscription', 'Modules\Superadmin\Http\Controllers\SubscriptionController');
 
     Route::get('/subscription/{subcription_id}/force-active', [Modules\Superadmin\Http\Controllers\SubscriptionController::class, 'forceActive'])->name('force-active');
