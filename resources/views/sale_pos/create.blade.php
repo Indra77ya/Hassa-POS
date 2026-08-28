@@ -131,4 +131,76 @@
         @endforeach
     @endif
     @include('sale_pos.partials.pos_layout_script', ['form_id' => 'add_pos_sell_form'])
+@if (!empty($pos_settings['enable_midtrans']) && !empty($pos_settings['midtrans_client_key']))
+    @php
+        $snap_js_url = (!empty($pos_settings['midtrans_mode']) && $pos_settings['midtrans_mode'] === 'production')
+            ? 'https://app.midtrans.com/snap/snap.js'
+            : 'https://app.sandbox.midtrans.com/snap/snap.js';
+    @endphp
+    <script src="{{$snap_js_url}}" data-client-key="{{$pos_settings['midtrans_client_key']}}"></script>
+    <script type="text/javascript">
+        $(document).on('click', '#pos-midtrans-pay-btn', function(){
+            var btn = $(this);
+            btn.prop('disabled', true);
+
+            var form = $('form#add_pos_sell_form');
+            var data = form.serialize();
+
+            $.ajax({
+                method: 'POST',
+                url: form.attr('action'),
+                data: data,
+                dataType: 'json',
+                success: function(result) {
+                    if (result.success == 1) {
+                        var transaction_id = result.receipt.transaction_id || result.transaction_id;
+                        if (!transaction_id) {
+                            btn.prop('disabled', false);
+                            toastr.success(result.msg);
+                            reset_pos_form();
+                            return;
+                        }
+
+                        $.ajax({
+                            url: "/midtrans/create-snap-token/" + transaction_id,
+                            type: 'POST',
+                            data: { _token: "{{ csrf_token() }}" },
+                            success: function(response) {
+                                btn.prop('disabled', false);
+                                if (response.success && response.token) {
+                                    snap.pay(response.token, {
+                                        onSuccess: function(res){
+                                            toastr.success("Pembayaran Midtrans berhasil!");
+                                            reset_pos_form();
+                                        },
+                                        onPending: function(res){
+                                            toastr.info("Pembayaran Midtrans pending.");
+                                            reset_pos_form();
+                                        },
+                                        onError: function(res){
+                                            toastr.error("Pembayaran Midtrans gagal!");
+                                        }
+                                    });
+                                } else {
+                                    toastr.error(response.message || "Gagal membuat token Midtrans.");
+                                }
+                            },
+                            error: function() {
+                                btn.prop('disabled', false);
+                                toastr.error("Gagal terhubung ke Midtrans gateway.");
+                            }
+                        });
+                    } else {
+                        btn.prop('disabled', false);
+                        toastr.error(result.msg);
+                    }
+                },
+                error: function() {
+                    btn.prop('disabled', false);
+                    toastr.error("Gagal menyimpan transaksi POS.");
+                }
+            });
+        });
+    </script>
+@endif
 @endsection

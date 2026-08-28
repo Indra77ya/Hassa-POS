@@ -95,6 +95,14 @@
                     </button>
                 @endif
 
+                @if (!empty($pos_settings['enable_midtrans']) && !empty($pos_settings['midtrans_client_key']))
+                    <button type="button"
+                        class="tw-font-bold tw-text-slate-600 hover:tw-text-blue-600 tw-cursor-pointer tw-text-xs md:tw-text-sm tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-1 tw-whitespace-nowrap tw-transition-colors no-print"
+                        id="pos-midtrans-pay-btn" title="Pay with Midtrans Snap">
+                        <i class="fas fa-qrcode tw-text-blue-500 tw-text-base" aria-hidden="true"></i> Midtrans
+                    </button>
+                @endif
+
                 {{-- Desktop-only primary CTAs (mobile has these in its own top row) --}}
                 <div class="!tw-hidden md:!tw-flex md:tw-items-center md:tw-gap-3">
                     <span class="pos-footer-divider tw-inline-block tw-w-px tw-h-7 tw-bg-slate-100 tw-flex-shrink-0 tw-self-center tw-rounded-[1px] tw-mx-1"></span>
