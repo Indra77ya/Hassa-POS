@@ -191,5 +191,37 @@
                 {!! Form::text('pos_settings[stripe_secret_key]', $pos_settings['stripe_secret_key'] ?? '', ['class' => 'form-control', 'id' => 'stripe_secret_key']); !!}
             </div>
         </div>
+
+        <div class="col-md-12">
+            <h4>Midtrans: <small>(Payment Gateway Indonesia)</small></h4>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <div class="checkbox">
+                    <br>
+                    <label>
+                        {!! Form::checkbox('pos_settings[enable_midtrans]', 1, !empty($pos_settings['enable_midtrans']), ['class' => 'input-icheck', 'id' => 'enable_midtrans']); !!} Enable Midtrans Payment Gateway
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                {!! Form::label('midtrans_server_key', 'Server Key:') !!}
+                {!! Form::text('pos_settings[midtrans_server_key]', $pos_settings['midtrans_server_key'] ?? '', ['class' => 'form-control', 'id' => 'midtrans_server_key']); !!}
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                {!! Form::label('midtrans_client_key', 'Client Key:') !!}
+                {!! Form::text('pos_settings[midtrans_client_key]', $pos_settings['midtrans_client_key'] ?? '', ['class' => 'form-control', 'id' => 'midtrans_client_key']); !!}
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                {!! Form::label('midtrans_mode', 'Mode / Environment:') !!}
+                {!! Form::select('pos_settings[midtrans_mode]', ['sandbox' => 'Sandbox (Testing)', 'production' => 'Production (Live)'], $pos_settings['midtrans_mode'] ?? 'sandbox', ['class' => 'form-control select2', 'id' => 'midtrans_mode', 'style' => 'width: 100%;']); !!}
+            </div>
+        </div>
     </div>
 </div>

@@ -112,6 +112,60 @@
                                 </form>
                             </div>
                         @endif
+
+                        @if(!empty($pos_settings['enable_midtrans']) && !empty($pos_settings['midtrans_client_key']))
+                            <div class="width-50 text-center f-left" style="margin-top: 10px;">
+                                <button type="button" class="btn btn-primary" id="pay-midtrans-btn">
+                                    <i class="fa fa-credit-card"></i> Pay with Midtrans
+                                </button>
+                            </div>
+
+                            @php
+                                $snap_js_url = (!empty($pos_settings['midtrans_mode']) && $pos_settings['midtrans_mode'] === 'production')
+                                    ? 'https://app.midtrans.com/snap/snap.js'
+                                    : 'https://app.sandbox.midtrans.com/snap/snap.js';
+                            @endphp
+                            <script src="{{$snap_js_url}}" data-client-key="{{$pos_settings['midtrans_client_key']}}"></script>
+                            <script type="text/javascript">
+                                document.getElementById('pay-midtrans-btn').onclick = function(){
+                                    var btn = $(this);
+                                    btn.prop('disabled', true);
+                                    $.ajax({
+                                        url: "{{route('midtrans.create_snap_token', [$transaction->id])}}",
+                                        type: 'POST',
+                                        data: {
+                                            _token: "{{ csrf_token() }}",
+                                            token: "{{ $transaction->invoice_token }}"
+                                        },
+                                        success: function(response) {
+                                            btn.prop('disabled', false);
+                                            if(response.success && response.token) {
+                                                snap.pay(response.token, {
+                                                    onSuccess: function(result){
+                                                        location.reload();
+                                                    },
+                                                    onPending: function(result){
+                                                        location.reload();
+                                                    },
+                                                    onError: function(result){
+                                                        alert("Payment failed!");
+                                                    },
+                                                    onClose: function(){
+                                                        // Customer closed the popup without finishing payment
+                                                    }
+                                                });
+                                            } else {
+                                                alert(response.message || 'Error initializing Midtrans.');
+                                            }
+                                        },
+                                        error: function(err) {
+                                            btn.prop('disabled', false);
+                                            alert('Failed to connect to Midtrans payment gateway.');
+                                        }
+                                    });
+                                };
+                            </script>
+                        @endif
                     @else
                         <table class="table no-border">
                             <tr>

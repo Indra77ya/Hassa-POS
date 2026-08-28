@@ -40,6 +40,11 @@ class BaseController extends Controller
             $gateways['pesapal'] = 'PesaPal';
         }
 
+        //Check if Midtrans is configured or not
+        if (env('MIDTRANS_SERVER_KEY') && env('MIDTRANS_CLIENT_KEY')) {
+            $gateways['midtrans'] = 'Midtrans';
+        }
+
         //check if Paystack is configured or not
         $system = System::getCurrency();
         if (in_array($system->country, ['Nigeria', 'Ghana']) && (config('paystack.publicKey') && config('paystack.secretKey'))) {
@@ -74,6 +79,15 @@ class BaseController extends Controller
     {
         if (! is_object($package)) {
             $package = Package::active()->find($package);
+        }
+
+        if (!empty($payment_transaction_id)) {
+            $existing = Subscription::where('business_id', $business_id)
+                ->where('payment_transaction_id', $payment_transaction_id)
+                ->first();
+            if ($existing) {
+                return $existing;
+            }
         }
 
         $subscription = ['business_id' => $business_id,
