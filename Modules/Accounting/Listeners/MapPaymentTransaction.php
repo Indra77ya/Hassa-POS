@@ -90,7 +90,7 @@ class MapPaymentTransaction
             //Do the mapping
             if (!is_null($deposit_to) && !is_null($payment_account)) {
                 $payment_id = $payment->id;
-                $user_id = request()->session()->get('user.id') ?? 1;
+                $user_id = auth()->id() ?? (request()->hasSession() ? request()->session()->get('user.id') : null) ?? $payment->created_by ?? 1;
                 $business_id = $transaction->business_id;
                 
                 $accountingUtil = new \Modules\Accounting\Utils\AccountingUtil();

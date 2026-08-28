@@ -32,7 +32,7 @@ class MapSellTransaction
             $transaction = $event->transaction;
             $id = $transaction->id;
             $business_id = $transaction->business_id;
-            $user_id = request()->session()->get('user.id') ?? 1;
+            $user_id = auth()->id() ?? (request()->hasSession() ? request()->session()->get('user.id') : null) ?? $transaction->created_by ?? 1;
 
             $accountingUtil = new \Modules\Accounting\Utils\AccountingUtil();
 
