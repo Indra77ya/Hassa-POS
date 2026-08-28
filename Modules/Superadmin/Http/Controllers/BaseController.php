@@ -81,6 +81,15 @@ class BaseController extends Controller
             $package = Package::active()->find($package);
         }
 
+        if (!empty($payment_transaction_id)) {
+            $existing = Subscription::where('business_id', $business_id)
+                ->where('payment_transaction_id', $payment_transaction_id)
+                ->first();
+            if ($existing) {
+                return $existing;
+            }
+        }
+
         $subscription = ['business_id' => $business_id,
             'package_id' => $package->id,
             'paid_via' => $gateway,

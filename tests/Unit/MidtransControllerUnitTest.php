@@ -35,4 +35,25 @@ class MidtransControllerUnitTest extends TestCase
         // Testing logic response directly or via route test
         $this->assertTrue(true);
     }
+
+    /** @test */
+    public function handle_notification_returns_200_for_midtrans_test_ping()
+    {
+        $transactionUtil = Mockery::mock(TransactionUtil::class);
+        $controller = new MidtransController($transactionUtil);
+
+        $payload = [
+            'order_id' => 'payment_notif_test_G545150152_d0cbb8a0-bd10-4e1e-b4df-033d5559e880',
+            'transaction_status' => 'settlement',
+            'status_code' => '200',
+            'gross_amount' => '105000.00',
+        ];
+        $request = Request::create('/midtrans/notification', 'POST', [], [], [], [], json_encode($payload));
+        $request->headers->set('Content-Type', 'application/json');
+
+        $response = $controller->handleNotification($request);
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('success', json_decode($response->getContent(), true)['status']);
+    }
 }

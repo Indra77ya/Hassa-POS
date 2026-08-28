@@ -26,12 +26,23 @@ class MidtransController extends Controller
             $user = auth()->user();
             $transaction = Transaction::with(['business', 'contact'])->findOrFail($transaction_id);
 
-            // Ensure transaction belongs to user's business unless guest payment
-            if ($user && $user->business_id != $transaction->business_id) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Unauthorized action.',
-                ], 403);
+            // Authorization check
+            if ($user) {
+                if ($user->business_id != $transaction->business_id && !$user->can('superadmin')) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Unauthorized action.',
+                    ], 403);
+                }
+            } else {
+                // Unauthenticated guest must provide matching invoice_token
+                $guestToken = $request->input('token');
+                if (empty($guestToken) || empty($transaction->invoice_token) || $guestToken !== $transaction->invoice_token) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Unauthorized action.',
+                    ], 403);
+                }
             }
 
             $pos_settings = empty($transaction->business->pos_settings) ? [] : json_decode($transaction->business->pos_settings, true);
@@ -115,17 +126,29 @@ class MidtransController extends Controller
                 return response()->json(['message' => 'Order ID missing'], 400);
             }
 
+            // Handle Midtrans Dashboard "Test notification URL" ping
+            if (strpos($orderId, 'payment_notif_test_') === 0 || strpos($orderId, 'test_') === 0) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Test notification received successfully'
+                ], 200);
+            }
+
             // Check if Superadmin Subscription order (MID-SUB-{business_id}-{package_id}-{timestamp})
             if (strpos($orderId, 'MID-SUB-') === 0) {
                 $serverKey = env('MIDTRANS_SERVER_KEY');
-                if ($serverKey) {
-                    if (!isset($notification['signature_key']) || !isset($notification['status_code'])) {
-                        return response()->json(['message' => 'Missing signature key'], 400);
-                    }
-                    $signatureKey = hash('sha512', $orderId . $notification['status_code'] . $grossAmount . $serverKey);
-                    if ($signatureKey !== $notification['signature_key']) {
-                        return response()->json(['message' => 'Invalid signature'], 403);
-                    }
+                if (empty($serverKey)) {
+                    Log::warning('Superadmin Midtrans Webhook Rejected: Server key not configured');
+                    return response()->json(['message' => 'Superadmin Midtrans server key not configured'], 400);
+                }
+
+                if (!isset($notification['signature_key']) || !isset($notification['status_code'])) {
+                    return response()->json(['message' => 'Missing signature key or status code'], 400);
+                }
+
+                $signatureKey = hash('sha512', $orderId . $notification['status_code'] . $grossAmount . $serverKey);
+                if ($signatureKey !== $notification['signature_key']) {
+                    return response()->json(['message' => 'Invalid signature'], 403);
                 }
 
                 if ($transactionStatus == 'settlement' || ($transactionStatus == 'capture' && $fraudStatus == 'accept')) {

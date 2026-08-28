@@ -134,7 +134,8 @@
                                         url: "{{route('midtrans.create_snap_token', [$transaction->id])}}",
                                         type: 'POST',
                                         data: {
-                                            _token: "{{ csrf_token() }}"
+                                            _token: "{{ csrf_token() }}",
+                                            token: "{{ $transaction->invoice_token }}"
                                         },
                                         success: function(response) {
                                             btn.prop('disabled', false);
