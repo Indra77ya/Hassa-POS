@@ -191,17 +191,57 @@ class MidtransController extends Controller
             }
 
             if ($isPaid) {
+                // Determine payment account (Kas / Bank) from business location default settings if available
+                $accountId = null;
+                $location = \App\BusinessLocation::find($transaction->location_id);
+                if ($location && !empty($location->default_payment_accounts)) {
+                    $defaultPaymentAccounts = json_decode($location->default_payment_accounts, true);
+                    $accountId = $defaultPaymentAccounts['custom_pay_1']['account']
+                        ?? $defaultPaymentAccounts['card']['account']
+                        ?? $defaultPaymentAccounts['cash']['account']
+                        ?? null;
+                }
+
+                if ($transaction->status != 'final') {
+                    // Update transaction status to final & generate invoice number
+                    $invoiceNo = $this->transactionUtil->getInvoiceNumber($transaction->business_id, 'final', $transaction->location_id);
+                    $transaction->status = 'final';
+                    $transaction->invoice_no = $invoiceNo;
+                    $transaction->transaction_date = \Carbon\Carbon::now()->toDateTimeString();
+                    $transaction->save();
+
+                    // Decrease product stock for stock-managed items
+                    $productUtil = new \App\Utils\ProductUtil();
+                    foreach ($transaction->sell_lines as $sell_line) {
+                        $decrease_qty = $sell_line->quantity;
+                        if ($sell_line->product && $sell_line->product->enable_stock == 1) {
+                            $productUtil->decreaseProductQuantity(
+                                $sell_line->product_id,
+                                $sell_line->variation_id,
+                                $transaction->location_id,
+                                $decrease_qty
+                            );
+                        }
+                    }
+                }
+
                 if ($transaction->payment_status != 'paid') {
-                    // Add payment line if not full paid
+                    // Add payment line
                     $payment_data = [
                         'amount' => $transaction->final_total,
                         'method' => 'midtrans',
                         'paid_on' => \Carbon\Carbon::now()->toDateTimeString(),
                         'created_by' => $transaction->created_by,
+                        'account_id' => $accountId,
                         'note' => 'Midtrans Order ID: ' . $orderId,
                     ];
                     $this->transactionUtil->createOrUpdatePaymentLines($transaction, [$payment_data]);
                     $this->transactionUtil->updatePaymentStatus($transaction->id, $transaction->final_total);
+                }
+
+                // Fire SellCreatedOrModified event to trigger Accounting Module mapping (Revenue, Cash/Bank, COGS)
+                if (class_exists('\App\Events\SellCreatedOrModified')) {
+                    event(new \App\Events\SellCreatedOrModified($transaction));
                 }
             }
 
