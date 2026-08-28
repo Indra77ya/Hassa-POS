@@ -142,7 +142,18 @@
                                             if(response.success && response.token) {
                                                 snap.pay(response.token, {
                                                     onSuccess: function(result){
-                                                        location.reload();
+                                                        $.ajax({
+                                                            url: "/midtrans/sync-payment/" + "{{ $transaction->id }}",
+                                                            type: 'POST',
+                                                            data: {
+                                                                _token: "{{ csrf_token() }}",
+                                                                token: "{{ $transaction->invoice_token }}",
+                                                                order_id: (result && result.order_id) ? result.order_id : ''
+                                                            },
+                                                            complete: function() {
+                                                                location.reload();
+                                                            }
+                                                        });
                                                     },
                                                     onPending: function(result){
                                                         location.reload();

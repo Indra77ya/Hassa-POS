@@ -81,7 +81,7 @@ class MapExpenseTransactions
             if (!is_null($deposit_to) && !is_null($payment_account)) {
                 $type = 'expense';
                 $id = $event->expense->id;
-                $user_id = request()->session()->get('user.id') ?? 1;
+                $user_id = auth()->id() ?? (request()->hasSession() ? request()->session()->get('user.id') : null) ?? $event->expense->created_by ?? 1;
                 $business_id = $event->expense->business_id;
                 $accountingUtil = new \Modules\Accounting\Utils\AccountingUtil();
                 $accountingUtil->saveMap($type, $id, $user_id, $business_id, $deposit_to, $payment_account);
