@@ -65,11 +65,12 @@ class SyncMidtransPendingPayments extends Command
         $count = 0;
 
         foreach ($transactions as $transaction) {
-            // Authenticate as transaction owner/creator to provide session context if running from CLI
+            // Provide session context for CLI execution
             if ($transaction->created_by) {
                 $user = \App\User::find($transaction->created_by);
                 if ($user) {
                     auth()->login($user);
+                    session(['user.business_id' => $transaction->business_id]);
                 }
             }
 

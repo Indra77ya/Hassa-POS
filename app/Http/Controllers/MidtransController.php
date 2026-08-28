@@ -317,7 +317,7 @@ class MidtransController extends Controller
                 'account_id' => $accountId,
                 'note' => 'Midtrans Order ID: ' . $orderId,
             ];
-            $this->transactionUtil->createOrUpdatePaymentLines($transaction, [$payment_data]);
+            $this->transactionUtil->createOrUpdatePaymentLines($transaction, [$payment_data], $transaction->business_id);
             $this->transactionUtil->updatePaymentStatus($transaction->id, $transaction->final_total);
         }
 
