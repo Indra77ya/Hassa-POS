@@ -37,6 +37,16 @@ class MidtransControllerUnitTest extends TestCase
     }
 
     /** @test */
+    public function payment_types_includes_midtrans_option()
+    {
+        $util = new \App\Utils\Util();
+        $paymentTypes = $util->payment_types();
+
+        $this->assertArrayHasKey('midtrans', $paymentTypes);
+        $this->assertEquals('Midtrans', $paymentTypes['midtrans']);
+    }
+
+    /** @test */
     public function handle_notification_returns_200_for_midtrans_test_ping()
     {
         $transactionUtil = Mockery::mock(TransactionUtil::class);
