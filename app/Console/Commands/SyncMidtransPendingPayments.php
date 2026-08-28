@@ -65,6 +65,14 @@ class SyncMidtransPendingPayments extends Command
         $count = 0;
 
         foreach ($transactions as $transaction) {
+            // Authenticate as transaction owner/creator to provide session context if running from CLI
+            if ($transaction->created_by) {
+                $user = \App\User::find($transaction->created_by);
+                if ($user) {
+                    auth()->login($user);
+                }
+            }
+
             $midtransController->finalizeAndPayTransaction($transaction, 'MID-POS-MANUAL-SYNC-' . $transaction->id);
             $count++;
             $this->info("Transaction #{$transaction->id} (Invoice: {$transaction->invoice_no}) synced to paid.");
