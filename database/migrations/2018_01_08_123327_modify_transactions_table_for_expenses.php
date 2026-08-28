@@ -14,10 +14,8 @@ return new class extends Migration
      */
     public function up()
     {
-        if (DB::getDriverName() !== 'sqlite') {
-            DB::statement("ALTER TABLE transactions MODIFY COLUMN type ENUM('purchase','sell', 'expense')");
-            DB::statement('ALTER TABLE transactions MODIFY COLUMN contact_id INT(11) UNSIGNED DEFAULT NULL');
-        }
+        DB::statement("ALTER TABLE transactions MODIFY COLUMN type ENUM('purchase','sell', 'expense')");
+        DB::statement('ALTER TABLE transactions MODIFY COLUMN contact_id INT(11) UNSIGNED DEFAULT NULL');
 
         Schema::table('transactions', function (Blueprint $table) {
             $table->integer('expense_category_id')->nullable()->unsigned()->after('final_total');
