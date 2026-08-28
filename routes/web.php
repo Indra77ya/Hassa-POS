@@ -97,7 +97,7 @@ Route::middleware(['setData'])->group(function () {
     Route::post('/confirm-payment/{id}', [SellPosController::class, 'confirmPayment'])
         ->name('confirm_payment');
 
-    // Midtrans Payment Routes
+    // Midtrans Payment Routes (Public Webhook & Guest Snap Token)
     Route::post('/midtrans/create-snap-token/{transaction_id}', [\App\Http\Controllers\MidtransController::class, 'createSnapToken'])
         ->name('midtrans.create_snap_token');
     Route::post('/midtrans/notification', [\App\Http\Controllers\MidtransController::class, 'handleNotification'])

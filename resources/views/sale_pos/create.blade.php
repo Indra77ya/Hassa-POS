@@ -141,22 +141,35 @@
     <script type="text/javascript">
         $(document).on('click', '#pos-midtrans-pay-btn', function(){
             var btn = $(this);
+
+            if ($('table#pos_table tbody').find('.product_row').length == 0) {
+                toastr.error("Keranjang belanja masih kosong!");
+                return false;
+            }
+
             btn.prop('disabled', true);
 
             var form = $('form#add_pos_sell_form');
-            var data = form.serialize();
+            var data = form.serializeArray();
+
+            data.push({name: 'status', value: 'draft'});
+            data.push({name: 'is_direct_sale', value: 0});
 
             $.ajax({
                 method: 'POST',
                 url: form.attr('action'),
-                data: data,
+                data: $.param(data),
                 dataType: 'json',
                 success: function(result) {
                     if (result.success == 1) {
-                        var transaction_id = result.receipt.transaction_id || result.transaction_id;
+                        var transaction_id = result.transaction_id;
+                        if (!transaction_id && result.receipt && result.receipt.transaction_id) {
+                            transaction_id = result.receipt.transaction_id;
+                        }
+
                         if (!transaction_id) {
                             btn.prop('disabled', false);
-                            toastr.success(result.msg);
+                            toastr.success(result.msg || "Transaksi berhasil dibuat.");
                             reset_pos_form();
                             return;
                         }
@@ -192,12 +205,16 @@
                         });
                     } else {
                         btn.prop('disabled', false);
-                        toastr.error(result.msg);
+                        toastr.error(result.msg || "Terjadi kesalahan saat membuat transaksi.");
                     }
                 },
-                error: function() {
+                error: function(xhr) {
                     btn.prop('disabled', false);
-                    toastr.error("Gagal menyimpan transaksi POS.");
+                    var msg = "Gagal menyimpan transaksi POS.";
+                    if (xhr.responseJSON && xhr.responseJSON.msg) {
+                        msg = xhr.responseJSON.msg;
+                    }
+                    toastr.error(msg);
                 }
             });
         });

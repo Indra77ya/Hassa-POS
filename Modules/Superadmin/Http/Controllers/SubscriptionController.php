@@ -392,6 +392,16 @@ class SubscriptionController extends BaseController
     }
 
     /**
+     * Midtrans payment method
+     *
+     * @return Response
+     */
+    protected function pay_midtrans($business_id, $business_name, $package, $request)
+    {
+        return 'MID-SUB-' . $business_id . '-' . $package->id . '-' . time();
+    }
+
+    /**
      * Offline payment method
      *
      * @return Response
@@ -911,7 +921,9 @@ class SubscriptionController extends BaseController
             $business_id = request()->session()->get('user.business_id');
             $user_id = request()->session()->get('user.id');
             $business = Business::find($business_id);
-            $user = request()->session()->get('user');
+            $userSession = request()->session()->get('user');
+            $userName = is_array($userSession) ? ($userSession['first_name'] ?? '') : ($userSession->first_name ?? '');
+            $userEmail = is_array($userSession) ? ($userSession['email'] ?? '') : ($userSession->email ?? '');
 
             $price = $package->price;
             $code = $request->input('code');
@@ -939,8 +951,8 @@ class SubscriptionController extends BaseController
                     'gross_amount' => $grossAmount,
                 ],
                 'customer_details' => [
-                    'first_name' => $user->first_name ?? $business->name ?? 'User',
-                    'email' => $user->email ?? $business->email ?? 'user@example.com',
+                    'first_name' => !empty($userName) ? $userName : ($business->name ?? 'User'),
+                    'email' => !empty($userEmail) ? $userEmail : ($business->email ?? 'user@example.com'),
                 ],
                 'custom_field1' => (string) $business_id,
                 'custom_field2' => (string) $package_id,

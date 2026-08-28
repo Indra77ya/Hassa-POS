@@ -23,7 +23,17 @@ class MidtransController extends Controller
     public function createSnapToken(Request $request, $transaction_id)
     {
         try {
+            $user = auth()->user();
             $transaction = Transaction::with(['business', 'contact'])->findOrFail($transaction_id);
+
+            // Ensure transaction belongs to user's business unless guest payment
+            if ($user && $user->business_id != $transaction->business_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized action.',
+                ], 403);
+            }
+
             $pos_settings = empty($transaction->business->pos_settings) ? [] : json_decode($transaction->business->pos_settings, true);
 
             if (empty($pos_settings['enable_midtrans']) || empty($pos_settings['midtrans_server_key'])) {
@@ -125,7 +135,7 @@ class MidtransController extends Controller
                         $couponCode = $notification['custom_field3'] ?? null;
 
                         $subController = new \Modules\Superadmin\Http\Controllers\SubscriptionController();
-                        $subController->_add_subscription($couponCode, $grossAmount, $businessId, $packageId, 'midtrans', $orderId, 1);
+                        $subController->_add_subscription($couponCode, $grossAmount, $businessId, (int)$packageId, 'midtrans', $orderId, 1);
                     }
                 }
 
@@ -151,17 +161,21 @@ class MidtransController extends Controller
             $pos_settings = empty($transaction->business->pos_settings) ? [] : json_decode($transaction->business->pos_settings, true);
             $serverKey = $pos_settings['midtrans_server_key'] ?? '';
 
-            if ($serverKey) {
-                if (!isset($notification['signature_key']) || !isset($notification['status_code'])) {
-                    Log::warning('Midtrans Missing Signature Key or Status Code');
-                    return response()->json(['message' => 'Missing signature key or status code'], 400);
-                }
-                $statusCode = $notification['status_code'];
-                $signatureKey = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
-                if ($signatureKey !== $notification['signature_key']) {
-                    Log::warning('Midtrans Invalid Signature Key');
-                    return response()->json(['message' => 'Invalid signature'], 403);
-                }
+            if (empty($serverKey)) {
+                Log::warning('Midtrans Webhook Rejected: Server key not configured');
+                return response()->json(['message' => 'Midtrans server key not configured'], 400);
+            }
+
+            if (!isset($notification['signature_key']) || !isset($notification['status_code'])) {
+                Log::warning('Midtrans Missing Signature Key or Status Code');
+                return response()->json(['message' => 'Missing signature key or status code'], 400);
+            }
+
+            $statusCode = $notification['status_code'];
+            $signatureKey = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+            if ($signatureKey !== $notification['signature_key']) {
+                Log::warning('Midtrans Invalid Signature Key');
+                return response()->json(['message' => 'Invalid signature'], 403);
             }
 
             // Check status and update payment if settled/captured
