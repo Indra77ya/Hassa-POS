@@ -214,64 +214,116 @@ class MidtransController extends Controller
             }
 
             if ($isPaid) {
-                // Determine payment account (Kas / Bank) from business location default settings if available
-                $accountId = null;
-                $location = \App\BusinessLocation::find($transaction->location_id);
-                if ($location && !empty($location->default_payment_accounts)) {
-                    $defaultPaymentAccounts = json_decode($location->default_payment_accounts, true);
-                    $accountId = $defaultPaymentAccounts['custom_pay_1']['account']
-                        ?? $defaultPaymentAccounts['card']['account']
-                        ?? $defaultPaymentAccounts['cash']['account']
-                        ?? null;
-                }
-
-                if ($transaction->status != 'final') {
-                    // Update transaction status to final & generate invoice number
-                    $invoiceNo = $this->transactionUtil->getInvoiceNumber($transaction->business_id, 'final', $transaction->location_id);
-                    $transaction->status = 'final';
-                    $transaction->invoice_no = $invoiceNo;
-                    $transaction->transaction_date = \Carbon\Carbon::now()->toDateTimeString();
-                    $transaction->save();
-
-                    // Decrease product stock for stock-managed items
-                    $productUtil = new \App\Utils\ProductUtil();
-                    foreach ($transaction->sell_lines as $sell_line) {
-                        $decrease_qty = $sell_line->quantity;
-                        if ($sell_line->product && $sell_line->product->enable_stock == 1) {
-                            $productUtil->decreaseProductQuantity(
-                                $sell_line->product_id,
-                                $sell_line->variation_id,
-                                $transaction->location_id,
-                                $decrease_qty
-                            );
-                        }
-                    }
-                }
-
-                if ($transaction->payment_status != 'paid') {
-                    // Add payment line
-                    $payment_data = [
-                        'amount' => $transaction->final_total,
-                        'method' => 'midtrans',
-                        'paid_on' => \Carbon\Carbon::now()->toDateTimeString(),
-                        'created_by' => $transaction->created_by,
-                        'account_id' => $accountId,
-                        'note' => 'Midtrans Order ID: ' . $orderId,
-                    ];
-                    $this->transactionUtil->createOrUpdatePaymentLines($transaction, [$payment_data]);
-                    $this->transactionUtil->updatePaymentStatus($transaction->id, $transaction->final_total);
-                }
-
-                // Fire SellCreatedOrModified event to trigger Accounting Module mapping (Revenue, Cash/Bank, COGS)
-                if (class_exists('\App\Events\SellCreatedOrModified')) {
-                    event(new \App\Events\SellCreatedOrModified($transaction));
-                }
+                $this->finalizeAndPayTransaction($transaction, $orderId);
             }
 
             return response()->json(['status' => 'success']);
         } catch (\Exception $e) {
             Log::error('Midtrans Notification Exception: ' . $e->getMessage());
             return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Client-side POS callback endpoint to sync payment after Midtrans Snap success
+     */
+    public function syncPayment(Request $request, $transaction_id)
+    {
+        try {
+            $user = auth()->user();
+            $transaction = Transaction::with(['business', 'sell_lines.product'])->findOrFail($transaction_id);
+
+            // Authorization check
+            if ($user) {
+                if ($user->business_id != $transaction->business_id && !$user->can('superadmin')) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Unauthorized action.',
+                    ], 403);
+                }
+            } else {
+                $guestToken = $request->input('token');
+                if (empty($guestToken) || empty($transaction->invoice_token) || $guestToken !== $transaction->invoice_token) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Unauthorized action.',
+                    ], 403);
+                }
+            }
+
+            $orderId = $request->input('order_id', 'MID-POS-SYNC-' . $transaction->id);
+            $this->finalizeAndPayTransaction($transaction, $orderId);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment synced successfully.',
+                'payment_status' => $transaction->fresh()->payment_status,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Midtrans Sync Payment Exception: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Helper to finalize transaction, decrease stock, add payment line, and fire accounting events
+     */
+    public function finalizeAndPayTransaction(Transaction $transaction, $orderId = '')
+    {
+        // Determine payment account (Kas / Bank) from business location default settings if available
+        $accountId = null;
+        $location = \App\BusinessLocation::find($transaction->location_id);
+        if ($location && !empty($location->default_payment_accounts)) {
+            $defaultPaymentAccounts = json_decode($location->default_payment_accounts, true);
+            $accountId = $defaultPaymentAccounts['custom_pay_1']['account']
+                ?? $defaultPaymentAccounts['card']['account']
+                ?? $defaultPaymentAccounts['cash']['account']
+                ?? null;
+        }
+
+        if ($transaction->status != 'final') {
+            // Update transaction status to final & generate invoice number
+            $invoiceNo = $this->transactionUtil->getInvoiceNumber($transaction->business_id, 'final', $transaction->location_id);
+            $transaction->status = 'final';
+            $transaction->invoice_no = $invoiceNo;
+            $transaction->transaction_date = \Carbon\Carbon::now()->toDateTimeString();
+            $transaction->save();
+
+            // Decrease product stock for stock-managed items
+            $productUtil = new \App\Utils\ProductUtil();
+            foreach ($transaction->sell_lines as $sell_line) {
+                $decrease_qty = $sell_line->quantity;
+                if ($sell_line->product && $sell_line->product->enable_stock == 1) {
+                    $productUtil->decreaseProductQuantity(
+                        $sell_line->product_id,
+                        $sell_line->variation_id,
+                        $transaction->location_id,
+                        $decrease_qty
+                    );
+                }
+            }
+        }
+
+        if ($transaction->payment_status != 'paid') {
+            // Add payment line
+            $payment_data = [
+                'amount' => $transaction->final_total,
+                'method' => 'midtrans',
+                'paid_on' => \Carbon\Carbon::now()->toDateTimeString(),
+                'created_by' => $transaction->created_by,
+                'account_id' => $accountId,
+                'note' => 'Midtrans Order ID: ' . $orderId,
+            ];
+            $this->transactionUtil->createOrUpdatePaymentLines($transaction, [$payment_data]);
+            $this->transactionUtil->updatePaymentStatus($transaction->id, $transaction->final_total);
+        }
+
+        // Fire SellCreatedOrModified event to trigger Accounting Module mapping (Revenue, Cash/Bank, COGS)
+        if (class_exists('\App\Events\SellCreatedOrModified')) {
+            event(new \App\Events\SellCreatedOrModified($transaction));
         }
     }
 }

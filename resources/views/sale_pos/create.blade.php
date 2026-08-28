@@ -183,8 +183,18 @@
                                 if (response.success && response.token) {
                                     snap.pay(response.token, {
                                         onSuccess: function(res){
-                                            toastr.success("Pembayaran Midtrans berhasil!");
-                                            reset_pos_form();
+                                            $.ajax({
+                                                url: "/midtrans/sync-payment/" + transaction_id,
+                                                type: 'POST',
+                                                data: {
+                                                    _token: "{{ csrf_token() }}",
+                                                    order_id: (res && res.order_id) ? res.order_id : ''
+                                                },
+                                                complete: function() {
+                                                    toastr.success("Pembayaran Midtrans berhasil!");
+                                                    reset_pos_form();
+                                                }
+                                            });
                                         },
                                         onPending: function(res){
                                             toastr.info("Pembayaran Midtrans pending.");
