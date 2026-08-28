@@ -153,6 +153,25 @@ class MapSellTransaction
                             ? $accounting_default_map['sell_payment']['deposit_to']
                             : null;
                     }
+                    if (is_null($p_cash_account_id) && isset($payment->method) && $payment->method === 'midtrans' && !empty($business_location->default_payment_accounts)) {
+                        $loc_accs = json_decode($business_location->default_payment_accounts, true);
+                        if (!empty($loc_accs['midtrans']['account'])) {
+                            $p_cash_account_id = \DB::table('accounts')
+                                ->where('id', $loc_accs['midtrans']['account'])
+                                ->value('accounting_account_id');
+                        }
+                    }
+                    if (is_null($p_cash_account_id) && isset($payment->method) && $payment->method === 'midtrans') {
+                        $p_cash_account_id = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                            ->where('status', 'active')
+                            ->where('account_primary_type', 'asset')
+                            ->where(function($q) {
+                                $q->where('name', 'like', '%Midtrans%')
+                                  ->orWhere('name', 'like', '%Bank%')
+                                  ->orWhere('account_sub_type_id', 3);
+                            })
+                            ->value('id');
+                    }
                     if (is_null($p_cash_account_id)) {
                         $p_cash_account_id = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
                             ->where('status', 'active')

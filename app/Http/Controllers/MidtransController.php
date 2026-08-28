@@ -273,13 +273,15 @@ class MidtransController extends Controller
      */
     public function finalizeAndPayTransaction(Transaction $transaction, $orderId = '')
     {
-        // Determine payment account (Kas / Bank) from business location default settings if available
+        // Determine payment account (Kas / Bank / Midtrans Settlement) from business location default settings if available
         $accountId = null;
         $location = \App\BusinessLocation::find($transaction->location_id);
         if ($location && !empty($location->default_payment_accounts)) {
             $defaultPaymentAccounts = json_decode($location->default_payment_accounts, true);
-            $accountId = $defaultPaymentAccounts['custom_pay_1']['account']
+            $accountId = $defaultPaymentAccounts['midtrans']['account']
+                ?? $defaultPaymentAccounts['custom_pay_1']['account']
                 ?? $defaultPaymentAccounts['card']['account']
+                ?? $defaultPaymentAccounts['bank_transfer']['account']
                 ?? $defaultPaymentAccounts['cash']['account']
                 ?? null;
         }

@@ -1,1 +1,1 @@
-{"version":1,"defects":[],"times":{"Tests\\Unit\\MidtransControllerUnitTest::snap_token_endpoint_validates_disabled_midtrans":0.176,"Tests\\Unit\\MidtransControllerUnitTest::handle_notification_returns_200_for_midtrans_test_ping":0.031}}
+{"version":1,"defects":[],"times":{"Tests\\Unit\\MidtransControllerUnitTest::snap_token_endpoint_validates_disabled_midtrans":0.183,"Tests\\Unit\\MidtransControllerUnitTest::payment_types_includes_midtrans_option":0.03,"Tests\\Unit\\MidtransControllerUnitTest::handle_notification_returns_200_for_midtrans_test_ping":0.033}}

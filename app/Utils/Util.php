@@ -159,7 +159,14 @@ class Util
             }
         }
 
-        $payment_types = ['cash' => __('lang_v1.cash'), 'card' => __('lang_v1.card'), 'cheque' => __('lang_v1.cheque'), 'bank_transfer' => __('lang_v1.bank_transfer'), 'other' => __('lang_v1.other')];
+        $payment_types = [
+            'cash' => __('lang_v1.cash'),
+            'card' => __('lang_v1.card'),
+            'cheque' => __('lang_v1.cheque'),
+            'bank_transfer' => __('lang_v1.bank_transfer'),
+            'other' => __('lang_v1.other'),
+            'midtrans' => 'Midtrans',
+        ];
 
         for ($i = 1; $i <= 7; $i++) {
             $key = 'custom_pay_' . $i;
