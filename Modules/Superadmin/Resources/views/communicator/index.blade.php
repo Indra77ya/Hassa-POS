@@ -65,9 +65,9 @@
                                     ]) !!}
                                     <div class="col-md-12 form-group">
                                         {!! Form::label('recipients', __('superadmin::lang.recipients') . ':*') !!} <button type="button"
-                                            class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary select-all">@lang('lang_v1.select_all')</button> <button
+                                            class="btn btn-primary btn-xs select-all">@lang('lang_v1.select_all')</button> <button
                                             type="button"
-                                            class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary deselect-all">@lang('lang_v1.deselect_all')</button>
+                                            class="btn btn-default btn-xs deselect-all">@lang('lang_v1.deselect_all')</button>
                                         {!! Form::select('recipients[]', $businesses, null, [
                                             'class' => 'form-control select2',
                                             'required',
@@ -79,14 +79,12 @@
                                         {!! Form::label('subject', __('superadmin::lang.subject') . ':*') !!}
                                         {!! Form::text('subject', null, ['class' => 'form-control', 'required']) !!}
                                     </div>
-                                    <div class="col-md-12 form-group ">
-                                        <div class="col-md-8 message-container">
-                                            {!! Form::label('message', __('superadmin::lang.message') . ':*') !!}
-                                        </div>
+                                    <div class="col-md-12 form-group">
+                                        {!! Form::label('message', __('superadmin::lang.message') . ':*') !!}
                                         {!! Form::textarea('message', null, ['class' => 'form-control', 'required', 'rows' => 6]) !!}
                                     </div>
                                     <div class="col-md-12 form-group">
-                                        <button type="submit" class="tw-dw-btn tw-dw-btn-error tw-text-white pull-right"
+                                        <button type="submit" class="btn btn-primary pull-right"
                                             id="send_message">@lang('superadmin::lang.send')</button>
                                     </div>
                                     {!! Form::close() !!}
