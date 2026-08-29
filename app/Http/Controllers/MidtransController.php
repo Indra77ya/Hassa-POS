@@ -24,7 +24,13 @@ class MidtransController extends Controller
     {
         try {
             $user = auth()->user();
-            $transaction = Transaction::with(['business', 'contact'])->findOrFail($transaction_id);
+            $transaction = Transaction::with([
+                'business',
+                'contact',
+                'sell_lines.product',
+                'sell_lines.variations',
+                'sell_lines.variations.product_variation',
+            ])->findOrFail($transaction_id);
 
             // Authorization check
             if ($user) {
@@ -63,16 +69,106 @@ class MidtransController extends Controller
             $grossAmount = (int) round($transaction->final_total);
             $orderId = 'MID-POS-' . $transaction->id . '-' . time();
 
+            $itemDetails = [];
+            $itemSum = 0;
+
+            foreach ($transaction->sell_lines as $sell_line) {
+                $productName = $sell_line->product->name ?? 'Product';
+                if (!empty($sell_line->variations) && !empty($sell_line->variations->name) && $sell_line->variations->name != 'DUMMY') {
+                    $variationName = $sell_line->variations->name;
+                    if (!empty($sell_line->variations->product_variation->name) && $sell_line->variations->product_variation->name != 'DUMMY') {
+                        $variationName = $sell_line->variations->product_variation->name . ' - ' . $variationName;
+                    }
+                    $productName .= ' (' . $variationName . ')';
+                }
+
+                $itemId = !empty($sell_line->variations->sub_sku)
+                    ? $sell_line->variations->sub_sku
+                    : (!empty($sell_line->product->sku) ? $sell_line->product->sku : 'ITEM-' . $sell_line->id);
+
+                $unitPrice = (int) round($sell_line->unit_price_inc_tax);
+                $qty = (int) round($sell_line->quantity);
+
+                $itemDetails[] = [
+                    'id' => mb_strimwidth($itemId, 0, 50, ''),
+                    'price' => $unitPrice,
+                    'quantity' => $qty,
+                    'name' => mb_strimwidth($productName, 0, 50, ''),
+                ];
+
+                $itemSum += ($unitPrice * $qty);
+            }
+
+            // Handle any discrepancy between item sum and gross amount (discounts, tax, shipping, or rounding)
+            $diff = $grossAmount - $itemSum;
+            if ($diff != 0) {
+                $itemDetails[] = [
+                    'id' => 'ADJUSTMENT',
+                    'price' => $diff,
+                    'quantity' => 1,
+                    'name' => $diff < 0 ? 'Diskon / Penyesuaian' : 'Biaya Tambahan / Pajak',
+                ];
+            }
+
+            // Build Customer Details
+            $contact = $transaction->contact;
+            $customerFirstName = $contact->name ?? 'Customer';
+            if (!empty($contact->first_name)) {
+                $customerFirstName = trim($contact->first_name . ' ' . ($contact->middle_name ?? ''));
+            }
+            $customerLastName = $contact->last_name ?? '';
+            $customerEmail = !empty($contact->email) ? $contact->email : 'customer@example.com';
+            $customerPhone = !empty($contact->mobile) ? $contact->mobile : ($contact->landline ?? '');
+
+            $billingAddress = [
+                'first_name' => $customerFirstName,
+                'last_name' => $customerLastName,
+                'phone' => $customerPhone,
+                'address' => trim(($contact->address_line_1 ?? '') . ' ' . ($contact->address_line_2 ?? '')),
+                'city' => $contact->city ?? '',
+                'postal_code' => $contact->zip_code ?? '',
+                'country_code' => 'IDN',
+            ];
+
+            $customerDetails = [
+                'first_name' => $customerFirstName,
+                'last_name' => $customerLastName,
+                'email' => $customerEmail,
+                'phone' => $customerPhone,
+                'billing_address' => array_filter($billingAddress),
+            ];
+
+            // Build Shipping Details if available
+            $shippingAddressStr = $transaction->shipping_address();
+            if (empty($shippingAddressStr) && !empty($transaction->shipping_address)) {
+                $shippingAddressStr = is_array($transaction->shipping_address) ? implode(', ', $transaction->shipping_address) : $transaction->shipping_address;
+            }
+            if (empty($shippingAddressStr) && !empty($contact->shipping_address)) {
+                $shippingAddressStr = $contact->shipping_address;
+            }
+
+            if (!empty($shippingAddressStr) || !empty($transaction->shipping_details)) {
+                $shippingName = $customerFirstName;
+                $shippingPhone = $customerPhone;
+                $shippingAddrLine = !empty($shippingAddressStr) ? $shippingAddressStr : ($transaction->shipping_details ?? '');
+
+                $customerDetails['shipping_address'] = array_filter([
+                    'first_name' => $shippingName,
+                    'last_name' => $customerLastName,
+                    'email' => $customerEmail,
+                    'phone' => $shippingPhone,
+                    'address' => $shippingAddrLine,
+                    'country_code' => 'IDN',
+                ]);
+            }
+
             $payload = [
                 'transaction_details' => [
                     'order_id' => $orderId,
                     'gross_amount' => $grossAmount,
                 ],
-                'customer_details' => [
-                    'first_name' => $transaction->contact->name ?? 'Customer',
-                    'email' => $transaction->contact->email ?? 'customer@example.com',
-                    'phone' => $transaction->contact->mobile ?? '',
-                ],
+                'customer_details' => $customerDetails,
+                'item_details' => $itemDetails,
                 'custom_field1' => (string) $transaction->id,
             ];
 

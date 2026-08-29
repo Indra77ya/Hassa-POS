@@ -954,6 +954,14 @@ class SubscriptionController extends BaseController
                     'first_name' => !empty($userName) ? $userName : ($business->name ?? 'User'),
                     'email' => !empty($userEmail) ? $userEmail : ($business->email ?? 'user@example.com'),
                 ],
+                'item_details' => [
+                    [
+                        'id' => mb_strimwidth('PKG-' . $package_id, 0, 50, ''),
+                        'price' => $grossAmount,
+                        'quantity' => 1,
+                        'name' => mb_strimwidth('Paket: ' . $package->name, 0, 50, ''),
+                    ],
+                ],
                 'custom_field1' => (string) $business_id,
                 'custom_field2' => (string) $package_id,
                 'custom_field3' => (string) $code,
