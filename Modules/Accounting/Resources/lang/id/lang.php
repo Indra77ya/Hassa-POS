@@ -428,4 +428,6 @@ return [
     'auto_map_default_accounts_confirmation_text' => 'Tindakan ini akan memetakan penjualan, pembelian, pembayaran, dan beban ke akun default secara otomatis berdasarkan daftar akun (CoA) yang aktif.',
     'coa_not_available_title' => 'Chart of Accounts (CoA) Belum Tersedia',
     'coa_not_available_text' => 'Anda belum memiliki Daftar Akun (CoA) untuk bisnis ini. Silakan buat akun default terlebih dahulu sebelum melakukan pemetaan transaksi.',
+
+    'map_transactions_help' => 'Tentukan akun default yang mana transaksi akan dipetakan secara otomatis',
 ];

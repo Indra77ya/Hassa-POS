@@ -19,4 +19,6 @@ return [
     'token' => 'Token reset password ini tidak valid.',
     'user' => 'Kami tidak dapat menemukan pengguna dengan alamat email itu.',
 
+
+    'throttled' => 'Harap tunggu sebelum mencoba lagi.',
 ];

@@ -303,4 +303,7 @@ return [
     'reset_crm' => 'CRM',
     'reset_selected' => 'Reset Selected Data',
     'reset_success' => 'Data successfully reset!',
+
+    'coupon_not_matched_with_packeg' => 'Coupon not matched with package',
+    'enable_recaptcha' => 'Enable Google reCAPTCHA',
 ];

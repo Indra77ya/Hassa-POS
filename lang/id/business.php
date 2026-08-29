@@ -111,4 +111,9 @@ return [
     'tax_number2' => 'Nomor Pajak 2',
     'is_active' => 'Aktif',
     'created_by' => 'Dibuat oleh',
+
+    'land_mark' => 'Patokan / Landmark',
+    'building_number' => 'Nomor Bangunan',
+    'street_name' => 'Nama Jalan',
+    'additional_number' => 'Nomor Tambahan',
 ];

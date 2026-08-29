@@ -210,4 +210,8 @@ return [
     'brand_model' => 'Brand/Model',
     'this_setting_applies_job_sheet_to_print_format_2_only' => 'This setting applies Job Sheet to Print Format 2 only',
     'version_info' => 'Repair module version - <code> :version </code>',
+
+    'save_and_upload_docs' => 'Save and upload docs',
+    'upload_job_sheet_docs' => 'Upload job sheet docs',
+    'use_for_repair_help_text' => 'If checked, brand will be displayed in dropdown used on repair module!',
 ];

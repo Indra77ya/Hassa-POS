@@ -118,4 +118,6 @@ return [
     'custom_field2' => 'Proyek Bidang Kustom 2',
     'custom_field3' => 'Proyek Bidang Kustom 3',
     'custom_field4' => 'Proyek Bidang Kustom 4',
+
+    'hours' => 'Jam',
 ];

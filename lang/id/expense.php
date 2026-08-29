@@ -34,4 +34,6 @@ return [
     'expense_for' => 'Biaya untuk',
     'expense_for_help' => 'Pilih pengguna (email/username) yang terkait dengan pengeluaran (Opsional)',
     'import_expense' => 'Impor pengeluaran'
+,
+    'date_format_instruction' => 'Format tanggal waktu pengeluaran harus "Y-m-d H:i:s" (2020-07-15 17:45:32)',
 ];

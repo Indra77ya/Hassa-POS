@@ -296,4 +296,16 @@ return [
     'reset_crm' => 'CRM',
     'reset_selected' => 'Setel Ulang Data Terpilih',
     'reset_success' => 'Data berhasil disetel ulang!',
+
+    'api_key_document' => 'Dokumen Kunci API',
+    'enable_google_recaptcha' => 'Aktifkan Google reCAPTCHA',
+    'fatoorah_heahing' => 'Anda bisa mendapatkan token kunci API langsung sebagai berikut:',
+    'fatoorah_step_2' => '2. Pilih tombol "Integration Settings" dari menu sebelah kiri.',
+    'fatoorah_step_3' => '3. Pilih tombol "API Key" dari menu dropdown.',
+    'fatoorah_step_4' => '4. Tekan tombol "Create" untuk menghasilkan token kunci API baru.',
+    'fatoorah_step_5' => '5. Klik pada ikon "Copy" di sudut kanan bawah kotak teks untuk menyalin dan menggunakannya dalam integrasi Anda.',
+    'google_recaptcha' => 'Google reCAPTCHA',
+    'my_fatoorah' => 'Myfatoorah',
+    'myfatoorah_account' => 'Akun Myfatoorah',
+    'using_your_super_master_account' => 'menggunakan Akun Super Master Anda.',
 ];

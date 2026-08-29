@@ -65,4 +65,11 @@ return [
     'show_customer' => 'Tampilkan informasi Pelanggan',
     'paid_label' => 'Jumlah Label Berbayar',
     'customer_label' => 'Label Pelanggan',
+
+    'sequential' => 'Berurutan',
+    'random' => 'Acak',
+    'number_type' => 'Tipe Penomoran',
+    'number_type_tooltip' => 'Berurutan akan menghasilkan nomor secara berurutan seperti 1,2,3,4 <br/> Acak akan menghasilkan nomor secara acak',
+    'invoice_scheme_for_sale' => 'Skema faktur untuk penjualan',
+    'invoice_scheme_for_pos' => 'Skema faktur untuk POS',
 ];
