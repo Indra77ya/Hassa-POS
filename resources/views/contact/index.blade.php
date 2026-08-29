@@ -31,6 +31,12 @@
         #contact_table th:first-child {
             z-index: 6;
         }
+        #contact_table td:first-child:has(.open),
+        #contact_table tr:has(.open) td:first-child,
+        #contact_table td.dropdown-opened,
+        #contact_table tr.dropdown-opened td:first-child {
+            z-index: 50 !important;
+        }
     </style>
 @endsection
 @section('content')
