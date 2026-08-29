@@ -403,6 +403,17 @@ class MidtransController extends Controller
                     );
                 }
             }
+
+            // Map purchase lines to sell lines so purchase price & gross profit are linked
+            $business = \App\Business::find($transaction->business_id);
+            if ($business) {
+                $business_data = [
+                    'id' => $business->id,
+                    'accounting_method' => $business->accounting_method,
+                    'location_id' => $transaction->location_id,
+                ];
+                $this->transactionUtil->mapPurchaseSell($business_data, $transaction->sell_lines, 'purchase');
+            }
         }
 
         if ($transaction->payment_status != 'paid') {
