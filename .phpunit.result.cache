@@ -1,1 +1,1 @@
-{"version":1,"defects":[],"times":{"Tests\\Unit\\ProfitReportPaymentStatusTest::get_profit_query_filters_by_paid_and_partial_payment_status":0.3}}
+{"version":1,"defects":{"Tests\\Feature\\ProfitLossAccountingSyncTest::testProfitLossReportSyncsWithAccounting":3},"times":{"Tests\\Unit\\ProfitReportPaymentStatusTest::get_profit_query_filters_by_paid_and_partial_payment_status":0.3,"Tests\\Feature\\ProfitLossAccountingSyncTest::testProfitLossReportSyncsWithAccounting":0.302}}
