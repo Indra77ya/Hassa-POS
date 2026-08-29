@@ -166,10 +166,12 @@
         // Fix Bootstrap dropdown menu clipping inside scrollable/responsive containers (like DataTables)
         $(document).on('show.bs.dropdown', '.dropdown, .btn-group', function (e) {
             $(this).closest('.table-responsive, .dataTables_scrollBody').addClass('dropdown-opened');
+            $(this).closest('td, tr').addClass('dropdown-opened');
         });
 
         $(document).on('hide.bs.dropdown', '.dropdown, .btn-group', function (e) {
             $(this).closest('.table-responsive, .dataTables_scrollBody').removeClass('dropdown-opened');
+            $(this).closest('td, tr').removeClass('dropdown-opened');
         });
 
         // Auto scroll sidebar to the active menu item on page load
