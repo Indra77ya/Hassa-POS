@@ -99,7 +99,7 @@
                     <button type="button"
                         class="tw-font-bold tw-text-slate-600 hover:tw-text-blue-600 tw-cursor-pointer tw-text-xs md:tw-text-sm tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-1 tw-whitespace-nowrap tw-transition-colors no-print"
                         id="pos-midtrans-pay-btn" title="Pay with Midtrans Snap">
-                        <i class="fas fa-qrcode tw-text-blue-500 tw-text-base" aria-hidden="true"></i> Midtrans
+                        <img src="{{ asset('img/midtrans_mark.png') }}" alt="Midtrans" class="tw-h-4 tw-w-auto tw-object-contain"> Midtrans
                     </button>
                 @endif
 
