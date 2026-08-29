@@ -3098,6 +3098,7 @@ class ReportController extends Controller
             )
             ->where('sale.type', 'sell')
             ->where('sale.status', 'final')
+            ->whereIn('sale.payment_status', ['paid', 'partial'])
             ->join('products as P', 'transaction_sell_lines.product_id', '=', 'P.id')
             ->where('sale.business_id', $business_id)
             ->where('transaction_sell_lines.children_type', '!=', 'combo');
