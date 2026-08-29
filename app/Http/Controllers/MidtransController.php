@@ -110,16 +110,64 @@ class MidtransController extends Controller
                 ];
             }
 
+            // Build Customer Details
+            $contact = $transaction->contact;
+            $customerFirstName = $contact->name ?? 'Customer';
+            if (!empty($contact->first_name)) {
+                $customerFirstName = trim($contact->first_name . ' ' . ($contact->middle_name ?? ''));
+            }
+            $customerLastName = $contact->last_name ?? '';
+            $customerEmail = !empty($contact->email) ? $contact->email : 'customer@example.com';
+            $customerPhone = !empty($contact->mobile) ? $contact->mobile : ($contact->landline ?? '');
+
+            $billingAddress = [
+                'first_name' => $customerFirstName,
+                'last_name' => $customerLastName,
+                'phone' => $customerPhone,
+                'address' => trim(($contact->address_line_1 ?? '') . ' ' . ($contact->address_line_2 ?? '')),
+                'city' => $contact->city ?? '',
+                'postal_code' => $contact->zip_code ?? '',
+                'country_code' => 'IDN',
+            ];
+
+            $customerDetails = [
+                'first_name' => $customerFirstName,
+                'last_name' => $customerLastName,
+                'email' => $customerEmail,
+                'phone' => $customerPhone,
+                'billing_address' => array_filter($billingAddress),
+            ];
+
+            // Build Shipping Details if available
+            $shippingAddressStr = $transaction->shipping_address();
+            if (empty($shippingAddressStr) && !empty($transaction->shipping_address)) {
+                $shippingAddressStr = is_array($transaction->shipping_address) ? implode(', ', $transaction->shipping_address) : $transaction->shipping_address;
+            }
+            if (empty($shippingAddressStr) && !empty($contact->shipping_address)) {
+                $shippingAddressStr = $contact->shipping_address;
+            }
+
+            if (!empty($shippingAddressStr) || !empty($transaction->shipping_details)) {
+                $shippingName = $customerFirstName;
+                $shippingPhone = $customerPhone;
+                $shippingAddrLine = !empty($shippingAddressStr) ? $shippingAddressStr : ($transaction->shipping_details ?? '');
+
+                $customerDetails['shipping_address'] = array_filter([
+                    'first_name' => $shippingName,
+                    'last_name' => $customerLastName,
+                    'email' => $customerEmail,
+                    'phone' => $shippingPhone,
+                    'address' => $shippingAddrLine,
+                    'country_code' => 'IDN',
+                ]);
+            }
+
             $payload = [
                 'transaction_details' => [
                     'order_id' => $orderId,
                     'gross_amount' => $grossAmount,
                 ],
-                'customer_details' => [
-                    'first_name' => $transaction->contact->name ?? 'Customer',
-                    'email' => $transaction->contact->email ?? 'customer@example.com',
-                    'phone' => $transaction->contact->mobile ?? '',
-                ],
+                'customer_details' => $customerDetails,
                 'item_details' => $itemDetails,
                 'custom_field1' => (string) $transaction->id,
             ];

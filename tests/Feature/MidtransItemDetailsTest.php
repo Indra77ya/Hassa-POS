@@ -57,7 +57,14 @@ class MidtransItemDetailsTest extends TestCase
         $contact = Contact::create([
             'business_id' => $business->id,
             'type' => 'customer',
-            'name' => 'Walk-In Customer',
+            'first_name' => 'Jane',
+            'last_name' => 'Doe',
+            'email' => 'jane@example.com',
+            'mobile' => '08123456789',
+            'address_line_1' => 'Jl. Merdeka No. 10',
+            'city' => 'Jakarta',
+            'zip_code' => '10110',
+            'shipping_address' => 'Jl. Sudirman No. 25, Jakarta',
             'created_by' => $user->id,
         ]);
 
@@ -128,6 +135,17 @@ class MidtransItemDetailsTest extends TestCase
             $this->assertEquals('ADJUSTMENT', $payload['item_details'][1]['id']);
             $this->assertEquals(-10000, $payload['item_details'][1]['price']);
             $this->assertEquals(1, $payload['item_details'][1]['quantity']);
+
+            // Verify customer details and shipping details
+            $this->assertEquals('Jane', $payload['customer_details']['first_name']);
+            $this->assertEquals('Doe', $payload['customer_details']['last_name']);
+            $this->assertEquals('jane@example.com', $payload['customer_details']['email']);
+            $this->assertEquals('08123456789', $payload['customer_details']['phone']);
+            $this->assertEquals('Jl. Merdeka No. 10', $payload['customer_details']['billing_address']['address']);
+            $this->assertEquals('Jakarta', $payload['customer_details']['billing_address']['city']);
+
+            $this->assertEquals('Jane', $payload['customer_details']['shipping_address']['first_name']);
+            $this->assertEquals('Jl. Sudirman No. 25, Jakarta', $payload['customer_details']['shipping_address']['address']);
 
             // Verify total item sum equals gross amount
             $sum = 0;
