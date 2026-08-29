@@ -118,4 +118,6 @@ return [
     'custom_field2' => 'Project Custom field 2',
     'custom_field3' => 'Project Custom field 3',
     'custom_field4' => 'Project Custom field 4',
+
+    'hour' => 'Hour',
 ];

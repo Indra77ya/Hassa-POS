@@ -69,4 +69,6 @@ return [
     'shipping' => 'Shipping',
     'shipping_details' => 'Shipping Details',
     'shipping_charges' => 'Shipping Charges',
+
+    'recent_transactions' => 'Your Recent Transactions',
 ];

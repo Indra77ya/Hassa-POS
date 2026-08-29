@@ -112,4 +112,12 @@ return [
     'expense_payment' => 'Expense Payment',
     'journal_entry' => 'Journal Entry',
     'stock_adjustment' => 'Stock Adjustment',
+
+    'packing_charge_account' => 'Packing Charge Account',
+    'shipping_income_account' => 'Shipping Income Account',
+    'tax_payable_account' => 'Tax Payable Account',
+    'inventory_account' => 'Inventory Account',
+    'purchase_account' => 'Purchase Account',
+    'sales_account' => 'Sales Account',
+    'rounding_account' => 'Rounding Account',
 ];
