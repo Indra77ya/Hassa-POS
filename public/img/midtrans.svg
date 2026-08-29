@@ -1,5 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
-  <path d="M 50 10 L 85 30 L 50 50 L 15 30 Z" fill="#00A3E0"/>
-  <path d="M 15 30 L 50 50 L 50 90 L 15 70 Z" fill="#002D62"/>
-  <path d="M 50 50 L 85 30 L 85 70 L 50 90 Z" fill="#0066B2"/>
+  <!-- Top Face (Light Blue / Cyan) -->
+  <polygon points="50,15 85,32 50,49 15,32" fill="#1da1f2" />
+  <!-- Right Face (Medium Blue) -->
+  <polygon points="50,49 85,32 85,68 50,85" fill="#0077b5" />
+  <!-- Left Face (Dark Blue) -->
+  <polygon points="50,49 15,32 15,68 50,85" fill="#0e4166" />
 </svg>
