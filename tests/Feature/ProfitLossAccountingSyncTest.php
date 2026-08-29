@@ -190,6 +190,27 @@ class ProfitLossAccountingSyncTest extends TestCase
             $table->timestamps();
         });
 
+        Schema::dropIfExists('notifications');
+        Schema::create('notifications', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('type');
+            $table->string('notifiable_type');
+            $table->unsignedBigInteger('notifiable_id');
+            $table->text('data');
+            $table->timestamp('read_at')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::dropIfExists('selling_price_groups');
+        Schema::create('selling_price_groups', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('business_id');
+            $table->string('name')->nullable();
+            $table->boolean('is_active')->default(1);
+            $table->softDeletes();
+            $table->timestamps();
+        });
+
         Schema::dropIfExists('variations');
         Schema::create('variations', function (Blueprint $table) {
             $table->bigIncrements('id');
@@ -324,11 +345,10 @@ class ProfitLossAccountingSyncTest extends TestCase
         $this->assertEquals(6000000, $pnl_details['accounting_data']['total_cogs']);
         $this->assertEquals(2000000, $pnl_details['accounting_data']['total_operating_expense']);
 
-        // Verify HTML endpoint response
-        $response = $this->get('/reports/profit-loss?start_date=2024-02-01&end_date=2024-02-28', ['X-Requested-With' => 'XMLHttpRequest']);
-        $response->assertStatus(200);
-        $response->assertSee('Laporan Laba Rugi Perusahaan');
-        $response->assertSee('LABA KOTOR');
-        $response->assertSee('Laba / Rugi Bersih Akhir');
+        // Verify Accounting module Profit Loss route
+        $accResponse = $this->get(route('accounting.profitLoss', ['start_date' => '2024-02-01', 'end_date' => '2024-02-28']));
+        $accResponse->assertStatus(200);
+        $accResponse->assertSee('LABA KOTOR');
+        $accResponse->assertSee('Penjualan Produk');
     }
 }

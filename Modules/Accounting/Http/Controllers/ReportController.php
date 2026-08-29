@@ -81,54 +81,115 @@ class ReportController extends Controller
             $end_date = $fy['end'];
         }
 
+        $location_id = request()->input('location_id', null);
+
         // Laba Rugi: Calculates balances of Income, Cost of Sales, Expenses within the date range.
         $balance_formula = $this->accountingUtil->balanceFormula();
 
         // 1. Pendapatan (Income)
-        $incomes = AccountingAccount::join('accounting_accounts_transactions as AAT',
+        $incomes_query = AccountingAccount::join('accounting_accounts_transactions as AAT',
                                 'AAT.accounting_account_id', '=', 'accounting_accounts.id')
                     ->join('accounting_account_types as AATP',
                                 'AATP.id', '=', 'accounting_accounts.account_sub_type_id')
                     ->whereBetween('AAT.operation_date', [$start_date, $end_date])
-                    ->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
                     ->where('accounting_accounts.business_id', $business_id)
-                    ->where('accounting_accounts.account_primary_type', 'income')
+                    ->where('accounting_accounts.account_primary_type', 'income');
+
+        if (! empty($location_id)) {
+            $incomes_query->where(function ($q) use ($location_id) {
+                $q->whereIn('AAT.transaction_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('id')->from('transactions')->where('location_id', $location_id);
+                })
+                ->orWhereIn('AAT.transaction_payment_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('TP.id')
+                        ->from('transaction_payments as TP')
+                        ->join('transactions as T', 'TP.transaction_id', '=', 'T.id')
+                        ->where('T.location_id', $location_id);
+                })
+                ->orWhereIn('AAT.acc_trans_mapping_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('id')
+                        ->from('accounting_acc_trans_mappings')
+                        ->where('location_id', $location_id);
+                });
+            });
+        }
+
+        $incomes = $incomes_query->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
                     ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
                     ->get();
 
         // 2. Harga Pokok Penjualan (Cost of Sale / HPP - sub_type_id = 13)
-        $cost_of_sales = AccountingAccount::join('accounting_accounts_transactions as AAT',
+        $cost_of_sales_query = AccountingAccount::join('accounting_accounts_transactions as AAT',
                                 'AAT.accounting_account_id', '=', 'accounting_accounts.id')
                     ->join('accounting_account_types as AATP',
                                 'AATP.id', '=', 'accounting_accounts.account_sub_type_id')
                     ->whereBetween('AAT.operation_date', [$start_date, $end_date])
-                    ->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
                     ->where('accounting_accounts.business_id', $business_id)
                     ->whereIn('accounting_accounts.account_primary_type', ['expense', 'expenses'])
-                    ->where('accounting_accounts.account_sub_type_id', 13)
+                    ->where('accounting_accounts.account_sub_type_id', 13);
+
+        if (! empty($location_id)) {
+            $cost_of_sales_query->where(function ($q) use ($location_id) {
+                $q->whereIn('AAT.transaction_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('id')->from('transactions')->where('location_id', $location_id);
+                })
+                ->orWhereIn('AAT.transaction_payment_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('TP.id')
+                        ->from('transaction_payments as TP')
+                        ->join('transactions as T', 'TP.transaction_id', '=', 'T.id')
+                        ->where('T.location_id', $location_id);
+                })
+                ->orWhereIn('AAT.acc_trans_mapping_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('id')
+                        ->from('accounting_acc_trans_mappings')
+                        ->where('location_id', $location_id);
+                });
+            });
+        }
+
+        $cost_of_sales = $cost_of_sales_query->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
                     ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
                     ->get();
 
         // 3. Beban Operasional (Expenses - sub_type_id = 14)
-        $operating_expenses = AccountingAccount::join('accounting_accounts_transactions as AAT',
+        $operating_expenses_query = AccountingAccount::join('accounting_accounts_transactions as AAT',
                                 'AAT.accounting_account_id', '=', 'accounting_accounts.id')
                     ->join('accounting_account_types as AATP',
                                 'AATP.id', '=', 'accounting_accounts.account_sub_type_id')
                     ->whereBetween('AAT.operation_date', [$start_date, $end_date])
-                    ->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
                     ->where('accounting_accounts.business_id', $business_id)
                     ->whereIn('accounting_accounts.account_primary_type', ['expense', 'expenses'])
-                    ->where('accounting_accounts.account_sub_type_id', 14)
+                    ->where('accounting_accounts.account_sub_type_id', 14);
+
+        if (! empty($location_id)) {
+            $operating_expenses_query->where(function ($q) use ($location_id) {
+                $q->whereIn('AAT.transaction_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('id')->from('transactions')->where('location_id', $location_id);
+                })
+                ->orWhereIn('AAT.transaction_payment_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('TP.id')
+                        ->from('transaction_payments as TP')
+                        ->join('transactions as T', 'TP.transaction_id', '=', 'T.id')
+                        ->where('T.location_id', $location_id);
+                })
+                ->orWhereIn('AAT.acc_trans_mapping_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('id')
+                        ->from('accounting_acc_trans_mappings')
+                        ->where('location_id', $location_id);
+                });
+            });
+        }
+
+        $operating_expenses = $operating_expenses_query->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
                     ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
                     ->get();
 
         // 4. Pendapatan/Beban Non-Operasional / Lain-lain (other_income / other_expense - sub_type_id = 12 / 15)
-        $other_incomes = AccountingAccount::join('accounting_accounts_transactions as AAT',
+        $other_incomes_query = AccountingAccount::join('accounting_accounts_transactions as AAT',
                                 'AAT.accounting_account_id', '=', 'accounting_accounts.id')
                     ->join('accounting_account_types as AATP',
                                 'AATP.id', '=', 'accounting_accounts.account_sub_type_id')
                     ->whereBetween('AAT.operation_date', [$start_date, $end_date])
-                    ->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
                     ->where('accounting_accounts.business_id', $business_id)
                     ->where(function($q) {
                         $q->where(function($sub) {
@@ -138,12 +199,35 @@ class ReportController extends Controller
                             $sub->whereIn('accounting_accounts.account_primary_type', ['expense', 'expenses'])
                                 ->where('accounting_accounts.account_sub_type_id', 15);
                         });
-                    })
+                    });
+
+        if (! empty($location_id)) {
+            $other_incomes_query->where(function ($q) use ($location_id) {
+                $q->whereIn('AAT.transaction_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('id')->from('transactions')->where('location_id', $location_id);
+                })
+                ->orWhereIn('AAT.transaction_payment_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('TP.id')
+                        ->from('transaction_payments as TP')
+                        ->join('transactions as T', 'TP.transaction_id', '=', 'T.id')
+                        ->where('T.location_id', $location_id);
+                })
+                ->orWhereIn('AAT.acc_trans_mapping_id', function($subQuery) use ($location_id) {
+                    $subQuery->select('id')
+                        ->from('accounting_acc_trans_mappings')
+                        ->where('location_id', $location_id);
+                });
+            });
+        }
+
+        $other_incomes = $other_incomes_query->select(DB::raw($balance_formula), 'accounting_accounts.name', 'AATP.name as sub_type')
                     ->groupBy('accounting_accounts.id', 'accounting_accounts.name', 'AATP.name')
                     ->get();
 
+        $business_locations = BusinessLocation::forDropdown($business_id, true);
+
         return view('accounting::report.profit_loss')
-            ->with(compact('incomes', 'cost_of_sales', 'operating_expenses', 'other_incomes', 'start_date', 'end_date'));
+            ->with(compact('incomes', 'cost_of_sales', 'operating_expenses', 'other_incomes', 'start_date', 'end_date', 'business_locations'));
     }
 
     /**
