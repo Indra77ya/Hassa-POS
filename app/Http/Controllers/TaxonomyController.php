@@ -150,8 +150,10 @@ class TaxonomyController extends Controller
             }
         }
 
+        $quick_add = request()->get('quick_add', false);
+
         return view('taxonomy.create')
-                    ->with(compact('parent_categories', 'module_category_data', 'category_type'));
+                    ->with(compact('parent_categories', 'module_category_data', 'category_type', 'quick_add'));
     }
 
     /**

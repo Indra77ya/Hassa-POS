@@ -740,6 +740,37 @@ $(document).on('submit', 'form#quick_add_unit_form', function(e) {
     });
 });
 
+//Quick add category
+$(document).on('submit', 'form#quick_add_category_form', function(e) {
+    e.preventDefault();
+    var form = $(this);
+    var data = form.serialize();
+
+    $.ajax({
+        method: 'POST',
+        url: $(this).attr('action'),
+        dataType: 'json',
+        data: data,
+        beforeSend: function(xhr) {
+            __disable_submit_button(form.find('button[type="submit"]'));
+        },
+        success: function(result) {
+            if (result.success == true) {
+                var cat_name = result.data.short_code ? result.data.name + '-' + result.data.short_code : result.data.name;
+                var newOption = new Option(cat_name, result.data.id, true, true);
+                // Append it to the select
+                $('#category_id')
+                    .append(newOption)
+                    .trigger('change');
+                $('div.view_modal').modal('hide');
+                toastr.success(result.msg);
+            } else {
+                toastr.error(result.msg);
+            }
+        },
+    });
+});
+
 //Quick add brand
 $(document).on('submit', 'form#quick_add_brand_form', function(e) {
     e.preventDefault();
