@@ -1382,11 +1382,26 @@ class BusinessController extends BaseController
 
             // 6. Seed Contacts (Customers & Suppliers)
             $contacts_data = [
-                ['type' => 'customer', 'name' => 'Budi Santoso', 'mobile' => '081234567890', 'contact_id' => 'CUST-0001'],
-                ['type' => 'customer', 'name' => 'Siti Aminah', 'mobile' => '081987654321', 'contact_id' => 'CUST-0002'],
-                ['type' => 'customer', 'name' => 'Ahmad Hidayat', 'mobile' => '082134567891', 'contact_id' => 'CUST-0003'],
-                ['type' => 'supplier', 'name' => 'PT Distributor Utama', 'mobile' => '085123456789', 'contact_id' => 'SUPP-0001'],
-                ['type' => 'supplier', 'name' => 'CV Sumber Makmur', 'mobile' => '087890123456', 'contact_id' => 'SUPP-0002'],
+                // Customers
+                ['type' => 'customer', 'name' => 'Budi Santoso', 'mobile' => '081234567890', 'contact_id' => 'CUST-0001', 'email' => 'budi@gmail.com', 'city' => 'Jakarta Selatan', 'state' => 'DKI Jakarta'],
+                ['type' => 'customer', 'name' => 'Siti Aminah', 'mobile' => '081987654321', 'contact_id' => 'CUST-0002', 'email' => 'siti.aminah@yahoo.com', 'city' => 'Bandung', 'state' => 'Jawa Barat'],
+                ['type' => 'customer', 'name' => 'Ahmad Hidayat', 'mobile' => '082134567891', 'contact_id' => 'CUST-0003', 'email' => 'ahmad.h@gmail.com', 'city' => 'Surabaya', 'state' => 'Jawa Timur'],
+                ['type' => 'customer', 'name' => 'Dewi Lestari', 'mobile' => '081345678912', 'contact_id' => 'CUST-0004', 'email' => 'dewi.lestari@gmail.com', 'city' => 'Semarang', 'state' => 'Jawa Tengah'],
+                ['type' => 'customer', 'name' => 'Rian Pratama', 'mobile' => '081567890123', 'contact_id' => 'CUST-0005', 'email' => 'rian.p@outlook.com', 'city' => 'Yogyakarta', 'state' => 'DI Yogyakarta'],
+
+                // Suppliers (Pemasok)
+                ['type' => 'supplier', 'name' => 'Hendra Setiawan', 'supplier_business_name' => 'PT Distributor Sembako Utama', 'mobile' => '085123456789', 'contact_id' => 'SUPP-0001', 'email' => 'sales@distributorutama.co.id', 'city' => 'Jakarta Barat', 'state' => 'DKI Jakarta', 'tax_number' => '01.234.567.8-012.000'],
+                ['type' => 'supplier', 'name' => 'Bambang Wijaya', 'supplier_business_name' => 'CV Sumber Makmur Abadi', 'mobile' => '087890123456', 'contact_id' => 'SUPP-0002', 'email' => 'info@sumbermakmur.com', 'city' => 'Surabaya', 'state' => 'Jawa Timur', 'tax_number' => '02.345.678.9-023.000'],
+                ['type' => 'supplier', 'name' => 'Agus Kurniawan', 'supplier_business_name' => 'PT Indofood Sukses Makmur Tbk', 'mobile' => '081122334455', 'contact_id' => 'SUPP-0003', 'email' => 'order@indofood.co.id', 'city' => 'Jakarta Selatan', 'state' => 'DKI Jakarta', 'tax_number' => '01.000.111.2-011.000'],
+                ['type' => 'supplier', 'name' => 'Rina Gunawan', 'supplier_business_name' => 'PT Unilever Indonesia Tbk', 'mobile' => '081233445566', 'contact_id' => 'SUPP-0004', 'email' => 'supply@unilever.co.id', 'city' => 'Tangerang', 'state' => 'Banten', 'tax_number' => '01.111.222.3-012.000'],
+                ['type' => 'supplier', 'name' => 'Luki Perkasa', 'supplier_business_name' => 'PT Nestle Indonesia', 'mobile' => '081344556677', 'contact_id' => 'SUPP-0005', 'email' => 'nestle.order@nestle.co.id', 'city' => 'Pasuruan', 'state' => 'Jawa Timur', 'tax_number' => '01.222.333.4-013.000'],
+                ['type' => 'supplier', 'name' => 'Eko Prasetyo', 'supplier_business_name' => 'CV Mayora Distribusi Nusantara', 'mobile' => '081455667788', 'contact_id' => 'SUPP-0006', 'email' => 'distribusi@mayora.co.id', 'city' => 'Bandung', 'state' => 'Jawa Barat', 'tax_number' => '02.444.555.6-024.000'],
+                ['type' => 'supplier', 'name' => 'Deni Suherman', 'supplier_business_name' => 'PT Wings Surya Indonesia', 'mobile' => '081566778899', 'contact_id' => 'SUPP-0007', 'email' => 'logistik@wingssurya.com', 'city' => 'Gresik', 'state' => 'Jawa Timur', 'tax_number' => '02.555.666.7-025.000'],
+                ['type' => 'supplier', 'name' => 'Suryadi', 'supplier_business_name' => 'PT Samsung Electronics Indonesia', 'mobile' => '081677889900', 'contact_id' => 'SUPP-0008', 'email' => 'b2b@samsung.co.id', 'city' => 'Cikarang', 'state' => 'Jawa Barat', 'tax_number' => '01.666.777.8-016.000'],
+                ['type' => 'supplier', 'name' => 'Tri Martono', 'supplier_business_name' => 'PT Asus Technology Indonesia', 'mobile' => '081788990011', 'contact_id' => 'SUPP-0009', 'email' => 'dealer@asus.co.id', 'city' => 'Jakarta Pusat', 'state' => 'DKI Jakarta', 'tax_number' => '01.777.888.9-017.000'],
+                ['type' => 'supplier', 'name' => 'Maya Putri', 'supplier_business_name' => 'CV Wardah Cosmetics Center', 'mobile' => '081899001122', 'contact_id' => 'SUPP-0010', 'email' => 'grosir@wardahbeauty.com', 'city' => 'Tangerang Selatan', 'state' => 'Banten', 'tax_number' => '02.888.999.0-028.000'],
+                ['type' => 'supplier', 'name' => 'Ferry Iskandar', 'supplier_business_name' => 'PT Mitra Adiperkasa Tbk', 'mobile' => '081900112233', 'contact_id' => 'SUPP-0011', 'email' => 'retail.supply@map.co.id', 'city' => 'Jakarta Selatan', 'state' => 'DKI Jakarta', 'tax_number' => '01.999.000.1-019.000'],
+                ['type' => 'supplier', 'name' => 'Hendra Wijaya', 'supplier_business_name' => 'CV Anugerah Jaya Logistik', 'mobile' => '082011223344', 'contact_id' => 'SUPP-0012', 'email' => 'anugerahjaya@gmail.com', 'city' => 'Semarang', 'state' => 'Jawa Tengah', 'tax_number' => '02.000.111.2-020.000'],
             ];
             foreach ($contacts_data as $cd) {
                 DB::table('contacts')->insert(array_merge($cd, [
