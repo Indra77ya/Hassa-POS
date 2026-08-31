@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Hash;
 use Modules\Superadmin\Entities\Package;
 use Modules\Superadmin\Notifications\PasswordUpdateNotification;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Yajra\DataTables\Facades\DataTables;
 
 class BusinessController extends BaseController
@@ -1469,6 +1470,101 @@ class BusinessController extends BaseController
                     'variation_id' => $v_id,
                     'location_id' => $location_id,
                     'qty_available' => $ps['stock']
+                ]);
+            }
+
+            // 8. Seed Roles & Users (Kasir, Akuntan, Sales, Staf Gudang, Manajer Toko, Agen Komisi)
+            $roles_data = [
+                [
+                    'name' => 'Kasir',
+                    'permissions' => ['sell.view', 'sell.create', 'sell.update', 'access_all_locations', 'view_cash_register', 'close_cash_register', 'print_invoice']
+                ],
+                [
+                    'name' => 'Akuntan',
+                    'permissions' => ['purchase_n_sell_report.view', 'contacts_report.view', 'tax_report.view', 'register_report.view', 'expense_report.view', 'expense.access', 'account.access', 'dashboard.data']
+                ],
+                [
+                    'name' => 'Sales Representative',
+                    'permissions' => ['customer.view', 'customer.create', 'customer.update', 'product.view', 'sell.view', 'sell.create', 'sell.update', 'sales_representative.view', 'dashboard.data', 'print_invoice', 'view_cash_register']
+                ],
+                [
+                    'name' => 'Staf Gudang',
+                    'permissions' => ['supplier.view', 'supplier.create', 'product.view', 'product.create', 'product.update', 'purchase.view', 'purchase.create', 'purchase.update', 'stock_report.view', 'unit.view', 'category.view', 'brand.view', 'dashboard.data']
+                ],
+                [
+                    'name' => 'Manajer Toko',
+                    'permissions' => [
+                        'user.view', 'supplier.view', 'customer.view', 'product.view', 'product.create', 'product.update',
+                        'purchase.view', 'purchase.create', 'sell.view', 'sell.create', 'sell.update',
+                        'purchase_n_sell_report.view', 'contacts_report.view', 'stock_report.view', 'expense.access', 'access_all_locations', 'dashboard.data', 'print_invoice', 'view_cash_register', 'close_cash_register'
+                    ]
+                ]
+            ];
+
+            $created_roles = [];
+            foreach ($roles_data as $rd) {
+                $role_name = $rd['name'] . '#' . $business_id;
+                $role = Role::firstOrCreate([
+                    'name' => $role_name,
+                    'business_id' => $business_id,
+                    'guard_name' => 'web'
+                ]);
+                $role->syncPermissions($rd['permissions']);
+                $created_roles[$rd['name']] = $role;
+            }
+
+            // Clean up previous demo users (except the business owner)
+            $owner_id = $user_id;
+            User::where('business_id', $business_id)->where('id', '!=', $owner_id)->delete();
+
+            $password = Hash::make('123456');
+
+            $demo_users = [
+                ['username' => 'kasir_' . $business_id, 'first_name' => 'Kasir', 'last_name' => 'Toko', 'email' => 'kasir' . $business_id . '@demo.com', 'role' => 'Kasir'],
+                ['username' => 'akuntan_' . $business_id, 'first_name' => 'Akuntan', 'last_name' => 'Keuangan', 'email' => 'akuntan' . $business_id . '@demo.com', 'role' => 'Akuntan'],
+                ['username' => 'sales_' . $business_id, 'first_name' => 'Sales', 'last_name' => 'Lapangan', 'email' => 'sales' . $business_id . '@demo.com', 'role' => 'Sales Representative'],
+                ['username' => 'gudang_' . $business_id, 'first_name' => 'Staf', 'last_name' => 'Gudang', 'email' => 'gudang' . $business_id . '@demo.com', 'role' => 'Staf Gudang'],
+                ['username' => 'manajer_' . $business_id, 'first_name' => 'Manajer', 'last_name' => 'Toko', 'email' => 'manajer' . $business_id . '@demo.com', 'role' => 'Manajer Toko'],
+            ];
+
+            foreach ($demo_users as $du) {
+                $new_u = User::create([
+                    'surname' => '',
+                    'first_name' => $du['first_name'],
+                    'last_name' => $du['last_name'],
+                    'username' => $du['username'],
+                    'email' => $du['email'],
+                    'password' => $password,
+                    'business_id' => $business_id,
+                    'user_type' => 'user',
+                    'status' => 'active',
+                    'is_cmmsn_agnt' => 0,
+                    'cmmsn_percent' => 0,
+                ]);
+
+                if (isset($created_roles[$du['role']])) {
+                    $new_u->assignRole($created_roles[$du['role']]->name);
+                }
+            }
+
+            // Seed Sales Commission Agents (Agen Komisi Penjualan)
+            $commission_agents = [
+                ['first_name' => 'Agen', 'last_name' => 'Rian', 'email' => 'rian' . $business_id . '@agent.com', 'contact_no' => '081299887766', 'percent' => 5],
+                ['first_name' => 'Agen', 'last_name' => 'Dewi', 'email' => 'dewi' . $business_id . '@agent.com', 'contact_no' => '081399887755', 'percent' => 7.5],
+            ];
+
+            foreach ($commission_agents as $ca) {
+                User::create([
+                    'surname' => '',
+                    'first_name' => $ca['first_name'],
+                    'last_name' => $ca['last_name'],
+                    'email' => $ca['email'],
+                    'contact_no' => $ca['contact_no'],
+                    'business_id' => $business_id,
+                    'user_type' => 'user',
+                    'status' => 'active',
+                    'is_cmmsn_agnt' => 1,
+                    'cmmsn_percent' => $ca['percent'],
                 ]);
             }
 
