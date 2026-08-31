@@ -1271,6 +1271,12 @@ class BusinessController extends BaseController
             }
 
             // Reset master data
+            $var_tmpl_ids = DB::table('variation_templates')->where('business_id', $business_id)->pluck('id')->toArray();
+            if (!empty($var_tmpl_ids)) {
+                DB::table('variation_value_templates')->whereIn('variation_template_id', $var_tmpl_ids)->delete();
+                DB::table('variation_templates')->whereIn('id', $var_tmpl_ids)->delete();
+            }
+
             DB::table('categories')->where('business_id', $business_id)->delete();
             DB::table('expense_categories')->where('business_id', $business_id)->delete();
             DB::table('brands')->where('business_id', $business_id)->delete();
@@ -1346,6 +1352,32 @@ class BusinessController extends BaseController
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);
+            }
+
+            // 5b. Seed Variation Templates (Varian Produk)
+            $variation_templates = [
+                ['name' => 'Ukuran', 'values' => ['S', 'M', 'L', 'XL', 'XXL']],
+                ['name' => 'Warna', 'values' => ['Merah', 'Biru', 'Hitam', 'Putih', 'Hijau']],
+                ['name' => 'Rasa / Varian', 'values' => ['Original', 'Cokelat', 'Keju', 'Vanilla', 'Matcha']],
+                ['name' => 'Kemasan / Ukuran Berat', 'values' => ['100 Gram', '250 Gram', '500 Gram', '1 Kilogram']],
+            ];
+
+            foreach ($variation_templates as $vt) {
+                $vt_id = DB::table('variation_templates')->insertGetId([
+                    'name' => $vt['name'],
+                    'business_id' => $business_id,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+
+                foreach ($vt['values'] as $val) {
+                    DB::table('variation_value_templates')->insert([
+                        'name' => $val,
+                        'variation_template_id' => $vt_id,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                }
             }
 
             // 4. Seed Categories
