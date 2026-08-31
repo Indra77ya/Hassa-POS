@@ -1530,7 +1530,7 @@ class BusinessController extends BaseController
 
             // Clean up previous demo users (except the business owner)
             $owner_id = $user_id;
-            User::where('business_id', $business_id)->where('id', '!=', $owner_id)->delete();
+            User::withTrashed()->where('business_id', $business_id)->where('id', '!=', $owner_id)->forceDelete();
 
             $password = Hash::make('123456');
 
