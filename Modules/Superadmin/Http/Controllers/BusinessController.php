@@ -1325,8 +1325,9 @@ class BusinessController extends BaseController
                     $c_id = DB::table('categories')->insertGetId([
                         'business_id' => $business_id,
                         'name' => $cat_name,
-                        'code' => 'CAT-' . str_pad($i + 1, 3, '0', STR_PAD_LEFT),
+                        'short_code' => 'CAT-' . str_pad($i + 1, 3, '0', STR_PAD_LEFT),
                         'category_type' => 'product',
+                        'parent_id' => 0,
                         'created_by' => $user_id,
                         'created_at' => now(),
                         'updated_at' => now(),

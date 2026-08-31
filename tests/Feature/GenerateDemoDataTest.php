@@ -104,8 +104,9 @@ class GenerateDemoDataTest extends TestCase
             $table->increments('id');
             $table->integer('business_id');
             $table->string('name');
-            $table->string('code')->nullable();
+            $table->string('short_code')->nullable();
             $table->string('category_type')->default('product');
+            $table->integer('parent_id')->default(0);
             $table->integer('created_by')->nullable();
             $table->timestamps();
         });
