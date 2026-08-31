@@ -1418,15 +1418,42 @@ class BusinessController extends BaseController
 
             // 7. Seed Sample Products
             $products_sample = [
+                // Makanan & Minuman
                 ['name' => 'Beras Premium 5kg', 'cat' => 'Makanan & Minuman', 'brand' => 'Indofood', 'unit' => 'Pak', 'cost' => 55000, 'price' => 68000, 'stock' => 150],
                 ['name' => 'Minyak Goreng 2L', 'cat' => 'Makanan & Minuman', 'brand' => 'Indofood', 'unit' => 'Botol', 'cost' => 28000, 'price' => 35000, 'stock' => 200],
+                ['name' => 'Gula Pasir 1kg', 'cat' => 'Makanan & Minuman', 'brand' => 'Indofood', 'unit' => 'Kilogram', 'cost' => 13500, 'price' => 16500, 'stock' => 300],
+                ['name' => 'Mie Instan Goreng (Dus 40 Pcs)', 'cat' => 'Makanan & Minuman', 'brand' => 'Indofood', 'unit' => 'Dus', 'cost' => 105000, 'price' => 125000, 'stock' => 80],
+                ['name' => 'Kopi Bubuk 200g', 'cat' => 'Makanan & Minuman', 'brand' => 'Nestle', 'unit' => 'Pak', 'cost' => 22000, 'price' => 28000, 'stock' => 110],
                 ['name' => 'Susu UHT 1L', 'cat' => 'Makanan & Minuman', 'brand' => 'Nestle', 'unit' => 'Dus', 'cost' => 14000, 'price' => 18000, 'stock' => 120],
+                ['name' => 'Biskuit Kaleng Assorted', 'cat' => 'Makanan & Minuman', 'brand' => 'Nestle', 'unit' => 'Pieces', 'cost' => 38000, 'price' => 48000, 'stock' => 60],
+                ['name' => 'Air Mineral 600ml (Dus 24)', 'cat' => 'Makanan & Minuman', 'brand' => 'Indofood', 'unit' => 'Dus', 'cost' => 38000, 'price' => 48000, 'stock' => 100],
+
+                // Elektronik & Gadget
                 ['name' => 'Smartphone Galaxy A15', 'cat' => 'Elektronik & Gadget', 'brand' => 'Samsung', 'unit' => 'Pieces', 'cost' => 2100000, 'price' => 2499000, 'stock' => 25],
-                ['name' => 'Headphone Wireless', 'cat' => 'Elektronik & Gadget', 'brand' => 'Sony', 'unit' => 'Pieces', 'cost' => 450000, 'price' => 599000, 'stock' => 40],
-                ['name' => 'Kaos Polos Cotton', 'cat' => 'Pakaian & Fashion', 'brand' => 'Uniqlo', 'unit' => 'Pieces', 'cost' => 60000, 'price' => 89000, 'stock' => 100],
-                ['name' => 'Sepatu Running', 'cat' => 'Pakaian & Fashion', 'brand' => 'Nike', 'unit' => 'Pieces', 'cost' => 350000, 'price' => 499000, 'stock' => 30],
-                ['name' => 'Sunscreen SPF 50', 'cat' => 'Kecantikan & Perawatan', 'brand' => 'Wardah', 'unit' => 'Pieces', 'cost' => 45000, 'price' => 62000, 'stock' => 80],
-                ['name' => 'Shampoo Soft 170ml', 'cat' => 'Kecantikan & Perawatan', 'brand' => 'Unilever', 'unit' => 'Botol', 'cost' => 18000, 'price' => 24000, 'stock' => 90],
+                ['name' => 'Headphone Wireless BT', 'cat' => 'Elektronik & Gadget', 'brand' => 'Sony', 'unit' => 'Pieces', 'cost' => 450000, 'price' => 599000, 'stock' => 40],
+                ['name' => 'Smart TV 43 Inch 4K', 'cat' => 'Elektronik & Gadget', 'brand' => 'Samsung', 'unit' => 'Pieces', 'cost' => 3800000, 'price' => 4399000, 'stock' => 12],
+                ['name' => 'Kabel Charger Type-C Fast', 'cat' => 'Elektronik & Gadget', 'brand' => 'Samsung', 'unit' => 'Pieces', 'cost' => 45000, 'price' => 75000, 'stock' => 150],
+                ['name' => 'Powerbank 10000mAh', 'cat' => 'Elektronik & Gadget', 'brand' => 'Sony', 'unit' => 'Pieces', 'cost' => 150000, 'price' => 219000, 'stock' => 65],
+                ['name' => 'Mouse Wireless Ergonomis', 'cat' => 'Elektronik & Gadget', 'brand' => 'Apple', 'unit' => 'Pieces', 'cost' => 85000, 'price' => 129000, 'stock' => 85],
+
+                // Pakaian & Fashion
+                ['name' => 'Kaos Polos Cotton 30S', 'cat' => 'Pakaian & Fashion', 'brand' => 'Uniqlo', 'unit' => 'Pieces', 'cost' => 60000, 'price' => 89000, 'stock' => 100],
+                ['name' => 'Celana Chino Slim Fit', 'cat' => 'Pakaian & Fashion', 'brand' => 'Uniqlo', 'unit' => 'Pieces', 'cost' => 150000, 'price' => 229000, 'stock' => 50],
+                ['name' => 'Sepatu Running Sport', 'cat' => 'Pakaian & Fashion', 'brand' => 'Nike', 'unit' => 'Pieces', 'cost' => 350000, 'price' => 499000, 'stock' => 30],
+                ['name' => 'Jaket Windbreaker Sport', 'cat' => 'Pakaian & Fashion', 'brand' => 'Nike', 'unit' => 'Pieces', 'cost' => 280000, 'price' => 399000, 'stock' => 40],
+                ['name' => 'Kemeja Casual Lengan Panjang', 'cat' => 'Pakaian & Fashion', 'brand' => 'Uniqlo', 'unit' => 'Pieces', 'cost' => 180000, 'price' => 259000, 'stock' => 45],
+
+                // Kecantikan & Perawatan
+                ['name' => 'Sunscreen Gel SPF 50', 'cat' => 'Kecantikan & Perawatan', 'brand' => 'Wardah', 'unit' => 'Pieces', 'cost' => 45000, 'price' => 62000, 'stock' => 80],
+                ['name' => 'Shampoo Soft & Smooth 170ml', 'cat' => 'Kecantikan & Perawatan', 'brand' => 'Unilever', 'unit' => 'Botol', 'cost' => 18000, 'price' => 24000, 'stock' => 90],
+                ['name' => 'Sabun Mandi Cair 400ml Refill', 'cat' => 'Kecantikan & Perawatan', 'brand' => 'Unilever', 'unit' => 'Pak', 'cost' => 22000, 'price' => 29000, 'stock' => 130],
+                ['name' => 'Serum Glowing Brightening 30ml', 'cat' => 'Kecantikan & Perawatan', 'brand' => 'Wardah', 'unit' => 'Pieces', 'cost' => 85000, 'price' => 119000, 'stock' => 70],
+                ['name' => 'Micellar Water Cleanser 240ml', 'cat' => 'Kecantikan & Perawatan', 'brand' => 'Wardah', 'unit' => 'Botol', 'cost' => 32000, 'price' => 45000, 'stock' => 95],
+
+                // Alat Tulis & Kantor
+                ['name' => 'Buku Tulis A5 Isi 58 (Box 10)', 'cat' => 'Alat Tulis & Kantor', 'brand' => 'Indofood', 'unit' => 'Box', 'cost' => 35000, 'price' => 48000, 'stock' => 75],
+                ['name' => 'Pulpen Gel Hitam 0.5mm (Pak 12)', 'cat' => 'Alat Tulis & Kantor', 'brand' => 'Indofood', 'unit' => 'Pak', 'cost' => 24000, 'price' => 36000, 'stock' => 110],
+                ['name' => 'Kertas HVS A4 75gsm (Rim)', 'cat' => 'Alat Tulis & Kantor', 'brand' => 'Indofood', 'unit' => 'Pak', 'cost' => 42000, 'price' => 52000, 'stock' => 140],
             ];
 
             foreach ($products_sample as $idx => $ps) {
