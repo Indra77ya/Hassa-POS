@@ -306,4 +306,20 @@ return [
 
     'coupon_not_matched_with_packeg' => 'Coupon not matched with package',
     'enable_recaptcha' => 'Enable Google reCAPTCHA',
+
+    'generate_demo_data' => 'Generate Demo Data',
+    'generate_demo_data_heading' => 'Generate Custom Demo Data',
+    'reset_old_data_first' => 'Reset old data first',
+    'reset_old_data_help' => 'If checked, existing transactions & master data will be cleared before creating demo data.',
+    'num_users' => 'Number of Users',
+    'num_suppliers' => 'Number of Suppliers',
+    'num_customers' => 'Number of Customers',
+    'num_products' => 'Number of Products',
+    'num_variations' => 'Number of Variations',
+    'num_units' => 'Number of Units',
+    'num_categories' => 'Number of Categories',
+    'num_brands' => 'Number of Brands',
+    'num_warranties' => 'Number of Warranties',
+    'num_transactions' => 'Number of Transactions',
+    'generate_demo_success' => 'Demo data generated successfully!',
 ];

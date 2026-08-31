@@ -161,6 +161,8 @@ class BusinessController extends BaseController
                         $html .= '<li><a href="' . action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'toggleActive'], [$row->id, 1]) . '" class="link_confirmation"><i class="fa fa-power-off text-success"></i> ' . __('lang_v1.activate') . '</a></li>';
                     }
 
+                    $html .= '<li><a href="#" class="btn-modal" data-href="' . action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'getDemoModal'], [$row->id]) . '" data-container=".view_modal"><i class="fa fa-magic"></i> ' . __('superadmin::lang.generate_demo_data') . '</a></li>';
+
                     $html .= '<li><a href="#" class="btn-modal" data-href="' . action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'getResetModal'], [$row->id]) . '" data-container=".view_modal"><i class="fa fa-undo"></i> ' . __('superadmin::lang.reset_business_data') . '</a></li>';
 
                     if (request()->session()->get('user.business_id') != $row->id) {
@@ -590,6 +592,24 @@ class BusinessController extends BaseController
         }
 
         return $output;
+    }
+
+    /**
+     * Display the generate demo data modal.
+     *
+     * @param  int  $id
+     * @return Response
+     */
+    public function getDemoModal($id)
+    {
+        if (! auth()->user()->can('superadmin')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $business = Business::findOrFail($id);
+
+        return view('superadmin::business.demo_modal')
+            ->with(compact('business'));
     }
 
     /**
@@ -1176,6 +1196,569 @@ class BusinessController extends BaseController
             $output = [
                 'success' => true,
                 'msg' => __('superadmin::lang.reset_success')
+            ];
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+
+            $output = [
+                'success' => false,
+                'msg' => __('messages.something_went_wrong') . ' ' . $e->getMessage()
+            ];
+        }
+
+        return response()->json($output);
+    }
+
+    /**
+     * Generates customizable demo data for a specific business.
+     *
+     * @param  Request  $request
+     * @param  int  $id
+     * @return Response
+     */
+    public function postGenerateDemo(Request $request, $id)
+    {
+        if (! auth()->user()->can('superadmin')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+            $notAllowed = $this->businessUtil->notAllowedInDemo();
+            if (! empty($notAllowed)) {
+                return response()->json($notAllowed);
+            }
+
+            $business_id = $id;
+            $user_id = auth()->user()->id;
+
+            // 1. Reset old data if requested
+            if (!empty($request->input('reset_old_data'))) {
+                $resetRequest = new Request(['select_all_global' => 1]);
+                $this->postResetData($resetRequest, $business_id);
+            }
+
+            DB::beginTransaction();
+
+            $business = Business::findOrFail($business_id);
+            $location = DB::table('business_locations')->where('business_id', $business_id)->first();
+            if (!$location) {
+                $location_obj = $this->businessUtil->addLocation($business_id, [
+                    'name' => 'Cabang Utama',
+                    'country' => 'Indonesia',
+                    'state' => 'Jawa Tengah',
+                    'city' => 'Semarang',
+                    'zip_code' => '50142',
+                    'landmark' => 'Jl. Anjasmoro',
+                ]);
+                $location_id = is_object($location_obj) ? $location_obj->id : (is_array($location_obj) ? $location_obj['id'] : $location_obj);
+            } else {
+                $location_id = $location->id;
+            }
+
+            // Quantities from request
+            $num_units = max(0, (int)$request->input('num_units', 5));
+            $num_categories = max(0, (int)$request->input('num_categories', 5));
+            $num_brands = max(0, (int)$request->input('num_brands', 5));
+            $num_warranties = max(0, (int)$request->input('num_warranties', 3));
+            $num_variations = max(0, (int)$request->input('num_variations', 3));
+            $num_suppliers = max(0, (int)$request->input('num_suppliers', 10));
+            $num_customers = max(0, (int)$request->input('num_customers', 10));
+            $num_products = max(0, (int)$request->input('num_products', 20));
+            $num_users = max(0, (int)$request->input('num_users', 5));
+            $num_transactions = max(0, (int)$request->input('num_transactions', 15));
+
+            // 2. Seed Units
+            $unit_pool = [
+                ['actual_name' => 'Pieces', 'short_name' => 'Pcs', 'allow_decimal' => 0],
+                ['actual_name' => 'Box', 'short_name' => 'Box', 'allow_decimal' => 0],
+                ['actual_name' => 'Paket', 'short_name' => 'Pak', 'allow_decimal' => 0],
+                ['actual_name' => 'Botol', 'short_name' => 'Btl', 'allow_decimal' => 0],
+                ['actual_name' => 'Kilogram', 'short_name' => 'Kg', 'allow_decimal' => 1],
+                ['actual_name' => 'Karton', 'short_name' => 'Ktn', 'allow_decimal' => 0],
+                ['actual_name' => 'Liter', 'short_name' => 'Ltr', 'allow_decimal' => 1],
+                ['actual_name' => 'Meter', 'short_name' => 'Mtr', 'allow_decimal' => 1],
+                ['actual_name' => 'Set', 'short_name' => 'Set', 'allow_decimal' => 0],
+                ['actual_name' => 'Pasang', 'short_name' => 'Psg', 'allow_decimal' => 0],
+            ];
+
+            $created_unit_ids = [];
+            for ($i = 0; $i < $num_units; $i++) {
+                if (isset($unit_pool[$i])) {
+                    $u_data = $unit_pool[$i];
+                } else {
+                    $u_data = ['actual_name' => 'Satuan ' . ($i + 1), 'short_name' => 'Sat' . ($i + 1), 'allow_decimal' => 0];
+                }
+
+                $existing_unit = DB::table('units')->where('business_id', $business_id)->where('actual_name', $u_data['actual_name'])->first();
+                if ($existing_unit) {
+                    $created_unit_ids[] = $existing_unit->id;
+                } else {
+                    $u_id = DB::table('units')->insertGetId([
+                        'business_id' => $business_id,
+                        'actual_name' => $u_data['actual_name'],
+                        'short_name' => $u_data['short_name'],
+                        'allow_decimal' => $u_data['allow_decimal'],
+                        'created_by' => $user_id,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                    $created_unit_ids[] = $u_id;
+                }
+            }
+
+            // 3. Seed Categories
+            $category_pool = [
+                'Makanan & Minuman', 'Kecantikan & Perawatan', 'Alat Tulis & Kantor', 'Elektronik & Gadget',
+                'Pakaian & Aksesoris', 'Perlengkapan Rumah', 'Kesehatan & Farmasi', 'Otomotif & Aksesoris',
+                'Bahan Bangunan', 'Olahraga & Hobi'
+            ];
+
+            $created_category_ids = [];
+            for ($i = 0; $i < $num_categories; $i++) {
+                $cat_name = $category_pool[$i] ?? ('Kategori Demo ' . ($i + 1));
+                $existing_cat = DB::table('categories')->where('business_id', $business_id)->where('name', $cat_name)->first();
+                if ($existing_cat) {
+                    $created_category_ids[] = $existing_cat->id;
+                } else {
+                    $c_id = DB::table('categories')->insertGetId([
+                        'business_id' => $business_id,
+                        'name' => $cat_name,
+                        'code' => 'CAT-' . str_pad($i + 1, 3, '0', STR_PAD_LEFT),
+                        'category_type' => 'product',
+                        'created_by' => $user_id,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                    $created_category_ids[] = $c_id;
+                }
+            }
+
+            // 4. Seed Brands
+            $brand_pool = [
+                'Indofood', 'Unilever', 'Wardah', 'Samsung', 'LG',
+                'Philips', 'Maspion', 'Polygon', 'Toyota', 'Honda'
+            ];
+
+            $created_brand_ids = [];
+            for ($i = 0; $i < $num_brands; $i++) {
+                $b_name = $brand_pool[$i] ?? ('Merek Demo ' . ($i + 1));
+                $existing_brand = DB::table('brands')->where('business_id', $business_id)->where('name', $b_name)->first();
+                if ($existing_brand) {
+                    $created_brand_ids[] = $existing_brand->id;
+                } else {
+                    $b_id = DB::table('brands')->insertGetId([
+                        'business_id' => $business_id,
+                        'name' => $b_name,
+                        'description' => 'Merek resmi ' . $b_name,
+                        'created_by' => $user_id,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                    $created_brand_ids[] = $b_id;
+                }
+            }
+
+            // 5. Seed Warranties
+            $warranty_pool = [
+                ['name' => 'Garansi Toko 1 Bulan', 'duration' => 1, 'duration_type' => 'months'],
+                ['name' => 'Garansi Resmi 6 Bulan', 'duration' => 6, 'duration_type' => 'months'],
+                ['name' => 'Garansi Resmi 1 Tahun', 'duration' => 1, 'duration_type' => 'years'],
+                ['name' => 'Garansi Distro 2 Tahun', 'duration' => 2, 'duration_type' => 'years'],
+            ];
+
+            $created_warranty_ids = [];
+            for ($i = 0; $i < $num_warranties; $i++) {
+                if (isset($warranty_pool[$i])) {
+                    $w_data = $warranty_pool[$i];
+                } else {
+                    $w_data = ['name' => 'Garansi Demo ' . ($i + 1) . ' Bulan', 'duration' => ($i + 1), 'duration_type' => 'months'];
+                }
+
+                $existing_w = DB::table('warranties')->where('business_id', $business_id)->where('name', $w_data['name'])->first();
+                if ($existing_w) {
+                    $created_warranty_ids[] = $existing_w->id;
+                } else {
+                    $w_id = DB::table('warranties')->insertGetId([
+                        'business_id' => $business_id,
+                        'name' => $w_data['name'],
+                        'description' => $w_data['name'],
+                        'duration' => $w_data['duration'],
+                        'duration_type' => $w_data['duration_type'],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                    $created_warranty_ids[] = $w_id;
+                }
+            }
+
+            // 6. Seed Variation Templates
+            $variation_template_pool = [
+                ['name' => 'Ukuran', 'values' => ['S', 'M', 'L', 'XL', 'XXL']],
+                ['name' => 'Warna', 'values' => ['Merah', 'Biru', 'Hitam', 'Putih', 'Hijau']],
+                ['name' => 'Kemasan', 'values' => ['Small (250ml)', 'Medium (500ml)', 'Large (1L)']],
+            ];
+
+            for ($i = 0; $i < $num_variations; $i++) {
+                if (isset($variation_template_pool[$i])) {
+                    $v_tmpl = $variation_template_pool[$i];
+                } else {
+                    $v_tmpl = ['name' => 'Varian Demo ' . ($i + 1), 'values' => ['Opsi A', 'Opsi B', 'Opsi C']];
+                }
+
+                $existing_vt = DB::table('variation_templates')->where('business_id', $business_id)->where('name', $v_tmpl['name'])->first();
+                if (!$existing_vt) {
+                    $vt_id = DB::table('variation_templates')->insertGetId([
+                        'business_id' => $business_id,
+                        'name' => $v_tmpl['name'],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                    foreach ($v_tmpl['values'] as $val) {
+                        DB::table('variation_value_templates')->insert([
+                            'name' => $val,
+                            'variation_template_id' => $vt_id,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
+                }
+            }
+
+            // 7. Seed Suppliers
+            $supplier_pool = [
+                'PT Indofood Sukses Makmur', 'PT Unilever Indonesia Tbk', 'PT Paragon Technology (Wardah)',
+                'PT Samsung Electronics', 'PT Wings Surya', 'PT Mayora Indah Tbk',
+                'PT Santos Jaya Abadi', 'PT Garudafood Putra Putri Jaya', 'PT Nutrifood Indonesia', 'PT Lion Wings'
+            ];
+
+            $created_supplier_ids = [];
+            for ($i = 0; $i < $num_suppliers; $i++) {
+                $s_name = $supplier_pool[$i] ?? ('Pemasok Demo ' . ($i + 1));
+                $s_id = DB::table('contacts')->insertGetId([
+                    'business_id' => $business_id,
+                    'type' => 'supplier',
+                    'supplier_business_name' => $s_name,
+                    'name' => $s_name,
+                    'contact_id' => 'SUP-' . str_pad($i + 1, 4, '0', STR_PAD_LEFT),
+                    'mobile' => '0812' . str_pad($i + 1, 8, '0', STR_PAD_LEFT),
+                    'email' => 'supplier' . ($i + 1) . '_' . $business_id . '@demo.com',
+                    'created_by' => $user_id,
+                    'is_default' => 0,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                $created_supplier_ids[] = $s_id;
+            }
+
+            // 8. Seed Customers
+            $contactUtil = new \App\Utils\ContactUtil();
+            $walkin_customer = $contactUtil->getWalkInCustomer($business_id);
+            $walkin_customer_id = is_object($walkin_customer) ? $walkin_customer->id : (is_array($walkin_customer) ? $walkin_customer['id'] : $walkin_customer);
+            $created_customer_ids = [$walkin_customer_id];
+
+            $customer_pool = [
+                'Budi Santoso', 'Siti Aminah', 'Rudi Hermawan', 'Dewi Lestari', 'Agus Setiawan',
+                'Rina Wijaya', 'Eko Prasetyo', 'Nur Hidayah', 'Dedi Kurniawan', 'Lia Rahmawati'
+            ];
+
+            for ($i = 0; $i < $num_customers; $i++) {
+                $c_name = $customer_pool[$i] ?? ('Pelanggan Demo ' . ($i + 1));
+                $c_id = DB::table('contacts')->insertGetId([
+                    'business_id' => $business_id,
+                    'type' => 'customer',
+                    'name' => $c_name,
+                    'contact_id' => 'CUST-' . str_pad($i + 1, 4, '0', STR_PAD_LEFT),
+                    'mobile' => '0857' . str_pad($i + 1, 8, '0', STR_PAD_LEFT),
+                    'email' => 'customer' . ($i + 1) . '_' . $business_id . '@demo.com',
+                    'created_by' => $user_id,
+                    'is_default' => 0,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                $created_customer_ids[] = $c_id;
+            }
+
+            // 9. Seed Products & Variations
+            $product_sample_pool = [
+                ['name' => 'Indomie Goreng Original 85g', 'cost' => 2800, 'price' => 3500, 'stock' => 200],
+                ['name' => 'Minyak Goreng Filma 2 Litre', 'cost' => 32000, 'price' => 38000, 'stock' => 150],
+                ['name' => 'Kopi Kapal Api Special 165g', 'cost' => 12500, 'price' => 15500, 'stock' => 180],
+                ['name' => 'Susu UHT Full Cream 1L', 'cost' => 16000, 'price' => 20000, 'stock' => 120],
+                ['name' => 'Gula Pasir Kristal Premium 1kg', 'cost' => 13500, 'price' => 16500, 'stock' => 250],
+                ['name' => 'Teh Celup Sosri Box 25', 'cost' => 6500, 'price' => 8500, 'stock' => 100],
+                ['name' => 'Air Mineral Aqua 600ml (Karton)', 'cost' => 45000, 'price' => 55000, 'stock' => 80],
+                ['name' => 'Biskuit Khong Guan Red Can 1600g', 'cost' => 85000, 'price' => 105000, 'stock' => 50],
+                ['name' => 'Sabun Cuci Piring Liquid 780ml', 'cost' => 14000, 'price' => 18000, 'stock' => 140],
+                ['name' => 'Deterjen Bubuk Attack 800g', 'cost' => 19500, 'price' => 24500, 'stock' => 110],
+                ['name' => 'Pembersih Lantai Pine 800ml Refill', 'cost' => 11000, 'price' => 14500, 'stock' => 95],
+                ['name' => 'Pasta Gigi Whitening 190g', 'cost' => 12500, 'price' => 16500, 'stock' => 160],
+                ['name' => 'Bedak Tabur Two Way Cake 14g', 'cost' => 45000, 'price' => 62000, 'stock' => 80],
+                ['name' => 'Shampoo Soft & Smooth 170ml', 'cost' => 18000, 'price' => 24000, 'stock' => 90],
+                ['name' => 'Sabun Mandi Cair 400ml Refill', 'cost' => 22000, 'price' => 29000, 'stock' => 130],
+                ['name' => 'Serum Glowing Brightening 30ml', 'cost' => 85000, 'price' => 119000, 'stock' => 70],
+                ['name' => 'Micellar Water Cleanser 240ml', 'cost' => 32000, 'price' => 45000, 'stock' => 95],
+                ['name' => 'Buku Tulis A5 Isi 58 (Box 10)', 'cost' => 35000, 'price' => 48000, 'stock' => 75],
+                ['name' => 'Pulpen Gel Hitam 0.5mm (Pak 12)', 'cost' => 24000, 'price' => 36000, 'stock' => 110],
+                ['name' => 'Kertas HVS A4 75gsm (Rim)', 'cost' => 42000, 'price' => 52000, 'stock' => 140],
+            ];
+
+            $created_products = [];
+            for ($i = 0; $i < $num_products; $i++) {
+                if (isset($product_sample_pool[$i])) {
+                    $ps = $product_sample_pool[$i];
+                } else {
+                    $ps = [
+                        'name' => 'Produk Demo #' . ($i + 1),
+                        'cost' => rand(10, 100) * 1000,
+                        'price' => rand(12, 150) * 1000,
+                        'stock' => rand(50, 200)
+                    ];
+                }
+
+                $sku = 'DEMO-' . str_pad($i + 1, 4, '0', STR_PAD_LEFT);
+                $unit_id = !empty($created_unit_ids) ? $created_unit_ids[$i % count($created_unit_ids)] : null;
+                $cat_id = !empty($created_category_ids) ? $created_category_ids[$i % count($created_category_ids)] : null;
+                $brand_id = !empty($created_brand_ids) ? $created_brand_ids[$i % count($created_brand_ids)] : null;
+
+                $p_id = DB::table('products')->insertGetId([
+                    'business_id' => $business_id,
+                    'name' => $ps['name'],
+                    'type' => 'single',
+                    'unit_id' => $unit_id,
+                    'brand_id' => $brand_id,
+                    'category_id' => $cat_id,
+                    'tax_type' => 'exclusive',
+                    'barcode_type' => 'C128',
+                    'enable_stock' => 1,
+                    'alert_quantity' => 10,
+                    'sku' => $sku,
+                    'created_by' => $user_id,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+
+                DB::table('product_locations')->insert([
+                    'product_id' => $p_id,
+                    'location_id' => $location_id
+                ]);
+
+                $pv_id = DB::table('product_variations')->insertGetId([
+                    'product_id' => $p_id,
+                    'name' => 'DUMMY',
+                    'is_dummy' => 1,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+
+                $profit_percent = $ps['cost'] > 0 ? round((($ps['price'] - $ps['cost']) / $ps['cost']) * 100, 2) : 25;
+
+                $v_id = DB::table('variations')->insertGetId([
+                    'product_id' => $p_id,
+                    'product_variation_id' => $pv_id,
+                    'name' => 'DUMMY',
+                    'sub_sku' => $sku,
+                    'default_purchase_price' => $ps['cost'],
+                    'dpp_inc_tax' => $ps['cost'],
+                    'profit_percent' => $profit_percent,
+                    'default_sell_price' => $ps['price'],
+                    'sell_price_inc_tax' => $ps['price'],
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+
+                DB::table('variation_location_details')->insert([
+                    'product_id' => $p_id,
+                    'product_variation_id' => $pv_id,
+                    'variation_id' => $v_id,
+                    'location_id' => $location_id,
+                    'qty_available' => $ps['stock']
+                ]);
+
+                $created_products[] = [
+                    'product_id' => $p_id,
+                    'variation_id' => $v_id,
+                    'cost' => $ps['cost'],
+                    'price' => $ps['price'],
+                    'stock' => $ps['stock']
+                ];
+            }
+
+            // 10. Seed Roles & Users
+            if ($num_users > 0) {
+                $roles_data = [
+                    ['name' => 'Kasir', 'permissions' => ['sell.view', 'sell.create', 'sell.update', 'access_all_locations', 'view_cash_register', 'close_cash_register', 'print_invoice']],
+                    ['name' => 'Akuntan', 'permissions' => ['purchase_n_sell_report.view', 'contacts_report.view', 'tax_report.view', 'register_report.view', 'expense_report.view', 'expense.access', 'account.access', 'dashboard.data']],
+                    ['name' => 'Sales Representative', 'permissions' => ['customer.view', 'customer.create', 'customer.update', 'product.view', 'sell.view', 'sell.create', 'sell.update', 'sales_representative.view', 'dashboard.data', 'print_invoice', 'view_cash_register']],
+                    ['name' => 'Staf Gudang', 'permissions' => ['supplier.view', 'supplier.create', 'product.view', 'product.create', 'product.update', 'purchase.view', 'purchase.create', 'purchase.update', 'stock_report.view', 'unit.view', 'category.view', 'brand.view', 'dashboard.data']],
+                    ['name' => 'Manajer Toko', 'permissions' => ['user.view', 'supplier.view', 'customer.view', 'product.view', 'product.create', 'product.update', 'purchase.view', 'purchase.create', 'sell.view', 'sell.create', 'sell.update', 'purchase_n_sell_report.view', 'contacts_report.view', 'stock_report.view', 'expense.access', 'access_all_locations', 'dashboard.data', 'print_invoice', 'view_cash_register', 'close_cash_register']],
+                ];
+
+                $created_roles = [];
+                foreach ($roles_data as $rd) {
+                    $role_name = $rd['name'] . '#' . $business_id;
+                    $role = \Spatie\Permission\Models\Role::firstOrCreate([
+                        'name' => $role_name,
+                        'business_id' => $business_id,
+                        'guard_name' => 'web'
+                    ]);
+
+                    foreach ($rd['permissions'] as $p_name) {
+                        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => $p_name, 'guard_name' => 'web']);
+                    }
+
+                    $role->syncPermissions($rd['permissions']);
+                    $created_roles[] = $role;
+                }
+
+                $password = \Illuminate\Support\Facades\Hash::make('123456');
+
+                for ($i = 0; $i < $num_users; $i++) {
+                    $assigned_role = $created_roles[$i % count($created_roles)];
+                    $role_clean = explode('#', $assigned_role->name)[0];
+                    $username = strtolower(str_replace(' ', '_', $role_clean)) . '_' . ($i + 1) . '_' . $business_id;
+
+                    $new_u = User::create([
+                        'surname' => '',
+                        'first_name' => $role_clean,
+                        'last_name' => 'User ' . ($i + 1),
+                        'username' => $username,
+                        'email' => $username . '@demo.com',
+                        'password' => $password,
+                        'business_id' => $business_id,
+                        'user_type' => 'user',
+                        'status' => 'active',
+                        'is_cmmsn_agnt' => 0,
+                        'cmmsn_percent' => 0,
+                    ]);
+
+                    $new_u->assignRole($assigned_role->name);
+                }
+
+                // Seed 1 Sales Commission Agent
+                User::create([
+                    'surname' => '',
+                    'first_name' => 'Agen Sales',
+                    'last_name' => '(Komisi)',
+                    'username' => 'agent_' . $business_id,
+                    'email' => 'agent_' . $business_id . '@demo.com',
+                    'password' => $password,
+                    'contact_no' => '081299887766',
+                    'business_id' => $business_id,
+                    'user_type' => 'user',
+                    'status' => 'active',
+                    'is_cmmsn_agnt' => 1,
+                    'cmmsn_percent' => 5,
+                ]);
+            }
+
+            // 11. Seed Transactions (Purchases & Sales)
+            if ($num_transactions > 0 && !empty($created_products)) {
+                $num_purchases = (int)ceil($num_transactions * 0.3);
+                $num_sales = $num_transactions - $num_purchases;
+
+                // Create Purchases
+                for ($i = 0; $i < $num_purchases; $i++) {
+                    $supplier_id = !empty($created_supplier_ids) ? $created_supplier_ids[$i % count($created_supplier_ids)] : null;
+                    $p_item = $created_products[$i % count($created_products)];
+                    $qty = rand(10, 50);
+                    $line_total = $p_item['cost'] * $qty;
+
+                    $purchase_id = DB::table('transactions')->insertGetId([
+                        'business_id' => $business_id,
+                        'location_id' => $location_id,
+                        'type' => 'purchase',
+                        'status' => 'received',
+                        'payment_status' => 'paid',
+                        'contact_id' => $supplier_id,
+                        'ref_no' => 'PO-' . date('Ymd') . '-' . str_pad($i + 1, 4, '0', STR_PAD_LEFT),
+                        'transaction_date' => \Carbon::now()->subDays(rand(1, 30))->format('Y-m-d H:i:s'),
+                        'total_before_tax' => $line_total,
+                        'final_total' => $line_total,
+                        'created_by' => $user_id,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+
+                    $pl_id = DB::table('purchase_lines')->insertGetId([
+                        'transaction_id' => $purchase_id,
+                        'product_id' => $p_item['product_id'],
+                        'variation_id' => $p_item['variation_id'],
+                        'quantity' => $qty,
+                        'purchase_price' => $p_item['cost'],
+                        'purchase_price_inc_tax' => $p_item['cost'],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+
+                    DB::table('transaction_payments')->insert([
+                        'business_id' => $business_id,
+                        'transaction_id' => $purchase_id,
+                        'amount' => $line_total,
+                        'method' => 'cash',
+                        'paid_on' => now(),
+                        'created_by' => $user_id,
+                        'payment_for' => $supplier_id,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+
+                // Create Sales
+                for ($i = 0; $i < $num_sales; $i++) {
+                    $customer_id = !empty($created_customer_ids) ? $created_customer_ids[$i % count($created_customer_ids)] : $walkin_customer_id;
+                    $p_item = $created_products[$i % count($created_products)];
+                    $qty = rand(1, 5);
+                    $line_total = $p_item['price'] * $qty;
+
+                    $sale_id = DB::table('transactions')->insertGetId([
+                        'business_id' => $business_id,
+                        'location_id' => $location_id,
+                        'type' => 'sell',
+                        'status' => 'final',
+                        'payment_status' => 'paid',
+                        'contact_id' => $customer_id,
+                        'invoice_no' => 'SELL-DEMO-' . str_pad($i + 1, 4, '0', STR_PAD_LEFT),
+                        'transaction_date' => \Carbon::now()->subDays(rand(0, 15))->format('Y-m-d H:i:s'),
+                        'total_before_tax' => $line_total,
+                        'final_total' => $line_total,
+                        'created_by' => $user_id,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+
+                    $sl_id = DB::table('transaction_sell_lines')->insertGetId([
+                        'transaction_id' => $sale_id,
+                        'product_id' => $p_item['product_id'],
+                        'variation_id' => $p_item['variation_id'],
+                        'quantity' => $qty,
+                        'unit_price' => $p_item['price'],
+                        'unit_price_inc_tax' => $p_item['price'],
+                        'unit_price_before_discount' => $p_item['price'],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+
+                    DB::table('transaction_payments')->insert([
+                        'business_id' => $business_id,
+                        'transaction_id' => $sale_id,
+                        'amount' => $line_total,
+                        'method' => 'cash',
+                        'paid_on' => now(),
+                        'created_by' => $user_id,
+                        'payment_for' => $customer_id,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            $output = [
+                'success' => true,
+                'msg' => __('superadmin::lang.generate_demo_success')
             ];
 
         } catch (\Exception $e) {
