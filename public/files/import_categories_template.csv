@@ -1,0 +1,4 @@
+Category Name,Category Code,Description,Parent Category
+Makanan,MKN,Kategori produk makanan,
+Minuman,MNM,Kategori produk minuman,
+Snack,SNK,Kategori makanan ringan,Makanan

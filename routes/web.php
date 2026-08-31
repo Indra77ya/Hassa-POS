@@ -367,6 +367,9 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/import-units', [ImportUnitsController::class, 'index']);
     Route::post('/import-units/store', [ImportUnitsController::class, 'store']);
 
+    Route::get('/import-categories', [\App\Http\Controllers\ImportCategoriesController::class, 'index']);
+    Route::post('/import-categories/store', [\App\Http\Controllers\ImportCategoriesController::class, 'store']);
+
     //Sales Commission Agent
     Route::resource('sales-commission-agents', SalesCommissionAgentController::class);
 

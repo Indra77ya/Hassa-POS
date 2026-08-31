@@ -201,6 +201,13 @@ class AdminSidebarMenu
                                 ['icon' => '', 'active' => request()->segment(1) == 'import-units']
                             );
                         }
+                        if (auth()->user()->can('category.create')) {
+                            $sub->url(
+                                action([\App\Http\Controllers\ImportCategoriesController::class, 'index']),
+                                __('category.import_categories'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'import-categories']
+                            );
+                        }
                         if (auth()->user()->can('product.create')) {
                             $sub->url(
                                 action([\App\Http\Controllers\SellingPriceGroupController::class, 'index']),
