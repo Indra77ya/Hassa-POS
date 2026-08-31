@@ -11,6 +11,11 @@ Route::middleware('web', 'authh', 'SetSessionData', 'auth', 'language', 'timezon
     Route::get('/get-recipe-details', [Modules\Manufacturing\Http\Controllers\RecipeController::class, 'getRecipeDetails']);
     Route::get('/get-ingredient-row/{variation_id}', [Modules\Manufacturing\Http\Controllers\RecipeController::class, 'getIngredientRow']);
     Route::get('/add-ingredient', [Modules\Manufacturing\Http\Controllers\RecipeController::class, 'addIngredients']);
+
+    Route::get('/import-recipe', [Modules\Manufacturing\Http\Controllers\RecipeController::class, 'getImportRecipe']);
+    Route::post('/import-recipe', [Modules\Manufacturing\Http\Controllers\RecipeController::class, 'postImportRecipe']);
+    Route::get('/import-recipe/download-template/{type?}', [Modules\Manufacturing\Http\Controllers\RecipeController::class, 'downloadImportTemplate']);
+
     Route::resource('/recipe', 'Modules\Manufacturing\Http\Controllers\RecipeController')->except('edit', 'update');
     Route::resource('/production', 'Modules\Manufacturing\Http\Controllers\ProductionController');
     Route::get('/settings/auto-map', [Modules\Manufacturing\Http\Controllers\SettingsController::class, 'autoMapAccounts']);
