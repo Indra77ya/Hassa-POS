@@ -39,7 +39,7 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         {!! Form::label('num_products', __('superadmin::lang.num_products') . ':') !!}
-                        {!! Form::number('num_products', 20, ['class' => 'form-control', 'min' => 0, 'max' => 200, 'required']) !!}
+                        {!! Form::number('num_products', 20, ['class' => 'form-control', 'min' => 0, 'max' => 20000, 'required']) !!}
                     </div>
                 </div>
                 <div class="col-md-6">
