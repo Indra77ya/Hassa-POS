@@ -77,7 +77,7 @@ return [
     'production_cost_type' => 'Production Cost Type',
     'instructions' => 'Instructions',
     'extra_cost_ins' => 'Additional production cost amount (Optional, default 0)',
-    'production_cost_type_ins' => 'Production cost type: "fixed" or "percentage" (Optional, default percentage)',
+    'production_cost_type_ins' => 'Production cost type: "fixed", "percentage", or "per_unit" (Optional, default percentage)',
     'recipe_instructions_ins' => 'Instructions or notes for manufacturing (Optional)',
     'ingredient_sku' => 'Ingredient SKU',
     'ingredient_sku_ins' => 'SKU of the raw material / ingredient product (Required)',

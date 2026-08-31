@@ -755,7 +755,7 @@ class RecipeController extends Controller
                         break;
                     }
 
-                    $production_cost_type = in_array($production_cost_type, ['fixed', 'percentage']) ? $production_cost_type : 'percentage';
+                    $production_cost_type = in_array($production_cost_type, ['fixed', 'percentage', 'per_unit']) ? $production_cost_type : 'percentage';
 
                     if (! isset($recipe_groups[$product_sku])) {
                         $recipe_groups[$product_sku] = [
@@ -880,6 +880,8 @@ class RecipeController extends Controller
                     $final_price = $total_ingredients_cost;
                     if ($group['production_cost_type'] == 'percentage') {
                         $final_price += ($total_ingredients_cost * $group['extra_cost'] / 100);
+                    } elseif ($group['production_cost_type'] == 'per_unit') {
+                        $final_price += ($group['extra_cost'] * $group['total_quantity']);
                     } else {
                         $final_price += $group['extra_cost'];
                     }

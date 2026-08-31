@@ -78,7 +78,7 @@ return [
     'production_cost_type' => 'Tipe Biaya Produksi',
     'instructions' => 'Instruksi',
     'extra_cost_ins' => 'Jumlah biaya tambahan produksi (Opsional, bawaan 0)',
-    'production_cost_type_ins' => 'Tipe biaya produksi: "fixed" atau "percentage" (Opsional, bawaan percentage)',
+    'production_cost_type_ins' => 'Tipe biaya produksi: "fixed", "percentage", atau "per_unit" (Opsional, bawaan percentage)',
     'recipe_instructions_ins' => 'Instruksi atau catatan pembuatan resep (Opsional)',
     'ingredient_sku' => 'SKU Bahan',
     'ingredient_sku_ins' => 'SKU produk bahan / material baku (Wajib)',
