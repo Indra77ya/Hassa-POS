@@ -74,6 +74,8 @@ return [
     'output_quantity_ins' => 'Quantity produced by this recipe (Required)',
     'output_sub_unit' => 'Output Sub Unit',
     'output_sub_unit_ins' => 'Sub unit short name for output quantity (Optional)',
+    'production_cost_type' => 'Production Cost Type',
+    'instructions' => 'Instructions',
     'extra_cost_ins' => 'Additional production cost amount (Optional, default 0)',
     'production_cost_type_ins' => 'Production cost type: "fixed" or "percentage" (Optional, default percentage)',
     'recipe_instructions_ins' => 'Instructions or notes for manufacturing (Optional)',

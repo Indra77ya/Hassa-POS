@@ -75,6 +75,8 @@ return [
     'output_quantity_ins' => 'Jumlah produk yang dihasilkan resep (Wajib)',
     'output_sub_unit' => 'Sub Satuan Output',
     'output_sub_unit_ins' => 'Nama singkat sub satuan untuk output (Opsional)',
+    'production_cost_type' => 'Tipe Biaya Produksi',
+    'instructions' => 'Instruksi',
     'extra_cost_ins' => 'Jumlah biaya tambahan produksi (Opsional, bawaan 0)',
     'production_cost_type_ins' => 'Tipe biaya produksi: "fixed" atau "percentage" (Opsional, bawaan percentage)',
     'recipe_instructions_ins' => 'Instruksi atau catatan pembuatan resep (Opsional)',
