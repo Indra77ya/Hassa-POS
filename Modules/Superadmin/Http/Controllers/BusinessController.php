@@ -1594,11 +1594,25 @@ class BusinessController extends BaseController
             $password = Hash::make('123456');
 
             $demo_users = [
-                ['username' => 'kasir_' . $business_id, 'first_name' => 'Kasir', 'last_name' => 'Toko', 'email' => 'kasir' . $business_id . '@demo.com', 'role' => 'Kasir'],
-                ['username' => 'akuntan_' . $business_id, 'first_name' => 'Akuntan', 'last_name' => 'Keuangan', 'email' => 'akuntan' . $business_id . '@demo.com', 'role' => 'Akuntan'],
-                ['username' => 'sales_' . $business_id, 'first_name' => 'Sales', 'last_name' => 'Lapangan', 'email' => 'sales' . $business_id . '@demo.com', 'role' => 'Sales Representative'],
-                ['username' => 'gudang_' . $business_id, 'first_name' => 'Staf', 'last_name' => 'Gudang', 'email' => 'gudang' . $business_id . '@demo.com', 'role' => 'Staf Gudang'],
-                ['username' => 'manajer_' . $business_id, 'first_name' => 'Manajer', 'last_name' => 'Toko', 'email' => 'manajer' . $business_id . '@demo.com', 'role' => 'Manajer Toko'],
+                // Kasir
+                ['username' => 'kasir1_' . $business_id, 'first_name' => 'Kasir', 'last_name' => 'Pagi (Andi)', 'email' => 'kasir1_' . $business_id . '@demo.com', 'role' => 'Kasir'],
+                ['username' => 'kasir2_' . $business_id, 'first_name' => 'Kasir', 'last_name' => 'Malam (Budi)', 'email' => 'kasir2_' . $business_id . '@demo.com', 'role' => 'Kasir'],
+                ['username' => 'kasir3_' . $business_id, 'first_name' => 'Kasir', 'last_name' => 'Cadangan (Siti)', 'email' => 'kasir3_' . $business_id . '@demo.com', 'role' => 'Kasir'],
+
+                // Keuangan & Akuntansi
+                ['username' => 'akuntan_' . $business_id, 'first_name' => 'Akuntan', 'last_name' => 'Keuangan Utama', 'email' => 'akuntan_' . $business_id . '@demo.com', 'role' => 'Akuntan'],
+                ['username' => 'finance_' . $business_id, 'first_name' => 'Staf', 'last_name' => 'Finance & Pajak', 'email' => 'finance_' . $business_id . '@demo.com', 'role' => 'Akuntan'],
+
+                // Sales & Pemasaran
+                ['username' => 'sales1_' . $business_id, 'first_name' => 'Sales', 'last_name' => 'Lapangan (Rian)', 'email' => 'sales1_' . $business_id . '@demo.com', 'role' => 'Sales Representative'],
+                ['username' => 'sales2_' . $business_id, 'first_name' => 'Sales', 'last_name' => 'Counter (Dewi)', 'email' => 'sales2_' . $business_id . '@demo.com', 'role' => 'Sales Representative'],
+
+                // Gudang & Logistik
+                ['username' => 'gudang1_' . $business_id, 'first_name' => 'Staf', 'last_name' => 'Gudang Utama', 'email' => 'gudang1_' . $business_id . '@demo.com', 'role' => 'Staf Gudang'],
+                ['username' => 'gudang2_' . $business_id, 'first_name' => 'Supervisor', 'last_name' => 'Inventaris', 'email' => 'gudang2_' . $business_id . '@demo.com', 'role' => 'Staf Gudang'],
+
+                // Manajemen Toko
+                ['username' => 'manajer_' . $business_id, 'first_name' => 'Manajer', 'last_name' => 'Toko Operasional', 'email' => 'manajer_' . $business_id . '@demo.com', 'role' => 'Manajer Toko'],
             ];
 
             foreach ($demo_users as $du) {
