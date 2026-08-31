@@ -163,6 +163,8 @@ class BusinessController extends BaseController
 
                     $html .= '<li><a href="#" class="btn-modal" data-href="' . action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'getResetModal'], [$row->id]) . '" data-container=".view_modal"><i class="fa fa-undo"></i> ' . __('superadmin::lang.reset_business_data') . '</a></li>';
 
+                    $html .= '<li><a href="' . action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'importDemoData'], [$row->id]) . '" class="import_demo_confirmation"><i class="fa fa-download"></i> ' . __('superadmin::lang.import_demo') . '</a></li>';
+
                     if (request()->session()->get('user.business_id') != $row->id) {
                         $html .= '<li class="divider"></li>';
                         $html .= '<li><a href="' . action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'destroy'], [$row->id]) . '" class="delete_business_confirmation" style="color: #ef4444 !important;"><i class="fa fa-trash text-danger" style="color: #ef4444 !important;"></i> ' . __('messages.delete') . '</a></li>';
@@ -1176,6 +1178,305 @@ class BusinessController extends BaseController
             $output = [
                 'success' => true,
                 'msg' => __('superadmin::lang.reset_success')
+            ];
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+
+            $output = [
+                'success' => false,
+                'msg' => __('messages.something_went_wrong') . ' ' . $e->getMessage()
+            ];
+        }
+
+        return response()->json($output);
+    }
+
+    /**
+     * Resets business data and imports dummy/demo data for a specific business.
+     *
+     * @param  int  $id
+     * @return Response
+     */
+    public function importDemoData($id)
+    {
+        if (! auth()->user()->can('superadmin')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+            $notAllowed = $this->businessUtil->notAllowedInDemo();
+            if (! empty($notAllowed)) {
+                return response()->json($notAllowed);
+            }
+
+            $business_id = $id;
+
+            DB::beginTransaction();
+
+            // 1. Reset existing transactions & master data for this business
+            if (\Illuminate\Support\Facades\Schema::hasTable('repair_job_sheets')) {
+                DB::table('repair_job_sheets')->where('business_id', $business_id)->delete();
+            }
+
+            $tx_ids = DB::table('transactions')->where('business_id', $business_id)->pluck('id')->toArray();
+            if (!empty($tx_ids)) {
+                DB::table('transaction_payments')->whereIn('transaction_id', $tx_ids)->delete();
+
+                $sell_line_ids = DB::table('transaction_sell_lines')->whereIn('transaction_id', $tx_ids)->pluck('id')->toArray();
+                if (!empty($sell_line_ids)) {
+                    DB::table('transaction_sell_lines_purchase_lines')->whereIn('sell_line_id', $sell_line_ids)->delete();
+                    DB::table('transaction_sell_lines')->whereIn('id', $sell_line_ids)->delete();
+                }
+
+                $purchase_line_ids = DB::table('purchase_lines')->whereIn('transaction_id', $tx_ids)->pluck('id')->toArray();
+                if (!empty($purchase_line_ids)) {
+                    DB::table('transaction_sell_lines_purchase_lines')->whereIn('purchase_line_id', $purchase_line_ids)->delete();
+                    DB::table('purchase_lines')->whereIn('id', $purchase_line_ids)->delete();
+                }
+
+                if (\Illuminate\Support\Facades\Schema::hasTable('stock_adjustment_lines')) {
+                    DB::table('stock_adjustment_lines')->whereIn('transaction_id', $tx_ids)->delete();
+                }
+
+                DB::table('account_transactions')->whereIn('transaction_id', $tx_ids)->delete();
+                DB::table('transactions')->whereIn('id', $tx_ids)->delete();
+            }
+
+            DB::table('transaction_payments')->where('business_id', $business_id)->delete();
+            DB::table('bookings')->where('business_id', $business_id)->delete();
+
+            // Reset products and product-related tables
+            $product_ids = DB::table('products')->where('business_id', $business_id)->pluck('id')->toArray();
+            if (!empty($product_ids)) {
+                $pv_ids = DB::table('product_variations')->whereIn('product_id', $product_ids)->pluck('id')->toArray();
+                $v_ids = DB::table('variations')->whereIn('product_id', $product_ids)->pluck('id')->toArray();
+
+                if (!empty($v_ids)) {
+                    DB::table('variation_location_details')->whereIn('variation_id', $v_ids)->delete();
+                    if (\Illuminate\Support\Facades\Schema::hasTable('variation_group_prices')) {
+                        DB::table('variation_group_prices')->whereIn('variation_id', $v_ids)->delete();
+                    }
+                    DB::table('variations')->whereIn('id', $v_ids)->delete();
+                }
+
+                if (!empty($pv_ids)) {
+                    DB::table('product_variations')->whereIn('id', $pv_ids)->delete();
+                }
+
+                DB::table('product_locations')->whereIn('product_id', $product_ids)->delete();
+                DB::table('products')->whereIn('id', $product_ids)->delete();
+            }
+
+            // Reset master data
+            DB::table('categories')->where('business_id', $business_id)->delete();
+            DB::table('expense_categories')->where('business_id', $business_id)->delete();
+            DB::table('brands')->where('business_id', $business_id)->delete();
+            DB::table('units')->where('business_id', $business_id)->delete();
+            DB::table('warranties')->where('business_id', $business_id)->delete();
+            DB::table('discounts')->where('business_id', $business_id)->delete();
+            DB::table('customer_groups')->where('business_id', $business_id)->delete();
+            DB::table('selling_price_groups')->where('business_id', $business_id)->delete();
+
+            // Reset contacts except non-deletable
+            DB::table('contacts')->where('business_id', $business_id)->where('is_default', 0)->delete();
+
+            // Ensure business location exists
+            $location = DB::table('business_locations')->where('business_id', $business_id)->first();
+            if (!$location) {
+                $location_id = DB::table('business_locations')->insertGetId([
+                    'business_id' => $business_id,
+                    'name' => 'Toko Utama',
+                    'city' => 'Jakarta',
+                    'country' => 'Indonesia',
+                    'is_active' => 1,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            } else {
+                $location_id = $location->id;
+            }
+
+            // Find business owner/user
+            $user = User::where('business_id', $business_id)->first();
+            $user_id = $user ? $user->id : auth()->user()->id;
+
+            // 2. Seed Units
+            $units_data = [
+                ['actual_name' => 'Pieces', 'short_name' => 'pcs', 'allow_decimal' => 0],
+                ['actual_name' => 'Box', 'short_name' => 'box', 'allow_decimal' => 0],
+                ['actual_name' => 'Botol', 'short_name' => 'btl', 'allow_decimal' => 0],
+                ['actual_name' => 'Pak', 'short_name' => 'pak', 'allow_decimal' => 0],
+                ['actual_name' => 'Dus', 'short_name' => 'dus', 'allow_decimal' => 0],
+                ['actual_name' => 'Kilogram', 'short_name' => 'kg', 'allow_decimal' => 1],
+                ['actual_name' => 'Liter', 'short_name' => 'ltr', 'allow_decimal' => 1],
+                ['actual_name' => 'Gram', 'short_name' => 'gr', 'allow_decimal' => 1],
+            ];
+            $unit_ids = [];
+            foreach ($units_data as $ud) {
+                $unit_ids[$ud['actual_name']] = DB::table('units')->insertGetId(array_merge($ud, [
+                    'business_id' => $business_id,
+                    'created_by' => $user_id,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]));
+            }
+
+            // 3. Seed Brands
+            $brands = [
+                ['name' => 'Indofood', 'description' => 'Produsen Makanan & Minuman'],
+                ['name' => 'Nestle', 'description' => 'Nutrisi & Produk Konsumsi'],
+                ['name' => 'Unilever', 'description' => 'Perawatan & Produk Konsumen'],
+                ['name' => 'Samsung', 'description' => 'Elektronik & Gadget'],
+                ['name' => 'Apple', 'description' => 'Gadget & Komputer Premium'],
+                ['name' => 'Sony', 'description' => 'Perangkat Elektronik & Audio'],
+                ['name' => 'Wardah', 'description' => 'Kosmetik & Skincare'],
+                ['name' => 'Nike', 'description' => 'Pakaian & Sepatu Olahraga'],
+                ['name' => 'Uniqlo', 'description' => 'Pakaian Kasual Modern'],
+            ];
+            $brand_ids = [];
+            foreach ($brands as $b) {
+                $brand_ids[$b['name']] = DB::table('brands')->insertGetId([
+                    'business_id' => $business_id,
+                    'name' => $b['name'],
+                    'description' => $b['description'],
+                    'created_by' => $user_id,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+
+            // 4. Seed Categories
+            $categories = [
+                'Makanan & Minuman',
+                'Elektronik & Gadget',
+                'Pakaian & Fashion',
+                'Kecantikan & Perawatan',
+                'Alat Tulis & Kantor',
+            ];
+            $category_ids = [];
+            foreach ($categories as $cat_name) {
+                $category_ids[$cat_name] = DB::table('categories')->insertGetId([
+                    'business_id' => $business_id,
+                    'name' => $cat_name,
+                    'category_type' => 'product',
+                    'parent_id' => 0,
+                    'created_by' => $user_id,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+
+            // 5. Seed Expense Categories
+            $exp_categories = ['Listrik & Air', 'Gaji Karyawan', 'Sewa Tempat', 'Internet & Telepon', 'Promosi & Iklan'];
+            foreach ($exp_categories as $exp_cat) {
+                DB::table('expense_categories')->insert([
+                    'business_id' => $business_id,
+                    'name' => $exp_cat,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+
+            // 6. Seed Contacts (Customers & Suppliers)
+            $contacts_data = [
+                ['type' => 'customer', 'name' => 'Budi Santoso', 'mobile' => '081234567890', 'contact_id' => 'CUST-0001'],
+                ['type' => 'customer', 'name' => 'Siti Aminah', 'mobile' => '081987654321', 'contact_id' => 'CUST-0002'],
+                ['type' => 'customer', 'name' => 'Ahmad Hidayat', 'mobile' => '082134567891', 'contact_id' => 'CUST-0003'],
+                ['type' => 'supplier', 'name' => 'PT Distributor Utama', 'mobile' => '085123456789', 'contact_id' => 'SUPP-0001'],
+                ['type' => 'supplier', 'name' => 'CV Sumber Makmur', 'mobile' => '087890123456', 'contact_id' => 'SUPP-0002'],
+            ];
+            foreach ($contacts_data as $cd) {
+                DB::table('contacts')->insert(array_merge($cd, [
+                    'business_id' => $business_id,
+                    'created_by' => $user_id,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]));
+            }
+
+            // Ensure Walk-In Customer exists
+            $contactUtil = new \App\Utils\ContactUtil();
+            $contactUtil->getWalkInCustomer($business_id);
+
+            // 7. Seed Sample Products
+            $products_sample = [
+                ['name' => 'Beras Premium 5kg', 'cat' => 'Makanan & Minuman', 'brand' => 'Indofood', 'unit' => 'Pak', 'cost' => 55000, 'price' => 68000, 'stock' => 150],
+                ['name' => 'Minyak Goreng 2L', 'cat' => 'Makanan & Minuman', 'brand' => 'Indofood', 'unit' => 'Botol', 'cost' => 28000, 'price' => 35000, 'stock' => 200],
+                ['name' => 'Susu UHT 1L', 'cat' => 'Makanan & Minuman', 'brand' => 'Nestle', 'unit' => 'Dus', 'cost' => 14000, 'price' => 18000, 'stock' => 120],
+                ['name' => 'Smartphone Galaxy A15', 'cat' => 'Elektronik & Gadget', 'brand' => 'Samsung', 'unit' => 'Pieces', 'cost' => 2100000, 'price' => 2499000, 'stock' => 25],
+                ['name' => 'Headphone Wireless', 'cat' => 'Elektronik & Gadget', 'brand' => 'Sony', 'unit' => 'Pieces', 'cost' => 450000, 'price' => 599000, 'stock' => 40],
+                ['name' => 'Kaos Polos Cotton', 'cat' => 'Pakaian & Fashion', 'brand' => 'Uniqlo', 'unit' => 'Pieces', 'cost' => 60000, 'price' => 89000, 'stock' => 100],
+                ['name' => 'Sepatu Running', 'cat' => 'Pakaian & Fashion', 'brand' => 'Nike', 'unit' => 'Pieces', 'cost' => 350000, 'price' => 499000, 'stock' => 30],
+                ['name' => 'Sunscreen SPF 50', 'cat' => 'Kecantikan & Perawatan', 'brand' => 'Wardah', 'unit' => 'Pieces', 'cost' => 45000, 'price' => 62000, 'stock' => 80],
+                ['name' => 'Shampoo Soft 170ml', 'cat' => 'Kecantikan & Perawatan', 'brand' => 'Unilever', 'unit' => 'Botol', 'cost' => 18000, 'price' => 24000, 'stock' => 90],
+            ];
+
+            foreach ($products_sample as $idx => $ps) {
+                $sku = 'DEMO-' . str_pad($idx + 1, 4, '0', STR_PAD_LEFT);
+                $unit_id = $unit_ids[$ps['unit']] ?? reset($unit_ids);
+                $brand_id = $brand_ids[$ps['brand']] ?? null;
+                $cat_id = $category_ids[$ps['cat']] ?? null;
+
+                $p_id = DB::table('products')->insertGetId([
+                    'business_id' => $business_id,
+                    'name' => $ps['name'],
+                    'type' => 'single',
+                    'unit_id' => $unit_id,
+                    'brand_id' => $brand_id,
+                    'category_id' => $cat_id,
+                    'tax_type' => 'exclusive',
+                    'barcode_type' => 'C128',
+                    'enable_stock' => 1,
+                    'alert_quantity' => 10,
+                    'sku' => $sku,
+                    'created_by' => $user_id,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+
+                DB::table('product_locations')->insert([
+                    'product_id' => $p_id,
+                    'location_id' => $location_id
+                ]);
+
+                $pv_id = DB::table('product_variations')->insertGetId([
+                    'product_id' => $p_id,
+                    'name' => 'DUMMY',
+                    'is_dummy' => 1,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+
+                $v_id = DB::table('variations')->insertGetId([
+                    'product_id' => $p_id,
+                    'product_variation_id' => $pv_id,
+                    'name' => 'DUMMY',
+                    'sub_sku' => $sku,
+                    'default_purchase_price' => $ps['cost'],
+                    'dpp_inc_tax' => $ps['cost'],
+                    'profit_percent' => 25,
+                    'default_sell_price' => $ps['price'],
+                    'sell_price_inc_tax' => $ps['price'],
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+
+                DB::table('variation_location_details')->insert([
+                    'product_id' => $p_id,
+                    'product_variation_id' => $pv_id,
+                    'variation_id' => $v_id,
+                    'location_id' => $location_id,
+                    'qty_available' => $ps['stock']
+                ]);
+            }
+
+            DB::commit();
+
+            $output = [
+                'success' => true,
+                'msg' => __('superadmin::lang.import_demo_success')
             ];
 
         } catch (\Exception $e) {

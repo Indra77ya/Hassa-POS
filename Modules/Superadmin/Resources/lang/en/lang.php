@@ -306,4 +306,7 @@ return [
 
     'coupon_not_matched_with_packeg' => 'Coupon not matched with package',
     'enable_recaptcha' => 'Enable Google reCAPTCHA',
+    'import_demo' => 'Import Demo',
+    'import_demo_confirm' => 'Are you sure you want to import demo data? Current transactions and master data for this business will be reset and populated with sample demo data.',
+    'import_demo_success' => 'Demo data imported successfully!',
 ];

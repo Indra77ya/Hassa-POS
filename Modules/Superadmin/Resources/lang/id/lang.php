@@ -308,4 +308,7 @@ return [
     'my_fatoorah' => 'Myfatoorah',
     'myfatoorah_account' => 'Akun Myfatoorah',
     'using_your_super_master_account' => 'menggunakan Akun Super Master Anda.',
+    'import_demo' => 'Impor demo',
+    'import_demo_confirm' => 'Apakah Anda yakin ingin mengimpor data demo? Data transaksi dan master data bisnis saat ini akan disetel ulang dan diganti dengan data sampel demo.',
+    'import_demo_success' => 'Data demo berhasil diimpor!',
 ];

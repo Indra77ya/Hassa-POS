@@ -215,6 +215,40 @@
                 }
             });
         });
+
+        $(document).on('click', 'a.import_demo_confirmation', function(e) {
+            e.preventDefault();
+            var url = $(this).attr('href');
+            swal({
+                title: LANG.sure,
+                text: "@lang('superadmin::lang.import_demo_confirm')",
+                icon: "warning",
+                buttons: true,
+                dangerMode: true,
+            }).then((confirmed) => {
+                if (confirmed) {
+                    $.ajax({
+                        method: 'POST',
+                        url: url,
+                        dataType: 'json',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(result) {
+                            if (result.success == true) {
+                                toastr.success(result.msg);
+                                superadmin_business_table.ajax.reload();
+                            } else {
+                                toastr.error(result.msg);
+                            }
+                        },
+                        error: function(xhr) {
+                            toastr.error(xhr.responseJSON && xhr.responseJSON.msg ? xhr.responseJSON.msg : LANG.something_went_wrong);
+                        }
+                    });
+                }
+            });
+        });
     </script>
 
 @endsection
