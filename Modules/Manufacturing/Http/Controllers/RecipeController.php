@@ -623,4 +623,325 @@ class RecipeController extends Controller
 
         return $output;
     }
+
+    /**
+     * Show import recipe view
+     *
+     * @return Response
+     */
+    public function getImportRecipe()
+    {
+        $business_id = request()->session()->get('user.business_id');
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'manufacturing_module')) || ! auth()->user()->can('manufacturing.add_recipe')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $zip_loaded = extension_loaded('zip') ? true : false;
+        if ($zip_loaded === false) {
+            $output = [
+                'success' => 0,
+                'msg' => 'Please install/enable PHP Zip archive for import',
+            ];
+            return view('manufacturing::recipe.import')->with('notification', $output);
+        }
+
+        return view('manufacturing::recipe.import');
+    }
+
+    /**
+     * Download import recipe CSV template
+     *
+     * @return Response
+     */
+    public function downloadImportTemplate()
+    {
+        $business_id = request()->session()->get('user.business_id');
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'manufacturing_module')) || ! auth()->user()->can('manufacturing.add_recipe')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $file_path = public_path('files/import_recipe_template.csv');
+        if (file_exists($file_path)) {
+            return response()->download($file_path, 'import_recipe_template.csv');
+        }
+
+        abort(404, 'Template file not found.');
+    }
+
+    /**
+     * Store imported recipes from CSV / Excel file
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function postImportRecipe(Request $request)
+    {
+        $business_id = request()->session()->get('user.business_id');
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'manufacturing_module')) || ! auth()->user()->can('manufacturing.add_recipe')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+            $notAllowed = $this->mfgUtil->notAllowedInDemo();
+            if (! empty($notAllowed)) {
+                return $notAllowed;
+            }
+
+            ini_set('max_execution_time', 0);
+            ini_set('memory_limit', -1);
+
+            if ($request->hasFile('recipes_csv')) {
+                $file = $request->file('recipes_csv');
+                $parsed_array = \Excel::toArray([], $file);
+
+                $imported_data = array_splice($parsed_array[0], 1);
+
+                $is_valid = true;
+                $error_msg = '';
+
+                // Group rows by Recipe Output Product SKU
+                $recipe_groups = [];
+
+                foreach ($imported_data as $key => $value) {
+                    $row_no = $key + 2;
+
+                    // Skip completely empty rows
+                    if (empty(array_filter($value))) {
+                        continue;
+                    }
+
+                    if (count($value) < 8) {
+                        $is_valid = false;
+                        $error_msg = "Minimum 8 columns required in row no. $row_no. Please use the latest template.";
+                        break;
+                    }
+
+                    $product_sku = trim($value[0]);
+                    $total_quantity = trim($value[1]);
+                    $sub_unit_name = trim($value[2]);
+                    $extra_cost = trim($value[3]);
+                    $production_cost_type = strtolower(trim($value[4]));
+                    $instructions = trim($value[5]);
+                    $ingredient_sku = trim($value[6]);
+                    $ingredient_quantity = trim($value[7]);
+                    $ingredient_sub_unit_name = isset($value[8]) ? trim($value[8]) : null;
+                    $ingredient_waste_percent = isset($value[9]) ? trim($value[9]) : 0;
+
+                    if (empty($product_sku)) {
+                        $is_valid = false;
+                        $error_msg = "Product SKU is required in row no. $row_no";
+                        break;
+                    }
+
+                    if (empty($ingredient_sku)) {
+                        $is_valid = false;
+                        $error_msg = "Ingredient SKU is required in row no. $row_no";
+                        break;
+                    }
+
+                    if (empty($total_quantity) || ! is_numeric($total_quantity) || $total_quantity <= 0) {
+                        $is_valid = false;
+                        $error_msg = "Invalid Output Quantity in row no. $row_no";
+                        break;
+                    }
+
+                    if (empty($ingredient_quantity) || ! is_numeric($ingredient_quantity) || $ingredient_quantity <= 0) {
+                        $is_valid = false;
+                        $error_msg = "Invalid Ingredient Quantity in row no. $row_no";
+                        break;
+                    }
+
+                    $production_cost_type = in_array($production_cost_type, ['fixed', 'percentage']) ? $production_cost_type : 'percentage';
+
+                    if (! isset($recipe_groups[$product_sku])) {
+                        $recipe_groups[$product_sku] = [
+                            'product_sku' => $product_sku,
+                            'total_quantity' => (float) $total_quantity,
+                            'sub_unit_name' => $sub_unit_name,
+                            'extra_cost' => ! empty($extra_cost) ? (float) $extra_cost : 0,
+                            'production_cost_type' => $production_cost_type,
+                            'instructions' => $instructions,
+                            'ingredients' => [],
+                            'first_row' => $row_no,
+                        ];
+                    }
+
+                    $recipe_groups[$product_sku]['ingredients'][] = [
+                        'row_no' => $row_no,
+                        'ingredient_sku' => $ingredient_sku,
+                        'quantity' => (float) $ingredient_quantity,
+                        'sub_unit_name' => $ingredient_sub_unit_name,
+                        'waste_percent' => ! empty($ingredient_waste_percent) ? (float) $ingredient_waste_percent : 0,
+                    ];
+                }
+
+                if (! $is_valid) {
+                    throw new \Exception($error_msg);
+                }
+
+                if (empty($recipe_groups)) {
+                    throw new \Exception("No valid recipe data found in file.");
+                }
+
+                DB::beginTransaction();
+
+                foreach ($recipe_groups as $sku => $group) {
+                    // Find product variation by sub_sku or product sku
+                    $variation = Variation::join('products as p', 'variations.product_id', '=', 'p.id')
+                        ->where('p.business_id', $business_id)
+                        ->where(function ($q) use ($sku) {
+                            $q->where('variations.sub_sku', $sku)
+                              ->orWhere('p.sku', $sku);
+                        })
+                        ->select('variations.*', 'p.unit_id as product_unit_id')
+                        ->first();
+
+                    if (empty($variation)) {
+                        $is_valid = false;
+                        $error_msg = "Product with SKU '$sku' not found in database (Row {$group['first_row']})";
+                        break;
+                    }
+
+                    // Resolve output sub_unit if specified
+                    $sub_unit_id = null;
+                    if (! empty($group['sub_unit_name'])) {
+                        $sub_units = $this->moduleUtil->getSubUnits($business_id, $variation->product_unit_id);
+                        foreach ($sub_units as $unit_id => $unit_info) {
+                            if (strtolower($unit_info['name']) == strtolower($group['sub_unit_name']) || strtolower($unit_info['short_name']) == strtolower($group['sub_unit_name'])) {
+                                $sub_unit_id = $unit_id;
+                                break;
+                            }
+                        }
+                        if (empty($sub_unit_id)) {
+                            $is_valid = false;
+                            $error_msg = "Sub unit '{$group['sub_unit_name']}' for product SKU '$sku' not found (Row {$group['first_row']})";
+                            break;
+                        }
+                    }
+
+                    // Process ingredients for this recipe
+                    $ingredients_data = [];
+                    $total_ingredients_cost = 0;
+
+                    foreach ($group['ingredients'] as $ing_index => $ing) {
+                        $ing_variation = Variation::join('products as p', 'variations.product_id', '=', 'p.id')
+                            ->where('p.business_id', $business_id)
+                            ->where(function ($q) use ($ing) {
+                                $q->where('variations.sub_sku', $ing['ingredient_sku'])
+                                  ->orWhere('p.sku', $ing['ingredient_sku']);
+                            })
+                            ->select('variations.*', 'p.unit_id as product_unit_id')
+                            ->first();
+
+                        if (empty($ing_variation)) {
+                            $is_valid = false;
+                            $error_msg = "Ingredient with SKU '{$ing['ingredient_sku']}' not found in database (Row {$ing['row_no']})";
+                            break 2;
+                        }
+
+                        $ing_sub_unit_id = null;
+                        $multiplier = 1;
+                        if (! empty($ing['sub_unit_name'])) {
+                            $ing_sub_units = $this->moduleUtil->getSubUnits($business_id, $ing_variation->product_unit_id);
+                            foreach ($ing_sub_units as $unit_id => $unit_info) {
+                                if (strtolower($unit_info['name']) == strtolower($ing['sub_unit_name']) || strtolower($unit_info['short_name']) == strtolower($ing['sub_unit_name'])) {
+                                    $ing_sub_unit_id = $unit_id;
+                                    $multiplier = ! empty($unit_info['multiplier']) ? $unit_info['multiplier'] : 1;
+                                    break;
+                                }
+                            }
+                            if (empty($ing_sub_unit_id)) {
+                                $is_valid = false;
+                                $error_msg = "Sub unit '{$ing['sub_unit_name']}' for ingredient SKU '{$ing['ingredient_sku']}' not found (Row {$ing['row_no']})";
+                                break 2;
+                            }
+                        }
+
+                        // Calculate cost of ingredient
+                        $ing_unit_price = $ing_variation->dpp_inc_tax;
+                        $actual_qty = $ing['quantity'] * $multiplier;
+                        $ing_cost = $actual_qty * $ing_unit_price;
+                        $total_ingredients_cost += $ing_cost;
+
+                        $ingredients_data[] = [
+                            'variation_id' => $ing_variation->id,
+                            'quantity' => $ing['quantity'],
+                            'sub_unit_id' => $ing_sub_unit_id,
+                            'waste_percent' => $ing['waste_percent'],
+                            'sort_order' => $ing_index + 1,
+                        ];
+                    }
+
+                    // Calculate final recipe price
+                    $final_price = $total_ingredients_cost;
+                    if ($group['production_cost_type'] == 'percentage') {
+                        $final_price += ($total_ingredients_cost * $group['extra_cost'] / 100);
+                    } else {
+                        $final_price += $group['extra_cost'];
+                    }
+
+                    // Create or Overwrite existing MfgRecipe
+                    $recipe = MfgRecipe::updateOrCreate(
+                        [
+                            'variation_id' => $variation->id,
+                        ],
+                        [
+                            'product_id' => $variation->product_id,
+                            'final_price' => $final_price,
+                            'ingredients_cost' => $total_ingredients_cost,
+                            'waste_percent' => 0,
+                            'total_quantity' => $group['total_quantity'],
+                            'extra_cost' => $group['extra_cost'],
+                            'production_cost_type' => $group['production_cost_type'],
+                            'instructions' => $group['instructions'],
+                            'sub_unit_id' => $sub_unit_id,
+                        ]
+                    );
+
+                    // Delete existing ingredients for overwritten recipe
+                    MfgRecipeIngredient::where('mfg_recipe_id', $recipe->id)->delete();
+
+                    // Insert new recipe ingredients
+                    foreach ($ingredients_data as $ing_data) {
+                        MfgRecipeIngredient::create([
+                            'mfg_recipe_id' => $recipe->id,
+                            'variation_id' => $ing_data['variation_id'],
+                            'quantity' => $ing_data['quantity'],
+                            'sub_unit_id' => $ing_data['sub_unit_id'],
+                            'waste_percent' => $ing_data['waste_percent'],
+                            'sort_order' => $ing_data['sort_order'],
+                        ]);
+                    }
+                }
+
+                if (! $is_valid) {
+                    throw new \Exception($error_msg);
+                }
+
+                DB::commit();
+
+                $output = [
+                    'success' => 1,
+                    'msg' => __('manufacturing::lang.recipe_imported_successfully'),
+                ];
+            } else {
+                $output = [
+                    'success' => 0,
+                    'msg' => 'No file uploaded',
+                ];
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
+
+            $output = [
+                'success' => 0,
+                'msg' => $e->getMessage(),
+            ];
+
+            return redirect()->action([\Modules\Manufacturing\Http\Controllers\RecipeController::class, 'getImportRecipe'])->with('notification', $output);
+        }
+
+        return redirect()->action([\Modules\Manufacturing\Http\Controllers\RecipeController::class, 'index'])->with('status', $output);
+    }
 }
