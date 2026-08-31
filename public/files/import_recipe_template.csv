@@ -1,3 +1,7 @@
 Product SKU,Output Quantity,Output Sub Unit,Extra Cost,Production Cost Type,Instructions,Ingredient SKU,Ingredient Quantity,Ingredient Sub Unit,Ingredient Waste Percent
 PROD-001,1,Pc,10,percentage,Aduk hingga merata lalu cetak.,ING-001,500,Gram,2.5
 PROD-001,1,Pc,10,percentage,Aduk hingga merata lalu cetak.,ING-002,2,Pc,0
+PROD-002,1,Pc,5000,fixed,Campur bahan kering lalu tambahkan air.,ING-001,250,Gram,1.0
+PROD-002,1,Pc,5000,fixed,Campur bahan kering lalu tambahkan air.,ING-003,1,Litre,0
+PROD-003,10,Box,1500,per_unit,Potong dan kemas ke dalam box.,ING-002,10,Pc,0
+PROD-003,10,Box,1500,per_unit,Potong dan kemas ke dalam box.,ING-004,5,Kg,2.0
