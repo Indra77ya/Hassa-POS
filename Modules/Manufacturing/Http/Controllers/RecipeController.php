@@ -649,20 +649,24 @@ class RecipeController extends Controller
     }
 
     /**
-     * Download import recipe CSV template
+     * Download import recipe template (CSV or Excel)
      *
+     * @param string $type
      * @return Response
      */
-    public function downloadImportTemplate()
+    public function downloadImportTemplate($type = 'csv')
     {
         $business_id = request()->session()->get('user.business_id');
         if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'manufacturing_module')) || ! auth()->user()->can('manufacturing.add_recipe')) {
             abort(403, 'Unauthorized action.');
         }
 
-        $file_path = public_path('files/import_recipe_template.csv');
+        $ext = strtolower($type) == 'xls' || strtolower($type) == 'excel' ? 'xls' : 'csv';
+        $filename = "import_recipe_template.{$ext}";
+        $file_path = public_path("files/{$filename}");
+
         if (file_exists($file_path)) {
-            return response()->download($file_path, 'import_recipe_template.csv');
+            return response()->download($file_path, $filename);
         }
 
         abort(404, 'Template file not found.');

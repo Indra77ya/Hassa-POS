@@ -48,7 +48,9 @@
                 <br><br>
                 <div class="row">
                     <div class="col-sm-6">
-                        <a href="{{ action([\Modules\Manufacturing\Http\Controllers\RecipeController::class, 'downloadImportTemplate']) }}" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-rounded-xl"><i class="fa fa-download"></i> @lang('lang_v1.download_template_file') (CSV)</a>
+                        <a href="{{ action([\Modules\Manufacturing\Http\Controllers\RecipeController::class, 'downloadImportTemplate'], ['type' => 'csv']) }}" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-rounded-xl"><i class="fa fa-download"></i> @lang('lang_v1.download_template_file') (CSV)</a>
+                        &nbsp;
+                        <a href="{{ action([\Modules\Manufacturing\Http\Controllers\RecipeController::class, 'downloadImportTemplate'], ['type' => 'xls']) }}" class="tw-dw-btn tw-dw-btn-success tw-text-white tw-rounded-xl"><i class="fa fa-download"></i> @lang('lang_v1.download_template_file') (Excel)</a>
                     </div>
                 </div>
             @endcomponent
