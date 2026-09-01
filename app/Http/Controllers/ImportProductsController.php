@@ -96,6 +96,15 @@ class ImportProductsController extends Controller
 
                 $parsed_array = Excel::toArray([], $file);
 
+                $header_row = $parsed_array[0][0] ?? [];
+                $has_product_id_column = false;
+                if (! empty($header_row) && isset($header_row[0])) {
+                    $first_header = strtoupper(trim($header_row[0]));
+                    if (str_contains($first_header, 'PRODUCT ID') || $first_header === 'ID') {
+                        $has_product_id_column = true;
+                    }
+                }
+
                 //Remove header row
                 $imported_data = array_splice($parsed_array[0], 1);
 
@@ -129,9 +138,23 @@ class ImportProductsController extends Controller
                     }
 
                     $row_no = $key + 1;
+
+                    // If header contains PRODUCT ID as column 0, extract it and shift values by 1
+                    $target_product_id = null;
+                    if ($has_product_id_column) {
+                        $raw_product_id = trim($value[0]);
+                        if (! empty($raw_product_id)) {
+                            $target_product_id = $raw_product_id;
+                        }
+                        $value = array_slice($value, 1);
+                    }
+
                     $product_array = [];
                     $product_array['business_id'] = $business_id;
                     $product_array['created_by'] = $user_id;
+                    if (! empty($target_product_id)) {
+                        $product_array['target_product_id'] = $target_product_id;
+                    }
 
                     //Add name
                     $product_name = trim($value[0]);
@@ -311,11 +334,13 @@ class ImportProductsController extends Controller
                     $sku = trim($value[5]);
                     if (! empty($sku)) {
                         $product_array['sku'] = $sku;
-                        //Check if product with same SKU already exist
-                        $is_exist = Product::where('sku', $product_array['sku'])
-                                        ->where('business_id', $business_id)
-                                        ->exists();
-                        if ($is_exist) {
+                        //Check if product with same SKU already exist (excluding current target product if updating)
+                        $sku_query = Product::where('sku', $product_array['sku'])
+                                        ->where('business_id', $business_id);
+                        if (! empty($target_product_id)) {
+                            $sku_query->where('id', '!=', $target_product_id);
+                        }
+                        if ($sku_query->exists()) {
                             $is_valid = false;
                             $error_msg = "$sku SKU already exist in row no. $row_no";
                             break;
@@ -642,69 +667,171 @@ class ImportProductsController extends Controller
                             unset($product_data['opening_stock_details']);
                         }
 
-                        //Create new product
-                        $product = Product::create($product_data);
-                        //If auto generate sku generate new sku
-                        if ($product->sku == ' ') {
-                            $sku = $this->productUtil->generateProductSku($product->id);
-                            $product->sku = $sku;
-                            $product->save();
-                        }
+                        $target_id = $product_data['target_product_id'] ?? null;
+                        unset($product_data['target_product_id']);
 
-                        //Rack, Row & Position.
-                        $this->rackDetails(
-                            $imported_data[$index][26],
-                            $imported_data[$index][27],
-                            $imported_data[$index][28],
-                            $business_id,
-                            $product->id,
-                            $index + 1
-                        );
+                        if (! empty($target_id)) {
+                            // Update existing product
+                            $product = Product::where('business_id', $business_id)->find($target_id);
+                            if (empty($product)) {
+                                $row_no = $index + 1;
+                                throw new \Exception("Product ID $target_id not found in row no. $row_no");
+                            }
 
-                        //Product locations
-                        if (! empty($imported_data[$index][36])) {
-                            $locations_array = explode(',', $imported_data[$index][36]);
-                            $location_ids = [];
-                            foreach ($locations_array as $business_location) {
-                                foreach ($business_locations as $loc) {
-                                    if (strtolower($loc->name) == strtolower(trim($business_location))) {
-                                        $location_ids[] = $loc->id;
+                            $product->update($product_data);
+
+                            if ($product->sku == ' ') {
+                                $sku = $this->productUtil->generateProductSku($product->id);
+                                $product->sku = $sku;
+                                $product->save();
+                            }
+
+                            // Update rack details
+                            \App\ProductRack::where('product_id', $product->id)->delete();
+                            $rack_col = $has_product_id_column ? 27 : 26;
+                            $row_col = $has_product_id_column ? 28 : 27;
+                            $pos_col = $has_product_id_column ? 29 : 28;
+                            $this->rackDetails(
+                                $imported_data[$index][$rack_col] ?? '',
+                                $imported_data[$index][$row_col] ?? '',
+                                $imported_data[$index][$pos_col] ?? '',
+                                $business_id,
+                                $product->id,
+                                $index + 1
+                            );
+
+                            // Product locations
+                            $loc_col = $has_product_id_column ? 37 : 36;
+                            if (! empty($imported_data[$index][$loc_col])) {
+                                $locations_array = explode(',', $imported_data[$index][$loc_col]);
+                                $location_ids = [];
+                                foreach ($locations_array as $business_location) {
+                                    foreach ($business_locations as $loc) {
+                                        if (strtolower($loc->name) == strtolower(trim($business_location))) {
+                                            $location_ids[] = $loc->id;
+                                        }
                                     }
                                 }
+                                if (! empty($location_ids)) {
+                                    $product->product_locations()->sync($location_ids);
+                                }
                             }
-                            if (! empty($location_ids)) {
-                                $product->product_locations()->sync($location_ids);
-                            }
-                        }
 
-                        //Create single product variation
-                        if ($product->type == 'single') {
-                            $this->productUtil->createSingleProductVariation(
-                                $product,
-                                $product->sku,
-                                $variation_data['dpp_exc_tax'],
-                                $variation_data['dpp_inc_tax'],
-                                $variation_data['profit_percent'],
-                                $variation_data['dsp_exc_tax'],
-                                $variation_data['dsp_inc_tax'],
-                                [],
-                                $variation_data['profit_margin_type']
+                            // Update variations
+                            if ($product->type == 'single') {
+                                $single_variation = Variation::where('product_id', $product->id)->first();
+                                if (! empty($single_variation)) {
+                                    $single_variation->update([
+                                        'sub_sku' => $product->sku,
+                                        'default_purchase_price' => $this->productUtil->num_uf($variation_data['dpp_exc_tax']),
+                                        'dpp_inc_tax' => $this->productUtil->num_uf($variation_data['dpp_inc_tax']),
+                                        'profit_percent' => $this->productUtil->num_uf($variation_data['profit_percent']),
+                                        'profit_margin_type' => $variation_data['profit_margin_type'],
+                                        'default_sell_price' => $this->productUtil->num_uf($variation_data['dsp_exc_tax']),
+                                        'sell_price_inc_tax' => $this->productUtil->num_uf($variation_data['dsp_inc_tax']),
+                                    ]);
+                                } else {
+                                    $this->productUtil->createSingleProductVariation(
+                                        $product,
+                                        $product->sku,
+                                        $variation_data['dpp_exc_tax'],
+                                        $variation_data['dpp_inc_tax'],
+                                        $variation_data['profit_percent'],
+                                        $variation_data['dsp_exc_tax'],
+                                        $variation_data['dsp_inc_tax'],
+                                        [],
+                                        $variation_data['profit_margin_type']
+                                    );
+                                }
+
+                                if (! empty($opening_stock)) {
+                                    $this->addOpeningStock($opening_stock, $product, $business_id);
+                                }
+                            } elseif ($product->type == 'variable') {
+                                // Delete existing variations and recreate
+                                Variation::where('product_id', $product->id)->delete();
+                                \App\ProductVariation::where('product_id', $product->id)->delete();
+
+                                $this->productUtil->createVariableProductVariations(
+                                    $product,
+                                    [$variation_data],
+                                    "with_out_variation",
+                                    $business_id
+                                );
+
+                                if (! empty($variation_data['opening_stock_location']) && $enable_stock == 1) {
+                                    $this->addOpeningStockForVariable($variation_data, $product, $business_id);
+                                }
+                            }
+                        } else {
+                            //Create new product
+                            $product = Product::create($product_data);
+                            //If auto generate sku generate new sku
+                            if ($product->sku == ' ') {
+                                $sku = $this->productUtil->generateProductSku($product->id);
+                                $product->sku = $sku;
+                                $product->save();
+                            }
+
+                            //Rack, Row & Position.
+                            $rack_col = $has_product_id_column ? 27 : 26;
+                            $row_col = $has_product_id_column ? 28 : 27;
+                            $pos_col = $has_product_id_column ? 29 : 28;
+                            $this->rackDetails(
+                                $imported_data[$index][$rack_col] ?? '',
+                                $imported_data[$index][$row_col] ?? '',
+                                $imported_data[$index][$pos_col] ?? '',
+                                $business_id,
+                                $product->id,
+                                $index + 1
                             );
-                            if (! empty($opening_stock)) {
-                                $this->addOpeningStock($opening_stock, $product, $business_id);
+
+                            //Product locations
+                            $loc_col = $has_product_id_column ? 37 : 36;
+                            if (! empty($imported_data[$index][$loc_col])) {
+                                $locations_array = explode(',', $imported_data[$index][$loc_col]);
+                                $location_ids = [];
+                                foreach ($locations_array as $business_location) {
+                                    foreach ($business_locations as $loc) {
+                                        if (strtolower($loc->name) == strtolower(trim($business_location))) {
+                                            $location_ids[] = $loc->id;
+                                        }
+                                    }
+                                }
+                                if (! empty($location_ids)) {
+                                    $product->product_locations()->sync($location_ids);
+                                }
                             }
-                        } elseif ($product->type == 'variable') {
-                            //Create variable product variations and with_out_variation is sku type of variation
 
-                            $this->productUtil->createVariableProductVariations(
-                                $product,
-                                [$variation_data],
-                                "with_out_variation",
-                                $business_id
-                            );
+                            //Create single product variation
+                            if ($product->type == 'single') {
+                                $this->productUtil->createSingleProductVariation(
+                                    $product,
+                                    $product->sku,
+                                    $variation_data['dpp_exc_tax'],
+                                    $variation_data['dpp_inc_tax'],
+                                    $variation_data['profit_percent'],
+                                    $variation_data['dsp_exc_tax'],
+                                    $variation_data['dsp_inc_tax'],
+                                    [],
+                                    $variation_data['profit_margin_type']
+                                );
+                                if (! empty($opening_stock)) {
+                                    $this->addOpeningStock($opening_stock, $product, $business_id);
+                                }
+                            } elseif ($product->type == 'variable') {
+                                //Create variable product variations and with_out_variation is sku type of variation
 
-                            if (! empty($variation_data['opening_stock_location']) && $enable_stock == 1) {
-                                $this->addOpeningStockForVariable($variation_data, $product, $business_id);
+                                $this->productUtil->createVariableProductVariations(
+                                    $product,
+                                    [$variation_data],
+                                    "with_out_variation",
+                                    $business_id
+                                );
+
+                                if (! empty($variation_data['opening_stock_location']) && $enable_stock == 1) {
+                                    $this->addOpeningStockForVariable($variation_data, $product, $business_id);
+                                }
                             }
                         }
                     }
