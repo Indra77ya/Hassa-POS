@@ -15,6 +15,7 @@ Route::middleware('web', 'authh', 'SetSessionData', 'auth', 'language', 'timezon
     Route::get('/import-recipe', [Modules\Manufacturing\Http\Controllers\RecipeController::class, 'getImportRecipe']);
     Route::post('/import-recipe', [Modules\Manufacturing\Http\Controllers\RecipeController::class, 'postImportRecipe']);
     Route::get('/import-recipe/download-template/{type?}', [Modules\Manufacturing\Http\Controllers\RecipeController::class, 'downloadImportTemplate']);
+    Route::get('/download-workflow-pdf', [Modules\Manufacturing\Http\Controllers\RecipeController::class, 'downloadWorkflowPdf']);
 
     Route::resource('/recipe', 'Modules\Manufacturing\Http\Controllers\RecipeController')->except('edit', 'update');
     Route::resource('/production', 'Modules\Manufacturing\Http\Controllers\ProductionController');

@@ -50,6 +50,9 @@
                         <path d="M5 12l14 0" />
                     </svg> @lang('messages.add')
                 </a>
+                <a href="{{action([\Modules\Manufacturing\Http\Controllers\RecipeController::class, 'downloadWorkflowPdf'])}}" target="_blank" class="tw-dw-btn tw-dw-btn-info tw-font-bold tw-text-white tw-border-none tw-rounded-xl tw-transition-all tw-duration-200 hover:tw-scale-[1.02] active:tw-scale-[0.98] pull-right" style="margin-right: 8px;">
+                    <i class="fa fa-file-pdf"></i> Unduh Alur Manufaktur (PDF)
+                </a>
                 
             </div>
         @endslot

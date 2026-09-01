@@ -950,4 +950,43 @@ class RecipeController extends Controller
 
         return redirect()->action([\Modules\Manufacturing\Http\Controllers\RecipeController::class, 'index'])->with('status', $output);
     }
+
+    /**
+     * Download Manufacturing Workflow PDF
+     *
+     * @return Response
+     */
+    public function downloadWorkflowPdf()
+    {
+        $business_id = request()->session()->get('user.business_id');
+        if (! (auth()->user()->can('superadmin') || $this->moduleUtil->hasThePermissionInSubscription($business_id, 'manufacturing_module')) || ! auth()->user()->can('manufacturing.access_recipe')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+            $html = view('docs.manufacturing_workflow_pdf')->render();
+
+            $mpdf = new \Mpdf\Mpdf([
+                'tempDir' => public_path('uploads/temp'),
+                'mode' => 'utf-8',
+                'format' => 'A4',
+                'orientation' => 'P',
+                'margin_left' => 12,
+                'margin_right' => 12,
+                'margin_top' => 12,
+                'margin_bottom' => 12,
+            ]);
+
+            $mpdf->WriteHTML($html);
+            $filename = 'Alur_Manufaktur_Pembelian_Manufaktur_Penjualan.pdf';
+
+            return response($mpdf->Output($filename, 'I'), 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="' . $filename . '"',
+            ]);
+        } catch (\Exception $e) {
+            \Log::emergency('File:' . $e->getFile() . 'Line:' . $e->getLine() . 'Message:' . $e->getMessage());
+            abort(500, $e->getMessage());
+        }
+    }
 }
