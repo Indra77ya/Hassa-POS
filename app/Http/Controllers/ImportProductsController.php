@@ -191,7 +191,7 @@ class ImportProductsController extends Controller
                 foreach ($imported_data as $key => $value) {
 
                     //Check if minimum required columns exist
-                    if (count($value) < 15) {
+                    if (count($value) < 2) {
                         $is_valid = false;
                         $error_msg = 'Some of the required columns are missing. Please, use latest CSV/Excel file template.';
                         break;
@@ -202,13 +202,20 @@ class ImportProductsController extends Controller
                     $product_array['business_id'] = $business_id;
                     $product_array['created_by'] = $user_id;
 
-                    $product_id = ($offset == 1 && ! empty(trim($value[0]))) ? trim($value[0]) : null;
+                    $product_id = ($offset == 1 && isset($value[0]) && ! empty(trim($value[0]))) ? trim($value[0]) : null;
                     $product_array['product_id'] = $product_id;
 
+                    $existing_product = null;
+                    if (! empty($product_id)) {
+                        $existing_product = Product::where('id', $product_id)->where('business_id', $business_id)->first();
+                    }
+
                     //Add name
-                    $product_name = trim($value[0 + $offset]);
+                    $product_name = isset($value[0 + $offset]) ? trim($value[0 + $offset]) : '';
                     if (! empty($product_name)) {
                         $product_array['name'] = $product_name;
+                    } elseif (! empty($existing_product)) {
+                        $product_array['name'] = $existing_product->name;
                     } else {
                         $is_valid = false;
                         $error_msg = "Product name is required in row no. $row_no";
@@ -216,7 +223,7 @@ class ImportProductsController extends Controller
                     }
 
                     //image name
-                    $image_name = trim($value[29 + $offset]);
+                    $image_name = isset($value[29 + $offset]) ? trim($value[29 + $offset]) : '';
                     if (! empty($image_name)) {
                         if (filter_var($image_name, FILTER_VALIDATE_URL)) {
                             $source_image = file_get_contents($image_name);
@@ -233,57 +240,43 @@ class ImportProductsController extends Controller
                         $product_array['image'] = '';
                     }
 
-                    $product_array['product_description'] = isset($value[30 + $offset]) ? $value[30 + $offset] : null;
+                    $product_array['product_description'] = isset($value[30 + $offset]) ? $value[30 + $offset] : ($existing_product ? $existing_product->product_description : null);
 
                     //Custom fields
-                    if (isset($value[31 + $offset])) {
-                        $product_array['product_custom_field1'] = trim($value[31 + $offset]);
-                    } else {
-                        $product_array['product_custom_field1'] = '';
-                    }
-                    if (isset($value[32 + $offset])) {
-                        $product_array['product_custom_field2'] = trim($value[32 + $offset]);
-                    } else {
-                        $product_array['product_custom_field2'] = '';
-                    }
-                    if (isset($value[33 + $offset])) {
-                        $product_array['product_custom_field3'] = trim($value[33 + $offset]);
-                    } else {
-                        $product_array['product_custom_field3'] = '';
-                    }
-                    if (isset($value[34 + $offset])) {
-                        $product_array['product_custom_field4'] = trim($value[34 + $offset]);
-                    } else {
-                        $product_array['product_custom_field4'] = '';
-                    }
+                    $product_array['product_custom_field1'] = isset($value[31 + $offset]) ? trim($value[31 + $offset]) : ($existing_product ? $existing_product->product_custom_field1 : '');
+                    $product_array['product_custom_field2'] = isset($value[32 + $offset]) ? trim($value[32 + $offset]) : ($existing_product ? $existing_product->product_custom_field2 : '');
+                    $product_array['product_custom_field3'] = isset($value[33 + $offset]) ? trim($value[33 + $offset]) : ($existing_product ? $existing_product->product_custom_field3 : '');
+                    $product_array['product_custom_field4'] = isset($value[34 + $offset]) ? trim($value[34 + $offset]) : ($existing_product ? $existing_product->product_custom_field4 : '');
 
                     //Add not for selling
-                    $product_array['not_for_selling'] = ! empty($value[35 + $offset]) && $value[35 + $offset] == 1 ? 1 : 0;
+                    $product_array['not_for_selling'] = (isset($value[35 + $offset]) && ! empty($value[35 + $offset]) && $value[35 + $offset] == 1) ? 1 : ($existing_product ? $existing_product->not_for_selling : 0);
 
                     //Add enable stock
-                    $enable_stock = trim($value[7 + $offset]);
-                    if (in_array($enable_stock, [0, 1])) {
-                        $product_array['enable_stock'] = $enable_stock;
+                    $enable_stock = isset($value[7 + $offset]) ? trim($value[7 + $offset]) : '';
+                    if (in_array($enable_stock, [0, 1, '0', '1'], true)) {
+                        $product_array['enable_stock'] = (int) $enable_stock;
+                    } elseif ($existing_product) {
+                        $product_array['enable_stock'] = $existing_product->enable_stock;
+                        $enable_stock = $existing_product->enable_stock;
                     } else {
-                        $is_valid = false;
-                        $error_msg = "Invalid value for MANAGE STOCK in row no. $row_no";
-                        break;
+                        $product_array['enable_stock'] = 1;
+                        $enable_stock = 1;
                     }
 
                     //Add product type
-                    $product_type = strtolower(trim($value[13 + $offset]));
+                    $product_type = isset($value[13 + $offset]) ? strtolower(trim($value[13 + $offset])) : '';
                     if (in_array($product_type, ['single', 'variable'])) {
                         $product_array['type'] = $product_type;
-                    } elseif ($product_type == 'combo') {
-                        continue;
+                    } elseif ($existing_product) {
+                        $product_array['type'] = $existing_product->type;
+                        $product_type = $existing_product->type;
                     } else {
-                        $is_valid = false;
-                        $error_msg = "Invalid value for PRODUCT TYPE in row no. $row_no";
-                        break;
+                        $product_array['type'] = 'single';
+                        $product_type = 'single';
                     }
 
                     //Add unit
-                    $unit_name = trim($value[2 + $offset]);
+                    $unit_name = isset($value[2 + $offset]) ? trim($value[2 + $offset]) : '';
                     if (! empty($unit_name)) {
                         $unit = Unit::where('business_id', $business_id)
                                     ->where(function ($query) use ($unit_name) {
@@ -297,6 +290,8 @@ class ImportProductsController extends Controller
                             $error_msg = "Unit with name $unit_name not found in row no. $row_no. You can add unit from Products > Units";
                             break;
                         }
+                    } elseif ($existing_product) {
+                        $product_array['unit_id'] = $existing_product->unit_id;
                     } else {
                         $is_valid = false;
                         $error_msg = "UNIT is required in row no. $row_no";
@@ -304,9 +299,9 @@ class ImportProductsController extends Controller
                     }
 
                     //Add barcode type
-                    $barcode_type = strtoupper(trim($value[6 + $offset]));
+                    $barcode_type = isset($value[6 + $offset]) ? strtoupper(trim($value[6 + $offset])) : '';
                     if (empty($barcode_type)) {
-                        $product_array['barcode_type'] = 'C128';
+                        $product_array['barcode_type'] = $existing_product ? $existing_product->barcode_type : 'C128';
                     } elseif (array_key_exists($barcode_type, $this->barcode_types)) {
                         $product_array['barcode_type'] = $barcode_type;
                     } else {
@@ -316,7 +311,7 @@ class ImportProductsController extends Controller
                     }
 
                     //Add Tax
-                    $tax_name = trim($value[11 + $offset]);
+                    $tax_name = isset($value[11 + $offset]) ? trim($value[11 + $offset]) : '';
                     $tax_amount = 0;
                     if (! empty($tax_name)) {
                         $tax = TaxRate::where('business_id', $business_id)
@@ -330,57 +325,79 @@ class ImportProductsController extends Controller
                             $error_msg = "Tax with name $tax_name in row no. $row_no not found. You can add tax from Settings > Tax Rates";
                             break;
                         }
+                    } elseif ($existing_product) {
+                        $product_array['tax'] = $existing_product->tax;
+                        if (! empty($existing_product->product_tax)) {
+                            $tax_amount = $existing_product->product_tax->amount;
+                        }
                     }
 
                     //Add tax type
-                    $tax_type = strtolower(trim($value[12 + $offset]));
+                    $tax_type = isset($value[12 + $offset]) ? strtolower(trim($value[12 + $offset])) : '';
                     if (in_array($tax_type, ['inclusive', 'exclusive'])) {
                         $product_array['tax_type'] = $tax_type;
+                    } elseif ($existing_product) {
+                        $product_array['tax_type'] = $existing_product->tax_type;
+                        $tax_type = $existing_product->tax_type;
                     } else {
-                        $is_valid = false;
-                        $error_msg = "Invalid value for Selling Price Tax Type in row no. $row_no";
-                        break;
+                        $product_array['tax_type'] = 'exclusive';
+                        $tax_type = 'exclusive';
                     }
 
                     //Add alert quantity
                     if ($product_array['enable_stock'] == 1) {
-                        $product_array['alert_quantity'] = trim($value[8 + $offset]);
+                        $alert_quantity = isset($value[8 + $offset]) ? trim($value[8 + $offset]) : '';
+                        if ($alert_quantity !== '') {
+                            $product_array['alert_quantity'] = $alert_quantity;
+                        } elseif ($existing_product) {
+                            $product_array['alert_quantity'] = $existing_product->alert_quantity;
+                        } else {
+                            $product_array['alert_quantity'] = 0;
+                        }
                     }
 
                     //Add brand
-                    //Check if brand exists else create new
-                    $brand_name = trim($value[1 + $offset]);
+                    $brand_name = isset($value[1 + $offset]) ? trim($value[1 + $offset]) : '';
                     if (! empty($brand_name)) {
                         $brand = Brands::firstOrCreate(
                             ['business_id' => $business_id, 'name' => $brand_name],
                             ['created_by' => $user_id]
                         );
                         $product_array['brand_id'] = $brand->id;
+                    } elseif ($existing_product) {
+                        $product_array['brand_id'] = $existing_product->brand_id;
                     }
 
                     //Add Category
-                    //Check if category exists else create new
-                    $category_name = trim($value[3 + $offset]);
+                    $category_name = isset($value[3 + $offset]) ? trim($value[3 + $offset]) : '';
+                    $category = null;
                     if (! empty($category_name)) {
                         $category = Category::firstOrCreate(
                             ['business_id' => $business_id, 'name' => $category_name, 'category_type' => 'product'],
                             ['created_by' => $user_id, 'parent_id' => 0]
                         );
                         $product_array['category_id'] = $category->id;
+                    } elseif ($existing_product) {
+                        $product_array['category_id'] = $existing_product->category_id;
+                        if (! empty($existing_product->category_id)) {
+                            $category = Category::find($existing_product->category_id);
+                        }
                     }
 
                     //Add Sub-Category
-                    $sub_category_name = trim($value[4 + $offset]);
+                    $sub_category_name = isset($value[4 + $offset]) ? trim($value[4 + $offset]) : '';
                     if (! empty($sub_category_name)) {
                         $sub_category = Category::firstOrCreate(
                             ['business_id' => $business_id, 'name' => $sub_category_name, 'category_type' => 'product'],
                             ['created_by' => $user_id, 'parent_id' => ! empty($category) ? $category->id : 0]
                         );
                         $product_array['sub_category_id'] = $sub_category->id;
+                    } elseif ($existing_product) {
+                        $product_array['sub_category_id'] = $existing_product->sub_category_id;
                     }
 
                     //Add SKU
-                    $sku = trim($value[5 + $offset]);
+                    $sku = isset($value[5 + $offset]) ? trim($value[5 + $offset]) : '';
                     if (! empty($sku)) {
                         $product_array['sku'] = $sku;
                         //Check if product with same SKU already exist (excluding the current product being updated)
@@ -394,50 +411,46 @@ class ImportProductsController extends Controller
                             $error_msg = "$sku SKU already exist in row no. $row_no";
                             break;
                         }
+                    } elseif ($existing_product) {
+                        $product_array['sku'] = $existing_product->sku;
                     } else {
                         $product_array['sku'] = ' ';
                     }
 
                     //Add product expiry
-                    $expiry_period = trim($value[9 + $offset]);
-                    $expiry_period_type = strtolower(trim($value[10 + $offset]));
+                    $expiry_period = isset($value[9 + $offset]) ? trim($value[9 + $offset]) : '';
+                    $expiry_period_type = isset($value[10 + $offset]) ? strtolower(trim($value[10 + $offset])) : '';
                     if (! empty($expiry_period) && in_array($expiry_period_type, ['months', 'days'])) {
                         $product_array['expiry_period'] = $expiry_period;
                         $product_array['expiry_period_type'] = $expiry_period_type;
+                    } elseif ($existing_product) {
+                        $product_array['expiry_period'] = $existing_product->expiry_period;
+                        $product_array['expiry_period_type'] = $existing_product->expiry_period_type;
                     } else {
-                        //If Expiry Date is set then make expiry_period 12 months.
-                        if (! empty($value[23 + $offset])) {
+                        if (isset($value[23 + $offset]) && ! empty($value[23 + $offset])) {
                             $product_array['expiry_period'] = 12;
                             $product_array['expiry_period_type'] = 'months';
                         }
                     }
 
                     //Enable IMEI or Serial Number
-                    $enable_sr_no = trim($value[24 + $offset]);
-                    if (in_array($enable_sr_no, [0, 1])) {
-                        $product_array['enable_sr_no'] = $enable_sr_no;
-                    } elseif (empty($enable_sr_no)) {
-                        $product_array['enable_sr_no'] = 0;
+                    $enable_sr_no = isset($value[24 + $offset]) ? trim($value[24 + $offset]) : '';
+                    if (in_array($enable_sr_no, [0, 1, '0', '1'], true)) {
+                        $product_array['enable_sr_no'] = (int) $enable_sr_no;
+                    } elseif ($existing_product) {
+                        $product_array['enable_sr_no'] = $existing_product->enable_sr_no;
                     } else {
-                        $is_valid = false;
-                        $error_msg = "Invalid value for ENABLE IMEI OR SERIAL NUMBER  in row no. $row_no";
-                        break;
+                        $product_array['enable_sr_no'] = 0;
                     }
 
                     //Weight
-                    if (isset($value[25 + $offset])) {
-                        $product_array['weight'] = trim($value[25 + $offset]);
-                    } else {
-                        $product_array['weight'] = '';
-                    }
+                    $product_array['weight'] = isset($value[25 + $offset]) ? trim($value[25 + $offset]) : ($existing_product ? $existing_product->weight : '');
 
                     if ($product_array['type'] == 'single') {
                         //Calculate profit margin
-                        $profit_margin = trim($value[19 + $offset]);
+                        $profit_margin = isset($value[19 + $offset]) ? trim($value[19 + $offset]) : '';
                         if (empty($profit_margin)) {
                             $profit_margin = $default_profit_percent;
-                        } else {
-                            $profit_margin = trim($value[19 + $offset]);
                         }
                         $product_array['variation']['profit_percent'] = $profit_margin;
 
@@ -449,7 +462,7 @@ class ImportProductsController extends Controller
                         $dpp_inc_tax = isset($value[17 + $offset]) ? trim($value[17 + $offset]) : '';
                         $dpp_exc_tax = isset($value[18 + $offset]) ? trim($value[18 + $offset]) : '';
                         if ($dpp_inc_tax == '' && $dpp_exc_tax == '') {
-                            if (! empty($product_id) && Product::where('id', $product_id)->where('business_id', $business_id)->exists()) {
+                            if (! empty($product_id) && $existing_product) {
                                 $existing_var = Variation::where('product_id', $product_id)->first();
                                 if (! empty($existing_var)) {
                                     $dpp_inc_tax = $existing_var->dpp_inc_tax;
@@ -469,7 +482,7 @@ class ImportProductsController extends Controller
                         }
 
                         //Calculate Selling price
-                        $selling_price = ! empty(trim($value[20 + $offset])) ? trim($value[20 + $offset]) : 0;
+                        $selling_price = isset($value[20 + $offset]) && trim($value[20 + $offset]) !== '' ? trim($value[20 + $offset]) : 0;
 
                         //Calculate product prices
                         $product_prices = $this->calculateVariationPrices($dpp_exc_tax, $dpp_inc_tax, $selling_price, $tax_amount, $tax_type, $profit_margin, $profit_margin_type);
@@ -481,10 +494,10 @@ class ImportProductsController extends Controller
                         $product_array['variation']['dsp_exc_tax'] = $product_prices['dsp_exc_tax'];
 
                         //Opening stock
-                        if (! empty($value[21 + $offset]) && $enable_stock == 1) {
+                        if (isset($value[21 + $offset]) && ! empty($value[21 + $offset]) && $enable_stock == 1) {
                             $product_array['opening_stock_details']['quantity'] = trim($value[21 + $offset]);
 
-                            if (! empty(trim($value[22 + $offset]))) {
+                            if (isset($value[22 + $offset]) && ! empty(trim($value[22 + $offset]))) {
                                 $location_name = trim($value[22 + $offset]);
                                 $location = BusinessLocation::where('name', $location_name)
                                                             ->where('business_id', $business_id)
@@ -504,202 +517,184 @@ class ImportProductsController extends Controller
                             $product_array['opening_stock_details']['expiry_date'] = null;
 
                             //Stock expiry date
-                            if (! empty($value[23 + $offset])) {
+                            if (isset($value[23 + $offset]) && ! empty($value[23 + $offset])) {
                                 $product_array['opening_stock_details']['exp_date'] = \Carbon::createFromFormat('m-d-Y', trim($value[23 + $offset]))->format('Y-m-d');
                             } else {
                                 $product_array['opening_stock_details']['exp_date'] = null;
                             }
                         }
                     } elseif ($product_array['type'] == 'variable') {
-                        $variation_name = trim($value[14 + $offset]);
-                        if (empty($variation_name)) {
+                        $variation_name = isset($value[14 + $offset]) ? trim($value[14 + $offset]) : '';
+                        if (empty($variation_name) && ! $existing_product) {
                             $is_valid = false;
                             $error_msg = "VARIATION NAME is required in row no. $row_no";
                             break;
                         }
-                        $variation_values_string = trim($value[15 + $offset]);
-                        if (empty($variation_values_string)) {
+                        $variation_values_string = isset($value[15 + $offset]) ? trim($value[15 + $offset]) : '';
+                        if (empty($variation_values_string) && ! $existing_product) {
                             $is_valid = false;
                             $error_msg = "VARIATION VALUES are required in row no. $row_no";
                             break;
                         }
 
-                        $variation_sku_string = trim($value[16 + $offset]);
+                        $variation_sku_string = isset($value[16 + $offset]) ? trim($value[16 + $offset]) : '';
 
-                        $dpp_inc_tax_string = trim($value[17 + $offset]);
-                        $dpp_exc_tax_string = trim($value[18 + $offset]);
-                        $selling_price_string = trim($value[20 + $offset]);
-                        $profit_margin_string = trim($value[19 + $offset]);
+                        $dpp_inc_tax_string = isset($value[17 + $offset]) ? trim($value[17 + $offset]) : '';
+                        $dpp_exc_tax_string = isset($value[18 + $offset]) ? trim($value[18 + $offset]) : '';
+                        $selling_price_string = isset($value[20 + $offset]) ? trim($value[20 + $offset]) : '';
+                        $profit_margin_string = isset($value[19 + $offset]) ? trim($value[19 + $offset]) : '';
                         $profit_margin_type_string = isset($value[37 + $offset]) ? trim($value[37 + $offset]) : 'percentage';
 
-                        if (empty($dpp_inc_tax_string) && empty($dpp_exc_tax_string)) {
+                        if (empty($dpp_inc_tax_string) && empty($dpp_exc_tax_string) && ! $existing_product) {
                             $is_valid = false;
                             $error_msg = "PURCHASE PRICE is required in row no. $row_no";
                             break;
                         }
 
-                        //Variation values
-                        $variation_values = array_map('trim', explode(
-                            '|',
-                            $variation_values_string
-                        ));
-
-                        $variation_skus = [];
-                        if (! empty($variation_sku_string)) {
-                            $variation_skus = array_map('trim', explode(
-                            '|',
-                                $variation_sku_string
+                        if (! empty($variation_values_string)) {
+                            //Variation values
+                            $variation_values = array_map('trim', explode(
+                                '|',
+                                $variation_values_string
                             ));
-                        }
 
-                        //Map Purchase price with variation values
-                        $dpp_inc_tax = [];
-                        if (! empty($dpp_inc_tax_string)) {
-                            $dpp_inc_tax = array_map('trim', explode(
+                            $variation_skus = [];
+                            if (! empty($variation_sku_string)) {
+                                $variation_skus = array_map('trim', explode(
                                 '|',
-                                $dpp_inc_tax_string
-                            ));
-                        } else {
-                            foreach ($variation_values as $k => $v) {
-                                $dpp_inc_tax[$k] = 0;
-                            }
-                        }
-
-                        $dpp_exc_tax = [];
-                        if (! empty($dpp_exc_tax_string)) {
-                            $dpp_exc_tax = array_map('trim', explode(
-                                '|',
-                                $dpp_exc_tax_string
-                            ));
-                        } else {
-                            foreach ($variation_values as $k => $v) {
-                                $dpp_exc_tax[$k] = 0;
-                            }
-                        }
-
-                        //Map Selling price with variation values
-                        $selling_price = [];
-                        if (! empty($selling_price_string)) {
-                            $selling_price = array_map('trim', explode(
-                                '|',
-                                $selling_price_string
+                                    $variation_sku_string
                                 ));
-                        } else {
-                            foreach ($variation_values as $k => $v) {
-                                $selling_price[$k] = 0;
                             }
-                        }
 
-                        //Map profit margin with variation values
-                        $profit_margin = [];
-                        if (! empty($profit_margin_string)) {
-                            $profit_margin = array_map('trim', explode(
-                                '|',
-                                $profit_margin_string
+                            //Map Purchase price with variation values
+                            $dpp_inc_tax = [];
+                            if (! empty($dpp_inc_tax_string)) {
+                                $dpp_inc_tax = array_map('trim', explode(
+                                    '|',
+                                    $dpp_inc_tax_string
                                 ));
-                        } else {
-                            foreach ($variation_values as $k => $v) {
-                                $profit_margin[$k] = $default_profit_percent;
-                            }
-                        }
-
-                        //Map profit margin type with variation values
-                        $profit_margin_type = [];
-                        if (! empty($profit_margin_type_string)) {
-                            $profit_margin_type = array_map('trim', explode(
-                                '|',
-                                $profit_margin_type_string
-                                ));
-                        } else {
-                            foreach ($variation_values as $k => $v) {
-                                $profit_margin_type[$k] = 'percentage';
-                            }
-                        }
-
-                        //Check if length of prices array is equal to variation values array length
-                        $array_lengths_count = [count($variation_values), count($dpp_inc_tax), count($dpp_exc_tax), count($selling_price), count($profit_margin), count($profit_margin_type)];
-
-                        if (! empty($variation_skus)) {
-                            $array_lengths_count[] = count($variation_skus);
-                        }
-                        $same = array_count_values($array_lengths_count);
-
-                        if (count($same) != 1) {
-                            $is_valid = false;
-                            $error_msg = "Prices mismatched with VARIATION VALUES in row no. $row_no";
-                            break;
-                        }
-                        $product_array['variation']['name'] = $variation_name;
-
-                        //Check if variation exists or create new
-                        $variation = $this->productUtil->createOrNewVariation($business_id, $variation_name);
-                        $product_array['variation']['variation_template_id'] = $variation->id;
-
-                        foreach ($variation_values as $k => $v) {
-                            $pm_type = !empty($profit_margin_type[$k]) ? strtolower($profit_margin_type[$k]) : 'percentage';
-                            $pm_type = in_array($pm_type, ['percentage', 'fixed']) ? $pm_type : 'percentage';
-                            $variation_prices = $this->calculateVariationPrices($dpp_exc_tax[$k], $dpp_inc_tax[$k], $selling_price[$k], $tax_amount, $tax_type, $profit_margin[$k], $pm_type);
-
-                            //get variation value
-                            $variation_value = $variation->values->filter(function ($item) use ($v) {
-                                return strtolower($item->name) == strtolower($v);
-                            })->first();
-
-                            if (empty($variation_value)) {
-                                $variation_value = VariationValueTemplate::create([
-                                    'name' => $v,
-                                    'variation_template_id' => $variation->id,
-                                ]);
-                            }
-
-                            //Assign Values
-                            $product_array['variation']['variations'][] = [
-                                'value' => $v,
-                                'variation_value_id' => $variation_value->id,
-                                'default_purchase_price' => $variation_prices['dpp_exc_tax'],
-                                'dpp_inc_tax' => $variation_prices['dpp_inc_tax'],
-                                'profit_percent' => $this->productUtil->num_f($profit_margin[$k]),
-                                'profit_margin_type' => $pm_type,
-                                'default_sell_price' => $variation_prices['dsp_exc_tax'],
-                                'sell_price_inc_tax' => $variation_prices['dsp_inc_tax'],
-                                'sub_sku' => ! empty($variation_skus[$k]) ? $variation_skus[$k] : '',
-                            ];
-                        }
-
-                        //Opening stock
-                        if (! empty($value[21 + $offset]) && $enable_stock == 1) {
-                            $variation_os = array_map('trim', explode('|', $value[21 + $offset]));
-
-                            //Check if count of variation and opening stock is matching or not.
-                            if (count($product_array['variation']['variations']) != count($variation_os)) {
-                                $is_valid = false;
-                                $error_msg = "Opening Stock mismatched with VARIATION VALUES in row no. $row_no";
-                                break;
-                            }
-
-                            if (! empty(trim($value[22 + $offset]))) {
-                                $location_name = trim($value[22 + $offset]);
-                                $location = BusinessLocation::where('name', $location_name)
-                                                            ->where('business_id', $business_id)
-                                                            ->first();
-                                if (empty($location)) {
-                                    $is_valid = false;
-                                    $error_msg = "No location with name '$location_name' found in row no. $row_no";
-                                    break;
-                                }
                             } else {
-                                $location = BusinessLocation::where('business_id', $business_id)->first();
+                                foreach ($variation_values as $k => $v) {
+                                    $dpp_inc_tax[$k] = 0;
+                                }
                             }
-                            $product_array['variation']['opening_stock_location'] = $location->id;
 
-                            foreach ($variation_os as $k => $v) {
-                                $product_array['variation']['variations'][$k]['opening_stock'] = $v;
-                                $product_array['variation']['variations'][$k]['opening_stock_exp_date'] = null;
+                            $dpp_exc_tax = [];
+                            if (! empty($dpp_exc_tax_string)) {
+                                $dpp_exc_tax = array_map('trim', explode(
+                                    '|',
+                                    $dpp_exc_tax_string
+                                ));
+                            } else {
+                                foreach ($variation_values as $k => $v) {
+                                    $dpp_exc_tax[$k] = 0;
+                                }
+                            }
 
-                                if (! empty($value[23 + $offset])) {
-                                    $product_array['variation']['variations'][$k]['opening_stock_exp_date'] = \Carbon::createFromFormat('m-d-Y', trim($value[23 + $offset]))->format('Y-m-d');
+                            //Map Selling price with variation values
+                            $selling_price = [];
+                            if (! empty($selling_price_string)) {
+                                $selling_price = array_map('trim', explode(
+                                    '|',
+                                    $selling_price_string
+                                    ));
+                            } else {
+                                foreach ($variation_values as $k => $v) {
+                                    $selling_price[$k] = 0;
+                                }
+                            }
+
+                            //Map profit margin with variation values
+                            $profit_margin = [];
+                            if (! empty($profit_margin_string)) {
+                                $profit_margin = array_map('trim', explode(
+                                    '|',
+                                    $profit_margin_string
+                                    ));
+                            } else {
+                                foreach ($variation_values as $k => $v) {
+                                    $profit_margin[$k] = $default_profit_percent;
+                                }
+                            }
+
+                            //Map profit margin type with variation values
+                            $profit_margin_type = [];
+                            if (! empty($profit_margin_type_string)) {
+                                $profit_margin_type = array_map('trim', explode(
+                                    '|',
+                                    $profit_margin_type_string
+                                    ));
+                            } else {
+                                foreach ($variation_values as $k => $v) {
+                                    $profit_margin_type[$k] = 'percentage';
+                                }
+                            }
+
+                            $product_array['variation']['name'] = $variation_name;
+
+                            //Check if variation exists or create new
+                            $variation = $this->productUtil->createOrNewVariation($business_id, $variation_name);
+                            $product_array['variation']['variation_template_id'] = $variation->id;
+
+                            foreach ($variation_values as $k => $v) {
+                                $pm_type = !empty($profit_margin_type[$k]) ? strtolower($profit_margin_type[$k]) : 'percentage';
+                                $pm_type = in_array($pm_type, ['percentage', 'fixed']) ? $pm_type : 'percentage';
+                                $variation_prices = $this->calculateVariationPrices($dpp_exc_tax[$k], $dpp_inc_tax[$k], $selling_price[$k], $tax_amount, $tax_type, $profit_margin[$k], $pm_type);
+
+                                //get variation value
+                                $variation_value = $variation->values->filter(function ($item) use ($v) {
+                                    return strtolower($item->name) == strtolower($v);
+                                })->first();
+
+                                if (empty($variation_value)) {
+                                    $variation_value = VariationValueTemplate::create([
+                                        'name' => $v,
+                                        'variation_template_id' => $variation->id,
+                                    ]);
+                                }
+
+                                //Assign Values
+                                $product_array['variation']['variations'][] = [
+                                    'value' => $v,
+                                    'variation_value_id' => $variation_value->id,
+                                    'default_purchase_price' => $variation_prices['dpp_exc_tax'],
+                                    'dpp_inc_tax' => $variation_prices['dpp_inc_tax'],
+                                    'profit_percent' => $this->productUtil->num_f($profit_margin[$k]),
+                                    'profit_margin_type' => $pm_type,
+                                    'default_sell_price' => $variation_prices['dsp_exc_tax'],
+                                    'sell_price_inc_tax' => $variation_prices['dsp_inc_tax'],
+                                    'sub_sku' => ! empty($variation_skus[$k]) ? $variation_skus[$k] : '',
+                                ];
+                            }
+
+                            //Opening stock
+                            if (isset($value[21 + $offset]) && ! empty($value[21 + $offset]) && $enable_stock == 1) {
+                                $variation_os = array_map('trim', explode('|', $value[21 + $offset]));
+
+                                if (isset($value[22 + $offset]) && ! empty(trim($value[22 + $offset]))) {
+                                    $location_name = trim($value[22 + $offset]);
+                                    $location = BusinessLocation::where('name', $location_name)
+                                                                ->where('business_id', $business_id)
+                                                                ->first();
+                                    if (empty($location)) {
+                                        $is_valid = false;
+                                        $error_msg = "No location with name '$location_name' found in row no. $row_no";
+                                        break;
+                                    }
                                 } else {
+                                    $location = BusinessLocation::where('business_id', $business_id)->first();
+                                }
+                                $product_array['variation']['opening_stock_location'] = $location->id;
+
+                                foreach ($variation_os as $k => $v) {
+                                    $product_array['variation']['variations'][$k]['opening_stock'] = $v;
                                     $product_array['variation']['variations'][$k]['opening_stock_exp_date'] = null;
+
+                                    if (isset($value[23 + $offset]) && ! empty($value[23 + $offset])) {
+                                        $product_array['variation']['variations'][$k]['opening_stock_exp_date'] = \Carbon::createFromFormat('m-d-Y', trim($value[23 + $offset]))->format('Y-m-d');
+                                    } else {
+                                        $product_array['variation']['variations'][$k]['opening_stock_exp_date'] = null;
+                                    }
                                 }
                             }
                         }
@@ -714,8 +709,10 @@ class ImportProductsController extends Controller
 
                 if (! empty($formated_data)) {
                     foreach ($formated_data as $index => $product_data) {
-                        $variation_data = $product_data['variation'];
-                        unset($product_data['variation']);
+                        $variation_data = isset($product_data['variation']) ? $product_data['variation'] : null;
+                        if (isset($product_data['variation'])) {
+                            unset($product_data['variation']);
+                        }
 
                         $opening_stock = null;
                         if (! empty($product_data['opening_stock_details'])) {
@@ -750,7 +747,7 @@ class ImportProductsController extends Controller
                             }
 
                             // Update variation if single
-                            if ($product->type == 'single') {
+                            if ($product->type == 'single' && ! empty($variation_data)) {
                                 $single_variation = Variation::where('product_id', $product->id)->first();
                                 if (! empty($single_variation)) {
                                     $single_variation->update([
@@ -786,7 +783,7 @@ class ImportProductsController extends Controller
                             }
 
                             // Create single product variation
-                            if ($product->type == 'single') {
+                            if ($product->type == 'single' && ! empty($variation_data)) {
                                 $this->productUtil->createSingleProductVariation(
                                     $product,
                                     $product->sku,
@@ -801,7 +798,7 @@ class ImportProductsController extends Controller
                                 if (! empty($opening_stock)) {
                                     $this->addOpeningStock($opening_stock, $product, $business_id);
                                 }
-                            } elseif ($product->type == 'variable') {
+                            } elseif ($product->type == 'variable' && ! empty($variation_data)) {
                                 $this->productUtil->createVariableProductVariations(
                                     $product,
                                     [$variation_data],
