@@ -440,4 +440,128 @@ class ImportProductsUpdateTest extends TestCase
         $this->assertEquals(150, (float)$updatedVariation->default_purchase_price);
         $this->assertEquals(180, (float)$updatedVariation->default_sell_price);
     }
+
+    /** @test */
+    public function it_can_update_category_and_price_via_csv_import()
+    {
+        $unit = Unit::create([
+            'business_id' => 1,
+            'actual_name' => 'Piece',
+            'short_name' => 'Pc',
+            'created_by' => 1,
+        ]);
+
+        $oldCategory = \App\Category::create([
+            'name' => 'Old Category',
+            'business_id' => 1,
+            'category_type' => 'product',
+            'parent_id' => 0,
+            'created_by' => 1,
+        ]);
+
+        $newCategory = \App\Category::create([
+            'name' => 'New Category',
+            'business_id' => 1,
+            'category_type' => 'product',
+            'parent_id' => 0,
+            'created_by' => 1,
+        ]);
+
+        $product = Product::create([
+            'name' => 'Test Product Price Cat',
+            'business_id' => 1,
+            'unit_id' => $unit->id,
+            'category_id' => $oldCategory->id,
+            'sku' => 'SKU-CAT-PRICE',
+            'type' => 'single',
+            'created_by' => 1,
+        ]);
+
+        $pv = \DB::table('product_variations')->insertGetId([
+            'name' => 'DUMMY',
+            'product_id' => $product->id,
+            'is_dummy' => 1,
+        ]);
+
+        Variation::create([
+            'name' => 'DUMMY',
+            'product_id' => $product->id,
+            'product_variation_id' => $pv,
+            'sub_sku' => 'SKU-CAT-PRICE',
+            'default_purchase_price' => 10000,
+            'dpp_inc_tax' => 10000,
+            'profit_percent' => 25,
+            'default_sell_price' => 12500,
+            'sell_price_inc_tax' => 12500,
+        ]);
+
+        $csvHeader = "PRODUCT ID,NAME,BRAND,UNIT,CATEGORY,SUB-CATEGORY,SKU (Leave blank to auto generate sku),BARCODE TYPE,MANAGE STOCK (1=yes 0=No),ALERT QUANTITY,EXPIRES IN,EXPIRY PERIOD UNIT (months/days),APPLICABLE TAX,Selling Price Tax Type (inclusive or exclusive),PRODUCT TYPE (single or variable),VARIATION NAME (Keep blank if product type is single),VARIATION VALUES (| seperated values & blank if product type if single),VARIATION SKUs (| seperated values & blank if product type if single),PURCHASE PRICE (Including tax),PURCHASE PRICE (Excluding tax),PROFIT MARGIN,SELLING PRICE,OPENING STOCK,OPENING STOCK LOCATION,EXPIRY DATE,ENABLE IMEI OR SERIAL NUMBER(1=yes 0=No),WEIGHT,RACK,ROW,POSITION,IMAGE,PRODUCT DESCRIPTION,CUSTOM FIELD 1,CUSTOM FIELD 2,CUSTOM FIELD 3,CUSTOM FIELD 4,NOT FOR SELLING(1=yes 0=No),PRODUCT LOCATIONS\n";
+
+        $csvRowArray = [
+            $product->id,             // 0: PRODUCT ID
+            'Test Product Price Cat', // 1: NAME
+            '',                       // 2: BRAND
+            'Pc',                     // 3: UNIT
+            'New Category',           // 4: CATEGORY
+            '',                       // 5: SUB-CATEGORY
+            'SKU-CAT-PRICE',          // 6: SKU
+            'C128',                   // 7: BARCODE TYPE
+            1,                        // 8: MANAGE STOCK
+            10,                       // 9: ALERT QUANTITY
+            '',                       // 10: EXPIRES IN
+            '',                       // 11: EXPIRY PERIOD UNIT
+            '',                       // 12: APPLICABLE TAX
+            'exclusive',              // 13: Selling Price Tax Type
+            'single',                 // 14: PRODUCT TYPE
+            '',                       // 15: VARIATION NAME
+            '',                       // 16: VARIATION VALUES
+            '',                       // 17: VARIATION SKUs
+            10000,                    // 18: PURCHASE PRICE Inc Tax
+            10000,                    // 19: PURCHASE PRICE Exc Tax
+            25,                       // 20: PROFIT MARGIN
+            25000,                    // 21: SELLING PRICE
+            '',                       // 22: OPENING STOCK
+            '',                       // 23: OPENING STOCK LOCATION
+            '',                       // 24: EXPIRY DATE
+            0,                        // 25: ENABLE IMEI
+            '',                       // 26: WEIGHT
+            '',                       // 27: RACK
+            '',                       // 28: ROW
+            '',                       // 29: POSITION
+            '',                       // 30: IMAGE
+            '',                       // 31: PRODUCT DESCRIPTION
+            '',                       // 32: CUSTOM FIELD 1
+            '',                       // 33: CUSTOM FIELD 2
+            '',                       // 34: CUSTOM FIELD 3
+            '',                       // 35: CUSTOM FIELD 4
+            0,                        // 36: NOT FOR SELLING
+            'Main Location',          // 37: PRODUCT LOCATIONS
+        ];
+        $csvRow = implode(',', $csvRowArray) . "\n";
+
+        $csvContent = $csvHeader . $csvRow;
+
+        $tempFile = sys_get_temp_dir() . '/update_products_' . uniqid() . '.csv';
+        file_put_contents($tempFile, $csvContent);
+
+        $uploadedFile = new UploadedFile(
+            $tempFile,
+            'update_products.csv',
+            'text/csv',
+            null,
+            true
+        );
+
+        $response = $this->post('/update-products/store', [
+            'products_csv' => $uploadedFile,
+        ]);
+
+        $response->assertRedirect('update-products');
+
+        $updatedProduct = Product::find($product->id);
+        $this->assertEquals($newCategory->id, $updatedProduct->category_id);
+
+        $updatedVariation = Variation::where('product_id', $product->id)->first();
+        $this->assertEquals(25000, (float)$updatedVariation->default_sell_price);
+    }
 }
