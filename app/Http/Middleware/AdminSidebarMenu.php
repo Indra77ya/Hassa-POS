@@ -167,6 +167,11 @@ class AdminSidebarMenu
                                 __('lang_v1.update_product_price'),
                                 ['icon' => '', 'active' => request()->segment(1) == 'update-product-price']
                             );
+                            $sub->url(
+                                action([\App\Http\Controllers\ImportProductsController::class, 'getUpdateProducts']),
+                                __('lang_v1.update_product'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'update-products']
+                            );
                         }
                         if (auth()->user()->can('product.view')) {
                             $sub->url(

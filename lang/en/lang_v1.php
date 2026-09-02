@@ -1534,6 +1534,13 @@ return [
     'overall_summary' => 'Overall Summary',
 
     'update_product_price' => 'Update Price',
+    'update_product' => 'Update Product',
+    'export_products' => 'Export Products',
+    'import_export_product' => 'Import / Export Product Update',
+    'update_product_instruction_1' => 'Export existing product details file by clicking Export Products.',
+    'update_product_instruction_2' => 'Edit the product information in the Excel file as needed.',
+    'update_product_instruction_3' => 'Do not change the PRODUCT ID column so the system can match and update the existing products.',
+    'update_product_instruction_4' => 'Upload the edited file and submit.',
     'signed_in_as' => 'Signed in as',
     'field_type' => 'Field Type',
     'text' => 'Text',

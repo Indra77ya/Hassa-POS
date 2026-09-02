@@ -363,6 +363,11 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::get('/import-products', [ImportProductsController::class, 'index']);
     Route::post('/import-products/store', [ImportProductsController::class, 'store']);
 
+    //Update products
+    Route::get('/update-products', [ImportProductsController::class, 'getUpdateProducts']);
+    Route::post('/update-products/store', [ImportProductsController::class, 'postUpdateProducts']);
+    Route::get('/update-products/export', [ImportProductsController::class, 'exportProducts']);
+
     //Import units
     Route::get('/import-units', [ImportUnitsController::class, 'index']);
     Route::post('/import-units/store', [ImportUnitsController::class, 'store']);
