@@ -190,10 +190,10 @@ class ImportProductsController extends Controller
                 DB::beginTransaction();
                 foreach ($imported_data as $key => $value) {
 
-                    //Check if any column is missing
-                    if (count($value) < 35) {
+                    //Check if minimum required columns exist
+                    if (count($value) < 15) {
                         $is_valid = false;
-                        $error_msg = 'Some of the columns are missing. Please, use latest CSV file template.';
+                        $error_msg = 'Some of the required columns are missing. Please, use latest CSV/Excel file template.';
                         break;
                     }
 
@@ -446,12 +446,23 @@ class ImportProductsController extends Controller
                         $product_array['variation']['profit_margin_type'] = $profit_margin_type;
 
                         //Calculate purchase price
-                        $dpp_inc_tax = trim($value[17 + $offset]);
-                        $dpp_exc_tax = trim($value[18 + $offset]);
+                        $dpp_inc_tax = isset($value[17 + $offset]) ? trim($value[17 + $offset]) : '';
+                        $dpp_exc_tax = isset($value[18 + $offset]) ? trim($value[18 + $offset]) : '';
                         if ($dpp_inc_tax == '' && $dpp_exc_tax == '') {
-                            $is_valid = false;
-                            $error_msg = "PURCHASE PRICE is required in row no. $row_no";
-                            break;
+                            if (! empty($product_id) && Product::where('id', $product_id)->where('business_id', $business_id)->exists()) {
+                                $existing_var = Variation::where('product_id', $product_id)->first();
+                                if (! empty($existing_var)) {
+                                    $dpp_inc_tax = $existing_var->dpp_inc_tax;
+                                    $dpp_exc_tax = $existing_var->default_purchase_price;
+                                } else {
+                                    $dpp_inc_tax = 0;
+                                    $dpp_exc_tax = 0;
+                                }
+                            } else {
+                                $is_valid = false;
+                                $error_msg = "PURCHASE PRICE is required in row no. $row_no";
+                                break;
+                            }
                         } else {
                             $dpp_inc_tax = ($dpp_inc_tax != '') ? $dpp_inc_tax : 0;
                             $dpp_exc_tax = ($dpp_exc_tax != '') ? $dpp_exc_tax : 0;
@@ -805,17 +816,20 @@ class ImportProductsController extends Controller
                         }
 
                         // Rack, Row & Position
+                        $rack_val = isset($imported_data[$index][26 + $offset]) ? $imported_data[$index][26 + $offset] : '';
+                        $row_val = isset($imported_data[$index][27 + $offset]) ? $imported_data[$index][27 + $offset] : '';
+                        $pos_val = isset($imported_data[$index][28 + $offset]) ? $imported_data[$index][28 + $offset] : '';
                         $this->rackDetails(
-                            $imported_data[$index][26 + $offset],
-                            $imported_data[$index][27 + $offset],
-                            $imported_data[$index][28 + $offset],
+                            $rack_val,
+                            $row_val,
+                            $pos_val,
                             $business_id,
                             $product->id,
                             $index + 1
                         );
 
                         // Product locations
-                        if (! empty($imported_data[$index][36 + $offset])) {
+                        if (isset($imported_data[$index][36 + $offset]) && ! empty($imported_data[$index][36 + $offset])) {
                             $locations_array = explode(',', $imported_data[$index][36 + $offset]);
                             $location_ids = [];
                             foreach ($locations_array as $business_location) {
