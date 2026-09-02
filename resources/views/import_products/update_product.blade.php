@@ -28,7 +28,7 @@
     @component('components.widget', ['class' => 'box-primary', 'title' => __('lang_v1.import_export_product')])
             <div class="row">
                 <div class="col-sm-6">
-                    <a href="{{action([\App\Http\Controllers\ImportProductsController::class, 'exportProducts'])}}" class="tw-dw-btn tw-dw-btn-primary tw-text-white theme-btn-bg tw-rounded-xl"><i class="fa fa-download"></i> @lang('lang_v1.export_products')</a>
+                    <a href="{{action([\App\Http\Controllers\ImportProductsController::class, 'exportProducts'])}}" class="tw-dw-btn tw-dw-btn-primary tw-text-white theme-btn-bg tw-rounded-xl">@lang('lang_v1.export_products')</a>
                 </div>
                 <div class="col-sm-6">
                     {!! Form::open(['url' => action([\App\Http\Controllers\ImportProductsController::class, 'postUpdateProducts']), 'method' => 'post', 'enctype' => 'multipart/form-data' ]) !!}
