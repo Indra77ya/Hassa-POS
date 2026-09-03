@@ -213,7 +213,7 @@
 						</table>
 						</div>
 					</div>
-					@include('sale_pos.partials.pos_details')
+					@include('sale_pos.partials.pos_form_totals')
 
 					@include('sale_pos.partials.payment_modal')
 

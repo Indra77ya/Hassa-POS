@@ -224,7 +224,7 @@
 							</tbody>
 						</table>
 					</div>
-					@include('sale_pos.partials.pos_details', ['edit' => true])
+					@include('sale_pos.partials.pos_form_totals', ['edit' => true])
 
 					@include('sale_pos.partials.payment_modal')
 
