@@ -1,4 +1,10 @@
-<div class="pos_form_totals tw-border-t tw-border-slate-100 tw-bg-slate-50/60 tw-rounded-b-2xl">
+@php
+	$is_discount_enabled = isset($is_discount_enabled) ? $is_discount_enabled : (($pos_settings['disable_discount'] ?? 0) != 1);
+	$is_rp_enabled = isset($is_rp_enabled) ? $is_rp_enabled : (session('business.enable_rp') == 1);
+	$edit_discount = isset($edit_discount) ? $edit_discount : true;
+@endphp
+
+<div class="pos_form_totals">
 
 	<div class="pos_totals_left">
 
@@ -24,7 +30,7 @@
 					<span class="mobile-only">DISC(-)</span>
 					<span class="desktop-only">@lang('sale.discount')(-) @show_tooltip(__('tooltip.sale_discount'))</span>
 					@if($edit_discount)
-						<i class="fas fa-edit pos_totals_edit tw-text-indigo-500 hover:tw-text-indigo-700 tw-ml-1 tw-cursor-pointer" id="pos-edit-discount" title="@lang('sale.edit_discount')" aria-hidden="true" data-toggle="modal" data-target="#posEditDiscountModal"></i>
+						<i class="fas fa-edit pos_totals_edit text-primary cursor-pointer" id="pos-edit-discount" title="@lang('sale.edit_discount')" aria-hidden="true" data-toggle="modal" data-target="#posEditDiscountModal"></i>
 					@endif
 				@endif
 			</span>
@@ -49,7 +55,7 @@
 			<span class="pos_totals_label">
 				<span class="mobile-only">TAX(+)</span>
 				<span class="desktop-only">@lang('sale.order_tax')(+) @show_tooltip(__('tooltip.sale_tax'))</span>
-				<i class="fas fa-edit pos_totals_edit tw-text-indigo-500 hover:tw-text-indigo-700 tw-ml-1 tw-cursor-pointer" title="@lang('sale.edit_order_tax')" aria-hidden="true" data-toggle="modal" data-target="#posEditOrderTaxModal" id="pos-edit-tax"></i>
+				<i class="fas fa-edit pos_totals_edit text-primary cursor-pointer" title="@lang('sale.edit_order_tax')" aria-hidden="true" data-toggle="modal" data-target="#posEditOrderTaxModal" id="pos-edit-tax"></i>
 			</span>
 			<span class="pos_totals_value" id="order_tax">@if(empty($edit)) 0 @else {{$transaction->tax_amount}} @endif</span>
 			<input type="hidden" name="tax_rate_id" id="tax_rate_id" value="@if(empty($edit)) {{$business_details->default_sales_tax}} @else {{$transaction->tax_id}} @endif" data-default="{{$business_details->default_sales_tax}}">
@@ -61,7 +67,7 @@
 			<span class="pos_totals_label">
 				<span class="mobile-only">SHIP(+)</span>
 				<span class="desktop-only">@lang('sale.shipping')(+) @show_tooltip(__('tooltip.shipping'))</span>
-				<i class="fas fa-edit pos_totals_edit tw-text-indigo-500 hover:tw-text-indigo-700 tw-ml-1 tw-cursor-pointer" title="@lang('sale.shipping')" aria-hidden="true" data-toggle="modal" data-target="#posShippingModal"></i>
+				<i class="fas fa-edit pos_totals_edit text-primary cursor-pointer" title="@lang('sale.shipping')" aria-hidden="true" data-toggle="modal" data-target="#posShippingModal"></i>
 			</span>
 			<span class="pos_totals_value" id="shipping_charges_amount">0</span>
 			<input type="hidden" name="shipping_details" id="shipping_details" value="@if(empty($edit)){{''}}@else{{$transaction->shipping_details}}@endif" data-default="">
@@ -78,7 +84,7 @@
 				<span class="pos_totals_label">
 					<span class="mobile-only">PACK(+)</span>
 					<span class="desktop-only">@lang('lang_v1.packing_charge')(+)</span>
-					<i class="fas fa-edit pos_totals_edit service_modal_btn tw-text-indigo-500 hover:tw-text-indigo-700 tw-ml-1 tw-cursor-pointer"></i>
+					<i class="fas fa-edit pos_totals_edit service_modal_btn text-primary cursor-pointer"></i>
 				</span>
 				<span class="pos_totals_value" id="packing_charge_text">0</span>
 			</div>
@@ -98,7 +104,7 @@
 	</div>
 
 	{{-- Total Payable hero --}}
-	<div class="pos_totals_right tw-rounded-b-2xl md:tw-rounded-br-2xl md:tw-rounded-bl-none">
+	<div class="pos_totals_right">
 		<span class="pos_totals_right_label">@lang('sale.total_payable')</span>
 		<span id="total_payable" class="pos_totals_right_value number">0</span>
 		<input type="hidden" name="final_total" id="final_total_input" value="0.00">
@@ -111,6 +117,7 @@
 		flex-direction: column;
 		margin: 0;
 		background: #f8fafc;
+		border-top: 1px solid #e2e8f0;
 	}
 	.pos_form_totals .pos_totals_left {
 		display: flex;
@@ -173,13 +180,13 @@
 		justify-content: space-between;
 		gap: 8px;
 		padding: 12px 16px;
-		background: #10b981;
+		background: #00a65a;
 		color: #ffffff;
 	}
 	.pos_form_totals .pos_totals_right_label {
 		font-size: 11px;
 		font-weight: 900;
-		color: #a7f3d0;
+		color: #ffffff;
 		text-transform: uppercase;
 		letter-spacing: 1px;
 		white-space: nowrap;
