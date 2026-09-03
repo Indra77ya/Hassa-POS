@@ -192,6 +192,25 @@ class UpdateProductExportImportTest extends TestCase
         ]);
     }
 
+    public function test_export_products_returns_excel_download()
+    {
+        $business_id = 1;
+
+        Business::create([
+            'id' => $business_id,
+            'name' => 'Test Business',
+            'time_zone' => 'Asia/Jakarta',
+            'fy_start_month' => 1,
+        ]);
+
+        $response = $this->withSession([
+            'user' => ['id' => 1, 'business_id' => $business_id],
+            'business' => ['id' => $business_id, 'time_zone' => 'Asia/Jakarta']
+        ])->get('/export-product-price');
+
+        $response->assertStatus(200);
+    }
+
     public function test_import_products_updates_product_details_by_sku()
     {
         $business_id = 1;
@@ -251,7 +270,7 @@ class UpdateProductExportImportTest extends TestCase
             'created_by' => 1,
         ]);
 
-        // Construct import CSV content
+        // Construct import CSV content without Purchase Prices / Margin
         $headers = [
             'Product',
             'SKU',
@@ -260,9 +279,6 @@ class UpdateProductExportImportTest extends TestCase
             'Brand',
             'Tax',
             'Business Locations',
-            'Default Purchase Price Exc. Tax',
-            'Default Purchase Price Inc. Tax',
-            'Margin (%)',
             'Default Selling Price Exc. Tax',
             'Default Selling Price Inc. Tax',
             'Wholesale Group Test'
@@ -276,9 +292,6 @@ class UpdateProductExportImportTest extends TestCase
             'Brand Test',
             'PPN 11 Test',
             'Location Test Update',
-            '20000',
-            '22200',
-            '25',
             '25000',
             '27750',
             '26000'
@@ -332,8 +345,6 @@ class UpdateProductExportImportTest extends TestCase
         $this->assertTrue($product->product_locations->contains('id', $location->id));
 
         // Assert Prices updated
-        $this->assertEquals(20000, (float)$variation->default_purchase_price);
-        $this->assertEquals(25, (float)$variation->profit_percent);
         $this->assertEquals(27750, (float)$variation->sell_price_inc_tax);
 
         // Assert Group Price updated

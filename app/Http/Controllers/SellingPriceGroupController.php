@@ -305,9 +305,6 @@ class SellingPriceGroupController extends Controller
             $locations = $variation->product && $variation->product->product_locations ? $variation->product->product_locations->pluck('name')->toArray() : [];
             $temp['Business Locations'] = implode(',', $locations);
 
-            $temp['Default Purchase Price Exc. Tax'] = $variation->default_purchase_price;
-            $temp['Default Purchase Price Inc. Tax'] = $variation->dpp_inc_tax;
-            $temp['Margin (%)'] = $variation->profit_percent;
             $temp['Default Selling Price Exc. Tax'] = $variation->default_sell_price;
             $temp['Default Selling Price Inc. Tax'] = $variation->sell_price_inc_tax;
 
