@@ -659,7 +659,7 @@ class ImportProductsController extends Controller
                                     ]);
                                 }
 
-                                $pm_val = is_numeric($profit_margin[$k]) ? (float) $profit_margin[$k] : $this->productUtil->num_uf($profit_margin[$k]);
+                                $pm_val = $this->parseImportNumber($profit_margin[$k]);
 
                                 //Assign Values
                                 $product_array['variation']['variations'][] = [
@@ -772,22 +772,22 @@ class ImportProductsController extends Controller
                                 if (! empty($single_variation)) {
                                     $var_update = ['sub_sku' => $product->sku];
                                     if (isset($variation_data['dpp_exc_tax']) && $variation_data['dpp_exc_tax'] !== '') {
-                                        $var_update['default_purchase_price'] = is_numeric($variation_data['dpp_exc_tax']) ? (float) $variation_data['dpp_exc_tax'] : $this->productUtil->num_uf($variation_data['dpp_exc_tax']);
+                                        $var_update['default_purchase_price'] = $this->parseImportNumber($variation_data['dpp_exc_tax']);
                                     }
                                     if (isset($variation_data['dpp_inc_tax']) && $variation_data['dpp_inc_tax'] !== '') {
-                                        $var_update['dpp_inc_tax'] = is_numeric($variation_data['dpp_inc_tax']) ? (float) $variation_data['dpp_inc_tax'] : $this->productUtil->num_uf($variation_data['dpp_inc_tax']);
+                                        $var_update['dpp_inc_tax'] = $this->parseImportNumber($variation_data['dpp_inc_tax']);
                                     }
                                     if (isset($variation_data['profit_percent']) && $variation_data['profit_percent'] !== '') {
-                                        $var_update['profit_percent'] = is_numeric($variation_data['profit_percent']) ? (float) $variation_data['profit_percent'] : $this->productUtil->num_uf($variation_data['profit_percent']);
+                                        $var_update['profit_percent'] = $this->parseImportNumber($variation_data['profit_percent']);
                                     }
                                     if (isset($variation_data['profit_margin_type'])) {
                                         $var_update['profit_margin_type'] = $variation_data['profit_margin_type'];
                                     }
                                     if (isset($variation_data['dsp_exc_tax']) && $variation_data['dsp_exc_tax'] !== '') {
-                                        $var_update['default_sell_price'] = is_numeric($variation_data['dsp_exc_tax']) ? (float) $variation_data['dsp_exc_tax'] : $this->productUtil->num_uf($variation_data['dsp_exc_tax']);
+                                        $var_update['default_sell_price'] = $this->parseImportNumber($variation_data['dsp_exc_tax']);
                                     }
                                     if (isset($variation_data['dsp_inc_tax']) && $variation_data['dsp_inc_tax'] !== '') {
-                                        $var_update['sell_price_inc_tax'] = is_numeric($variation_data['dsp_inc_tax']) ? (float) $variation_data['dsp_inc_tax'] : $this->productUtil->num_uf($variation_data['dsp_inc_tax']);
+                                        $var_update['sell_price_inc_tax'] = $this->parseImportNumber($variation_data['dsp_inc_tax']);
                                     }
                                     $single_variation->update($var_update);
                                 } else {
@@ -894,12 +894,57 @@ class ImportProductsController extends Controller
         return redirect($redirect_to)->with('status', $output);
     }
 
+    private function parseImportNumber($val)
+    {
+        if ($val === null || trim((string) $val) === '') {
+            return 0.0;
+        }
+        $str = trim((string) $val);
+
+        if (strpos($str, ',') !== false && strpos($str, '.') !== false) {
+            $last_comma = strrpos($str, ',');
+            $last_dot = strrpos($str, '.');
+            if ($last_comma > $last_dot) {
+                $clean = str_replace('.', '', $str);
+                $clean = str_replace(',', '.', $clean);
+
+                return (float) $clean;
+            } else {
+                $clean = str_replace(',', '', $str);
+
+                return (float) $clean;
+            }
+        }
+
+        if (strpos($str, ',') !== false && strpos($str, '.') === false) {
+            $parts = explode(',', $str);
+            $last_part = end($parts);
+            if (strlen($last_part) === 3 && count($parts) > 1) {
+                return (float) str_replace(',', '', $str);
+            } else {
+                return (float) str_replace(',', '.', $str);
+            }
+        }
+
+        if (strpos($str, '.') !== false && strpos($str, ',') === false) {
+            $parts = explode('.', $str);
+            $last_part = end($parts);
+            if (strlen($last_part) === 3 && count($parts) > 1) {
+                return (float) str_replace('.', '', $str);
+            } else {
+                return (float) $str;
+            }
+        }
+
+        return (float) $str;
+    }
+
     private function calculateVariationPrices($dpp_exc_tax, $dpp_inc_tax, $selling_price, $tax_amount, $tax_type, $margin, $margin_type = 'percentage')
     {
-        $dpp_exc_tax = is_numeric($dpp_exc_tax) ? (float) $dpp_exc_tax : $this->productUtil->num_uf($dpp_exc_tax);
-        $dpp_inc_tax = is_numeric($dpp_inc_tax) ? (float) $dpp_inc_tax : $this->productUtil->num_uf($dpp_inc_tax);
-        $selling_price = is_numeric($selling_price) ? (float) $selling_price : $this->productUtil->num_uf($selling_price);
-        $margin = is_numeric($margin) ? (float) $margin : $this->productUtil->num_uf($margin);
+        $dpp_exc_tax = $this->parseImportNumber($dpp_exc_tax);
+        $dpp_inc_tax = $this->parseImportNumber($dpp_inc_tax);
+        $selling_price = $this->parseImportNumber($selling_price);
+        $margin = $this->parseImportNumber($margin);
 
         //Calculate purchase prices
         if ($dpp_inc_tax == 0) {
