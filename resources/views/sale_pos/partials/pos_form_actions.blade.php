@@ -1,77 +1,37 @@
 @php
     $is_mobile = isMobile();
 @endphp
-<div class="row" style="margin:0;">
-    <div
-        class="pos-form-actions tw-fixed tw-bottom-0 tw-left-0 tw-right-0 tw-w-full tw-z-[1000] !tw-mt-0 tw-bg-white tw-border-t tw-border-slate-100 tw-shadow-[0_-8px_30px_rgb(0,0,0,0.04)] tw-rounded-t-2xl">
-        <div
-            class="tw-flex tw-items-center tw-justify-between tw-flex-col sm:tw-flex-row md:tw-flex-row lg:tw-flex-row xl:tw-flex-row tw-gap-2.5 tw-overflow-x-auto tw-w-full tw-px-5 tw-py-2 tw-min-h-[60px]">
+<div class="row" style="margin: 0;">
+    <div class="pos-form-actions" style="position: fixed; bottom: 0; left: 0; right: 0; width: 100%; z-index: 1000; background-color: #f4f5f7; border-top: 2px solid #d2d6de; padding: 8px 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05);">
+        <div class="row" style="margin: 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 5px;">
 
-            <div class="!tw-w-full md:!tw-w-none !tw-flex md:!tw-hidden !tw-flex-row !tw-items-center !tw-gap-3">
+            <div class="pull-left" style="display: flex; align-items: center; flex-wrap: wrap; gap: 5px;">
                 @if (empty($edit))
-                    <button type="button" class="tw-leading-none tw-whitespace-nowrap tw-font-bold tw-text-rose-600 tw-cursor-pointer tw-text-xs md:tw-text-sm tw-bg-rose-50 hover:tw-bg-rose-100 tw-border tw-border-rose-100 tw-p-2.5 tw-rounded-xl tw-w-[5.5rem] tw-flex tw-flex-row tw-items-center tw-justify-center tw-gap-1 active:tw-scale-95 tw-transition-all js-pos-cancel"> <i
-                            class="fas fa-window-close"></i> @lang('sale.cancel')</button>
+                    <button type="button" class="btn btn-danger btn-flat btn-sm js-pos-cancel">
+                        <i class="fas fa-window-close"></i> @lang('sale.cancel')
+                    </button>
                 @else
-                    <button type="button" class="btn-danger tw-dw-btn hide tw-dw-btn-xs js-pos-delete" id="pos-delete"
-                        @if (!empty($only_payment)) disabled @endif> <i class="fas fa-trash-alt"></i>
-                        @lang('messages.delete')</button>
+                    <button type="button" class="btn btn-danger btn-flat btn-sm js-pos-delete" id="pos-delete" @if (!empty($only_payment)) disabled @endif>
+                        <i class="fas fa-trash-alt"></i> @lang('messages.delete')
+                    </button>
                 @endif
-
-                @if (!Gate::check('disable_pay_checkout') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
-                    <button type="button"
-                        class="pos-finalize tw-leading-none tw-whitespace-nowrap tw-flex tw-flex-row tw-items-center tw-justify-center tw-gap-1.5 tw-font-bold tw-text-white tw-cursor-pointer tw-text-xs md:tw-text-sm tw-bg-slate-800 hover:tw-bg-slate-900 tw-rounded-xl tw-p-2.5 tw-w-[8.5rem] active:tw-scale-95 tw-transition-all no-print @if ($pos_settings['disable_pay_checkout'] != 0) hide @endif"
-                        title="@lang('lang_v1.tooltip_checkout_multi_pay')"><i class="fas fa-money-check-alt"
-                            aria-hidden="true"></i> @lang('lang_v1.checkout_multi_pay') </button>
-                @endif
-
-                @if (!Gate::check('disable_express_checkout') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
-                    <button type="button"
-                        class="tw-leading-none tw-whitespace-nowrap tw-font-bold tw-text-white tw-cursor-pointer tw-text-xs md:tw-text-sm tw-p-2.5 tw-rounded-xl tw-w-[5.5rem] tw-flex tw-flex-row tw-items-center tw-justify-center tw-gap-1 active:tw-scale-95 tw-transition-all no-print @if ($pos_settings['disable_express_checkout'] != 0 || !array_key_exists('cash', $payment_types)) hide @endif pos-express-finalize"
-                        style="background-color: #10b981 !important; color: #ffffff !important;"
-                        data-pay_method="cash" title="@lang('tooltip.express_checkout')"> <i class="fas fa-money-bill-alt"
-                            aria-hidden="true"></i> @lang('lang_v1.express_checkout_cash')</button>
-                @endif
-            </div>
-
-            <div class="tw-flex tw-items-center tw-gap-4 tw-flex-row tw-overflow-x-auto pos-footer-secondary">
-
-                {{-- Cancel: isolated on the far left (desktop only; mobile has its own Cancel above) --}}
-                <div class="!tw-hidden md:!tw-flex md:tw-items-center md:tw-gap-3">
-                    @if (empty($edit))
-                        <button type="button"
-                            class="tw-leading-none tw-whitespace-nowrap tw-font-bold tw-text-rose-600 tw-cursor-pointer tw-text-xs md:tw-text-sm tw-bg-rose-50 hover:tw-bg-rose-100 tw-border tw-border-rose-100 tw-py-2 tw-px-4 tw-rounded-xl tw-w-[8.5rem] tw-flex tw-flex-row tw-items-center tw-justify-center tw-gap-1.5 active:tw-scale-95 tw-transition-all js-pos-cancel"> <i
-                                class="fas fa-window-close"></i> @lang('sale.cancel')</button>
-                    @else
-                        <button type="button"
-                            class="tw-leading-none tw-whitespace-nowrap tw-font-bold tw-text-white tw-cursor-pointer tw-text-xs md:tw-text-sm tw-bg-rose-600 hover:tw-bg-rose-700 tw-py-2 tw-px-4 tw-rounded-xl tw-w-[8.5rem] tw-flex tw-flex-row tw-items-center tw-justify-center tw-gap-1.5 hide active:tw-scale-95 tw-transition-all js-pos-delete"
-                            @if (!empty($only_payment)) disabled @endif> <i
-                                class="fas fa-trash-alt"></i> @lang('messages.delete')</button>
-                    @endif
-                    <span class="pos-footer-divider tw-inline-block tw-w-px tw-h-7 tw-bg-slate-100 tw-flex-shrink-0 tw-self-center tw-rounded-[1px] tw-mx-1"></span>
-                </div>
 
                 @if (!Gate::check('disable_draft') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
-                    <button type="button"
-                        class="tw-font-bold tw-text-slate-600 hover:tw-text-indigo-600 tw-text-xs md:tw-text-sm tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-1 tw-whitespace-nowrap tw-transition-colors @if ($pos_settings['disable_draft'] != 0) hide @endif"
-                        id="pos-draft" @if (!empty($only_payment)) disabled @endif><i
-                            class="fas fa-edit tw-text-indigo-500 tw-text-base"></i> @lang('sale.draft')</button>
+                    <button type="button" class="btn bg-navy btn-flat btn-sm @if ($pos_settings['disable_draft'] != 0) hide @endif" id="pos-draft" @if (!empty($only_payment)) disabled @endif>
+                        <i class="fas fa-edit"></i> @lang('sale.draft')
+                    </button>
                 @endif
 
                 @if (!Gate::check('disable_quotation') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
-                    <button type="button"
-                        class="tw-font-bold tw-text-slate-600 hover:tw-text-amber-600 tw-cursor-pointer tw-text-xs md:tw-text-sm tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-1 tw-whitespace-nowrap tw-transition-colors @if ($is_mobile) col-xs-6 @endif"
-                        id="pos-quotation" @if (!empty($only_payment)) disabled @endif><i
-                            class="fas fa-file-alt tw-text-amber-500 tw-text-base"></i> @lang('lang_v1.quotation')</button>
+                    <button type="button" class="btn bg-purple btn-flat btn-sm" id="pos-quotation" @if (!empty($only_payment)) disabled @endif>
+                        <i class="fas fa-file-alt"></i> @lang('lang_v1.quotation')
+                    </button>
                 @endif
 
                 @if (!Gate::check('disable_suspend_sale') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
                     @if (empty($pos_settings['disable_suspend']))
-                        <button type="button"
-                            class="tw-font-bold tw-text-slate-600 hover:tw-text-rose-600 tw-cursor-pointer tw-text-xs md:tw-text-sm tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-1 tw-whitespace-nowrap tw-transition-colors no-print pos-express-finalize"
-                            data-pay_method="suspend" title="@lang('lang_v1.tooltip_suspend')"
-                            @if (!empty($only_payment)) disabled @endif>
-                            <i class="fas fa-pause-circle tw-text-rose-500 tw-text-base" aria-hidden="true"></i>
-                            @lang('lang_v1.suspend')
+                        <button type="button" class="btn btn-warning btn-flat btn-sm no-print pos-express-finalize" data-pay_method="suspend" title="@lang('lang_v1.tooltip_suspend')" @if (!empty($only_payment)) disabled @endif>
+                            <i class="fas fa-pause-circle" aria-hidden="true"></i> @lang('lang_v1.suspend')
                         </button>
                     @endif
                 @endif
@@ -79,62 +39,49 @@
                 @if (!Gate::check('disable_credit_sale') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
                     @if (empty($pos_settings['disable_credit_sale_button']))
                         <input type="hidden" name="is_credit_sale" value="0" id="is_credit_sale">
-                        <button type="button"
-                            class="tw-font-bold tw-text-slate-600 hover:tw-text-violet-600 tw-cursor-pointer tw-text-xs md:tw-text-sm tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-1 tw-whitespace-nowrap tw-transition-colors no-print pos-express-finalize @if ($is_mobile) col-xs-6 @endif"
-                            data-pay_method="credit_sale" title="@lang('lang_v1.tooltip_credit_sale')"
-                            @if (!empty($only_payment)) disabled @endif>
-                            <i class="fas fa-handshake tw-text-violet-500 tw-text-base" aria-hidden="true"></i> @lang('lang_v1.credit_sale')
+                        <button type="button" class="btn bg-maroon btn-flat btn-sm no-print pos-express-finalize" data-pay_method="credit_sale" title="@lang('lang_v1.tooltip_credit_sale')" @if (!empty($only_payment)) disabled @endif>
+                            <i class="fas fa-handshake" aria-hidden="true"></i> @lang('lang_v1.credit_sale')
                         </button>
                     @endif
                 @endif
+
                 @if (!Gate::check('disable_card') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
-                    <button type="button"
-                        class="tw-font-bold tw-text-slate-600 hover:tw-text-pink-600 tw-cursor-pointer tw-text-xs md:tw-text-sm tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-1 tw-whitespace-nowrap tw-transition-colors no-print @if (!empty($pos_settings['disable_suspend']))  @endif pos-express-finalize @if (!array_key_exists('card', $payment_types)) hide @endif @if ($is_mobile) col-xs-6 @endif"
-                        data-pay_method="card" title="@lang('lang_v1.tooltip_express_checkout_card')">
-                        <i class="fas fa-credit-card tw-text-pink-500 tw-text-base" aria-hidden="true"></i> @lang('lang_v1.express_checkout_card')
+                    <button type="button" class="btn bg-orange btn-flat btn-sm no-print pos-express-finalize @if (!array_key_exists('card', $payment_types)) hide @endif" data-pay_method="card" title="@lang('lang_v1.tooltip_express_checkout_card')">
+                        <i class="fas fa-credit-card" aria-hidden="true"></i> @lang('lang_v1.express_checkout_card')
                     </button>
                 @endif
 
                 @if (!empty($pos_settings['enable_midtrans']) && !empty($pos_settings['midtrans_client_key']))
-                    <button type="button"
-                        class="tw-font-bold tw-text-slate-600 hover:tw-text-blue-600 tw-cursor-pointer tw-text-xs md:tw-text-sm tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-1 tw-whitespace-nowrap tw-transition-colors no-print"
-                        id="pos-midtrans-pay-btn" title="Pay with Midtrans Snap">
-                        <img src="{{ asset('img/midtrans_mark.png') }}" alt="Midtrans" class="tw-h-4 tw-w-auto tw-object-contain"> Midtrans
+                    <button type="button" class="btn btn-info btn-flat btn-sm no-print" id="pos-midtrans-pay-btn" title="Pay with Midtrans Snap">
+                        <img src="{{ asset('img/midtrans_mark.png') }}" alt="Midtrans" style="height: 14px; width: auto; vertical-align: middle; display: inline-block;"> Midtrans
+                    </button>
+                @endif
+            </div>
+
+            <div class="pull-right" style="display: flex; align-items: center; flex-wrap: wrap; gap: 5px;">
+                @if (!isset($pos_settings['hide_recent_trans']) || $pos_settings['hide_recent_trans'] == 0)
+                    <button type="button" class="btn btn-default btn-flat btn-sm hidden-xs" data-toggle="modal" data-target="#recent_transactions_modal" id="recent-transactions">
+                        <i class="fas fa-history"></i> @lang('lang_v1.recent_transactions')
                     </button>
                 @endif
 
-                {{-- Desktop-only primary CTAs (mobile has these in its own top row) --}}
-                <div class="!tw-hidden md:!tw-flex md:tw-items-center md:tw-gap-3">
-                    <span class="pos-footer-divider tw-inline-block tw-w-px tw-h-7 tw-bg-slate-100 tw-flex-shrink-0 tw-self-center tw-rounded-[1px] tw-mx-1"></span>
-                    @if (!Gate::check('disable_pay_checkout') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
-                        <button type="button"
-                            class="pos-finalize tw-leading-none tw-whitespace-nowrap tw-flex tw-flex-row tw-items-center tw-justify-center tw-gap-1.5 tw-font-extrabold tw-text-white tw-cursor-pointer tw-text-xs md:tw-text-sm tw-bg-slate-800 hover:tw-bg-slate-900 tw-py-2.5 tw-px-5 tw-rounded-xl tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95 tw-shadow-sm hover:tw-shadow-md no-print @if ($pos_settings['disable_pay_checkout'] != 0) hide @endif"
-                            style="width: 150px !important; height: 38px !important;"
-                            title="@lang('lang_v1.tooltip_checkout_multi_pay')"><i class="fas fa-money-check-alt"
-                                aria-hidden="true"></i> @lang('lang_v1.checkout_multi_pay') </button>
-                    @endif
+                @if (!Gate::check('disable_pay_checkout') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
+                    <button type="button" class="btn btn-primary btn-flat btn-sm pos-finalize no-print @if ($pos_settings['disable_pay_checkout'] != 0) hide @endif" title="@lang('lang_v1.tooltip_checkout_multi_pay')" style="font-weight: bold;">
+                        <i class="fas fa-money-check-alt" aria-hidden="true"></i> @lang('lang_v1.checkout_multi_pay')
+                    </button>
+                @endif
 
-                    @if (!Gate::check('disable_express_checkout') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
-                        <button type="button"
-                            class="tw-leading-none tw-whitespace-nowrap tw-font-extrabold tw-text-white tw-cursor-pointer tw-text-xs md:tw-text-sm tw-py-2.5 tw-px-5 tw-rounded-xl tw-flex tw-flex-row tw-items-center tw-justify-center tw-gap-1.5 tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95 tw-shadow-sm hover:tw-shadow-md no-print @if ($pos_settings['disable_express_checkout'] != 0 || !array_key_exists('cash', $payment_types)) hide @endif pos-express-finalize"
-                            style="background-color: #10b981 !important; color: #ffffff !important; width: 150px !important; height: 38px !important;"
-                            data-pay_method="cash" title="@lang('tooltip.express_checkout')"> <i class="fas fa-money-bill-alt"
-                                aria-hidden="true"></i> @lang('lang_v1.express_checkout_cash')</button>
-                    @endif
-                </div>
-            </div>
-
-            <div class="tw-w-full md:tw-w-fit tw-flex tw-items-center tw-justify-end tw-hidden md:tw-flex" style="padding-right: 36px !important;">
-                @if (!isset($pos_settings['hide_recent_trans']) || $pos_settings['hide_recent_trans'] == 0)
-                    <button type="button"
-                        class="tw-font-bold tw-bg-indigo-50 hover:tw-bg-indigo-100 tw-border tw-border-indigo-100 tw-text-indigo-600 tw-rounded-xl tw-w-full md:tw-w-fit tw-px-4 tw-h-9 tw-cursor-pointer tw-text-xs md:tw-text-sm tw-inline-flex tw-items-center tw-justify-center tw-gap-1.5 tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95"
-                        data-toggle="modal" data-target="#recent_transactions_modal" id="recent-transactions"><i
-                            class="fas fa-history"></i> @lang('lang_v1.recent_transactions')</button>
+                @if (!Gate::check('disable_express_checkout') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
+                    <button type="button" class="btn btn-success btn-flat btn-sm no-print @if ($pos_settings['disable_express_checkout'] != 0 || !array_key_exists('cash', $payment_types)) hide @endif pos-express-finalize" data-pay_method="cash" title="@lang('tooltip.express_checkout')" style="font-weight: bold;">
+                        <i class="fas fa-money-bill-alt" aria-hidden="true"></i> @lang('lang_v1.express_checkout_cash')
+                    </button>
                 @endif
             </div>
+
         </div>
     </div>
 </div>
+
 @if (isset($transaction))
     @include('sale_pos.partials.edit_discount_modal', [
         'sales_discount' => $transaction->discount_amount,

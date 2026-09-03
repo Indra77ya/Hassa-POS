@@ -6,35 +6,35 @@
 			$unit_short_name = $variation->product->unit->short_name;
 		}
 	@endphp
-	<div class="col-md-3 col-xs-4 no-print !tw-px-[3px]">
-		<div class="product_box tw-w-full tw-mb-1 tw-text-center tw-cursor-pointer tw-font-semibold tw-bg-white tw-rounded-lg tw-p-1 tw-border tw-border-[#fde68a] tw-shadow-[0_1px_3px_rgba(0,0,0,0.06)] tw-transition-all tw-duration-150 hover:-tw-translate-y-px hover:tw-shadow-[0_4px_12px_rgba(0,0,0,0.1)] active:tw-scale-[0.97] @if($enable_stock && $variation->qty_available <= 0) product_out_of_stock !tw-bg-[#f3f4f6] tw-opacity-60 @endif" data-toggle="tooltip" data-placement="bottom" data-variation_id="{{$variation->id}}" title="{{$variation->full_name}}">
+	<div class="col-md-3 col-xs-4 no-print" style="padding: 2px;">
+		<div class="product_box text-center cursor-pointer @if($enable_stock && $variation->qty_available <= 0) product_out_of_stock @endif" data-toggle="tooltip" data-placement="bottom" data-variation_id="{{$variation->id}}" title="{{$variation->full_name}}" style="background: #fff; border: 1px solid #f39c12; border-radius: 4px; padding: 5px; margin-bottom: 5px; min-height: 120px;">
 
-		<div class="image-container tw-h-[58px] tw-w-[58px] tw-mx-auto tw-mb-[3px]"
-			style="background-image: url('{{ count($variation->media) > 0 ? $variation->media->first()->display_url : (!empty($variation->product->image_url) ? $variation->product->image_url : asset('/img/default.png')) }}');
-			background-repeat: no-repeat; background-position: center;
-			background-size: contain; height: 58px; width: 58px;">
+			<div class="image-container"
+				style="background-image: url('{{ count($variation->media) > 0 ? $variation->media->first()->display_url : (!empty($variation->product->image_url) ? $variation->product->image_url : asset('/img/default.png')) }}');
+				background-repeat: no-repeat; background-position: center;
+				background-size: contain; height: 50px; width: 100%; margin: 0 auto 3px auto;">
+			</div>
 
-		</div>
+			<div class="text_div">
+				<small class="text-muted" style="font-weight: bold; font-size: 11px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+					{{$variation->product->name}}
+					@if($variation->product->type == 'variable')
+						- {{$variation->name}}
+					@endif
+				</small>
 
-		<div class="text_div tw-mt-0.5">
-			<small class="text text-muted tw-w-full tw-line-clamp-1 !tw-leading-[13px] tw-max-h-[13px] !tw-text-[11px]">{{$variation->product->name}}
-			@if($variation->product->type == 'variable')
-				- {{$variation->name}}
-			@endif
-			</small>
-
-			<small class="text-muted">
-				({{$variation->sub_sku}})
-			</small><br>
-			<small class="text-muted" style="font-size: 10px;">
-				@if($enable_stock)
-					{{ @num_format($variation->qty_available) }} {{$unit_short_name}} @lang('lang_v1.in_stock')
-				@else
-					--
-				@endif
-			</small><br>
-			<span class="product_price !tw-text-[11px] tw-font-bold tw-text-[#15803d] tw-leading-[13px] tw-whitespace-nowrap tw-overflow-hidden tw-text-ellipsis">@format_currency($variation->sell_price_inc_tax)</span>
-		</div>
+				<small class="text-muted" style="font-size: 10px;">
+					({{$variation->sub_sku}})
+				</small><br>
+				<small class="text-muted" style="font-size: 10px;">
+					@if($enable_stock)
+						{{ @num_format($variation->qty_available) }} {{$unit_short_name}} @lang('lang_v1.in_stock')
+					@else
+						--
+					@endif
+				</small><br>
+				<span class="product_price text-success" style="font-weight: bold; font-size: 11px;">@format_currency($variation->sell_price_inc_tax)</span>
+			</div>
 
 		</div>
 	</div>

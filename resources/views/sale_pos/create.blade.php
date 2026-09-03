@@ -3,7 +3,7 @@
 @section('title', __('sale.pos_sale'))
 
 @section('content')
-    <section class="content no-print">
+    <section class="content no-print" style="padding: 10px;">
         <input type="hidden" id="amount_rounding_method" value="{{ $pos_settings['amount_rounding_method'] ?? '' }}">
         @if (!empty($pos_settings['allow_overselling']))
             <input type="hidden" id="is_overselling_allowed">
@@ -20,51 +20,42 @@
             'method' => 'post',
             'id' => 'add_pos_sell_form',
         ]) !!}
-        <div class="row" style="margin:0;">
-            <div class="col-md-12" style="padding:0;">
-                <div class="row tw-flex lg:tw-flex-row md:tw-flex-col sm:tw-flex-col tw-flex-col tw-items-stretch" style="gap: 4px; margin: 0; padding: 0;">
-                    {{-- <div class="@if (empty($pos_settings['hide_product_suggestion'])) col-md-7 @else col-md-10 col-md-offset-1 @endif no-padding pr-12"> --}}
-                    <div class="tw-w-full @if(empty($pos_settings['hide_product_suggestion'])) lg:tw-w-[60%]  @else lg:tw-w-[100%] @endif" style="padding:0;">
+        <div class="row">
+            <div class="@if(empty($pos_settings['hide_product_suggestion'])) col-md-7 col-sm-12 @else col-md-12 @endif" style="padding-right: 5px;">
+                <div class="box box-solid box-success" style="margin-bottom: 10px;">
+                    <div class="box-body" style="padding: 10px;">
+                        {!! Form::hidden('location_id', $default_location->id ?? null, [
+                            'id' => 'location_id',
+                            'data-receipt_printer_type' => !empty($default_location->receipt_printer_type)
+                                ? $default_location->receipt_printer_type
+                                : 'browser',
+                            'data-default_payment_accounts' => $default_location->default_payment_accounts ?? '',
+                        ]) !!}
+                        <!-- sub_type -->
+                        {!! Form::hidden('sub_type', isset($sub_type) ? $sub_type : null) !!}
+                        <input type="hidden" id="item_addition_method"
+                            value="{{ $business_details->item_addition_method }}">
+                        @include('sale_pos.partials.pos_form')
 
-                        <div class="tw-shadow-[rgba(17,_17,_26,_0.1)_0px_0px_16px] tw-rounded-2xl tw-bg-white" style="padding:0;overflow:hidden;height:100%;">
+                        @include('sale_pos.partials.pos_form_totals')
 
-                            {{-- <div class="box box-solid mb-12 @if (!isMobile()) mb-40 @endif"> --}}
-                                <div class="box-body pb-0">
-                                    {!! Form::hidden('location_id', $default_location->id ?? null, [
-                                        'id' => 'location_id',
-                                        'data-receipt_printer_type' => !empty($default_location->receipt_printer_type)
-                                            ? $default_location->receipt_printer_type
-                                            : 'browser',
-                                        'data-default_payment_accounts' => $default_location->default_payment_accounts ?? '',
-                                    ]) !!}
-                                    <!-- sub_type -->
-                                    {!! Form::hidden('sub_type', isset($sub_type) ? $sub_type : null) !!}
-                                    <input type="hidden" id="item_addition_method"
-                                        value="{{ $business_details->item_addition_method }}">
-                                    @include('sale_pos.partials.pos_form')
+                        @include('sale_pos.partials.payment_modal')
 
-                                    @include('sale_pos.partials.pos_form_totals')
+                        @if (empty($pos_settings['disable_suspend']))
+                            @include('sale_pos.partials.suspend_note_modal')
+                        @endif
 
-                                    @include('sale_pos.partials.payment_modal')
-
-                                    @if (empty($pos_settings['disable_suspend']))
-                                        @include('sale_pos.partials.suspend_note_modal')
-                                    @endif
-
-                                    @if (empty($pos_settings['disable_recurring_invoice']))
-                                        @include('sale_pos.partials.recurring_invoice_modal')
-                                    @endif
-                                </div>
-                            {{-- </div> --}}
-                        </div>
+                        @if (empty($pos_settings['disable_recurring_invoice']))
+                            @include('sale_pos.partials.recurring_invoice_modal')
+                        @endif
                     </div>
-                    @if (empty($pos_settings['hide_product_suggestion']))
-                        <div class="tw-w-full lg:tw-w-[40%]" style="padding:0;" id="pos_sidebar_wrap">
-                            @include('sale_pos.partials.pos_sidebar')
-                        </div>
-                    @endif
                 </div>
             </div>
+            @if (empty($pos_settings['hide_product_suggestion']))
+                <div class="col-md-5 col-sm-12" style="padding-left: 5px;" id="pos_sidebar_wrap">
+                    @include('sale_pos.partials.pos_sidebar')
+                </div>
+            @endif
         </div>
         @include('sale_pos.partials.pos_form_actions')
         {!! Form::close() !!}
