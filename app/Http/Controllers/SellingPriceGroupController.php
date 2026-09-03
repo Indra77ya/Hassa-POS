@@ -257,22 +257,59 @@ class SellingPriceGroupController extends Controller
      */
     public function export()
     {
+        if (! auth()->user()->can('product.create') && ! auth()->user()->can('product.update')) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $business_id = request()->user()->business_id;
         $price_groups = SellingPriceGroup::where('business_id', $business_id)->active()->get();
 
         $variations = Variation::join('products as p', 'variations.product_id', '=', 'p.id')
                             ->join('product_variations as pv', 'variations.product_variation_id', '=', 'pv.id')
+                            ->leftJoin('categories as c', 'p.category_id', '=', 'c.id')
+                            ->leftJoin('categories as sub_c', 'p.sub_category_id', '=', 'sub_c.id')
+                            ->leftJoin('brands as b', 'p.brand_id', '=', 'b.id')
+                            ->leftJoin('tax_rates as t', 'p.tax', '=', 't.id')
                             ->where('p.business_id', $business_id)
                             ->whereIn('p.type', ['single', 'variable'])
-                            ->select('sub_sku', 'p.name as product_name', 'variations.name as variation_name', 'p.type', 'variations.id', 'pv.name as product_variation_name', 'sell_price_inc_tax')
-                            ->with(['group_prices'])
+                            ->select(
+                                'variations.sub_sku',
+                                'p.name as product_name',
+                                'variations.name as variation_name',
+                                'p.type',
+                                'variations.id',
+                                'pv.name as product_variation_name',
+                                'c.name as category_name',
+                                'sub_c.name as sub_category_name',
+                                'b.name as brand_name',
+                                't.name as tax_name',
+                                'variations.default_purchase_price',
+                                'variations.dpp_inc_tax',
+                                'variations.profit_percent',
+                                'variations.default_sell_price',
+                                'variations.sell_price_inc_tax'
+                            )
+                            ->with(['group_prices', 'product.product_locations'])
                             ->get();
+
         $export_data = [];
         foreach ($variations as $variation) {
             $temp = [];
-            $temp['product'] = $variation->type == 'single' ? $variation->product_name : $variation->product_name.' - '.$variation->product_variation_name.' - '.$variation->variation_name;
-            $temp['sku'] = $variation->sub_sku;
-            $temp['Selling Price Including Tax'] = $variation->sell_price_inc_tax;
+            $temp['Product'] = $variation->type == 'single' ? $variation->product_name : $variation->product_name.' - '.$variation->product_variation_name.' - '.$variation->variation_name;
+            $temp['SKU'] = $variation->sub_sku;
+            $temp['Category'] = $variation->category_name ?? '';
+            $temp['Sub Category'] = $variation->sub_category_name ?? '';
+            $temp['Brand'] = $variation->brand_name ?? '';
+            $temp['Tax'] = $variation->tax_name ?? '';
+
+            $locations = $variation->product && $variation->product->product_locations ? $variation->product->product_locations->pluck('name')->toArray() : [];
+            $temp['Business Locations'] = implode(',', $locations);
+
+            $temp['Default Purchase Price Exc. Tax'] = $variation->default_purchase_price;
+            $temp['Default Purchase Price Inc. Tax'] = $variation->dpp_inc_tax;
+            $temp['Margin (%)'] = $variation->profit_percent;
+            $temp['Default Selling Price Exc. Tax'] = $variation->default_sell_price;
+            $temp['Default Selling Price Inc. Tax'] = $variation->sell_price_inc_tax;
 
             foreach ($price_groups as $price_group) {
                 $price_group_id = $price_group->id;
@@ -291,7 +328,7 @@ class SellingPriceGroupController extends Controller
         ob_start();
 
         return collect($export_data)->downloadExcel(
-            'product_prices.xlsx',
+            'update_products.xlsx',
             null,
             true
         );
