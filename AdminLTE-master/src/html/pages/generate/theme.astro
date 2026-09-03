@@ -1,0 +1,908 @@
+---
+import Head from "@components/_head.astro"
+import Footer from "@components/dashboard/_footer.astro"
+import Topbar from "@components/dashboard/_topbar.astro"
+import Scripts from "@components/_scripts.astro"
+import SkinPreview from "@components/_skin-preview.astro"
+import { convertPathToHtml } from "../../../utils/index.js"
+import { palette, paletteV3, skinGroups, skinGroupsV3, skins, skinsV3 } from "../../../utils/palette.mjs"
+
+const title = "AdminLTE 4 | Theme Customize"
+// The extended palette (dist/css/adminlte-colors.css) is opt-in; this page
+// loads it so the pickers can offer those colours too. Skins use `.text-bg-*`
+// so the contrast text comes along — see docs/colors.html.
+const paletteClasses = palette.map(c => `text-bg-${c.name}`)
+// The AdminLTE 3 originals (adminlte-colors-v3.css) are the alternative sheet;
+// the two define the same class names, so the page loads one at a time.
+const paletteSets = [
+  { key: "designed", label: "Designed palette (4.4)", file: "adminlte-colors.css", groups: skinGroups, skins, classes: paletteClasses, text: Object.fromEntries(palette.map(c => [`text-bg-${c.name}`, c.textColor])) },
+  { key: "v3", label: "AdminLTE 3 originals", file: "adminlte-colors-v3.css", groups: skinGroupsV3, skins: skinsV3, classes: paletteV3.map(c => `text-bg-${c.name}`), text: Object.fromEntries(paletteV3.map(c => [`text-bg-${c.name}`, c.textColor])) }
+]
+// `data-lte-primary` values each sheet can offer (#6107)
+const primaryChoices = {
+  designed: palette.map(c => c.name),
+  v3: paletteV3.map(c => c.name)
+}
+// `data-lte-contrast="aa"` text colours, and how many colours it changes (#6110)
+const paletteTextAA = {
+  designed: Object.fromEntries(palette.map(c => [`text-bg-${c.name}`, c.textColorAA])),
+  v3: Object.fromEntries(paletteV3.map(c => [`text-bg-${c.name}`, c.textColorAA]))
+}
+const aaFlipCount = {
+  designed: palette.filter(c => c.textColor !== c.textColorAA).length,
+  v3: paletteV3.filter(c => c.textColor !== c.textColorAA).length
+}
+const paletteSetsJson = paletteSets.map(({ key, file, classes, text }) => ({
+  key, file, classes, text, textAA: paletteTextAA[key], aaFlips: aaFlipCount[key], primaries: primaryChoices[key]
+}))
+const path = "../../../dist"
+const htmlPath = convertPathToHtml(path);
+
+// Smart path resolution: calculate relative path based on directory depth
+const pathname = Astro.url.pathname;
+const pathSegments = pathname.split('/').filter(segment => segment !== '');
+const depth = pathSegments.length > 0 ? pathSegments.length - 1 : 0;
+const deploymentPath = depth === 0 ? './' : '../'.repeat(depth);
+---
+
+<!doctype html>
+<html lang="en">
+  <!--begin::Head-->
+  <head>
+    <Head title={title} path={path} />
+    <!--begin::Optional Stylesheet(Extended palette — needed for the "Extended palette" options below)-->
+    <link rel="stylesheet" href={deploymentPath + "css/adminlte-colors.css"} id="palette-stylesheet" data-css-dir={deploymentPath + "css/"} />
+    <!--end::Optional Stylesheet(Extended palette)-->
+    <style>
+      /* Page-local: the preset thumbnails' button shell. */
+      .lte-skin-btn {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.4rem 0.4rem 0.3rem;
+        font-size: 0.8125rem;
+        line-height: 1.2;
+        color: var(--bs-body-color);
+        background: var(--bs-body-bg);
+        border: 1px solid var(--bs-border-color);
+        border-radius: var(--bs-border-radius);
+      }
+      .lte-skin-btn:hover {
+        border-color: var(--bs-secondary-color);
+      }
+      .lte-skin-btn[aria-pressed="true"] {
+        border-color: var(--bs-body-color);
+        box-shadow: 0 0 0 1px var(--bs-body-color);
+      }
+      .lte-skin-btn:focus-visible {
+        outline: 2px solid var(--bs-focus-ring-color);
+        outline-offset: 2px;
+      }
+    </style>
+  </head>
+  <!--end::Head-->
+  <!--begin::Body-->
+  <body class="sidebar-expand-lg bg-body-tertiary">
+    <!--begin::App Wrapper-->
+    <div class="app-wrapper">
+      <Topbar path={path} />
+      <!--begin::Sidebar-->
+      <aside class="app-sidebar bg-primary shadow" data-bs-theme="dark">
+        <!--begin::Sidebar Brand-->
+        <div class="sidebar-brand">
+          <!--begin::Brand Link-->
+          <a href={htmlPath + "/index.html"} class="brand-link">
+            <!--begin::Brand Image-->
+            <img
+              src={deploymentPath + "assets/img/AdminLTELogo.png"}
+              alt="AdminLTE Logo"
+              class="brand-image opacity-75 shadow"
+            />
+            <!--end::Brand Image-->
+            <!--begin::Brand Text-->
+            <span class="brand-text fw-light">AdminLTE 4</span>
+            <!--end::Brand Text-->
+          </a>
+          <!--end::Brand Link-->
+        </div>
+        <!--end::Sidebar Brand-->
+
+        <!--begin::Sidebar Wrapper-->
+        <div class="sidebar-wrapper">
+          <nav class="mt-2">
+            <!--begin::Sidebar Menu-->
+            <ul
+              class="nav sidebar-menu flex-column"
+              data-lte-toggle="treeview"
+              role="menu"
+              data-accordion="false"
+            >
+              <li class="nav-header">MULTI LEVEL EXAMPLE</li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="nav-icon bi bi-circle-fill"></i>
+                  <p>Level 1</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="nav-icon bi bi-circle-fill"></i>
+                  <p>
+                    Level 1
+                    <i class="nav-arrow bi bi-chevron-right"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="nav-icon bi bi-circle"></i>
+                      <p>Level 2</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="nav-icon bi bi-circle"></i>
+                      <p>
+                        Level 2
+                        <i class="nav-arrow bi bi-chevron-right"></i>
+                      </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                      <li class="nav-item">
+                        <a href="#" class="nav-link">
+                          <i class="nav-icon bi bi-record-circle-fill"></i>
+                          <p>Level 3</p>
+                        </a>
+                      </li>
+                      <li class="nav-item">
+                        <a href="#" class="nav-link">
+                          <i class="nav-icon bi bi-record-circle-fill"></i>
+                          <p>Level 3</p>
+                        </a>
+                      </li>
+                      <li class="nav-item">
+                        <a href="#" class="nav-link">
+                          <i class="nav-icon bi bi-record-circle-fill"></i>
+                          <p>Level 3</p>
+                        </a>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="nav-icon bi bi-circle"></i>
+                      <p>Level 2</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="nav-icon bi bi-circle-fill"></i>
+                  <p>Level 1</p>
+                </a>
+              </li>
+            </ul>
+            <!--end::Sidebar Menu-->
+          </nav>
+        </div>
+        <!--end::Sidebar Wrapper-->
+      </aside>
+      <!--end::Sidebar-->
+      <!--begin::App Main-->
+      <main class="app-main">
+        <!--begin::App Content Header-->
+        <div class="app-content-header">
+          <!--begin::Container-->
+          <div class="container-fluid">
+            <!--begin::Row-->
+            <div class="row">
+              <!--begin::Col-->
+              <div class="col-sm-6">
+                <h1 class="mb-0 fs-3">Theme Customize</h1>
+              </div>
+              <!--end::Col-->
+              <!--begin::Col-->
+              <div class="col-sm-6">
+                <nav aria-label="breadcrumb">
+                  <ol class="breadcrumb float-sm-end">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                      Theme Customize
+                    </li>
+                  </ol>
+                </nav>
+              </div>
+              <!--end::Col-->
+            </div>
+            <!--end::Row-->
+          </div>
+          <!--end::Container-->
+        </div>
+        <!--end::App Content Header-->
+        <!--begin::App Content-->
+        <div class="app-content">
+          <!--begin::Container-->
+          <div class="container-fluid">
+            <div class="callout callout-info mb-4">
+              <p>
+                Pick a colour mode and a background for the sidebar, the navbar
+                and the footer. Each choice is applied to <em>this page</em> at
+                once, and the markup to copy is printed next to the pickers — a
+                "theme" in AdminLTE 4 is just a background utility plus
+                <code>data-bs-theme</code> on the element, no extra CSS.
+              </p>
+              <p class="mb-0">
+                The <strong>Extended palette</strong> group in each picker
+                (orange, amber, olive, teal, sky, indigo, violet, fuchsia, pink,
+                navy, steel, slate, graphite, midnight) needs the optional
+                <code>css/adminlte-colors.css</code>, which this page loads. Every
+                one of those colours takes white text, so pair it with the
+                <em>Dark</em> mode — the picker does that for you. Palette,
+                presets and how to add your brand colour:
+                <a href={deploymentPath + "docs/colors.html"} class="callout-link">Colors documentation</a>
+                · <a href={deploymentPath + "UI/colors.html"} class="callout-link">Colors demo</a>.
+              </p>
+            </div>
+            <!--begin::Row-->
+            <div class="row">
+              <!--begin::Col-->
+              <div class="col-12">
+                <!--begin::Card(Presets)-->
+                <div class="card mb-4">
+                  <div class="card-header">
+                    <h3 class="card-title">Presets</h3>
+                  </div>
+                  <div class="card-body">
+                    <p>
+                      Sidebar + navbar combinations in the families admin
+                      dashboards usually offer. Click one to apply it to this
+                      page and fill the pickers below; then fine-tune.
+                    </p>
+                    <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+                      <span class="fw-semibold">Palette</span>
+                      <div class="btn-group" role="group" aria-label="Palette stylesheet">
+                        {
+                          paletteSets.map((set, i) => (
+                            <button type="button" class:list={["btn btn-outline-secondary btn-sm", i === 0 && "active"]} data-palette-switch={set.key} aria-pressed={i === 0 ? "true" : "false"}>
+                              {set.label}
+                            </button>
+                          ))
+                        }
+                      </div>
+                      <span class="text-body-secondary small">
+                        <span data-palette-set="designed">Fourteen colours designed for 4.4 — every one takes white text.</span>
+                        <span data-palette-set="v3" hidden>The eighteen AdminLTE 3 colours, values unchanged, with v3's text-colour rule.</span>
+                      </span>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                      <input class="form-check-input" type="checkbox" role="switch" id="contrast-aa" />
+                      <label class="form-check-label" for="contrast-aa">
+                        Force WCAG AA text — <code class="text-body-emphasis">data-lte-contrast="aa"</code>
+                        <span class="text-body-secondary small ms-1">
+                          <span data-palette-set="designed">nothing changes: every designed colour already clears 4.5:1.</span>
+                          <span data-palette-set="v3" hidden>flips the text on the 8 v3 colours whose assigned text misses 4.5:1; backgrounds keep their values.</span>
+                        </span>
+                      </label>
+                    </div>
+                    {
+                      paletteSets.map((set, i) => (
+                        <div class="theme-presets" data-palette-set={set.key} hidden={i !== 0}>
+                          {
+                            set.groups.map(group => (
+                              <div class="mb-3">
+                                <p class="fw-semibold mb-1">{group.name}</p>
+                                <p class="text-body-secondary small mb-2">{group.note}</p>
+                                <div class="d-flex flex-wrap gap-2">
+                                  {
+                                    set.skins.filter(skin => skin.group === group.name).map(skin => (
+                                      <button
+                                        type="button"
+                                        class="lte-skin-btn"
+                                        data-preset-sidebar={skin.sidebar.cls}
+                                        data-preset-sidebar-theme={skin.sidebar.theme}
+                                        data-preset-header={skin.header.cls}
+                                        data-preset-header-theme={skin.header.theme}
+                                        data-preset-primary={skin.primary}
+                                        title={skin.note}
+                                        aria-pressed="false"
+                                      >
+                                        <SkinPreview skin={skin} />
+                                        <span>{skin.name}</span>
+                                      </button>
+                                    ))
+                                  }
+                                </div>
+                              </div>
+                            ))
+                          }
+                        </div>
+                      ))
+                    }
+                  </div>
+                </div>
+                <!--end::Card(Presets)-->
+                <!--begin::Card-->
+                <div class="card">
+                  <!--begin::Card Header-->
+                  <div class="card-header">
+                    <!--begin::Card Title-->
+                    <h3 class="card-title">Sidebar Theme</h3>
+                    <!--end::Card Title-->
+
+                    <!--begin::Card Toolbar-->
+                    <div class="card-tools">
+                      <button
+                        type="button"
+                        class="btn btn-tool"
+                        data-lte-toggle="card-collapse"
+                        aria-label="Collapse card"
+                      >
+                        <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
+                        <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-tool"
+                        data-lte-toggle="card-remove"
+                        aria-label="Remove card"
+                        title="Remove"
+                      >
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    </div>
+                    <!--end::Card Toolbar-->
+                  </div>
+                  <!--end::Card Header-->
+                  <!--begin::Card Body-->
+                  <div class="card-body">
+                    <!--begin::Row-->
+                    <div class="row">
+                      <!--begin::Col-->
+                      <div class="col-md-3">
+                        <select
+                          id="sidebar-color-modes"
+                          class="form-select form-select-lg"
+                          aria-label="Sidebar Color Mode Select"
+                        >
+                          <option value="">---Select---</option>
+                          <option value="dark">Dark</option>
+                          <option value="light">Light</option>
+                        </select>
+                      </div>
+                      <!--end::Col-->
+                      <!--begin::Col-->
+                      <div class="col-md-3">
+                        <select
+                          id="sidebar-color"
+                          class="form-select form-select-lg"
+                          aria-label="Sidebar Color Select"
+                        >
+                          <option value="">---Select---</option>
+                        </select>
+                      </div>
+                      <!--end::Col-->
+                      <!--begin::Col-->
+                      <div class="col-md-6">
+                        <div id="sidebar-color-code" class="w-100"></div>
+                      </div>
+                      <!--end::Col-->
+                    </div>
+                    <!--end::Row-->
+                  </div>
+                  <!--end::Card Body-->
+                  <!--begin::Card Footer-->
+                  <div class="card-footer">
+                    Bootstrap's own backgrounds are documented under
+                    <a
+                      href="https://getbootstrap.com/docs/5.3/utilities/background/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="link-primary">Background utilities</a
+                    >; the <em>Extended palette</em> group needs
+                    <code>css/adminlte-colors.css</code> — see
+                    <a href={deploymentPath + "docs/colors.html"} class="link-primary">Colors</a>.
+                  </div>
+                  <!--end::Card Footer-->
+                </div>
+                <!--end::Card-->
+
+                <!--begin::Card-->
+                <div class="card mt-4">
+                  <!--begin::Card Header-->
+                  <div class="card-header">
+                    <!--begin::Card Title-->
+                    <h3 class="card-title">Navbar Theme</h3>
+                    <!--end::Card Title-->
+
+                    <!--begin::Card Toolbar-->
+                    <div class="card-tools">
+                      <button
+                        type="button"
+                        class="btn btn-tool"
+                        data-lte-toggle="card-collapse"
+                        aria-label="Collapse card"
+                      >
+                        <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
+                        <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-tool"
+                        data-lte-toggle="card-remove"
+                        aria-label="Remove card"
+                        title="Remove"
+                      >
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    </div>
+                    <!--end::Card Toolbar-->
+                  </div>
+                  <!--end::Card Header-->
+                  <!--begin::Card Body-->
+                  <div class="card-body">
+                    <!--begin::Row-->
+                    <div class="row">
+                      <!--begin::Col-->
+                      <div class="col-md-3">
+                        <select
+                          id="navbar-color-modes"
+                          class="form-select form-select-lg"
+                          aria-label="Navbar Color Mode Select"
+                        >
+                          <option value="">---Select---</option>
+                          <option value="dark">Dark</option>
+                          <option value="light">Light</option>
+                        </select>
+                      </div>
+                      <!--end::Col-->
+                      <!--begin::Col-->
+                      <div class="col-md-3">
+                        <select
+                          id="navbar-color"
+                          class="form-select form-select-lg"
+                          aria-label="Navbar Color Select"
+                        >
+                          <option value="">---Select---</option>
+                        </select>
+                      </div>
+                      <!--end::Col-->
+                      <!--begin::Col-->
+                      <div class="col-md-6">
+                        <div id="navbar-color-code" class="w-100"></div>
+                      </div>
+                      <!--end::Col-->
+                    </div>
+                    <!--end::Row-->
+                  </div>
+                  <!--end::Card Body-->
+                  <!--begin::Card Footer-->
+                  <div class="card-footer">
+                    Bootstrap's own backgrounds are documented under
+                    <a
+                      href="https://getbootstrap.com/docs/5.3/utilities/background/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="link-primary">Background utilities</a
+                    >; the <em>Extended palette</em> group needs
+                    <code>css/adminlte-colors.css</code> — see
+                    <a href={deploymentPath + "docs/colors.html"} class="link-primary">Colors</a>.
+                  </div>
+                  <!--end::Card Footer-->
+                </div>
+                <!--end::Card-->
+
+                <!--begin::Card-->
+                <div class="card mt-4">
+                  <!--begin::Card Header-->
+                  <div class="card-header">
+                    <!--begin::Card Title-->
+                    <h3 class="card-title">Footer Theme</h3>
+                    <!--end::Card Title-->
+
+                    <!--begin::Card Toolbar-->
+                    <div class="card-tools">
+                      <button
+                        type="button"
+                        class="btn btn-tool"
+                        data-lte-toggle="card-collapse"
+                        aria-label="Collapse card"
+                      >
+                        <i data-lte-icon="expand" class="bi bi-plus-lg"></i>
+                        <i data-lte-icon="collapse" class="bi bi-dash-lg"></i>
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-tool"
+                        data-lte-toggle="card-remove"
+                        aria-label="Remove card"
+                        title="Remove"
+                      >
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    </div>
+                    <!--end::Card Toolbar-->
+                  </div>
+                  <!--end::Card Header-->
+                  <!--begin::Card Body-->
+                  <div class="card-body">
+                    <!--begin::Row-->
+                    <div class="row">
+                      <!--begin::Col-->
+                      <div class="col-md-3">
+                        <select
+                          id="footer-color-modes"
+                          class="form-select form-select-lg"
+                          aria-label="Footer Color Mode Select"
+                        >
+                          <option value="">---Select---</option>
+                          <option value="dark">Dark</option>
+                          <option value="light">Light</option>
+                        </select>
+                      </div>
+                      <!--end::Col-->
+                      <!--begin::Col-->
+                      <div class="col-md-3">
+                        <select
+                          id="footer-color"
+                          class="form-select form-select-lg"
+                          aria-label="Footer Color Select"
+                        >
+                          <option value="">---Select---</option>
+                        </select>
+                      </div>
+                      <!--end::Col-->
+                      <!--begin::Col-->
+                      <div class="col-md-6">
+                        <div id="footer-color-code" class="w-100"></div>
+                      </div>
+                      <!--end::Col-->
+                    </div>
+                    <!--end::Row-->
+                  </div>
+                  <!--end::Card Body-->
+                  <!--begin::Card Footer-->
+                  <div class="card-footer">
+                    Bootstrap's own backgrounds are documented under
+                    <a
+                      href="https://getbootstrap.com/docs/5.3/utilities/background/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="link-primary">Background utilities</a
+                    >; the <em>Extended palette</em> group needs
+                    <code>css/adminlte-colors.css</code> — see
+                    <a href={deploymentPath + "docs/colors.html"} class="link-primary">Colors</a>.
+                  </div>
+                  <!--end::Card Footer-->
+                </div>
+                <!--end::Card-->
+                <!--begin::Card(Primary colour)-->
+                <div class="card mt-4">
+                  <!--begin::Card Header-->
+                  <div class="card-header">
+                    <h3 class="card-title">Primary Color</h3>
+                  </div>
+                  <!--end::Card Header-->
+                  <!--begin::Card Body-->
+                  <div class="card-body">
+                    <p>
+                      Bootstrap bakes <code>$primary</code> into its components,
+                      so <code>.btn-primary</code> stays blue however you set
+                      <code>--bs-primary</code>. The palette sheet rewires them:
+                      put <code>data-lte-primary</code> on <code>&lt;html&gt;</code>
+                      and buttons, links, pagination, checkboxes, progress bars
+                      and the focus ring follow the colour you pick.
+                    </p>
+                    <!--begin::Row-->
+                    <div class="row">
+                      <!--begin::Col-->
+                      <div class="col-md-3">
+                        <select
+                          id="primary-color"
+                          class="form-select form-select-lg"
+                          aria-label="Primary Color Select"
+                        >
+                          <option value="">---Select---</option>
+                        </select>
+                      </div>
+                      <!--end::Col-->
+                      <!--begin::Col-->
+                      <div class="col-md-9">
+                        <div id="primary-color-code" class="w-100"></div>
+                      </div>
+                      <!--end::Col-->
+                    </div>
+                    <!--end::Row-->
+                    <!--begin::Row(Preview)-->
+                    <div class="row g-3 align-items-center mt-1">
+                      <div class="col-auto">
+                        <button type="button" class="btn btn-primary">Primary button</button>
+                      </div>
+                      <div class="col-auto">
+                        <button type="button" class="btn btn-outline-primary">Outline</button>
+                      </div>
+                      <div class="col-auto">
+                        <span class="badge text-bg-primary">Badge</span>
+                      </div>
+                      <div class="col-auto">
+                        <div class="form-check mb-0">
+                          <input class="form-check-input" type="checkbox" id="primary-check" checked />
+                          <label class="form-check-label" for="primary-check">Checked</label>
+                        </div>
+                      </div>
+                      <div class="col-12 col-md-4">
+                        <div class="progress" role="progressbar" aria-label="Example progress" aria-valuenow="62" aria-valuemin="0" aria-valuemax="100">
+                          <div class="progress-bar" style="width: 62%">62%</div>
+                        </div>
+                      </div>
+                    </div>
+                    <!--end::Row(Preview)-->
+                  </div>
+                  <!--end::Card Body-->
+                  <!--begin::Card Footer-->
+                  <div class="card-footer">
+                    Needs <code>css/adminlte-colors.css</code> (or
+                    <code>css/adminlte-colors-v3.css</code>) — see
+                    <a href={deploymentPath + "docs/colors.html"} class="link-primary">Colors</a>.
+                  </div>
+                  <!--end::Card Footer-->
+                </div>
+                <!--end::Card(Primary colour)-->
+              </div>
+              <!--end::Col-->
+            </div>
+            <!--end::Row-->
+          </div>
+          <!--end::Container-->
+        </div>
+        <!--end::App Content-->
+      </main>
+      <!--end::App Main-->
+      <Footer />
+    </div>
+    <!--end::App Wrapper-->
+    <!--begin::Script-->
+    <Scripts path={path} />
+    <script is:inline define:vars={{ paletteSetsJson }}>
+      // Theme Customize: one controller for the three regions. Applies the
+      // chosen background + colour mode to THIS page and prints the markup.
+      // Page-local demo script — not part of adminlte.js.
+      const option = bg => `<option value="${bg}" class="text-${bg.replace(/^(text-bg-|bg-gradient-)/, "")}">${bg}</option>`
+      const gradients = set => set.classes.map(c => c.replace("text-bg-", "bg-gradient-"))
+
+      document.addEventListener("DOMContentLoaded", () => {
+        // Bootstrap's background utilities (all of adminlte.css) …
+        const bootstrapBg = [
+          "bg-primary", "bg-primary-subtle",
+          "bg-secondary", "bg-secondary-subtle",
+          "bg-success", "bg-success-subtle",
+          "bg-danger", "bg-danger-subtle",
+          "bg-warning", "bg-warning-subtle",
+          "bg-info", "bg-info-subtle",
+          "bg-light", "bg-light-subtle",
+          "bg-dark", "bg-dark-subtle",
+          "bg-body-secondary", "bg-body-tertiary", "bg-body",
+          "bg-black", "bg-white", "bg-transparent"
+        ]
+        // … plus the extended palette (opt-in css/adminlte-colors.css or the
+        // AdminLTE 3 originals, adminlte-colors-v3.css — one at a time), as
+        // `.text-bg-*` so the contrast text comes with the background, and its
+        // `.bg-gradient-*` variants.
+        const stylesheet = document.getElementById("palette-stylesheet")
+        const contrastToggle = document.querySelector("#contrast-aa")
+        let activeSet = paletteSetsJson[0]
+        let aaContrast = false
+        // The automatic text colour of a background class, in the mode that is on
+        const textOf = bg => (aaContrast ? activeSet.textAA : activeSet.text)[bg.replace("bg-gradient-", "text-bg-")] || "white"
+        // Every class any palette can put on an element — so switching palettes cleans up.
+        const allBg = [...bootstrapBg, ...paletteSetsJson.flatMap(set => [...set.classes, ...gradients(set)])]
+        const availableBg = () => [...bootstrapBg, ...activeSet.classes, ...gradients(activeSet)]
+
+        const regions = [
+          { element: ".app-sidebar", modes: "#sidebar-color-modes", colors: "#sidebar-color", code: "#sidebar-color-code", open: '&lt;aside class="app-sidebar', close: '&gt;...&lt;/aside&gt;' },
+          { element: ".app-header", modes: "#navbar-color-modes", colors: "#navbar-color", code: "#navbar-color-code", open: '&lt;nav class="app-header navbar navbar-expand', close: '&gt;...&lt;/nav&gt;' },
+          { element: ".app-footer", modes: "#footer-color-modes", colors: "#footer-color", code: "#footer-color-code", open: '&lt;footer class="app-footer', close: '&gt;...&lt;/footer&gt;' }
+        ]
+
+        const controllers = {}
+        const presetButtons = document.querySelectorAll(".theme-presets [data-preset-sidebar]")
+
+        // `data-lte-primary` on <html>: makes Bootstrap's `primary` components
+        // (buttons, links, pagination, checkboxes, progress) take a palette
+        // colour. Empty value = no attribute = Bootstrap's blue.
+        const primary = (() => {
+          const select = document.querySelector("#primary-color")
+          const code = document.querySelector("#primary-color-code")
+          if (!select || !code) {
+            return null
+          }
+          let value = ""
+          const render = () => {
+            if (value) {
+              document.documentElement.setAttribute("data-lte-primary", value)
+            } else {
+              document.documentElement.removeAttribute("data-lte-primary")
+            }
+            select.value = value
+            code.innerHTML = `<pre><code class="language-html">&lt;html lang="en"${value ? ` data-lte-primary="${value}"` : ""}&gt;</code></pre>`
+            markPresets()
+          }
+          const renderOptions = () => {
+            select.innerHTML =
+              '<option value="">---Select--- (Bootstrap blue)</option>' +
+              `<optgroup label="Extended palette (${activeSet.file})">${activeSet.primaries.map(name => `<option value="${name}" class="text-${name}">${name}</option>`).join("")}</optgroup>`
+          }
+          renderOptions()
+          select.addEventListener("input", event => {
+            value = event.target.value
+            render()
+          })
+          return {
+            get: () => value,
+            set: next => {
+              value = activeSet.primaries.includes(next) ? next : ""
+              render()
+            },
+            refresh: () => {
+              renderOptions()
+              if (value && !activeSet.primaries.includes(value)) {
+                value = ""
+              }
+              render()
+            }
+          }
+        })()
+        const markPresets = () => {
+          const sidebar = controllers[".app-sidebar"]
+          const header = controllers[".app-header"]
+          if (!sidebar || !header) {
+            return
+          }
+          for (const button of presetButtons) {
+            const matches =
+              (primary ? button.getAttribute("data-preset-primary") === (primary.get() || "primary") : true) &&
+              button.getAttribute("data-preset-sidebar") === sidebar.get().bg &&
+              button.getAttribute("data-preset-sidebar-theme") === sidebar.get().mode &&
+              button.getAttribute("data-preset-header") === header.get().bg &&
+              button.getAttribute("data-preset-header-theme") === header.get().mode
+            button.setAttribute("aria-pressed", String(matches))
+          }
+        }
+
+        for (const region of regions) {
+          const element = document.querySelector(region.element)
+          const modeSelect = document.querySelector(region.modes)
+          const colorSelect = document.querySelector(region.colors)
+          const code = document.querySelector(region.code)
+          if (!element || !modeSelect || !colorSelect || !code) {
+            continue
+          }
+
+          const renderOptions = () => {
+            colorSelect.innerHTML =
+              '<option value="">---Select---</option>' +
+              `<optgroup label="Bootstrap">${bootstrapBg.map(option).join("")}</optgroup>` +
+              `<optgroup label="Extended palette (${activeSet.file})">${activeSet.classes.map(option).join("")}</optgroup>` +
+              `<optgroup label="Extended palette · gradient">${gradients(activeSet).map(option).join("")}</optgroup>`
+          }
+          renderOptions()
+
+          // Start from what the page is already showing.
+          let mode = element.getAttribute("data-bs-theme") || ""
+          let bg = [...element.classList].find(c => allBg.includes(c)) || ""
+          modeSelect.value = mode
+          colorSelect.value = bg
+
+          const render = () => {
+            if (mode) {
+              element.setAttribute("data-bs-theme", mode)
+            } else {
+              element.removeAttribute("data-bs-theme")
+            }
+            const classes = [bg].filter(Boolean).join(" ")
+            const theme = mode ? ` data-bs-theme="${mode}"` : ""
+            code.innerHTML = `<pre><code class="language-html">${region.open}${classes ? " " + classes : ""}"${theme}${region.close}</code></pre>`
+            markPresets()
+          }
+
+          const applyBg = value => {
+            bg = value
+            element.classList.remove(...allBg)
+            if (bg) {
+              element.classList.add(bg)
+            }
+          }
+
+          controllers[region.element] = {
+            get: () => ({ bg, mode }),
+            set: (nextBg, nextMode) => {
+              applyBg(nextBg)
+              mode = nextMode
+              colorSelect.value = bg
+              modeSelect.value = mode
+              render()
+            },
+            // After a palette switch: rebuild the options; a colour the new
+            // palette doesn't have falls back to the region's plain background.
+            refresh: () => {
+              renderOptions()
+              if (bg && !availableBg().includes(bg)) {
+                applyBg("")
+              }
+              colorSelect.value = bg
+              render()
+            }
+          }
+
+          modeSelect.addEventListener("input", event => {
+            mode = event.target.value
+            render()
+          })
+
+          colorSelect.addEventListener("input", event => {
+            applyBg(event.target.value)
+            // A palette colour pairs with the mode that matches its text colour
+            // (dark for white-text colours) when no mode was chosen yet.
+            if ((bg.startsWith("text-bg-") || bg.startsWith("bg-gradient-")) && !mode) {
+              mode = textOf(bg) === "white" ? "dark" : "light"
+              modeSelect.value = mode
+            }
+            render()
+          })
+
+          render()
+        }
+
+        // Presets: sidebar + navbar in one click; the footer is left as it is.
+        for (const button of presetButtons) {
+          button.addEventListener("click", () => {
+            controllers[".app-sidebar"]?.set(button.getAttribute("data-preset-sidebar"), button.getAttribute("data-preset-sidebar-theme"))
+            controllers[".app-header"]?.set(button.getAttribute("data-preset-header"), button.getAttribute("data-preset-header-theme"))
+            primary?.set(button.getAttribute("data-preset-primary"))
+          })
+        }
+
+        // WCAG AA text: `data-lte-contrast="aa"` on <html>. A region whose colour
+        // flips to dark text needs the light colour mode so its links follow.
+        contrastToggle?.addEventListener("change", () => {
+          aaContrast = contrastToggle.checked
+          if (aaContrast) {
+            document.documentElement.setAttribute("data-lte-contrast", "aa")
+          } else {
+            document.documentElement.removeAttribute("data-lte-contrast")
+          }
+          for (const controller of Object.values(controllers)) {
+            const { bg } = controller.get()
+            if (bg && (bg.startsWith("text-bg-") || bg.startsWith("bg-gradient-"))) {
+              controller.set(bg, textOf(bg) === "white" ? "dark" : "light")
+            }
+          }
+        })
+
+        // Palette switch: swap the stylesheet, show that palette's presets, rebuild the pickers.
+        for (const button of document.querySelectorAll("[data-palette-switch]")) {
+          button.addEventListener("click", () => {
+            activeSet = paletteSetsJson.find(set => set.key === button.getAttribute("data-palette-switch")) || paletteSetsJson[0]
+            stylesheet.href = stylesheet.getAttribute("data-css-dir") + activeSet.file
+            for (const b of document.querySelectorAll("[data-palette-switch]")) {
+              const on = b === button
+              b.classList.toggle("active", on)
+              b.setAttribute("aria-pressed", String(on))
+            }
+            for (const el of document.querySelectorAll("[data-palette-set]")) {
+              el.hidden = el.getAttribute("data-palette-set") !== activeSet.key
+            }
+            for (const c of Object.values(controllers)) {
+              c.refresh()
+            }
+            primary?.refresh()
+          })
+        }
+        primary?.refresh()
+        markPresets()
+      })
+    </script>
+    <!--end::Script-->
+  </body><!--end::Body-->
+</html>

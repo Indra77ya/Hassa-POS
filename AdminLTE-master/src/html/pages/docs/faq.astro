@@ -1,0 +1,399 @@
+---
+import Head from "@components/_head.astro"
+import Footer from "@components/dashboard/_footer.astro"
+import Topbar from "@components/dashboard/_topbar.astro"
+import Sidenav from "@components/dashboard/_sidenav.astro"
+import Scripts from "@components/_scripts.astro"
+
+const title = "FAQ | AdminLTE 4"
+const path = "../../../dist"
+const mainPage = "docs"
+const page = "faq";
+
+type Qa = { q: string; a: string }
+type Section = { id: string; title: string; icon: string; tone: string; items: Qa[] }
+
+const sections: Section[] = [
+  {
+    id: "getting-started",
+    title: "Getting started",
+    icon: "rocket-takeoff",
+    tone: "primary",
+    items: [
+      {
+        q: "What is AdminLTE, exactly?",
+        a: `A free, MIT-licensed admin dashboard <em>template</em>. It's a set of HTML, CSS, and JavaScript files built on top of Bootstrap 5.3 — not a framework, not an npm component library. You drop it into your project, modify the markup to suit your app, and ship.`
+      },
+      {
+        q: "Do I need a build step to use it?",
+        a: `No. The <a href="getting-started.html">Getting Started</a> guide shows the CDN-only approach — copy four <code>&lt;link&gt;</code> tags and four <code>&lt;script&gt;</code> tags into your HTML and you're done. The npm-based workflow is there if you want to customise SCSS variables or tree-shake the JavaScript.`
+      },
+      {
+        q: "Which Bootstrap version does v4 require?",
+        a: `Bootstrap 5.3.x. The current <code>package.json</code> pins 5.3.8 — older 5.3 minors should work but aren't tested. Bootstrap 5.0 / 5.1 / 5.2 will not work (the color-mode and <code>data-bs-theme</code> system landed in 5.3).`
+      },
+      {
+        q: "Can I use AdminLTE 4 with jQuery?",
+        a: `You don't <em>need</em> jQuery — AdminLTE 4's JavaScript is vanilla. If your existing app already uses jQuery, it'll coexist fine. But none of AdminLTE 4's own plugins call into jQuery, and there are no <code>$.fn.xxx()</code> plugin shims.<br /><br />The v3 <code>plugins/</code> folder is gone too. Every widget it bundled has a vanilla-JS successor — see the <a href="migration.html#third-party-plugin-replacements">plugin replacement table</a> for the full mapping (Select2 → Tom Select, DataTables → Tabulator, Summernote → Quill, and so on).`
+      },
+      {
+        q: "Does AdminLTE 4 support Select2?",
+        a: `AdminLTE 4 recommends <a href="https://tom-select.js.org/" target="_blank" rel="noopener">Tom Select</a> instead. It covers everything people reach for Select2 to do — searchable dropdowns, multi-select, tagging, clearable selections, AJAX-backed options, virtual scrolling over large datasets, keyboard navigation — in roughly <strong>20&nbsp;kB gzip</strong>, against Select2's <strong>~50&nbsp;kB</strong> once jQuery is counted. <code>forms/advanced.html</code> demos all of it, including a paginated remote-data field with request cancellation, and there's a <a href="../forms/advanced.html#select2">line-by-line API mapping</a> if you're porting existing code.<br /><br />Select2 itself is still maintained (4.1.0 shipped in 2026), but it is still a jQuery plugin — its UMD wrapper hard-requires jQuery and there is no jQuery-free build. Bundling it would put jQuery back into a framework whose entire v4 premise is not needing it, and none of the official Vue/React/Django/Laravel ports could consume it.<br /><br />If you're locked into Select2 anyway, AdminLTE ships an optional <strong>styling-only</strong> compatibility sheet — see <a href="integrations.html#select2-compatibility-theme">Select2 compatibility theme</a>. You bring the plugin; it makes Select2 match Bootstrap 5.3, dark mode and modals included. No jQuery is added to AdminLTE.`
+      }
+    ]
+  },
+  {
+    id: "framework-integrations",
+    title: "Framework integrations",
+    icon: "puzzle",
+    tone: "info",
+    items: [
+      {
+        q: "Can AdminLTE be used with WordPress?",
+        a: `Yes — it's just HTML/CSS/JS. The typical path is to build a custom WordPress theme that wraps AdminLTE's markup around <code>wp_head()</code>, <code>wp_footer()</code>, and WordPress's loops. AdminLTE doesn't ship a WordPress-specific build; the work of porting nav-walker classes and authentication forms is yours.`
+      },
+      {
+        q: "Laravel? Symfony? Yii? Django? Rails?",
+        a: `All workable. AdminLTE is a server-rendered template — copy the demo pages into your views/templates, replace static content with your framework's template variables, and wire up routes/auth as usual. Community Composer/Packagist packages exist for Laravel and Symfony, though they typically lag the upstream version — verify they ship v4 before you depend on them.`
+      },
+      {
+        q: "React, Vue, Svelte, Angular?",
+        a: `<p>Workable but less natural. AdminLTE's JavaScript plugins use DOM lifecycle hooks (<code>DOMContentLoaded</code>, MutationObserver patterns) which fight with framework reconciliation. If you're using a SPA framework, consider:</p>
+<ul>
+  <li>Using AdminLTE <em>only</em> for CSS — keep the visual style, but write your own React/Vue components for the interactive parts.</li>
+  <li>Or pick a component library built for your framework (PrimeReact, Vuetify, etc.).</li>
+</ul>
+<p class="mb-0">We don't recommend wrapping AdminLTE's jQuery-era plugins in SPA framework components — it's a maintenance burden that outweighs the visual win.</p>`
+      }
+    ]
+  },
+  {
+    id: "customization",
+    title: "Customization",
+    icon: "palette",
+    tone: "warning",
+    items: [
+      {
+        q: "How do I change the primary colour?",
+        a: `<p>Bootstrap compiles <code>$primary</code> into its components, so overriding <code>--bs-primary</code> alone repaints <code>.text-primary</code> and <code>.bg-primary</code> but leaves <code>.btn-primary</code>, pagination, checkboxes and the focus ring blue. Two things actually work:</p>
+<p><strong>With Sass</strong> — set <code>$primary</code> before importing AdminLTE and everything is compiled with it:</p>
+<pre class="astro-code"><code>$primary: #6610f2;
+@import "admin-lte/src/scss/adminlte";</code></pre>
+<p><strong>Without a build step</strong> — load the opt-in palette sheet and name your colour on <code>&lt;html&gt;</code>; it rewires the components that bake the hex:</p>
+<pre class="astro-code"><code>&lt;link rel="stylesheet" href="css/adminlte-colors.css"&gt;
+&lt;html lang="en" data-lte-primary="indigo"&gt;</code></pre>
+<p class="mb-0">A brand colour outside the palette needs only <code>--bs-primary</code> plus that attribute — see <a href="colors.html">Colors &amp; Skins</a>. For sidebar width, breakpoints and the spacing scale, see <a href="customization.html">Customization &amp; Theming</a>.</p>`
+      },
+      {
+        q: "Where did the v3 colours go — <code>bg-navy</code>, <code>bg-teal</code>, the sidebar skins? Can I add my brand colour?",
+        a: `<p>They live in an opt-in stylesheet, <code>dist/css/adminlte-colors.css</code> (≈ 8 kB gzipped), so they cost nothing unless you load it: fourteen redesigned colours — every one readable with white text — with the full <code>.bg-*</code>, <code>.text-bg-*</code>, <code>.card-*</code>, <code>.callout-*</code>, <code>.bg-gradient-*</code> families. A sidebar "skin" is just <code>&lt;aside class="app-sidebar text-bg-navy" data-bs-theme="dark"&gt;</code>.</p>
+<p class="mb-0">Want the AdminLTE 3 colours exactly as they were? Load <code>dist/css/adminlte-colors-v3.css</code> instead — the 18 v3 colours under their original names and values, same class families. Your own colour is a one-liner in Sass, <code>$lte-palette-custom: ("brand": #0f766e)</code>. To make one of them Bootstrap's <code>primary</code> — buttons, links, pagination, form focus — add <code>data-lte-primary="teal"</code> to <code>&lt;html&gt;</code>. Everything — palette, presets, the brand-colour checker — is on <a href="colors.html">Colors</a>; try skins live on the <a href="../UI/colors.html">Colors demo</a> or the <a href="../generate/theme.html">Theme Customize</a> page.`
+      },
+      {
+        q: "How do I add a date picker / multi-select / rich text editor?",
+        a: `AdminLTE deliberately doesn't bundle these — they'd bloat the framework. The <a href="integrations.html">Recommended Integrations</a> page lists best-in-class third-party libraries (Flatpickr, Tom Select, Quill, etc.) with copy-paste install snippets.`
+      },
+      {
+        q: "Can I use FontAwesome instead of Bootstrap Icons?",
+        a: `Yes. Bootstrap Icons is the default in the demos because it's MIT, ships with Bootstrap, and is SVG-based — but nothing in AdminLTE's CSS or JS requires it. Drop in FontAwesome's stylesheet and replace <code>&lt;i class="bi bi-x"&gt;</code> with <code>&lt;i class="fas fa-x"&gt;</code> throughout.`
+      }
+    ]
+  },
+  {
+    id: "versions",
+    title: "Versions and updates",
+    icon: "arrow-clockwise",
+    tone: "success",
+    items: [
+      {
+        q: "How do I get notified of new versions?",
+        a: `<a href="https://github.com/ColorlibHQ/AdminLTE">Watch the GitHub repo</a> (Releases-only mode) or subscribe to the RSS feed at <code>https://github.com/ColorlibHQ/AdminLTE/releases.atom</code>.`
+      },
+      {
+        q: "Where's the AdminLTE 3 documentation?",
+        a: `Still online at <a href="https://adminlte.io/docs/3.2/">adminlte.io/docs/3.2</a> and earlier versions are linked there. The v3 branch on GitHub continues to receive critical bug fixes; new features land in v4 only.`
+      },
+      {
+        q: "How do I upgrade from v3 to v4?",
+        a: `See the dedicated <a href="migration.html">Migration from v3</a> guide. The short version: class names changed (<code>.wrapper</code> → <code>.app-wrapper</code>), <code>data-toggle</code> → <code>data-bs-toggle</code>, dark mode uses <code>data-bs-theme</code> instead of <code>.dark-mode</code>, and jQuery isn't required anymore.`
+      }
+    ]
+  },
+  {
+    id: "licensing",
+    title: "Licensing",
+    icon: "shield-check",
+    tone: "secondary",
+    items: [
+      {
+        q: "Is AdminLTE free for commercial use?",
+        a: `Yes — MIT licensed. You can use it in commercial products, SaaS apps, client work, anything. The only requirement is preserving the copyright notice in the source files (<code>adminlte.css</code> / <code>adminlte.js</code>). You don't need to display attribution in the UI.`
+      },
+      {
+        q: "Do I need to credit AdminLTE in my app?",
+        a: `No. The MIT license requires you to keep the licence notice in the source files you distribute — that's it. You don't have to mention AdminLTE in the rendered UI, your About page, or your README.`
+      },
+      {
+        q: "Can I sell a product made with AdminLTE?",
+        a: `Yes. The MIT license explicitly permits this. You can also resell modified versions of AdminLTE itself (theme marketplaces frequently do this) — just preserve the original copyright notice.`
+      }
+    ]
+  },
+  {
+    id: "troubleshooting",
+    title: "Troubleshooting",
+    icon: "wrench-adjustable",
+    tone: "danger",
+    items: [
+      {
+        q: "The sidebar doesn't collapse when I click the hamburger menu.",
+        a: `Check that the PushMenu plugin is loaded. It's bundled into <code>adminlte.js</code> — make sure the script tag is on the page and <em>after</em> the markup it operates on. Also verify your hamburger button has <code>data-lte-toggle="sidebar"</code> (not <code>data-widget="pushmenu"</code>, which is the v3 attribute).`
+      },
+      {
+        q: "Dark mode doesn't persist after refresh.",
+        a: `The included <a href="color-mode.html">Color Mode</a> toggle writes to <code>localStorage</code> under the key <code>lte-theme</code>. If you're using a different toggle implementation, make sure it both sets <code>document.documentElement.setAttribute('data-bs-theme', ...)</code> and writes to localStorage on change.`
+      },
+      {
+        q: "My own theming keeps getting overwritten by AdminLTE.",
+        a: `Turn the bundled switcher off with <code>&lt;html data-lte-color-mode="off"&gt;</code>. ColorMode then never writes <code>data-bs-theme</code> — not on load, not on a toggle click, not when the OS preference changes — so your own switcher (or a custom Bootstrap theme name) stays in control. If you only need a server-rendered default instead, render <code>data-bs-theme</code> on <code>&lt;html&gt;</code> and it is respected as long as the visitor hasn't picked a theme themselves. See <a href="color-mode.html">Color Mode</a>.`
+      },
+      {
+        q: "Bootstrap modal closes when I press Escape, but the AdminLTE sidebar closes too.",
+        a: `Fixed in v4.0.0 (#5993). If you're still seeing this, you're on an older RC — update to the latest.`
+      },
+      {
+        q: "Printing adds the URL after every link and a box around buttons.",
+        a: `Those are AdminLTE's print defaults, meant for reading a page on paper. For a page that prints as a document — an invoice or work order that goes to a customer — add <code>&lt;html data-lte-print="plain"&gt;</code> (it works on any container too) and both go away, while text stays black on white. See the <a href="recipes.html">Recipes</a> page.`
+      },
+      {
+        q: "The sidebar and header no longer print.",
+        a: `By design: the shell — header, sidebar and footer — is navigation, and printing it spent 200px of every sheet on a menu and pushed the content onto extra pages (#6113). The content now gets the full width of the paper, as it did in v3. Add <code>&lt;html data-lte-print="app"&gt;</code> to print the whole layout again, or Bootstrap's <code>.d-print-flex</code> / <code>.d-print-block</code> to bring back one piece of it.`
+      },
+      {
+        q: "My custom SCSS doesn't override AdminLTE's defaults.",
+        a: `Put your overrides <em>before</em> the <code>@import</code> of AdminLTE's SCSS. AdminLTE uses <code>!default</code> on its variables, which means the first declaration wins. See <a href="customization.html#scss-variables">Customization &amp; Theming</a> for the import order.`
+      },
+      {
+        q: "<code>npm install</code> fails with peer dependency errors.",
+        a: `We use an npm <code>overrides</code> block in <code>package.json</code> to keep peers happy — make sure you're on npm 8.3+ which respects them. If you're on an older npm, install with <code>--legacy-peer-deps</code>.`
+      }
+    ]
+  }
+];
+
+const totalQuestions = sections.reduce((sum, s) => sum + s.items.length, 0);
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <Head title={title} path={path} />
+  </head>
+  <body class="layout-fixed sidebar-expand-lg bg-body-tertiary docs-page faq-page">
+    <div class="app-wrapper">
+      <Topbar path={path} />
+      <Sidenav path={path} mainPage={mainPage} page={page} />
+      <main class="app-main">
+        <div class="app-content-header">
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-sm-6">
+                <h1 class="mb-0 fs-3">FAQ</h1>
+              </div>
+              <div class="col-sm-6">
+                <nav aria-label="breadcrumb">
+                  <ol class="breadcrumb float-sm-end">
+                    <li class="breadcrumb-item"><a href="#">Docs</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">FAQ</li>
+                  </ol>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="app-content">
+          <div class="container-fluid">
+
+            <!-- Hero -->
+            <section class="faq-hero text-center mb-4">
+              <span class="faq-hero-eyebrow">
+                <i class="bi bi-patch-question-fill" aria-hidden="true"></i>
+                Frequently Asked Questions
+              </span>
+              <h1 class="faq-hero-title">How can we help?</h1>
+              <p class="faq-hero-lead">
+                Quick answers to the {totalQuestions} questions we get asked most often.
+                Use the search to jump to anything, or click a topic below.
+              </p>
+              <form class="faq-search" role="search" onsubmit="return false;">
+                <i class="bi bi-search faq-search-icon" aria-hidden="true"></i>
+                <input
+                  type="search"
+                  id="faq-search-input"
+                  class="form-control form-control-lg"
+                  placeholder="Search the FAQ&hellip;"
+                  aria-label="Search the FAQ"
+                  autocomplete="off"
+                />
+                <button
+                  type="button"
+                  class="faq-search-clear d-none"
+                  id="faq-search-clear"
+                  aria-label="Clear search"
+                >
+                  <i class="bi bi-x-lg" aria-hidden="true"></i>
+                </button>
+              </form>
+              <p class="faq-empty-state d-none" id="faq-empty-state">
+                <i class="bi bi-emoji-frown" aria-hidden="true"></i>
+                No questions match your search. Try a different keyword or
+                <a href="https://github.com/ColorlibHQ/AdminLTE/discussions" target="_blank" rel="noopener">open a Discussion</a>.
+              </p>
+            </section>
+
+            <!-- Section nav chips -->
+            <nav class="faq-chips mb-4" aria-label="FAQ sections">
+              {
+                sections.map((s) => (
+                  <a href={`#${s.id}`} class={`faq-chip faq-chip-${s.tone}`}>
+                    <i class={`bi bi-${s.icon}`} aria-hidden="true"></i>
+                    <span>{s.title}</span>
+                    <span class="faq-chip-count">{s.items.length}</span>
+                  </a>
+                ))
+              }
+            </nav>
+
+            <!-- Sections -->
+            <div class="faq-sections">
+              {
+                sections.map((section) => (
+                  <section id={section.id} class="faq-section" data-faq-section>
+                    <header class={`faq-section-header faq-section-${section.tone}`}>
+                      <span class="faq-section-icon">
+                        <i class={`bi bi-${section.icon}`} aria-hidden="true" />
+                      </span>
+                      <div>
+                        <h2 class="faq-section-title">{section.title}</h2>
+                        <p class="faq-section-count">
+                          {section.items.length} {section.items.length === 1 ? "question" : "questions"}
+                        </p>
+                      </div>
+                    </header>
+                    <div class="faq-section-items">
+                      {section.items.map((item) => (
+                        <details class="faq-item" data-faq-item>
+                          <summary>
+                            <span class="faq-q-icon">
+                              <i class="bi bi-question-lg" aria-hidden="true" />
+                            </span>
+                            <span class="faq-q-text" set:html={item.q} />
+                            <span class="faq-q-chevron">
+                              <i class="bi bi-chevron-down" aria-hidden="true" />
+                            </span>
+                          </summary>
+                          <div class="faq-answer" set:html={item.a} />
+                        </details>
+                      ))}
+                    </div>
+                  </section>
+                ))
+              }
+            </div>
+
+            <!-- CTA footer -->
+            <section class="faq-cta mt-5">
+              <div class="faq-cta-icon">
+                <i class="bi bi-chat-quote" aria-hidden="true"></i>
+              </div>
+              <h2>Still need help?</h2>
+              <p>
+                Open a discussion on GitHub or browse the documentation for more
+                in-depth answers.
+              </p>
+              <div class="faq-cta-actions">
+                <a
+                  href="https://github.com/ColorlibHQ/AdminLTE/discussions"
+                  target="_blank"
+                  rel="noopener"
+                  class="btn btn-primary"
+                >
+                  <i class="bi bi-github me-2" aria-hidden="true"></i>
+                  Open a Discussion
+                </a>
+                <a href="introduction.html" class="btn btn-outline-secondary">
+                  <i class="bi bi-book me-2" aria-hidden="true"></i>
+                  Browse Documentation
+                </a>
+              </div>
+            </section>
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </div>
+    <Scripts path={path} />
+
+    <script is:inline>
+      // FAQ live search + clear button
+      ;(() => {
+        "use strict"
+        const input = document.getElementById("faq-search-input")
+        const clearBtn = document.getElementById("faq-search-clear")
+        const emptyState = document.getElementById("faq-empty-state")
+        if (!input) return
+
+        const items = Array.from(document.querySelectorAll("[data-faq-item]"))
+        const sections = Array.from(document.querySelectorAll("[data-faq-section]"))
+
+        const normalize = (s) => s.toLowerCase().trim()
+
+        const filter = (query) => {
+          const q = normalize(query)
+          clearBtn.classList.toggle("d-none", q.length === 0)
+
+          let visibleTotal = 0
+          for (const item of items) {
+            const text = item.textContent || ""
+            const matches = q === "" || normalize(text).includes(q)
+            item.classList.toggle("d-none", !matches)
+            // Open matching items when searching so users see context
+            item.open = q !== "" && matches
+            if (matches) visibleTotal++
+          }
+
+          // Hide entire sections that have no visible items
+          for (const section of sections) {
+            const hasVisible = section.querySelectorAll(
+              "[data-faq-item]:not(.d-none)"
+            ).length > 0
+            section.classList.toggle("d-none", !hasVisible)
+          }
+
+          emptyState.classList.toggle("d-none", visibleTotal !== 0)
+        }
+
+        input.addEventListener("input", (e) => filter(e.target.value))
+
+        clearBtn.addEventListener("click", () => {
+          input.value = ""
+          filter("")
+          input.focus()
+        })
+
+        // Smooth scroll to section on chip click + offset for sticky header
+        for (const chip of document.querySelectorAll(".faq-chip")) {
+          chip.addEventListener("click", (e) => {
+            const id = chip.getAttribute("href")?.replace("#", "")
+            if (!id) return
+            const target = document.getElementById(id)
+            if (!target) return
+            e.preventDefault()
+            target.scrollIntoView({ behavior: "smooth", block: "start" })
+            history.replaceState(null, "", "#" + id)
+          })
+        }
+      })()
+    </script>
+  </body>
+</html>

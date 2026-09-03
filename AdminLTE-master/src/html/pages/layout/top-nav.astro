@@ -1,0 +1,261 @@
+---
+import Head from "@components/_head.astro"
+import Footer from "@components/dashboard/_footer.astro"
+import Scripts from "@components/_scripts.astro"
+
+const title = "AdminLTE 4 | Top Nav Layout"
+const path = "../../../dist"
+const htmlPath = "..";
+
+// Smart path resolution: calculate relative path based on directory depth
+const pathname = Astro.url.pathname;
+const pathSegments = pathname.split('/').filter(segment => segment !== '');
+const depth = pathSegments.length > 0 ? pathSegments.length - 1 : 0;
+const deploymentPath = depth === 0 ? './' : '../'.repeat(depth);
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <!--begin::Head-->
+  <head>
+    <Head title={title} path={path} />
+  </head>
+  <!--end::Head-->
+  <!--
+    Top-nav layout: there is NO <aside class="app-sidebar"> on this page, so the
+    app-wrapper grid's sidebar column (grid-template-columns: auto 1fr) collapses
+    to zero width on its own — header, main, and footer span the full viewport.
+    The primary navigation lives in the app-header as a plain Bootstrap
+    navbar-expand-lg (Collapse + toggler on mobile). No PushMenu, and therefore
+    no sidebar-expand-* class on <body>.
+  -->
+  <!--begin::Body-->
+  <body class="bg-body-tertiary">
+    <!--begin::App Wrapper-->
+    <div class="app-wrapper">
+      <!--begin::Header-->
+      <nav class="app-header navbar navbar-expand-lg bg-body">
+        <!--begin::Container-->
+        <div class="container-fluid">
+          <!--begin::Brand-->
+          <a href={htmlPath + "/index.html"} class="navbar-brand d-flex align-items-center">
+            <img
+              src={deploymentPath + "assets/img/AdminLTELogo.png"}
+              alt="AdminLTE Logo"
+              width="30"
+              height="30"
+              class="opacity-75 shadow me-2"
+            />
+            <span class="fw-light">AdminLTE 4</span>
+          </a>
+          <!--end::Brand-->
+          <!--begin::Toggler (plain Bootstrap collapse, not PushMenu)-->
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#topNavMenu"
+            aria-controls="topNavMenu"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <!--end::Toggler-->
+          <!--begin::Collapsible Menu-->
+          <div class="collapse navbar-collapse" id="topNavMenu">
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="#">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href={htmlPath + "/starter.html"}>Starter</a>
+              </li>
+              <li class="nav-item dropdown">
+                <a
+                  class="nav-link dropdown-toggle"
+                  href="#"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >Pages</a>
+                <ul class="dropdown-menu">
+                  <li>
+                    <a class="dropdown-item" href={htmlPath + "/pages/profile.html"}>Profile</a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href={htmlPath + "/pages/invoice.html"}>Invoice</a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href={htmlPath + "/pages/calendar.html"}>Calendar</a>
+                  </li>
+                  <li><hr class="dropdown-divider" /></li>
+                  <li>
+                    <a class="dropdown-item" href={htmlPath + "/pages/faq.html"}>FAQ</a>
+                  </li>
+                </ul>
+              </li>
+              <li class="nav-item dropdown">
+                <a
+                  class="nav-link dropdown-toggle"
+                  href="#"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >Forms</a>
+                <ul class="dropdown-menu">
+                  <li>
+                    <a class="dropdown-item" href={htmlPath + "/forms/elements.html"}>Elements</a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href={htmlPath + "/forms/advanced.html"}>Advanced Elements</a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href={htmlPath + "/forms/editors.html"}>Editors</a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href={htmlPath + "/forms/validation.html"}>Validation</a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+              <li class="nav-item">
+                <a class="nav-link" href={htmlPath + "/docs/introduction.html"}>
+                  <i class="bi bi-book me-1" aria-hidden="true"></i>
+                  Documentation
+                </a>
+              </li>
+            </ul>
+          </div>
+          <!--end::Collapsible Menu-->
+        </div>
+        <!--end::Container-->
+      </nav>
+      <!--end::Header-->
+      <!--begin::App Main-->
+      <main class="app-main">
+        <!--begin::App Content Header-->
+        <div class="app-content-header">
+          <!--begin::Container-->
+          <div class="container-fluid">
+            <!--begin::Row-->
+            <div class="row">
+              <div class="col-sm-6">
+                <h1 class="mb-0 fs-3">Top Nav Layout</h1>
+              </div>
+              <div class="col-sm-6">
+                <nav aria-label="breadcrumb">
+                  <ol class="breadcrumb float-sm-end">
+                    <li class="breadcrumb-item"><a href="#">Home</a></li>
+                    <li class="breadcrumb-item"><a href="#">Layout</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Top Nav</li>
+                  </ol>
+                </nav>
+              </div>
+            </div>
+            <!--end::Row-->
+          </div>
+          <!--end::Container-->
+        </div>
+        <!--end::App Content Header-->
+        <!--begin::App Content-->
+        <div class="app-content">
+          <!--begin::Container-->
+          <div class="container-fluid">
+            <div class="row g-4">
+              <div class="col-12">
+                <div class="callout callout-info">
+                  A horizontal layout for apps with a handful of top-level sections:
+                  the sidebar is gone and the main navigation moves into the header.
+                  Resize the window below the <code>lg</code> breakpoint to see the
+                  menu collapse behind the toggler.
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="card card-primary card-outline mb-4">
+                  <div class="card-header">
+                    <div class="card-title">How this layout works</div>
+                  </div>
+                  <div class="card-body">
+                    <p>
+                      Three small differences from the default demo pages &mdash; no
+                      extra CSS or layout class required:
+                    </p>
+                    <ul class="mb-0">
+                      <li class="mb-2">
+                        The <code>&lt;aside class="app-sidebar"&gt;</code> element is
+                        omitted. The <code>app-wrapper</code> grid sizes its sidebar
+                        column with <code>auto</code>, so an empty column collapses to
+                        zero width and the content spans the full viewport.
+                      </li>
+                      <li class="mb-2">
+                        The header keeps the <code>app-header</code> class but becomes
+                        a regular Bootstrap <code>navbar-expand-lg</code> with a
+                        toggler and a <code>.navbar-collapse</code> menu &mdash;
+                        AdminLTE's PushMenu isn't used at all.
+                      </li>
+                      <li>
+                        The <code>sidebar-expand-*</code> class is dropped from
+                        <code>&lt;body&gt;</code>, since there is no sidebar to expand.
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="card card-success card-outline mb-4">
+                  <div class="card-header">
+                    <div class="card-title">Everything else stays the same</div>
+                  </div>
+                  <div class="card-body">
+                    <p>
+                      Cards, the content header, breadcrumbs, the footer, and the
+                      light/dark color modes all behave exactly as they do on the
+                      sidebar pages &mdash; this card is unmodified AdminLTE markup.
+                    </p>
+                    <p class="mb-2">Monthly report generation</p>
+                    <div
+                      class="progress mb-3"
+                      role="progressbar"
+                      aria-label="Monthly report generation"
+                      aria-valuenow="72"
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                    >
+                      <div class="progress-bar" style="width: 72%">72%</div>
+                    </div>
+                    <p class="mb-2">Storage used</p>
+                    <div
+                      class="progress mb-3"
+                      role="progressbar"
+                      aria-label="Storage used"
+                      aria-valuenow="45"
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                    >
+                      <div class="progress-bar text-bg-success" style="width: 45%">45%</div>
+                    </div>
+                    <a href={htmlPath + "/index.html"} class="btn btn-primary">
+                      Back to the sidebar layout
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!--end::Container-->
+        </div>
+        <!--end::App Content-->
+      </main>
+      <!--end::App Main-->
+      <Footer />
+    </div>
+    <!--end::App Wrapper-->
+    <!--begin::Script-->
+    <Scripts path={path} />
+    <!--end::Script-->
+  </body><!--end::Body-->
+</html>

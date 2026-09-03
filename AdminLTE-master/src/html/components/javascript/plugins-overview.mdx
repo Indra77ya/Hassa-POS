@@ -1,0 +1,167 @@
+AdminLTE ships eight JavaScript plugins as a single bundle (`adminlte.js`). Each one is exported from the package root, can be triggered via `data-lte-*` attributes for declarative use, and exposes a programmatic API for code-driven control.
+
+##### At a glance
+
+| Plugin | Data API | Programmatic | Documentation |
+|---|---|---|---|
+| **PushMenu** | `data-lte-toggle="sidebar"` | `.toggle()` / `.expand()` / `.collapse()` | [Reference](pushmenu.html) |
+| **Treeview** | `data-lte-toggle="treeview"` on parent menu | `.toggle()` / `.open()` / `.close()` | [Reference](treeview.html) |
+| **CardWidget** | `data-lte-toggle="card-collapse"`, `card-remove`, `card-maximize` | `.toggle()` / `.collapse()` / `.expand()` / `.remove()` / `.maximize()` / `.minimize()` / `.toggleMaximize()` | [Reference](card-widget.html) |
+| **DirectChat** | `data-lte-toggle="chat-pane"` | `.toggle()` | [Reference](direct-chat.html) |
+| **FullScreen** | `data-lte-toggle="fullscreen"` | `.toggleFullScreen()` / `.inFullScreen()` / `.outFullscreen()` | [Reference](fullscreen.html) |
+| **SidebarSearch** | `data-lte-toggle="sidebar-search"` on an input | `.search(term)` / `.clear()` | [Reference](sidebar-search.html) |
+| **Layout** | (auto-applied to `<body>`) | `.holdTransition(time)` | [Reference](layout.html) |
+| **AccessibilityManager** | (helper function: `initAccessibility()`) | `.announce()` / `.focusElement()` / `.trapFocus()` / `.addLandmarks()` | [Reference](accessibility.html) |
+
+##### Two ways to use them
+
+###### 1. Data API (declarative)
+
+For most pages, the data API is enough — no JavaScript code required. Drop the right `data-lte-*` attribute on the trigger element and the bundle wires it up on page load:
+
+```html
+<!-- Sidebar toggle -->
+<button data-lte-toggle="sidebar">☰</button>
+
+<!-- Card collapse / remove / maximize -->
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Title</h3>
+    <div class="card-tools">
+      <button class="btn btn-tool" data-lte-toggle="card-collapse" aria-label="Collapse card">
+        <i data-lte-icon="expand" class="bi bi-dash-lg"></i>
+        <i data-lte-icon="collapse" class="bi bi-plus-lg"></i>
+      </button>
+    </div>
+  </div>
+  <div class="card-body">…</div>
+</div>
+```
+
+The bundle attaches all data-API listeners on `DOMContentLoaded`. Dynamically-injected elements still work for the [PushMenu](pushmenu.html), [CardWidget](card-widget.html), [Treeview](treeview.html), and [SidebarSearch](sidebar-search.html) plugins, which use event delegation.
+
+###### 2. Programmatic (imperative)
+
+When you need to control a plugin from your own code — eg. open the sidebar after a successful login, or expand a card on a route change — retrieve the instance the data API already created, or create one on demand (since 4.1):
+
+```js
+// ESM (bundler import)
+import { PushMenu, CardWidget } from "admin-lte"
+
+// Sidebar: the data API creates the instance on load — just fetch it
+const sidebar = document.querySelector(".app-sidebar")
+PushMenu.getInstance(sidebar)?.expand()
+
+// Card maximize: reuses the existing instance, or creates one
+const card = document.querySelector("#chart-card")
+CardWidget.getOrCreateInstance(card).maximize()
+```
+
+Or use the globals (UMD bundle, no build step):
+
+```html
+<script>
+  // The bundle assigns to window.adminlte
+  adminlte.PushMenu.getInstance(document.querySelector(".app-sidebar"))?.expand()
+</script>
+```
+
+###### Component lifecycle
+
+Every component follows the same Bootstrap-style contract:
+
+- `Component.getInstance(element)` — the instance created for that element, or `null`.
+- `Component.getOrCreateInstance(element, config?)` — reuse or create (config only applies on creation).
+- `instance.dispose()` — unregister the instance; `getInstance()` returns `null` afterwards.
+
+One instance is kept per element in a registry backed by a `WeakMap`, so instances are garbage-collected together with their elements (nothing to clean up on Hotwired Turbo navigations). The data API listens with **delegated document-level handlers**, which means toggles inside content inserted after page load — AJAX partials, Turbo Frames — work without any re-initialisation.
+
+##### Listening to plugin events
+
+Every plugin fires bubbling `CustomEvent`s on its root element (the card, the nav item, the sidebar) — listen on `document` for global hooks or on the element itself for scoped ones. Actions with a "before" event are cancelable: call `preventDefault()` to veto them.
+
+```js
+document.addEventListener("expanded.lte.card-widget", (e) => {
+  console.log("Card expanded:", e.target)
+})
+
+// Veto card removal until the user confirmed
+document.addEventListener("remove.lte.card-widget", (e) => {
+  if (!confirm("Remove this card?")) {
+    e.preventDefault()
+  }
+})
+```
+
+###### Event name reference
+
+| Plugin | Before (cancelable) | After | Fired for |
+|---|---|---|---|
+| PushMenu | `open.lte.push-menu` | `opened.lte.push-menu` | Sidebar expanding |
+| PushMenu | `collapse.lte.push-menu` | `collapsed.lte.push-menu` | Sidebar collapsing |
+| Treeview | `expand.lte.treeview` | `expanded.lte.treeview` | Submenu opening (after fires post-animation) |
+| Treeview | `collapse.lte.treeview` | `collapsed.lte.treeview` | Submenu closing (after fires post-animation) |
+| Treeview | — | `load.lte.treeview` | Pre-opened submenu detected on page load |
+| CardWidget | `expand.lte.card-widget` | `expanded.lte.card-widget` | Card expanding (after fires post-animation) |
+| CardWidget | `collapse.lte.card-widget` | `collapsed.lte.card-widget` | Card collapsing (after fires post-animation) |
+| CardWidget | `remove.lte.card-widget` | `removed.lte.card-widget` | Card removal (the card leaves the DOM after `removed`) |
+| CardWidget | — | `maximized.lte.card-widget` | Card maximized |
+| CardWidget | — | `minimized.lte.card-widget` | Card minimized |
+| DirectChat | — | `expanded.lte.direct-chat` | Contacts pane opened |
+| DirectChat | — | `collapsed.lte.direct-chat` | Contacts pane closed |
+| FullScreen | — | `maximized.lte.fullscreen` | Entered fullscreen |
+| FullScreen | — | `minimized.lte.fullscreen` | Exited fullscreen |
+| SidebarSearch | — | `filtered.lte.sidebar-search` | Menu filtered (`detail: { query, matches }`; `matches` is `-1` on clear) |
+| ColorMode | — | `changed.lte.color-mode` | Theme changed (`detail: { theme, resolved }`, fired on `document`) |
+
+All events bubble (since 4.1). The "after" events of animated actions fire when the animation completes, not when it starts.
+
+##### Configuring via data attributes
+
+Some plugins read config from `data-*` attributes on their target element:
+
+```html
+<!-- Treeview — non-accordion (multiple submenus can be open at once) -->
+<ul class="nav sidebar-menu" data-lte-toggle="treeview" data-accordion="false">…</ul>
+
+<!-- Treeview — custom animation speed -->
+<ul class="nav sidebar-menu" data-lte-toggle="treeview" data-animation-speed="500">…</ul>
+
+<!-- Sidebar — opt into localStorage persistence (default: off) -->
+<aside class="app-sidebar" data-enable-persistence="true">…</aside>
+
+<!-- Sidebar — override the mobile breakpoint -->
+<aside class="app-sidebar" data-sidebar-breakpoint="768">…</aside>
+```
+
+Each plugin's reference page documents which attributes it supports.
+
+##### CSS classes the plugins manage
+
+The plugins toggle a small set of CSS classes that you can also style or react to:
+
+| Class | Set by | Where | Meaning |
+|---|---|---|---|
+| `sidebar-collapse` | PushMenu | `<body>` | Sidebar collapsed (desktop mini state, or mobile-closed) |
+| `sidebar-open` | PushMenu | `<body>` | Mobile sidebar explicitly opened by user |
+| `sidebar-mini` | PushMenu | `<body>` | Mini-sidebar mode active |
+| `menu-open` | Treeview | `.nav-item` | Submenu is currently expanded |
+| `collapsed-card` | CardWidget | `.card` | Card body/footer are collapsed |
+| `maximized-card` | CardWidget | `<html>` and `.card` | Card is in fullscreen mode |
+| `direct-chat-contacts-open` | DirectChat | `.direct-chat` | Contacts pane visible |
+| `hold-transition` | Layout | `<body>` | Transitions disabled briefly (during resize, etc.) |
+| `app-loaded` | Layout | `<body>` | Initial page-load animation finished |
+| `reduce-motion` | AccessibilityManager | `<body>` | OS `prefers-reduced-motion` detected |
+| `menu-open` | SidebarSearch | `.nav-item` | Submenu expanded to reveal a match (restored on clear) |
+
+##### Production vs source
+
+The plugins live in [`src/ts/`](https://github.com/ColorlibHQ/master/src/ts) as TypeScript modules. The published `dist/js/adminlte.js` is a Rollup bundle of all eight, exporting them under a single `adminlte` namespace (UMD) or named imports (ESM).
+
+If you only need one or two plugins and care about bundle size, importing individual modules from `node_modules/admin-lte/src/ts/` will tree-shake — but you'll need TypeScript in your toolchain.
+
+##### Where to next
+
+- Detailed reference for each plugin (links in the table above)
+- [Layout Blueprint](../layout-blueprint.html) — the structural classes the plugins operate on
+- [Accessibility](accessibility.html) — keyboard navigation, focus trapping, ARIA helpers

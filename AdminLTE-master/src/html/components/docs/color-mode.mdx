@@ -1,0 +1,134 @@
+AdminLTE supports Bootstrap 5.3 color modes (light, dark, and auto) out of the box. Since 4.1 the switcher ships in `adminlte.js` as the **ColorMode** module — you no longer need to copy a script into your pages.
+
+##### How it works
+
+- The chosen mode is persisted in `localStorage` under the key `lte-theme`.
+- `auto` follows the operating system's `prefers-color-scheme` and updates live when the OS preference changes.
+- The resolved mode is applied as `data-bs-theme="light|dark"` on `<html>`, so every Bootstrap and AdminLTE component adapts automatically.
+
+The mode is resolved from three sources, in this order:
+
+1. **The visitor's stored choice** — `localStorage.lte-theme`, written when they click a toggle. It is their own click on this device, so it wins.
+2. **The theme your page declared** — `data-bs-theme` on `<html>` as it was served. Use this to render a per-user preference from a cookie or a user record; it survives OS preference changes.
+3. **The OS preference** — `prefers-color-scheme`, followed live while neither of the above expressed a choice.
+
+Only `light`, `dark` and `auto` are understood. A custom Bootstrap theme name in `data-bs-theme` is not a mode ColorMode can resolve, so it is ignored — see *Opting out* below.
+
+##### Markup
+
+Add toggle buttons anywhere with `data-bs-theme-value` — the module binds them automatically. Optional `data-lte-theme-icon` elements act as an indicator for the current choice (the demo uses them in the topbar trigger):
+
+```html
+<li class="nav-item dropdown">
+  <a
+    class="nav-link"
+    href="#"
+    id="bd-theme"
+    aria-label="Toggle color scheme"
+    data-bs-toggle="dropdown"
+    aria-expanded="false"
+  >
+    <i class="bi bi-sun-fill" data-lte-theme-icon="light"></i>
+    <i class="bi bi-moon-fill d-none" data-lte-theme-icon="dark"></i>
+    <i class="bi bi-circle-half d-none" data-lte-theme-icon="auto"></i>
+  </a>
+  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="bd-theme">
+    <li>
+      <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light" aria-pressed="false">
+        <i class="bi bi-sun-fill me-2"></i>
+        Light
+        <i class="bi bi-check-lg ms-auto d-none"></i>
+      </button>
+    </li>
+    <li>
+      <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark" aria-pressed="false">
+        <i class="bi bi-moon-fill me-2"></i>
+        Dark
+        <i class="bi bi-check-lg ms-auto d-none"></i>
+      </button>
+    </li>
+    <li>
+      <button type="button" class="dropdown-item d-flex align-items-center active" data-bs-theme-value="auto" aria-pressed="true">
+        <i class="bi bi-circle-half me-2"></i>
+        Auto
+        <i class="bi bi-check-lg ms-auto d-none"></i>
+      </button>
+    </li>
+  </ul>
+</li>
+```
+
+The module keeps the `active` class, `aria-pressed` state, and the `.bi-check-lg` check marks in sync on every `[data-bs-theme-value]` button.
+
+##### JavaScript API
+
+```js
+import { ColorMode } from "admin-lte"
+
+const colorMode = new ColorMode()
+
+colorMode.getPreferredTheme() // "light" | "dark" | "auto" — the effective choice
+colorMode.getStoredTheme()    // what the visitor picked, or null
+colorMode.getMarkupTheme()    // what the page declared on <html>, or null
+colorMode.setTheme("dark")    // apply + persist + sync toggles
+
+// React to changes (fired on document)
+document.addEventListener("changed.lte.color-mode", (event) => {
+  console.log(event.detail.theme)    // what the user chose: "light" | "dark" | "auto"
+  console.log(event.detail.resolved) // what got applied:    "light" | "dark"
+})
+```
+
+##### Preventing the flash of wrong theme
+
+The module runs after the DOM is ready, so pages should also apply the stored theme *before first paint* with a tiny inline snippet in `<head>` (this is the one piece that must stay inline — see `#6043`):
+
+```html
+<script>
+  (() => {
+    "use strict"
+    const root = document.documentElement
+    if (root.getAttribute("data-lte-color-mode") === "off") return
+    let stored = null
+    try { stored = localStorage.getItem("lte-theme") } catch {}
+    const authored = root.getAttribute("data-bs-theme")
+    let resolved = "light"
+    if (stored === "dark" || stored === "light") resolved = stored
+    else if (authored === "dark" || authored === "light") resolved = authored
+    else if (matchMedia("(prefers-color-scheme: dark)").matches) resolved = "dark"
+    root.setAttribute("data-bs-theme", resolved)
+    root.style.colorScheme = resolved
+    if (resolved !== authored) root.setAttribute("data-lte-theme-resolved", "")
+  })()
+</script>
+```
+
+It follows the same precedence as the module, so a theme you rendered server-side is not overwritten before paint. The last line matters: it flags a value the snippet worked out itself, so the module doesn't mistake it for a theme your page declared and stop following the OS preference.
+
+##### Server-rendered themes
+
+If you store a per-user preference server-side, render it on `<html>` and the module will keep it — on load, and across OS preference changes:
+
+```html
+<html lang="en" data-bs-theme="dark">
+```
+
+It remains a default: the moment a visitor clicks a toggle, their choice is persisted and takes precedence on that device from then on. Clear `lte-theme` from `localStorage` when you want the server's value to take over again.
+
+##### Opting out
+
+Applications with their own theming — a custom Bootstrap theme, or a switcher of your own — turn the module off entirely:
+
+```html
+<html lang="en" data-lte-color-mode="off">
+```
+
+ColorMode then never writes `data-bs-theme`: not on load, not when a `[data-bs-theme-value]` toggle is clicked, and not when the OS preference changes. The inline snippet above honours it too, so nothing touches your theme before first paint either. Your own code stays in full control of `<html data-bs-theme>`.
+
+##### Per-region color modes
+
+`data-bs-theme` also works on any element, not just `<html>` — for example a permanently dark sidebar in an otherwise light layout:
+
+```html
+<aside class="app-sidebar" data-bs-theme="dark">...</aside>
+```
