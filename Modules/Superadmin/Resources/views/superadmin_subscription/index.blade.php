@@ -5,8 +5,8 @@
     @include('superadmin::layouts.nav')
     <!-- Content Header (Page header) -->
     <section class="content-header">
-        <h1 class="tw-text-xl md:tw-text-3xl tw-font-bold tw-text-black">@lang('superadmin::lang.subscription')
-            <small class="tw-text-sm md:tw-text-base tw-text-gray-700 tw-font-semibold">@lang('superadmin::lang.view_subscription')</small>
+        <h1>@lang('superadmin::lang.subscription')
+            <small>@lang('superadmin::lang.view_subscription')</small>
         </h1>
     </section>
 
@@ -47,38 +47,31 @@
             </div>
         @endcomponent
 
-        <div
-            class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md  tw-ring-gray-200">
-            <div class="tw-p-4 sm:tw-p-5">
-                <div class="tw-flow-root tw-mt-5 tw-border-b tw-border-gray-200">
-                    <div class="tw-mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
-                        <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
-                            @can('superadmin')
-                                <table class="table table-bordered table-striped" id="superadmin_subscription_table">
-                                    <thead>
-                                        <tr>
-                                            <th>@lang('superadmin::lang.business_name')</th>
-                                            <th>@lang('superadmin::lang.package_name')</th>
-                                            <th>@lang('superadmin::lang.status')</th>
-                                            <th>@lang('lang_v1.created_at')</th>
-                                            <th>@lang('superadmin::lang.start_date')</th>
-                                            <th>@lang('superadmin::lang.trial_end_date')</th>
-                                            <th>@lang('superadmin::lang.end_date')</th>
-                                            <th>@lang('superadmin::lang.coupon_code')</th>
-                                            <th>@lang('superadmin::lang.original_price')</th>
-                                            <th>@lang('superadmin::lang.paid_amount')</th>
-                                            <th>@lang('superadmin::lang.paid_via')</th>
-                                            <th>@lang('superadmin::lang.payment_transaction_id')</th>
-                                            <th>@lang('superadmin::lang.action')</th>
-                                        </tr>
-                                    </thead>
-                                </table>
-                            @endcan
-                        </div>
-                    </div>
+        @component('components.widget', ['class' => 'box-primary', 'title' => __('superadmin::lang.subscription')])
+            @can('superadmin')
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped" id="superadmin_subscription_table">
+                        <thead>
+                            <tr>
+                                <th>@lang('superadmin::lang.business_name')</th>
+                                <th>@lang('superadmin::lang.package_name')</th>
+                                <th>@lang('superadmin::lang.status')</th>
+                                <th>@lang('lang_v1.created_at')</th>
+                                <th>@lang('superadmin::lang.start_date')</th>
+                                <th>@lang('superadmin::lang.trial_end_date')</th>
+                                <th>@lang('superadmin::lang.end_date')</th>
+                                <th>@lang('superadmin::lang.coupon_code')</th>
+                                <th>@lang('superadmin::lang.original_price')</th>
+                                <th>@lang('superadmin::lang.paid_amount')</th>
+                                <th>@lang('superadmin::lang.paid_via')</th>
+                                <th>@lang('superadmin::lang.payment_transaction_id')</th>
+                                <th>@lang('superadmin::lang.action')</th>
+                            </tr>
+                        </thead>
+                    </table>
                 </div>
-            </div>
-        </div>
+            @endcan
+        @endcomponent
 
         <div class="modal fade" id="statusModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"></div>
 
