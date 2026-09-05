@@ -90,4 +90,12 @@ class LaundryItemTypeController extends Controller
 
         return $output;
     }
+
+    public function getItemTypeDetails($id)
+    {
+        $business_id = request()->session()->get('user.business_id');
+        $item_type = LaundryItemType::where('business_id', $business_id)->find($id);
+
+        return response()->json($item_type);
+    }
 }

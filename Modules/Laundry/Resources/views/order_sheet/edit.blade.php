@@ -40,7 +40,7 @@
             <div class="col-md-4">
                 <div class="form-group">
                     {!! Form::label('laundry_item_type_id', __('laundry::lang.item_type') . ':*') !!}
-                    {!! Form::select('laundry_item_type_id', $item_types, $order_sheet->laundry_item_type_id, ['class' => 'form-control select2', 'required']) !!}
+                    {!! Form::select('laundry_item_type_id', $item_types, $order_sheet->laundry_item_type_id, ['class' => 'form-control select2', 'id' => 'laundry_item_type_id', 'required']) !!}
                 </div>
             </div>
             <div class="col-md-4">
@@ -54,7 +54,7 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             {!! Form::label('unit_name', __('laundry::lang.unit') . ':*') !!}
-                            {!! Form::text('unit_name', $order_sheet->unit_name, ['class' => 'form-control', 'required']) !!}
+                            {!! Form::text('unit_name', $order_sheet->unit_name, ['class' => 'form-control', 'id' => 'unit_name', 'required']) !!}
                         </div>
                     </div>
                 </div>
@@ -115,4 +115,25 @@
     @endcomponent
     {!! Form::close() !!}
 </section>
+@endsection
+
+@section('javascript')
+<script type="text/javascript">
+$(document).ready(function() {
+    $(document).on('change', '#laundry_item_type_id', function() {
+        var item_type_id = $(this).val();
+        if (item_type_id) {
+            $.ajax({
+                url: '/laundry/item-types/get-details/' + item_type_id,
+                dataType: 'json',
+                success: function(result) {
+                    if (result && result.unit_name) {
+                        $('#unit_name').val(result.unit_name);
+                    }
+                }
+            });
+        }
+    });
+});
+</script>
 @endsection

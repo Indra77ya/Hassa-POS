@@ -17,6 +17,8 @@ Route::middleware(['web', 'auth', 'SetSessionData', 'language', 'timezone', 'Adm
     Route::resource('statuses', \Modules\Laundry\Http\Controllers\LaundryStatusController::class);
     Route::resource('processes', \Modules\Laundry\Http\Controllers\LaundryProcessController::class);
     Route::resource('service-types', \Modules\Laundry\Http\Controllers\LaundryServiceTypeController::class);
+
+    Route::get('item-types/get-details/{id}', [\Modules\Laundry\Http\Controllers\LaundryItemTypeController::class, 'getItemTypeDetails'])->name('laundry.item_types.get_details');
     Route::resource('item-types', \Modules\Laundry\Http\Controllers\LaundryItemTypeController::class);
 
     Route::get('reports/staff-points', [\Modules\Laundry\Http\Controllers\LaundryReportController::class, 'staffPointsReport'])->name('laundry.reports.staff_points');
