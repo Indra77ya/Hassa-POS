@@ -63,6 +63,7 @@ return [
     'process_status' => 'Status Proses',
     'points_earned' => 'Poin Diperoleh',
     'completed' => 'Selesai',
+    'in_progress' => 'Sedang Diproses',
     'pending' => 'Menunggu',
     'skipped' => 'Dilewati',
     'laundry_receipt' => 'TANDA TERIMA LAUNDRY',

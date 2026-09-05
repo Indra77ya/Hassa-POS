@@ -68,6 +68,8 @@
                                     <td>
                                         @if($log->status == 'completed')
                                             <span class="label bg-green">@lang('laundry::lang.completed')</span>
+                                        @elseif($log->status == 'in_progress')
+                                            <span class="label bg-light-blue">@lang('laundry::lang.in_progress')</span>
                                         @else
                                             <span class="label bg-yellow">@lang('laundry::lang.pending')</span>
                                         @endif

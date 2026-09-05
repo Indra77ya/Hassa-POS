@@ -277,14 +277,15 @@ class OrderSheetController extends Controller
                 $staff_id = !empty($raw_staff_id) ? $raw_staff_id : null;
                 $process = LaundryProcess::find($process_id);
 
-                $status = $staff_id ? 'completed' : 'pending';
-                $points_earned = ($staff_id && $process) ? ($process->points * $order_sheet->quantity) : 0;
+                $status = !empty($row['status']) ? $row['status'] : ($staff_id ? 'completed' : 'pending');
+                $is_completed = ($status === 'completed');
+                $points_earned = ($is_completed && $process) ? ($process->points * $order_sheet->quantity) : 0;
 
                 $existing_log = LaundryOrderProcessLog::where('order_sheet_id', $order_sheet->id)
                     ->where('laundry_process_id', $process_id)
                     ->first();
 
-                $completed_at = $staff_id ? ($existing_log && $existing_log->completed_at ? $existing_log->completed_at : Carbon::now()) : null;
+                $completed_at = $is_completed ? ($existing_log && $existing_log->completed_at ? $existing_log->completed_at : Carbon::now()) : null;
 
                 LaundryOrderProcessLog::updateOrCreate(
                     [

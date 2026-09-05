@@ -52,6 +52,8 @@
                     <td>
                         @if($log->status == 'completed')
                             @lang('laundry::lang.completed')
+                        @elseif($log->status == 'in_progress')
+                            @lang('laundry::lang.in_progress')
                         @else
                             @lang('laundry::lang.pending')
                         @endif

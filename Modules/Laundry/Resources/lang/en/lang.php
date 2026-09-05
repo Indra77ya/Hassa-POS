@@ -63,6 +63,7 @@ return [
     'process_status' => 'Process Status',
     'points_earned' => 'Points Earned',
     'completed' => 'Completed',
+    'in_progress' => 'In Progress',
     'pending' => 'Pending',
     'skipped' => 'Skipped',
     'laundry_receipt' => 'LAUNDRY RECEIPT',

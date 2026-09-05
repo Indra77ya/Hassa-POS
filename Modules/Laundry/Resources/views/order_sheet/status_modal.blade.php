@@ -26,9 +26,10 @@
         <table class="table table-bordered table-striped">
             <thead>
                 <tr>
-                    <th class="col-md-5">@lang('laundry::lang.process_name')</th>
-                    <th class="col-md-5">@lang('laundry::lang.staff_in_charge')</th>
-                    <th class="col-md-2 text-center">@lang('messages.action')</th>
+                    <th class="col-md-4">@lang('laundry::lang.process_name')</th>
+                    <th class="col-md-4">@lang('laundry::lang.staff_in_charge')</th>
+                    <th class="col-md-3">@lang('laundry::lang.process_status')</th>
+                    <th class="col-md-1 text-center">@lang('messages.action')</th>
                 </tr>
             </thead>
             <tbody id="modal_process_rows_container">
@@ -50,6 +51,13 @@
                                 @foreach($staffs as $s_id => $s_name)
                                     <option value="{{ $s_id }}" {{ $s_id == $log->staff_id ? 'selected' : '' }}>{{ $s_name }}</option>
                                 @endforeach
+                            </select>
+                        </td>
+                        <td>
+                            <select name="process_rows[{{ $index }}][status]" class="form-control select2 modal-status-select" style="width:100%">
+                                <option value="pending" {{ $log->status == 'pending' ? 'selected' : '' }}>@lang('laundry::lang.pending')</option>
+                                <option value="in_progress" {{ $log->status == 'in_progress' ? 'selected' : '' }}>@lang('laundry::lang.in_progress')</option>
+                                <option value="completed" {{ $log->status == 'completed' ? 'selected' : '' }}>@lang('laundry::lang.completed')</option>
                             </select>
                         </td>
                         <td class="text-center">
@@ -93,6 +101,13 @@ $(document).ready(function() {
             <td>
                 <select name="process_rows[${idx}][staff_id]" class="form-control select2 modal-staff-select" style="width:100%">
                     ${modal_staff_options_html}
+                </select>
+            </td>
+            <td>
+                <select name="process_rows[${idx}][status]" class="form-control select2 modal-status-select" style="width:100%">
+                    <option value="pending">{{ __('laundry::lang.pending') }}</option>
+                    <option value="in_progress">{{ __('laundry::lang.in_progress') }}</option>
+                    <option value="completed">{{ __('laundry::lang.completed') }}</option>
                 </select>
             </td>
             <td class="text-center">
