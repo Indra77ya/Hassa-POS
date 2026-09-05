@@ -19,4 +19,9 @@ Route::middleware(['web', 'auth', 'SetSessionData', 'language', 'timezone', 'Adm
     Route::resource('item-types', 'LaundryItemTypeController');
 
     Route::get('reports/staff-points', 'LaundryReportController@staffPointsReport')->name('laundry.reports.staff_points');
+
+    Route::get('/install', 'InstallController@index');
+    Route::post('/install', 'InstallController@install');
+    Route::get('/install/uninstall', 'InstallController@uninstall');
+    Route::get('/install/update', 'InstallController@update');
 });
