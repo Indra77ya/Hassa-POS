@@ -24,6 +24,7 @@
                         <th>@lang('laundry::lang.name')</th>
                         <th>@lang('laundry::lang.unit')</th>
                         <th>@lang('laundry::lang.default_price')</th>
+                        <th>@lang('laundry::lang.default_processes')</th>
                         <th>@lang('brand.note')</th>
                     </tr>
                 </thead>
@@ -46,6 +47,7 @@ $(document).ready(function() {
             { data: 'name', name: 'name' },
             { data: 'unit_name', name: 'unit_name' },
             { data: 'default_price', name: 'default_price' },
+            { data: 'default_processes', name: 'default_processes', orderable: false, searchable: false },
             { data: 'description', name: 'description' }
         ]
     });

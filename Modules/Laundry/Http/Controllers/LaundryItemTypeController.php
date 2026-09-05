@@ -5,6 +5,7 @@ namespace Modules\Laundry\Http\Controllers;
 use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 use Modules\Laundry\Entities\LaundryItemType;
+use Modules\Laundry\Entities\LaundryProcess;
 use Yajra\DataTables\Facades\DataTables;
 
 class LaundryItemTypeController extends Controller
@@ -22,7 +23,12 @@ class LaundryItemTypeController extends Controller
                     $html .= '<button data-href="' . action([\Modules\Laundry\Http\Controllers\LaundryItemTypeController::class, 'destroy'], [$row->id]) . '" class="btn btn-xs btn-danger delete_item_type_button"><i class="glyphicon glyphicon-trash"></i> ' . __('messages.delete') . '</button>';
                     return $html;
                 })
-                ->rawColumns(['action'])
+                ->addColumn('default_processes', function ($row) {
+                    if (empty($row->process_ids)) return '-';
+                    $processes = LaundryProcess::whereIn('id', $row->process_ids)->pluck('name')->toArray();
+                    return implode(', ', $processes);
+                })
+                ->rawColumns(['action', 'default_processes'])
                 ->make(true);
         }
 
@@ -31,7 +37,10 @@ class LaundryItemTypeController extends Controller
 
     public function create()
     {
-        return view('laundry::item_type.create');
+        $business_id = request()->session()->get('user.business_id');
+        $processes = LaundryProcess::where('business_id', $business_id)->where('is_active', true)->orderBy('sort_order', 'asc')->pluck('name', 'id');
+
+        return view('laundry::item_type.create', compact('processes'));
     }
 
     public function store(Request $request)
@@ -39,7 +48,7 @@ class LaundryItemTypeController extends Controller
         $business_id = request()->session()->get('user.business_id');
 
         try {
-            $input = $request->only(['name', 'unit_name', 'default_price', 'description']);
+            $input = $request->only(['name', 'unit_name', 'default_price', 'description', 'process_ids']);
             $input['business_id'] = $business_id;
 
             LaundryItemType::create($input);
@@ -56,8 +65,9 @@ class LaundryItemTypeController extends Controller
     {
         $business_id = request()->session()->get('user.business_id');
         $item_type = LaundryItemType::where('business_id', $business_id)->findOrFail($id);
+        $processes = LaundryProcess::where('business_id', $business_id)->where('is_active', true)->orderBy('sort_order', 'asc')->pluck('name', 'id');
 
-        return view('laundry::item_type.edit', compact('item_type'));
+        return view('laundry::item_type.edit', compact('item_type', 'processes'));
     }
 
     public function update(Request $request, $id)
@@ -65,7 +75,7 @@ class LaundryItemTypeController extends Controller
         $business_id = request()->session()->get('user.business_id');
 
         try {
-            $input = $request->only(['name', 'unit_name', 'default_price', 'description']);
+            $input = $request->only(['name', 'unit_name', 'default_price', 'description', 'process_ids']);
             $item_type = LaundryItemType::where('business_id', $business_id)->findOrFail($id);
             $item_type->update($input);
 
@@ -96,6 +106,18 @@ class LaundryItemTypeController extends Controller
         $business_id = request()->session()->get('user.business_id');
         $item_type = LaundryItemType::where('business_id', $business_id)->find($id);
 
-        return response()->json($item_type);
+        $processes = [];
+        if ($item_type && !empty($item_type->process_ids)) {
+            $processes = LaundryProcess::where('business_id', $business_id)
+                ->whereIn('id', $item_type->process_ids)
+                ->orderBy('sort_order', 'asc')
+                ->get(['id', 'name', 'points']);
+        }
+
+        return response()->json([
+            'unit_name' => $item_type ? $item_type->unit_name : 'kg',
+            'default_price' => $item_type ? $item_type->default_price : 0,
+            'processes' => $processes,
+        ]);
     }
 }

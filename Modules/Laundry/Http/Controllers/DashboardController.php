@@ -91,11 +91,14 @@ class DashboardController extends Controller
             ];
 
             $created_processes = [];
+            $all_proc_ids = [];
             foreach ($process_data as $p) {
-                $created_processes[] = LaundryProcess::firstOrCreate(
+                $proc = LaundryProcess::firstOrCreate(
                     ['business_id' => $business_id, 'name' => $p['name']],
                     array_merge($p, ['business_id' => $business_id])
                 );
+                $created_processes[] = $proc;
+                $all_proc_ids[] = $proc->id;
             }
 
             // 3. Seed Service Types
@@ -113,13 +116,13 @@ class DashboardController extends Controller
                 );
             }
 
-            // 4. Seed Item Types
+            // 4. Seed Item Types with mapped process_ids
             $item_data = [
-                ['name' => 'Cuci Lipat Kiloan', 'unit_name' => 'kg', 'default_price' => 8000],
-                ['name' => 'Cuci Setrika Kiloan', 'unit_name' => 'kg', 'default_price' => 10000],
-                ['name' => 'Bed Cover Besar', 'unit_name' => 'pcs', 'default_price' => 35000],
-                ['name' => 'Jas / Gaun', 'unit_name' => 'pcs', 'default_price' => 25000],
-                ['name' => 'Sepatu / Sneaker', 'unit_name' => 'pasang', 'default_price' => 30000],
+                ['name' => 'Cuci Lipat Kiloan', 'unit_name' => 'kg', 'default_price' => 8000, 'process_ids' => $all_proc_ids],
+                ['name' => 'Cuci Setrika Kiloan', 'unit_name' => 'kg', 'default_price' => 10000, 'process_ids' => $all_proc_ids],
+                ['name' => 'Bed Cover Besar', 'unit_name' => 'pcs', 'default_price' => 35000, 'process_ids' => [$all_proc_ids[0], $all_proc_ids[1], $all_proc_ids[2], $all_proc_ids[4]]],
+                ['name' => 'Jas / Gaun', 'unit_name' => 'pcs', 'default_price' => 25000, 'process_ids' => [$all_proc_ids[0], $all_proc_ids[3], $all_proc_ids[4]]],
+                ['name' => 'Sepatu / Sneaker', 'unit_name' => 'pasang', 'default_price' => 30000, 'process_ids' => [$all_proc_ids[0], $all_proc_ids[1], $all_proc_ids[2], $all_proc_ids[4]]],
             ];
 
             $created_items = [];
@@ -132,7 +135,7 @@ class DashboardController extends Controller
 
             // 5. Seed 3 Sample Order Sheets
             $demo_orders = [
-                ['qty' => 5.0, 'item_idx' => 1, 'service_idx' => 1, 'status_idx' => 1, 'items_detail' => '5 kg Pakaian Harian (Kemeja, Celana)'],
+                ['qty' => 5.0, 'item_idx' => 0, 'service_idx' => 1, 'status_idx' => 1, 'items_detail' => '5 kg Pakaian Harian (Kemeja, Celana)'],
                 ['qty' => 1.0, 'item_idx' => 2, 'service_idx' => 0, 'status_idx' => 3, 'items_detail' => '1 Pcs Bed Cover King Size'],
                 ['qty' => 2.0, 'item_idx' => 4, 'service_idx' => 1, 'status_idx' => 0, 'items_detail' => '2 Pasang Sepatu Nike & Adidas'],
             ];
@@ -166,14 +169,17 @@ class DashboardController extends Controller
                     'created_by' => $user_id,
                 ]);
 
+                $assigned_proc_ids = $itm->process_ids ?? $all_proc_ids;
                 foreach ($created_processes as $proc) {
+                    if (!in_array($proc->id, $assigned_proc_ids)) continue;
+
                     $is_done = ($st->is_completed_status || $proc->sort_order <= $st->sort_order);
                     LaundryOrderProcessLog::create([
                         'order_sheet_id' => $order_sheet->id,
                         'laundry_process_id' => $proc->id,
                         'staff_id' => $is_done ? $user_id : null,
                         'status' => $is_done ? 'completed' : 'pending',
-                        'points_earned' => $proc->points * $ord['qty'],
+                        'points_earned' => $is_done ? ($proc->points * $ord['qty']) : 0,
                         'completed_at' => $is_done ? Carbon::now() : null,
                         'created_by' => $user_id,
                     ]);

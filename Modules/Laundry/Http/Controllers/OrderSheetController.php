@@ -126,26 +126,7 @@ class OrderSheetController extends Controller
                 'created_by' => $user_id,
             ]);
 
-            // Create process logs
-            $active_processes = LaundryProcess::where('business_id', $business_id)->where('is_active', true)->orderBy('sort_order', 'asc')->get();
-            $process_staffs = $request->process_staffs ?? [];
-
-            foreach ($active_processes as $proc) {
-                $raw_staff_id = isset($process_staffs[$proc->id]) ? $process_staffs[$proc->id] : null;
-                $staff_id = !empty($raw_staff_id) ? $raw_staff_id : null;
-                $status = $staff_id ? 'completed' : 'skipped';
-                $points_earned = $staff_id ? ($proc->points * ($order_sheet->quantity ?? 1)) : 0;
-
-                LaundryOrderProcessLog::create([
-                    'order_sheet_id' => $order_sheet->id,
-                    'laundry_process_id' => $proc->id,
-                    'staff_id' => $staff_id,
-                    'status' => $status,
-                    'points_earned' => $points_earned,
-                    'completed_at' => $staff_id ? Carbon::now() : null,
-                    'created_by' => $user_id,
-                ]);
-            }
+            $this->_syncProcessLogs($order_sheet, $request, $user_id);
 
             DB::commit();
 
@@ -186,6 +167,7 @@ class OrderSheetController extends Controller
     public function update(Request $request, $id)
     {
         $business_id = request()->session()->get('user.business_id');
+        $user_id = request()->session()->get('user.id');
 
         try {
             DB::beginTransaction();
@@ -212,32 +194,7 @@ class OrderSheetController extends Controller
                 'notes' => $request->notes,
             ]);
 
-            // Update process logs staff assignments & points
-            $process_staffs = $request->process_staffs ?? [];
-            foreach ($process_staffs as $process_id => $raw_staff_id) {
-                $staff_id = !empty($raw_staff_id) ? $raw_staff_id : null;
-                $process = LaundryProcess::find($process_id);
-                $status = $staff_id ? 'completed' : 'skipped';
-                $points_earned = ($staff_id && $process) ? ($process->points * $order_sheet->quantity) : 0;
-
-                $existing_log = LaundryOrderProcessLog::where('order_sheet_id', $order_sheet->id)
-                    ->where('laundry_process_id', $process_id)
-                    ->first();
-                $completed_at = $staff_id ? ($existing_log && $existing_log->completed_at ? $existing_log->completed_at : Carbon::now()) : null;
-
-                LaundryOrderProcessLog::updateOrCreate(
-                    [
-                        'order_sheet_id' => $order_sheet->id,
-                        'laundry_process_id' => $process_id,
-                    ],
-                    [
-                        'staff_id' => $staff_id,
-                        'status' => $status,
-                        'points_earned' => $points_earned,
-                        'completed_at' => $completed_at,
-                    ]
-                );
-            }
+            $this->_syncProcessLogs($order_sheet, $request, $user_id);
 
             DB::commit();
 
@@ -278,6 +235,7 @@ class OrderSheetController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $business_id = request()->session()->get('user.business_id');
+        $user_id = request()->session()->get('user.id');
 
         try {
             DB::beginTransaction();
@@ -292,16 +250,40 @@ class OrderSheetController extends Controller
 
             $order_sheet->save();
 
-            $process_staffs = $request->process_staffs ?? [];
-            foreach ($process_staffs as $process_id => $raw_staff_id) {
+            $this->_syncProcessLogs($order_sheet, $request, $user_id);
+
+            DB::commit();
+
+            $output = ['success' => true, 'msg' => __('laundry::lang.status_updated_success')];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $output = ['success' => false, 'msg' => $e->getMessage()];
+        }
+
+        return $output;
+    }
+
+    private function _syncProcessLogs($order_sheet, Request $request, $user_id)
+    {
+        $process_rows = $request->process_rows;
+        $kept_process_ids = [];
+
+        if (!empty($process_rows) && is_array($process_rows)) {
+            foreach ($process_rows as $row) {
+                if (empty($row['process_id'])) continue;
+
+                $process_id = $row['process_id'];
+                $raw_staff_id = !empty($row['staff_id']) ? $row['staff_id'] : null;
                 $staff_id = !empty($raw_staff_id) ? $raw_staff_id : null;
                 $process = LaundryProcess::find($process_id);
+
                 $status = $staff_id ? 'completed' : 'skipped';
                 $points_earned = ($staff_id && $process) ? ($process->points * $order_sheet->quantity) : 0;
 
                 $existing_log = LaundryOrderProcessLog::where('order_sheet_id', $order_sheet->id)
                     ->where('laundry_process_id', $process_id)
                     ->first();
+
                 $completed_at = $staff_id ? ($existing_log && $existing_log->completed_at ? $existing_log->completed_at : Carbon::now()) : null;
 
                 LaundryOrderProcessLog::updateOrCreate(
@@ -314,19 +296,50 @@ class OrderSheetController extends Controller
                         'status' => $status,
                         'points_earned' => $points_earned,
                         'completed_at' => $completed_at,
+                        'created_by' => $user_id,
                     ]
                 );
+
+                $kept_process_ids[] = $process_id;
             }
+        } elseif (!empty($request->process_staffs) && is_array($request->process_staffs)) {
+            // Fallback for legacy process_staffs
+            foreach ($request->process_staffs as $process_id => $raw_staff_id) {
+                $staff_id = !empty($raw_staff_id) ? $raw_staff_id : null;
+                $process = LaundryProcess::find($process_id);
+                $status = $staff_id ? 'completed' : 'skipped';
+                $points_earned = ($staff_id && $process) ? ($process->points * $order_sheet->quantity) : 0;
 
-            DB::commit();
+                $existing_log = LaundryOrderProcessLog::where('order_sheet_id', $order_sheet->id)
+                    ->where('laundry_process_id', $process_id)
+                    ->first();
 
-            $output = ['success' => true, 'msg' => __('laundry::lang.status_updated_success')];
-        } catch (\Exception $e) {
-            DB::rollBack();
-            $output = ['success' => false, 'msg' => $e->getMessage()];
+                $completed_at = $staff_id ? ($existing_log && $existing_log->completed_at ? $existing_log->completed_at : Carbon::now()) : null;
+
+                LaundryOrderProcessLog::updateOrCreate(
+                    [
+                        'order_sheet_id' => $order_sheet->id,
+                        'laundry_process_id' => $process_id,
+                    ],
+                    [
+                        'staff_id' => $staff_id,
+                        'status' => $status,
+                        'points_earned' => $points_earned,
+                        'completed_at' => $completed_at,
+                        'created_by' => $user_id,
+                    ]
+                );
+
+                $kept_process_ids[] = $process_id;
+            }
         }
 
-        return $output;
+        // Delete logs for processes removed from the dynamic rows
+        if (!empty($kept_process_ids)) {
+            LaundryOrderProcessLog::where('order_sheet_id', $order_sheet->id)
+                ->whereNotIn('laundry_process_id', $kept_process_ids)
+                ->delete();
+        }
     }
 
     public function print($id)

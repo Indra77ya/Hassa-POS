@@ -83,19 +83,52 @@
         </div>
 
         <hr>
-        <h4 class="text-primary">@lang('laundry::lang.process_staff_assignment')</h4>
         <div class="row">
-            @php
-                $existing_logs = $order_sheet->processLogs->pluck('staff_id', 'laundry_process_id')->toArray();
-            @endphp
-            @foreach($processes as $proc)
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label>{{ $proc->name }} (@lang('laundry::lang.points'): {{ $proc->points }}):</label>
-                        {!! Form::select("process_staffs[{$proc->id}]", $staffs, isset($existing_logs[$proc->id]) ? $existing_logs[$proc->id] : null, ['class' => 'form-control select2', 'placeholder' => __('laundry::lang.select_staff')]) !!}
-                    </div>
-                </div>
-            @endforeach
+            <div class="col-md-12">
+                <h4 class="text-primary pull-left">@lang('laundry::lang.process_staff_assignment')</h4>
+                <button type="button" class="btn btn-success btn-xs pull-right" id="add_process_row_btn">
+                    <i class="fa fa-plus"></i> @lang('laundry::lang.add_process_row')
+                </button>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped" id="process_rows_table">
+                <thead>
+                    <tr>
+                        <th class="col-md-5">@lang('laundry::lang.process_name')</th>
+                        <th class="col-md-5">@lang('laundry::lang.staff_in_charge')</th>
+                        <th class="col-md-2 text-center">@lang('messages.action')</th>
+                    </tr>
+                </thead>
+                <tbody id="process_rows_container">
+                    @foreach($order_sheet->processLogs as $index => $log)
+                        <tr class="process-row">
+                            <td>
+                                <select name="process_rows[{{ $index }}][process_id]" class="form-control select2 process-select" required style="width:100%">
+                                    <option value="">@lang('laundry::lang.select_process')</option>
+                                    @foreach($processes as $p)
+                                        <option value="{{ $p->id }}" {{ $p->id == $log->laundry_process_id ? 'selected' : '' }}>
+                                            {{ $p->name }} (@lang('laundry::lang.points'): {{ $p->points }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </td>
+                            <td>
+                                <select name="process_rows[{{ $index }}][staff_id]" class="form-control select2 staff-select" style="width:100%">
+                                    <option value="">@lang('laundry::lang.select_staff')</option>
+                                    @foreach($staffs as $s_id => $s_name)
+                                        <option value="{{ $s_id }}" {{ $s_id == $log->staff_id ? 'selected' : '' }}>{{ $s_name }}</option>
+                                    @endforeach
+                                </select>
+                            </td>
+                            <td class="text-center">
+                                <button type="button" class="btn btn-danger btn-xs remove-process-row"><i class="fa fa-trash"></i> @lang('laundry::lang.remove_process_row')</button>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
 
         <div class="row">
@@ -120,6 +153,58 @@
 @section('javascript')
 <script type="text/javascript">
 $(document).ready(function() {
+    var process_options_html = `<option value="">{{ __('laundry::lang.select_process') }}</option>`;
+    @foreach($processes as $p)
+        process_options_html += `<option value="{{ $p->id }}">{{ e($p->name) }} ({{ __('laundry::lang.points') }}: {{ $p->points }})</option>`;
+    @endforeach
+
+    var staff_options_html = `<option value="">{{ __('laundry::lang.select_staff') }}</option>`;
+    @foreach($staffs as $s_id => $s_name)
+        staff_options_html += `<option value="{{ $s_id }}">{{ e($s_name) }}</option>`;
+    @endforeach
+
+    function createProcessRowIndex() {
+        return new Date().getTime() + Math.floor(Math.random() * 1000);
+    }
+
+    function addProcessRow(selected_process_id, selected_staff_id) {
+        var idx = createProcessRowIndex();
+        var row_html = `<tr class="process-row">
+            <td>
+                <select name="process_rows[${idx}][process_id]" class="form-control select2 process-select" required style="width:100%">
+                    ${process_options_html}
+                </select>
+            </td>
+            <td>
+                <select name="process_rows[${idx}][staff_id]" class="form-control select2 staff-select" style="width:100%">
+                    ${staff_options_html}
+                </select>
+            </td>
+            <td class="text-center">
+                <button type="button" class="btn btn-danger btn-xs remove-process-row"><i class="fa fa-trash"></i> {{ __('laundry::lang.remove_process_row') }}</button>
+            </td>
+        </tr>`;
+
+        var $row = $(row_html);
+        if (selected_process_id) {
+            $row.find('.process-select').val(selected_process_id);
+        }
+        if (selected_staff_id) {
+            $row.find('.staff-select').val(selected_staff_id);
+        }
+
+        $('#process_rows_container').append($row);
+        $row.find('.select2').select2();
+    }
+
+    $(document).on('click', '#add_process_row_btn', function() {
+        addProcessRow(null, null);
+    });
+
+    $(document).on('click', '.remove-process-row', function() {
+        $(this).closest('tr.process-row').remove();
+    });
+
     $(document).on('change', '#laundry_item_type_id', function() {
         var item_type_id = $(this).val();
         if (item_type_id) {
@@ -129,6 +214,12 @@ $(document).ready(function() {
                 success: function(result) {
                     if (result && result.unit_name) {
                         $('#unit_name').val(result.unit_name);
+                    }
+                    if (result && result.processes && result.processes.length > 0) {
+                        $('#process_rows_container').empty();
+                        $.each(result.processes, function(i, proc) {
+                            addProcessRow(proc.id, null);
+                        });
                     }
                 }
             });

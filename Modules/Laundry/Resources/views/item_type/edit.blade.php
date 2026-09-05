@@ -23,6 +23,11 @@
       </div>
 
       <div class="form-group">
+        {!! Form::label('process_ids', __('laundry::lang.default_processes') . ':') !!}
+        {!! Form::select('process_ids[]', $processes, $item_type->process_ids, ['class' => 'form-control select2', 'multiple', 'style' => 'width:100%']) !!}
+      </div>
+
+      <div class="form-group">
         {!! Form::label('description', __('brand.note') . ':') !!}
         {!! Form::textarea('description', $item_type->description, ['class' => 'form-control', 'rows' => 2]) !!}
       </div>
