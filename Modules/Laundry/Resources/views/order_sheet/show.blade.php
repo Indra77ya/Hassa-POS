@@ -98,6 +98,8 @@
                             <td>
                                 @if($log->status == 'completed')
                                     <span class="label bg-green">@lang('laundry::lang.completed')</span>
+                                @elseif($log->status == 'skipped')
+                                    <span class="label bg-gray">@lang('laundry::lang.skipped')</span>
                                 @else
                                     <span class="label bg-yellow">@lang('laundry::lang.pending')</span>
                                 @endif

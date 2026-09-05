@@ -133,13 +133,14 @@ class OrderSheetController extends Controller
             foreach ($active_processes as $proc) {
                 $raw_staff_id = isset($process_staffs[$proc->id]) ? $process_staffs[$proc->id] : null;
                 $staff_id = !empty($raw_staff_id) ? $raw_staff_id : null;
-                $points_earned = $proc->points * ($order_sheet->quantity ?? 1);
+                $status = $staff_id ? 'completed' : 'skipped';
+                $points_earned = $staff_id ? ($proc->points * ($order_sheet->quantity ?? 1)) : 0;
 
                 LaundryOrderProcessLog::create([
                     'order_sheet_id' => $order_sheet->id,
                     'laundry_process_id' => $proc->id,
                     'staff_id' => $staff_id,
-                    'status' => $staff_id ? 'completed' : 'pending',
+                    'status' => $status,
                     'points_earned' => $points_earned,
                     'completed_at' => $staff_id ? Carbon::now() : null,
                     'created_by' => $user_id,
@@ -216,7 +217,8 @@ class OrderSheetController extends Controller
             foreach ($process_staffs as $process_id => $raw_staff_id) {
                 $staff_id = !empty($raw_staff_id) ? $raw_staff_id : null;
                 $process = LaundryProcess::find($process_id);
-                $points_earned = $process ? ($process->points * $order_sheet->quantity) : 0;
+                $status = $staff_id ? 'completed' : 'skipped';
+                $points_earned = ($staff_id && $process) ? ($process->points * $order_sheet->quantity) : 0;
 
                 LaundryOrderProcessLog::updateOrCreate(
                     [
@@ -225,7 +227,7 @@ class OrderSheetController extends Controller
                     ],
                     [
                         'staff_id' => $staff_id,
-                        'status' => $staff_id ? 'completed' : 'pending',
+                        'status' => $status,
                         'points_earned' => $points_earned,
                         'completed_at' => $staff_id ? Carbon::now() : null,
                     ]
@@ -289,7 +291,8 @@ class OrderSheetController extends Controller
             foreach ($process_staffs as $process_id => $raw_staff_id) {
                 $staff_id = !empty($raw_staff_id) ? $raw_staff_id : null;
                 $process = LaundryProcess::find($process_id);
-                $points_earned = $process ? ($process->points * $order_sheet->quantity) : 0;
+                $status = $staff_id ? 'completed' : 'skipped';
+                $points_earned = ($staff_id && $process) ? ($process->points * $order_sheet->quantity) : 0;
 
                 LaundryOrderProcessLog::updateOrCreate(
                     [
@@ -298,7 +301,7 @@ class OrderSheetController extends Controller
                     ],
                     [
                         'staff_id' => $staff_id,
-                        'status' => $staff_id ? 'completed' : 'pending',
+                        'status' => $status,
                         'points_earned' => $points_earned,
                         'completed_at' => $staff_id ? Carbon::now() : null,
                     ]

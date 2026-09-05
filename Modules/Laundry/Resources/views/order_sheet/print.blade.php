@@ -49,7 +49,15 @@
                 <tr>
                     <td>{{ optional($log->process)->name }}</td>
                     <td>{{ optional($log->staff)->first_name ? optional($log->staff)->first_name . ' ' . optional($log->staff)->last_name : '-' }}</td>
-                    <td>{{ $log->status == 'completed' ? __('laundry::lang.completed') : __('laundry::lang.pending') }}</td>
+                    <td>
+                        @if($log->status == 'completed')
+                            @lang('laundry::lang.completed')
+                        @elseif($log->status == 'skipped')
+                            @lang('laundry::lang.skipped')
+                        @else
+                            @lang('laundry::lang.pending')
+                        @endif
+                    </td>
                 </tr>
             @endforeach
         </tbody>
