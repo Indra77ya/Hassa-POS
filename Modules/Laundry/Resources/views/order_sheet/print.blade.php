@@ -45,15 +45,13 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($order_sheet->processLogs as $log)
+            @foreach($order_sheet->processLogs->where('status', '!=', 'skipped') as $log)
                 <tr>
                     <td>{{ optional($log->process)->name }}</td>
                     <td>{{ optional($log->staff)->first_name ? optional($log->staff)->first_name . ' ' . optional($log->staff)->last_name : '-' }}</td>
                     <td>
                         @if($log->status == 'completed')
                             @lang('laundry::lang.completed')
-                        @elseif($log->status == 'skipped')
-                            @lang('laundry::lang.skipped')
                         @else
                             @lang('laundry::lang.pending')
                         @endif

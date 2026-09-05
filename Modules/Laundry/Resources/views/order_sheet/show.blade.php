@@ -91,15 +91,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($order_sheet->processLogs as $log)
+                    @forelse($order_sheet->processLogs->where('status', '!=', 'skipped') as $log)
                         <tr>
                             <td>{{ optional($log->process)->name }}</td>
                             <td>{{ optional($log->staff)->user_full_name ?? (optional($log->staff)->first_name ? optional($log->staff)->first_name . ' ' . optional($log->staff)->last_name : '-') }}</td>
                             <td>
                                 @if($log->status == 'completed')
                                     <span class="label bg-green">@lang('laundry::lang.completed')</span>
-                                @elseif($log->status == 'skipped')
-                                    <span class="label bg-gray">@lang('laundry::lang.skipped')</span>
                                 @else
                                     <span class="label bg-yellow">@lang('laundry::lang.pending')</span>
                                 @endif
