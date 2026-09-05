@@ -50,6 +50,15 @@ class DashboardController extends Controller
         try {
             DB::beginTransaction();
 
+            // 0. Reset existing demo data for this business
+            $order_ids = LaundryOrderSheet::where('business_id', $business_id)->pluck('id');
+            LaundryOrderProcessLog::whereIn('order_sheet_id', $order_ids)->delete();
+            LaundryOrderSheet::where('business_id', $business_id)->delete();
+            LaundryItemType::where('business_id', $business_id)->delete();
+            LaundryServiceType::where('business_id', $business_id)->delete();
+            LaundryProcess::where('business_id', $business_id)->delete();
+            LaundryStatus::where('business_id', $business_id)->delete();
+
             $location = BusinessLocation::where('business_id', $business_id)->first();
             $location_id = $location ? $location->id : 1;
 
@@ -75,10 +84,7 @@ class DashboardController extends Controller
 
             $created_statuses = [];
             foreach ($status_data as $s) {
-                $created_statuses[] = LaundryStatus::firstOrCreate(
-                    ['business_id' => $business_id, 'name' => $s['name']],
-                    array_merge($s, ['business_id' => $business_id])
-                );
+                $created_statuses[] = LaundryStatus::create(array_merge($s, ['business_id' => $business_id]));
             }
 
             // 2. Seed Processes
@@ -93,10 +99,7 @@ class DashboardController extends Controller
             $created_processes = [];
             $all_proc_ids = [];
             foreach ($process_data as $p) {
-                $proc = LaundryProcess::firstOrCreate(
-                    ['business_id' => $business_id, 'name' => $p['name']],
-                    array_merge($p, ['business_id' => $business_id])
-                );
+                $proc = LaundryProcess::create(array_merge($p, ['business_id' => $business_id]));
                 $created_processes[] = $proc;
                 $all_proc_ids[] = $proc->id;
             }
@@ -110,10 +113,7 @@ class DashboardController extends Controller
 
             $created_services = [];
             foreach ($service_data as $sv) {
-                $created_services[] = LaundryServiceType::firstOrCreate(
-                    ['business_id' => $business_id, 'name' => $sv['name']],
-                    array_merge($sv, ['business_id' => $business_id])
-                );
+                $created_services[] = LaundryServiceType::create(array_merge($sv, ['business_id' => $business_id]));
             }
 
             // 4. Seed Item Types with mapped process_ids
@@ -127,10 +127,7 @@ class DashboardController extends Controller
 
             $created_items = [];
             foreach ($item_data as $it) {
-                $created_items[] = LaundryItemType::firstOrCreate(
-                    ['business_id' => $business_id, 'name' => $it['name']],
-                    array_merge($it, ['business_id' => $business_id])
-                );
+                $created_items[] = LaundryItemType::create(array_merge($it, ['business_id' => $business_id]));
             }
 
             // 5. Seed 3 Sample Order Sheets
@@ -188,7 +185,7 @@ class DashboardController extends Controller
 
             DB::commit();
 
-            $output = ['success' => true, 'msg' => 'Data demo laundry berhasil dimasukkan!'];
+            $output = ['success' => true, 'msg' => 'Data demo laundry berhasil direset & diperbarui!'];
         } catch (\Exception $e) {
             DB::rollBack();
             $output = ['success' => false, 'msg' => $e->getMessage()];
