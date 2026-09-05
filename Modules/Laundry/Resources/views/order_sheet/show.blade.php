@@ -91,7 +91,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($order_sheet->processLogs->where('status', '!=', 'skipped') as $log)
+                    @forelse($order_sheet->processLogs as $log)
                         <tr>
                             <td>{{ optional($log->process)->name }}</td>
                             <td>{{ optional($log->staff)->user_full_name ?? (optional($log->staff)->first_name ? optional($log->staff)->first_name . ' ' . optional($log->staff)->last_name : '-') }}</td>

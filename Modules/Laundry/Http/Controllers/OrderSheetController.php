@@ -277,7 +277,7 @@ class OrderSheetController extends Controller
                 $staff_id = !empty($raw_staff_id) ? $raw_staff_id : null;
                 $process = LaundryProcess::find($process_id);
 
-                $status = $staff_id ? 'completed' : 'skipped';
+                $status = $staff_id ? 'completed' : 'pending';
                 $points_earned = ($staff_id && $process) ? ($process->points * $order_sheet->quantity) : 0;
 
                 $existing_log = LaundryOrderProcessLog::where('order_sheet_id', $order_sheet->id)
@@ -307,7 +307,7 @@ class OrderSheetController extends Controller
             foreach ($request->process_staffs as $process_id => $raw_staff_id) {
                 $staff_id = !empty($raw_staff_id) ? $raw_staff_id : null;
                 $process = LaundryProcess::find($process_id);
-                $status = $staff_id ? 'completed' : 'skipped';
+                $status = $staff_id ? 'completed' : 'pending';
                 $points_earned = ($staff_id && $process) ? ($process->points * $order_sheet->quantity) : 0;
 
                 $existing_log = LaundryOrderProcessLog::where('order_sheet_id', $order_sheet->id)

@@ -62,7 +62,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($order_sheet->processLogs->where('status', '!=', 'skipped') as $log)
+                            @foreach($order_sheet->processLogs as $log)
                                 <tr>
                                     <td>{{ optional($log->process)->name }}</td>
                                     <td>
