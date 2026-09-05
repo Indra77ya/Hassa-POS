@@ -23,7 +23,7 @@
                 <div class="form-group" style="width: 70%;">
                     <input type="text" name="search_key" class="form-control input-lg" style="width: 100%;" placeholder="Misal: LND-2024-0001 atau 08123456789" value="{{ $search ?? $order_no }}" required>
                 </div>
-                <button type="submit" class="btn btn-primary btn-lg"><i class="glyphicon glyphicon-search"></i> @lang('messages.search')</button>
+                <button type="submit" class="btn btn-primary btn-lg"><i class="glyphicon glyphicon-search"></i> @lang('laundry::lang.search')</button>
             </form>
         </div>
 

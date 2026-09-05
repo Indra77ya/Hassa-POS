@@ -25,7 +25,7 @@ class LaundryServiceProvider extends ServiceProvider
             'laundry::layouts.partials.sidebar',
             'laundry::layouts.partials.header',
         ], function ($view) {
-            if (auth()->user()->can('superadmin')) {
+            if (auth()->check() && auth()->user()->can('superadmin')) {
                 $__is_laundry_enabled = true;
             } else {
                 $business_id = session()->get('user.business_id');

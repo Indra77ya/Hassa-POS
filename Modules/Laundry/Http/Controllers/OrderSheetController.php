@@ -220,6 +220,11 @@ class OrderSheetController extends Controller
                 $status = $staff_id ? 'completed' : 'skipped';
                 $points_earned = ($staff_id && $process) ? ($process->points * $order_sheet->quantity) : 0;
 
+                $existing_log = LaundryOrderProcessLog::where('order_sheet_id', $order_sheet->id)
+                    ->where('laundry_process_id', $process_id)
+                    ->first();
+                $completed_at = $staff_id ? ($existing_log && $existing_log->completed_at ? $existing_log->completed_at : Carbon::now()) : null;
+
                 LaundryOrderProcessLog::updateOrCreate(
                     [
                         'order_sheet_id' => $order_sheet->id,
@@ -229,7 +234,7 @@ class OrderSheetController extends Controller
                         'staff_id' => $staff_id,
                         'status' => $status,
                         'points_earned' => $points_earned,
-                        'completed_at' => $staff_id ? Carbon::now() : null,
+                        'completed_at' => $completed_at,
                     ]
                 );
             }
@@ -294,6 +299,11 @@ class OrderSheetController extends Controller
                 $status = $staff_id ? 'completed' : 'skipped';
                 $points_earned = ($staff_id && $process) ? ($process->points * $order_sheet->quantity) : 0;
 
+                $existing_log = LaundryOrderProcessLog::where('order_sheet_id', $order_sheet->id)
+                    ->where('laundry_process_id', $process_id)
+                    ->first();
+                $completed_at = $staff_id ? ($existing_log && $existing_log->completed_at ? $existing_log->completed_at : Carbon::now()) : null;
+
                 LaundryOrderProcessLog::updateOrCreate(
                     [
                         'order_sheet_id' => $order_sheet->id,
@@ -303,7 +313,7 @@ class OrderSheetController extends Controller
                         'staff_id' => $staff_id,
                         'status' => $status,
                         'points_earned' => $points_earned,
-                        'completed_at' => $staff_id ? Carbon::now() : null,
+                        'completed_at' => $completed_at,
                     ]
                 );
             }

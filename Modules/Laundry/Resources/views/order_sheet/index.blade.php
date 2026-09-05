@@ -65,9 +65,10 @@
 @endsection
 
 @section('javascript')
+@include('laundry::layouts.partials.javascripts')
 <script type="text/javascript">
 $(document).ready(function() {
-    var order_sheets_table = $('#order_sheets_table').DataTable({
+    window.order_sheets_table = $('#order_sheets_table').DataTable({
         processing: true,
         serverSide: true,
         ajax: {

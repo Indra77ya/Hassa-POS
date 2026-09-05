@@ -99,7 +99,7 @@ class DataController extends Controller
         $module_util = new ModuleUtil();
         $is_laundry_enabled = (bool) $module_util->hasThePermissionInSubscription($business_id, 'laundry_module');
 
-        if ($is_laundry_enabled && (auth()->user()->can('superadmin') || auth()->user()->can('laundry.view') || auth()->user()->can('laundry.create'))) {
+        if ($is_laundry_enabled && auth()->check() && (auth()->user()->can('superadmin') || auth()->user()->can('laundry.view') || auth()->user()->can('laundry.create'))) {
             Menu::modify('admin-sidebar-menu', function ($menu) {
                 $menu->dropdown(
                     __('laundry::lang.laundry'),

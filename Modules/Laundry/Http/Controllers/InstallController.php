@@ -57,6 +57,10 @@ class InstallController extends Controller
      */
     public function install()
     {
+        if (! auth()->user()->can('superadmin') && ! auth()->user()->can('manage_modules')) {
+            abort(403, 'Unauthorized action.');
+        }
+
         try {
             DB::beginTransaction();
 

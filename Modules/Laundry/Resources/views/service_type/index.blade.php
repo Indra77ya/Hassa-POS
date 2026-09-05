@@ -33,9 +33,10 @@
 @endsection
 
 @section('javascript')
+@include('laundry::layouts.partials.javascripts')
 <script type="text/javascript">
 $(document).ready(function() {
-    var service_types_table = $('#service_types_table').DataTable({
+    window.service_types_table = $('#service_types_table').DataTable({
         processing: true,
         serverSide: true,
         ajax: '{{ action([\Modules\Laundry\Http\Controllers\LaundryServiceTypeController::class, 'index']) }}',

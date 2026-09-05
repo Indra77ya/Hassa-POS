@@ -34,9 +34,10 @@
 @endsection
 
 @section('javascript')
+@include('laundry::layouts.partials.javascripts')
 <script type="text/javascript">
 $(document).ready(function() {
-    var statuses_table = $('#statuses_table').DataTable({
+    window.statuses_table = $('#statuses_table').DataTable({
         processing: true,
         serverSide: true,
         ajax: '{{ action([\Modules\Laundry\Http\Controllers\LaundryStatusController::class, 'index']) }}',
