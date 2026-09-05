@@ -15,7 +15,7 @@ class AddLaundryColumnsToTransactionsTable extends Migration
     {
         Schema::table('transactions', function (Blueprint $table) {
             if (!Schema::hasColumn('transactions', 'laundry_order_sheet_id')) {
-                $table->unsignedBigInteger('laundry_order_sheet_id')->nullable()->after('repair_job_sheet_id');
+                $table->unsignedBigInteger('laundry_order_sheet_id')->nullable();
                 $table->foreign('laundry_order_sheet_id')->references('id')->on('laundry_order_sheets')->onDelete('set null');
             }
         });

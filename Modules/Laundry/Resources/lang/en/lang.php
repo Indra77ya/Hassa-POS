@@ -27,6 +27,7 @@ return [
     'add_item_type' => 'Add Item Type',
     'edit_item_type' => 'Edit Item Type',
     'staff_points_report' => 'Staff Points Report',
+    'import_demo_data' => 'Import Demo Data',
     'view_laundry' => 'View Laundry',
     'add_laundry_order' => 'Add Laundry Order',
     'edit_laundry_order' => 'Edit Laundry Order',

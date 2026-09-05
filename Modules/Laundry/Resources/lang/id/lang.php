@@ -27,6 +27,7 @@ return [
     'add_item_type' => 'Tambah Jenis Barang',
     'edit_item_type' => 'Edit Jenis Barang',
     'staff_points_report' => 'Laporan Poin Petugas',
+    'import_demo_data' => 'Masukkan Data Demo',
     'view_laundry' => 'Lihat Laundry',
     'add_laundry_order' => 'Tambah Pesanan Laundry',
     'edit_laundry_order' => 'Edit Pesanan Laundry',

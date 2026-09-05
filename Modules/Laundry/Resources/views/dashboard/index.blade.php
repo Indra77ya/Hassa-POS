@@ -3,7 +3,13 @@
 
 @section('content')
 <section class="content-header">
-    <h1>@lang('laundry::lang.laundry_dashboard')</h1>
+    <h1>@lang('laundry::lang.laundry_dashboard')
+        {!! Form::open(['url' => route('laundry.import_demo_data'), 'method' => 'post', 'style' => 'display:inline-block; float: right;']) !!}
+            <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('Apakah Anda yakin ingin memasukkan data demo laundry?')">
+                <i class="fa fa-database"></i> @lang('laundry::lang.import_demo_data')
+            </button>
+        {!! Form::close() !!}
+    </h1>
 </section>
 
 <section class="content">

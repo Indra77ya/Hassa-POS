@@ -7,6 +7,7 @@ Route::post('/laundry/status/search', [\Modules\Laundry\Http\Controllers\PublicS
 
 Route::middleware(['web', 'auth', 'SetSessionData', 'language', 'timezone', 'AdminSidebarMenu'])->prefix('laundry')->group(function () {
     Route::get('/dashboard', [\Modules\Laundry\Http\Controllers\DashboardController::class, 'index'])->name('laundry.dashboard');
+    Route::post('/import-demo-data', [\Modules\Laundry\Http\Controllers\DashboardController::class, 'importDemoData'])->name('laundry.import_demo_data');
 
     Route::resource('order-sheet', \Modules\Laundry\Http\Controllers\OrderSheetController::class);
     Route::get('order-sheet/{id}/print', [\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'print'])->name('laundry.order_sheet.print');
