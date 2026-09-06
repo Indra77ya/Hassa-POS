@@ -410,6 +410,9 @@ $(document).ready(function () {
         '.input-number .quantity-up, .input-number .quantity-down',
         function () {
             var input = $(this).closest('.input-number').find('input');
+            if (input.prop('readonly') || input.prop('disabled') || $(this).prop('disabled') || $(this).is('[disabled]')) {
+                return false;
+            }
             var qty = __read_number(input);
             var step = 1;
             if (input.data('step')) {
