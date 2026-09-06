@@ -115,6 +115,7 @@
     </div>
 
     <div class="modal-footer">
+      <button type="button" class="btn btn-success add-laundry-to-cart-modal" data-id="{{ $order_sheet->id }}"><i class="fa fa-shopping-cart"></i> Masukkan ke Keranjang</button>
       <a href="{{ action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'print'], [$order_sheet->id]) }}" class="btn btn-primary" target="_blank"><i class="fa fa-print"></i> @lang('messages.print')</a>
       <button type="button" class="btn btn-default" data-dismiss="modal">@lang('messages.close')</button>
     </div>

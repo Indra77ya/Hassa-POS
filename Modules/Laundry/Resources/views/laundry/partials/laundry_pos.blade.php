@@ -18,6 +18,9 @@
                 <button type="button" class="btn btn-default bg-white btn-flat !tw-border-0 !tw-h-9 !tw-text-sky-600 hover:!tw-bg-sky-50/50 active:tw-scale-95 tw-transition-transform" id="show_laundry_order_sheet_btn" title="@lang('laundry::lang.order_sheet_detail')" style="border: 0; background: transparent; height: 36px; display: inline-flex; align-items: center; justify-content: center;">
                     <i class="fa fa-eye fa-lg"></i>
                 </button>
+                <button type="button" class="btn btn-default bg-white btn-flat !tw-border-0 !tw-h-9 !tw-text-emerald-600 hover:!tw-bg-emerald-50/50 active:tw-scale-95 tw-transition-transform" id="add_laundry_to_cart_btn" title="Masukkan ke Keranjang" style="border: 0; background: transparent; height: 36px; display: inline-flex; align-items: center; justify-content: center;">
+                    <i class="fa fa-shopping-cart fa-lg"></i>
+                </button>
             </span>
         </div>
     </div>

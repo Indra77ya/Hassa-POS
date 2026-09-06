@@ -1,4 +1,37 @@
 <script type="text/javascript">
+    function addOrderSheetToCart(order_sheet_id) {
+        if (!order_sheet_id) {
+            toastr.warning('{{ __("laundry::lang.select_order_sheet") }}');
+            return;
+        }
+        $.ajax({
+            url: '/laundry/order-sheet/' + order_sheet_id + '/get-pos-details',
+            dataType: 'json',
+            success: function(result) {
+                if (result.success && result.variation_id) {
+                    if (result.contact_id && $('select#customer_id').length) {
+                        if ($('select#customer_id option[value="' + result.contact_id + '"]').length) {
+                            $('select#customer_id').val(result.contact_id).trigger('change');
+                        } else if (result.customer_name) {
+                            var newCustomerOption = new Option(result.customer_name, result.contact_id, true, true);
+                            $('select#customer_id').append(newCustomerOption).trigger('change');
+                        }
+                    }
+                    if (typeof pos_product_row === 'function') {
+                        pos_product_row(result.variation_id, null, null, result.quantity);
+                        toastr.success('Pesanan laundry berhasil dimasukkan ke keranjang');
+                        $('.view_modal').modal('hide');
+                    }
+                } else {
+                    toastr.error('Produk/jasa untuk jenis barang laundry ini tidak ditemukan');
+                }
+            },
+            error: function() {
+                toastr.error('Gagal mengambil detail pesanan laundry');
+            }
+        });
+    }
+
     $(document).ready(function(){
         $(document).on('submit', '#add_status_form, #edit_status_form, #add_process_form, #edit_process_form, #add_service_type_form, #edit_service_type_form, #add_item_type_form, #edit_item_type_form, #update_laundry_status_form, #quick_add_order_sheet_form, #edit_order_sheet_modal_form', function(e) {
             e.preventDefault();
@@ -77,6 +110,18 @@
                     $('.view_modal').html(result).modal('show');
                 }
             });
+        });
+
+        $(document).on('click', '#add_laundry_to_cart_btn', function(e) {
+            e.preventDefault();
+            var id = $('#laundry_order_sheet_id').val();
+            addOrderSheetToCart(id);
+        });
+
+        $(document).on('click', '.add-laundry-to-cart-modal', function(e) {
+            e.preventDefault();
+            var id = $(this).data('id');
+            addOrderSheetToCart(id);
         });
     });
 </script>

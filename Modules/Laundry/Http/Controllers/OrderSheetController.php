@@ -394,4 +394,60 @@ class OrderSheetController extends Controller
 
         return view('laundry::order_sheet.print', compact('order_sheet'));
     }
+
+    public function getPosDetails($id)
+    {
+        $business_id = request()->session()->get('user.business_id');
+        $order_sheet = LaundryOrderSheet::where('business_id', $business_id)
+            ->with(['customer', 'itemType'])
+            ->findOrFail($id);
+
+        $variation_id = null;
+        $item_type_name = optional($order_sheet->itemType)->name;
+
+        if (!empty($item_type_name)) {
+            $variation = \App\Variation::join('products as p', 'p.id', '=', 'variations.product_id')
+                ->where('p.business_id', $business_id)
+                ->where('p.name', 'LIKE', '%' . $item_type_name . '%')
+                ->select('variations.id')
+                ->first();
+
+            if ($variation) {
+                $variation_id = $variation->id;
+            }
+        }
+
+        if (!$variation_id) {
+            $variation = \App\Variation::join('products as p', 'p.id', '=', 'variations.product_id')
+                ->where('p.business_id', $business_id)
+                ->where('p.name', 'LIKE', '%Laundry%')
+                ->select('variations.id')
+                ->first();
+
+            if ($variation) {
+                $variation_id = $variation->id;
+            }
+        }
+
+        if (!$variation_id) {
+            $variation = \App\Variation::join('products as p', 'p.id', '=', 'variations.product_id')
+                ->where('p.business_id', $business_id)
+                ->select('variations.id')
+                ->first();
+
+            if ($variation) {
+                $variation_id = $variation->id;
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'order_sheet_id' => $order_sheet->id,
+            'contact_id' => $order_sheet->contact_id,
+            'customer_name' => optional($order_sheet->customer)->name,
+            'quantity' => $order_sheet->quantity,
+            'variation_id' => $variation_id,
+            'item_type_name' => $item_type_name,
+        ]);
+    }
 }

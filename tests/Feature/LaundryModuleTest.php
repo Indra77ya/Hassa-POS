@@ -80,5 +80,6 @@ class LaundryModuleTest extends TestCase
         $this->assertStringContainsString('fa-plus-circle', $view);
         $this->assertStringContainsString('edit_laundry_order_sheet_btn', $view);
         $this->assertStringContainsString('show_laundry_order_sheet_btn', $view);
+        $this->assertStringContainsString('add_laundry_to_cart_btn', $view);
     }
 }

@@ -13,6 +13,7 @@ Route::middleware(['web', 'auth', 'SetSessionData', 'language', 'timezone', 'Adm
     Route::get('order-sheet/{id}/print', [\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'print'])->name('laundry.order_sheet.print');
     Route::post('order-sheet/{id}/update-status', [\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'updateStatus'])->name('laundry.order_sheet.update_status');
     Route::get('order-sheet/{id}/get-status-modal', [\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'getStatusModal'])->name('laundry.order_sheet.get_status_modal');
+    Route::get('order-sheet/{id}/get-pos-details', [\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'getPosDetails'])->name('laundry.order_sheet.get_pos_details');
 
     Route::resource('statuses', \Modules\Laundry\Http\Controllers\LaundryStatusController::class);
     Route::resource('processes', \Modules\Laundry\Http\Controllers\LaundryProcessController::class);
