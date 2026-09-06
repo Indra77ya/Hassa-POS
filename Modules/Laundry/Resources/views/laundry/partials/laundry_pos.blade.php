@@ -1,3 +1,6 @@
+@php
+    $order_sheets = $order_sheets ?? ($view_data['order_sheets'] ?? []);
+@endphp
 <div class="col-md-4">
     <div class="form-group">
         <div class="input-group">
