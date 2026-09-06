@@ -89,6 +89,12 @@ class OrderSheetController extends Controller
         $processes = LaundryProcess::where('business_id', $business_id)->where('is_active', true)->orderBy('sort_order', 'asc')->get();
         $staffs = User::forDropdown($business_id, false);
 
+        $quick_add = request()->get('quick_add', false);
+
+        if ($quick_add || request()->ajax()) {
+            return view('laundry::order_sheet.quick_add_modal', compact('business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'processes', 'staffs', 'quick_add'));
+        }
+
         return view('laundry::order_sheet.create', compact('business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'processes', 'staffs'));
     }
 
@@ -130,10 +136,24 @@ class OrderSheetController extends Controller
 
             DB::commit();
 
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'msg' => __('laundry::lang.order_sheet_added_success'),
+                    'data' => [
+                        'id' => $order_sheet->id,
+                        'order_no' => $order_sheet->order_no,
+                    ],
+                ]);
+            }
+
             $output = ['success' => true, 'msg' => __('laundry::lang.order_sheet_added_success')];
             return redirect()->action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'index'])->with('status', $output);
         } catch (\Exception $e) {
             DB::rollBack();
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'msg' => $e->getMessage()]);
+            }
             return redirect()->back()->with('status', ['success' => false, 'msg' => $e->getMessage()]);
         }
     }
@@ -144,6 +164,10 @@ class OrderSheetController extends Controller
         $order_sheet = LaundryOrderSheet::where('business_id', $business_id)
             ->with(['customer', 'location', 'status', 'serviceType', 'itemType', 'createdBy', 'processLogs.process', 'processLogs.staff'])
             ->findOrFail($id);
+
+        if (request()->ajax()) {
+            return view('laundry::order_sheet.show_modal', compact('order_sheet'));
+        }
 
         return view('laundry::order_sheet.show', compact('order_sheet'));
     }
@@ -160,6 +184,10 @@ class OrderSheetController extends Controller
         $item_types = LaundryItemType::forDropdown($business_id);
         $processes = LaundryProcess::where('business_id', $business_id)->where('is_active', true)->orderBy('sort_order', 'asc')->get();
         $staffs = User::forDropdown($business_id, false);
+
+        if (request()->ajax()) {
+            return view('laundry::order_sheet.edit_modal', compact('order_sheet', 'business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'processes', 'staffs'));
+        }
 
         return view('laundry::order_sheet.edit', compact('order_sheet', 'business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'processes', 'staffs'));
     }
@@ -198,10 +226,24 @@ class OrderSheetController extends Controller
 
             DB::commit();
 
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'msg' => __('laundry::lang.order_sheet_updated_success'),
+                    'data' => [
+                        'id' => $order_sheet->id,
+                        'order_no' => $order_sheet->order_no,
+                    ],
+                ]);
+            }
+
             $output = ['success' => true, 'msg' => __('laundry::lang.order_sheet_updated_success')];
             return redirect()->action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'index'])->with('status', $output);
         } catch (\Exception $e) {
             DB::rollBack();
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'msg' => $e->getMessage()]);
+            }
             return redirect()->back()->with('status', ['success' => false, 'msg' => $e->getMessage()]);
         }
     }

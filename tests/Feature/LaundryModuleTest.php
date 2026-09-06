@@ -67,4 +67,18 @@ class LaundryModuleTest extends TestCase
         $this->assertStringContainsString('sub_type=laundry', $view);
         $this->assertStringContainsString('fa-tshirt', $view);
     }
+
+    public function test_laundry_pos_input_group_view_rendering()
+    {
+        \Illuminate\Support\Facades\View::addNamespace('laundry', base_path('Modules/Laundry/Resources/views'));
+
+        $view = view('laundry::laundry.partials.laundry_pos', [
+            'order_sheets' => [1 => 'LND-2026-0001'],
+        ])->render();
+
+        $this->assertStringContainsString('laundry_order_sheet_id', $view);
+        $this->assertStringContainsString('fa-plus-circle', $view);
+        $this->assertStringContainsString('edit_laundry_order_sheet_btn', $view);
+        $this->assertStringContainsString('show_laundry_order_sheet_btn', $view);
+    }
 }
