@@ -18,7 +18,7 @@ class LaundryProcessController extends Controller
 
             return DataTables::of($processes)
                 ->addColumn('action', function ($row) {
-                    $html = '<button data-href="' . action([\Modules\Laundry\Http\Controllers\LaundryProcessController::class, 'edit'], [$row->id]) . '" class="btn btn-xs btn-primary edit_process_button"><i class="glyphicon glyphicon-edit"></i> ' . __('messages.edit') . '</button> ';
+                    $html = '<button data-href="' . action([\Modules\Laundry\Http\Controllers\LaundryProcessController::class, 'edit'], [$row->id]) . '" class="btn btn-xs btn-primary btn-modal" data-container=".view_modal"><i class="glyphicon glyphicon-edit"></i> ' . __('messages.edit') . '</button> ';
                     $html .= '<button data-href="' . action([\Modules\Laundry\Http\Controllers\LaundryProcessController::class, 'destroy'], [$row->id]) . '" class="btn btn-xs btn-danger delete_process_button"><i class="glyphicon glyphicon-trash"></i> ' . __('messages.delete') . '</button>';
                     return $html;
                 })
