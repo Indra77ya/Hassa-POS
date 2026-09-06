@@ -1,0 +1,14 @@
+{
+    "name": "Laundry",
+    "alias": "laundry",
+    "description": "Laundry management module for managing laundry order sheets, processes, service types, staff points, and status tracking.",
+    "keywords": [],
+    "active": 1,
+    "order": 0,
+    "providers": [
+        "Modules\\Laundry\\Providers\\LaundryServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}
