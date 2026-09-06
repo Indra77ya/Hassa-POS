@@ -216,6 +216,10 @@
                 @include('repair::layouts.partials.pos_header')
             @endif
 
+            @if (isModuleEnabled('Laundry') && $transaction_sub_type != 'laundry')
+                @include('laundry::layouts.partials.pos_header')
+            @endif
+
             @if (in_array('pos_sale', $enabled_modules) && !empty($transaction_sub_type))
                 @can('sell.create')
                     <a href="{{ action([\App\Http\Controllers\SellPosController::class, 'create']) }}"

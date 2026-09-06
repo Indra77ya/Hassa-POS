@@ -50,4 +50,21 @@ class LaundryModuleTest extends TestCase
         $points_earned = $process->points * $quantity;
         $this->assertEquals(10.0, $points_earned);
     }
+
+    public function test_laundry_pos_header_view_rendering()
+    {
+        \Illuminate\Support\Facades\View::addNamespace('laundry', base_path('Modules/Laundry/Resources/views'));
+
+        $user = \Mockery::mock(\App\User::class)->makePartial();
+        $user->shouldReceive('can')->andReturn(true);
+        $this->actingAs($user);
+
+        $view = view('laundry::layouts.partials.pos_header', [
+            '__is_laundry_enabled' => true,
+            'transaction_sub_type' => '',
+        ])->render();
+
+        $this->assertStringContainsString('sub_type=laundry', $view);
+        $this->assertStringContainsString('fa-tshirt', $view);
+    }
 }
