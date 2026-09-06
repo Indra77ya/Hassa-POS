@@ -18,7 +18,7 @@ class LaundryStatusController extends Controller
 
             return DataTables::of($statuses)
                 ->addColumn('action', function ($row) {
-                    $html = '<button data-href="' . action([\Modules\Laundry\Http\Controllers\LaundryStatusController::class, 'edit'], [$row->id]) . '" class="btn btn-xs btn-primary edit_status_button"><i class="glyphicon glyphicon-edit"></i> ' . __('messages.edit') . '</button> ';
+                    $html = '<button data-href="' . action([\Modules\Laundry\Http\Controllers\LaundryStatusController::class, 'edit'], [$row->id]) . '" class="btn btn-xs btn-primary btn-modal" data-container=".view_modal"><i class="glyphicon glyphicon-edit"></i> ' . __('messages.edit') . '</button> ';
                     $html .= '<button data-href="' . action([\Modules\Laundry\Http\Controllers\LaundryStatusController::class, 'destroy'], [$row->id]) . '" class="btn btn-xs btn-danger delete_status_button"><i class="glyphicon glyphicon-trash"></i> ' . __('messages.delete') . '</button>';
                     return $html;
                 })

@@ -89,6 +89,12 @@ class OrderSheetController extends Controller
         $processes = LaundryProcess::where('business_id', $business_id)->where('is_active', true)->orderBy('sort_order', 'asc')->get();
         $staffs = User::forDropdown($business_id, false);
 
+        $quick_add = request()->get('quick_add', false);
+
+        if ($quick_add || request()->ajax()) {
+            return view('laundry::order_sheet.quick_add_modal', compact('business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'processes', 'staffs', 'quick_add'));
+        }
+
         return view('laundry::order_sheet.create', compact('business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'processes', 'staffs'));
     }
 
@@ -130,10 +136,24 @@ class OrderSheetController extends Controller
 
             DB::commit();
 
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'msg' => __('laundry::lang.order_sheet_added_success'),
+                    'data' => [
+                        'id' => $order_sheet->id,
+                        'order_no' => $order_sheet->order_no,
+                    ],
+                ]);
+            }
+
             $output = ['success' => true, 'msg' => __('laundry::lang.order_sheet_added_success')];
             return redirect()->action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'index'])->with('status', $output);
         } catch (\Exception $e) {
             DB::rollBack();
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'msg' => $e->getMessage()]);
+            }
             return redirect()->back()->with('status', ['success' => false, 'msg' => $e->getMessage()]);
         }
     }
@@ -144,6 +164,10 @@ class OrderSheetController extends Controller
         $order_sheet = LaundryOrderSheet::where('business_id', $business_id)
             ->with(['customer', 'location', 'status', 'serviceType', 'itemType', 'createdBy', 'processLogs.process', 'processLogs.staff'])
             ->findOrFail($id);
+
+        if (request()->ajax()) {
+            return view('laundry::order_sheet.show_modal', compact('order_sheet'));
+        }
 
         return view('laundry::order_sheet.show', compact('order_sheet'));
     }
@@ -160,6 +184,10 @@ class OrderSheetController extends Controller
         $item_types = LaundryItemType::forDropdown($business_id);
         $processes = LaundryProcess::where('business_id', $business_id)->where('is_active', true)->orderBy('sort_order', 'asc')->get();
         $staffs = User::forDropdown($business_id, false);
+
+        if (request()->ajax()) {
+            return view('laundry::order_sheet.edit_modal', compact('order_sheet', 'business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'processes', 'staffs'));
+        }
 
         return view('laundry::order_sheet.edit', compact('order_sheet', 'business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'processes', 'staffs'));
     }
@@ -198,10 +226,24 @@ class OrderSheetController extends Controller
 
             DB::commit();
 
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'msg' => __('laundry::lang.order_sheet_updated_success'),
+                    'data' => [
+                        'id' => $order_sheet->id,
+                        'order_no' => $order_sheet->order_no,
+                    ],
+                ]);
+            }
+
             $output = ['success' => true, 'msg' => __('laundry::lang.order_sheet_updated_success')];
             return redirect()->action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'index'])->with('status', $output);
         } catch (\Exception $e) {
             DB::rollBack();
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'msg' => $e->getMessage()]);
+            }
             return redirect()->back()->with('status', ['success' => false, 'msg' => $e->getMessage()]);
         }
     }
@@ -351,5 +393,111 @@ class OrderSheetController extends Controller
             ->findOrFail($id);
 
         return view('laundry::order_sheet.print', compact('order_sheet'));
+    }
+
+    public function getPosDetails($id)
+    {
+        try {
+            $business_id = request()->session()->get('user.business_id');
+            $order_sheet = LaundryOrderSheet::where('business_id', $business_id)
+                ->with(['customer', 'itemType'])
+                ->findOrFail($id);
+
+            $variation_id = null;
+            $item_type = $order_sheet->itemType;
+            $item_type_name = optional($item_type)->name;
+
+            if ($item_type && \Illuminate\Support\Facades\Schema::hasColumn('laundry_item_types', 'variation_id') && !empty($item_type->variation_id)) {
+                $variation_id = $item_type->variation_id;
+            }
+
+            if (!$variation_id && !empty($item_type_name)) {
+                // 1. Check exact match by product name
+                $variation = \App\Variation::join('products as p', 'p.id', '=', 'variations.product_id')
+                    ->where('p.business_id', $business_id)
+                    ->where('p.name', $item_type_name)
+                    ->select('variations.id')
+                    ->first();
+
+                if ($variation) {
+                    $variation_id = $variation->id;
+                } else {
+                    // 2. Auto-create exact service product for this Laundry Item Type
+                    $variation_id = $this->_createProductForItemType($business_id, $item_type);
+                }
+
+                if ($variation_id && $item_type && \Illuminate\Support\Facades\Schema::hasColumn('laundry_item_types', 'variation_id')) {
+                    $item_type->variation_id = $variation_id;
+                    $item_type->save();
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'order_sheet_id' => $order_sheet->id,
+                'contact_id' => $order_sheet->contact_id,
+                'customer_name' => optional($order_sheet->customer)->name,
+                'quantity' => $order_sheet->quantity,
+                'variation_id' => $variation_id,
+                'item_type_name' => $item_type_name,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error getPosDetails: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'msg' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    private function _createProductForItemType($business_id, $item_type)
+    {
+        if (empty($item_type)) return null;
+
+        try {
+            $user_id = request()->session()->get('user.id') ?? 1;
+            $unit_name = $item_type->unit_name ?? 'kg';
+            $unit = \App\Unit::where('business_id', $business_id)->where('actual_name', 'LIKE', '%' . $unit_name . '%')->first();
+            if (!$unit) {
+                $unit = \App\Unit::where('business_id', $business_id)->first();
+            }
+
+            $product_data = [
+                'name' => $item_type->name,
+                'business_id' => $business_id,
+                'unit_id' => $unit ? $unit->id : 1,
+                'type' => 'single',
+                'enable_stock' => 0,
+                'alert_quantity' => 0,
+                'created_by' => $user_id,
+                'sku' => 'LND-ITM-' . $item_type->id . '-' . time(),
+            ];
+
+            $product = \App\Product::create($product_data);
+
+            // Sync product locations
+            $locations = \App\BusinessLocation::forDropdown($business_id);
+            if (!empty($locations)) {
+                $product->product_locations()->sync(array_keys($locations->toArray()));
+            }
+
+            // Create single product variation using ProductUtil
+            $productUtil = new \App\Utils\ProductUtil();
+            $price = $item_type->default_price ?? 0;
+            $variation = $productUtil->createSingleProductVariation(
+                $product,
+                $product->sku,
+                $price,
+                $price,
+                0,
+                $price,
+                $price
+            );
+
+            return $variation ? $variation->id : null;
+        } catch (\Exception $e) {
+            \Log::error('Error creating product for laundry item type: ' . $e->getMessage());
+            return null;
+        }
     }
 }

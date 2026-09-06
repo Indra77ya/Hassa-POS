@@ -235,6 +235,15 @@
         		@endphp
         	@endif
         @endforeach
+		@php
+			$is_laundry_item = (!empty($product->sku) && strpos($product->sku, 'LND-ITM-') === 0) || (!empty($product->sub_sku) && strpos($product->sub_sku, 'LND-ITM-') === 0);
+		@endphp
+		@if($is_laundry_item)
+			<div class="tw-text-center tw-font-bold tw-text-slate-800 tw-py-1">
+				{{@format_quantity($product->quantity_ordered)}}
+				<input type="hidden" class="form-control pos_quantity input_number mousetrap input_quantity" value="{{@format_quantity($product->quantity_ordered)}}" name="products[{{$row_count}}][quantity]">
+			</div>
+		@else
 		<div class="input-group input-number tw-border tw-border-slate-200 tw-rounded-xl tw-overflow-hidden tw-shadow-none" style="display: table; width: 100%; max-width: 120px; margin: 0 auto;">
 			<span class="input-group-btn !tw-table-cell" style="width: auto;">
 				<button type="button" class="btn quantity-down !tw-border-0 !tw-bg-slate-50 hover:!tw-bg-slate-100 !tw-text-rose-500 active:tw-scale-95 tw-transition-all !tw-px-2.5 !tw-h-8 tw-inline-flex tw-items-center tw-justify-center" style="border: 0; outline: none; box-shadow: none;"><i class="fa fa-minus tw-text-[10px]"></i></button>
@@ -260,6 +269,7 @@
 				<button type="button" class="btn quantity-up !tw-border-0 !tw-bg-slate-50 hover:!tw-bg-slate-100 !tw-text-emerald-500 active:tw-scale-95 tw-transition-all !tw-px-2.5 !tw-h-8 tw-inline-flex tw-items-center tw-justify-center" style="border: 0; outline: none; box-shadow: none;"><i class="fa fa-plus tw-text-[10px]"></i></button>
 			</span>
 		</div>
+		@endif
 		
 		<input type="hidden" name="products[{{$row_count}}][product_unit_id]" value="{{$product->unit_id}}">
 		<div class="text-center tw-mt-1">

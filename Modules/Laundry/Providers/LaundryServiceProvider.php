@@ -24,6 +24,7 @@ class LaundryServiceProvider extends ServiceProvider
         View::composer([
             'laundry::layouts.partials.sidebar',
             'laundry::layouts.partials.header',
+            'laundry::layouts.partials.pos_header',
         ], function ($view) {
             if (auth()->check() && auth()->user()->can('superadmin')) {
                 $__is_laundry_enabled = true;
