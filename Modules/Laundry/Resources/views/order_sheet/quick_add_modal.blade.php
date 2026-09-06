@@ -215,15 +215,15 @@ $(document).ready(function() {
         $row.find('.select2').select2();
     }
 
-    $(document).on('click', '#modal_add_process_row_btn', function() {
+    $(document).off('click', '#modal_add_process_row_btn').on('click', '#modal_add_process_row_btn', function() {
         addModalProcessRow(null, null);
     });
 
-    $(document).on('click', '.remove-process-row', function() {
+    $(document).off('click', '.remove-process-row').on('click', '.remove-process-row', function() {
         $(this).closest('tr.process-row').remove();
     });
 
-    $(document).on('change', '#modal_laundry_item_type_id', function() {
+    $(document).off('change', '#modal_laundry_item_type_id').on('change', '#modal_laundry_item_type_id', function() {
         var item_type_id = $(this).val();
         if (item_type_id) {
             $.ajax({

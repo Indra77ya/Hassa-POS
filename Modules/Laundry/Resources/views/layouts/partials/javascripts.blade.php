@@ -33,7 +33,7 @@
     }
 
     $(document).ready(function(){
-        $(document).on('submit', '#add_status_form, #edit_status_form, #add_process_form, #edit_process_form, #add_service_type_form, #edit_service_type_form, #add_item_type_form, #edit_item_type_form, #update_laundry_status_form, #quick_add_order_sheet_form, #edit_order_sheet_modal_form', function(e) {
+        $(document).off('submit', '#add_status_form, #edit_status_form, #add_process_form, #edit_process_form, #add_service_type_form, #edit_service_type_form, #add_item_type_form, #edit_item_type_form, #update_laundry_status_form, #quick_add_order_sheet_form, #edit_order_sheet_modal_form').on('submit', '#add_status_form, #edit_status_form, #add_process_form, #edit_process_form, #add_service_type_form, #edit_service_type_form, #add_item_type_form, #edit_item_type_form, #update_laundry_status_form, #quick_add_order_sheet_form, #edit_order_sheet_modal_form', function(e) {
             e.preventDefault();
             var form = $(this);
             var data = form.serialize();
@@ -80,7 +80,7 @@
             });
         });
 
-        $(document).on('click', '#edit_laundry_order_sheet_btn', function(e) {
+        $(document).off('click', '#edit_laundry_order_sheet_btn').on('click', '#edit_laundry_order_sheet_btn', function(e) {
             e.preventDefault();
             var id = $('#laundry_order_sheet_id').val();
             if (!id) {
@@ -96,7 +96,7 @@
             });
         });
 
-        $(document).on('click', '#show_laundry_order_sheet_btn', function(e) {
+        $(document).off('click', '#show_laundry_order_sheet_btn').on('click', '#show_laundry_order_sheet_btn', function(e) {
             e.preventDefault();
             var id = $('#laundry_order_sheet_id').val();
             if (!id) {
@@ -112,13 +112,13 @@
             });
         });
 
-        $(document).on('click', '#add_laundry_to_cart_btn', function(e) {
+        $(document).off('click', '#add_laundry_to_cart_btn').on('click', '#add_laundry_to_cart_btn', function(e) {
             e.preventDefault();
             var id = $('#laundry_order_sheet_id').val();
             addOrderSheetToCart(id);
         });
 
-        $(document).on('click', '.add-laundry-to-cart-modal', function(e) {
+        $(document).off('click', '.add-laundry-to-cart-modal').on('click', '.add-laundry-to-cart-modal', function(e) {
             e.preventDefault();
             var id = $(this).data('id');
             addOrderSheetToCart(id);
