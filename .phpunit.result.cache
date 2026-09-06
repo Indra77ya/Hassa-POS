@@ -1,1 +1,1 @@
-{"version":1,"defects":[],"times":{"Tests\\Feature\\LaundryModuleTest::test_laundry_entities_and_points_calculation":0.294,"Tests\\Feature\\LaundryModuleTest::test_laundry_pos_header_view_rendering":0.137}}
+{"version":1,"defects":[],"times":{"Tests\\Feature\\LaundryModuleTest::test_laundry_entities_and_points_calculation":0.368,"Tests\\Feature\\LaundryModuleTest::test_laundry_pos_header_view_rendering":0.143}}
