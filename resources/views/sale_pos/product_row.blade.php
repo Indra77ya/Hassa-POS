@@ -236,7 +236,7 @@
         	@endif
         @endforeach
 		@php
-			$is_laundry_item = !empty($product->sku) && strpos($product->sku, 'LND-ITM-') === 0;
+			$is_laundry_item = (!empty($product->sku) && strpos($product->sku, 'LND-ITM-') === 0) || (!empty($product->sub_sku) && strpos($product->sub_sku, 'LND-ITM-') === 0);
 		@endphp
 		@if($is_laundry_item)
 			<div class="tw-text-center tw-font-bold tw-text-slate-800 tw-py-1">
