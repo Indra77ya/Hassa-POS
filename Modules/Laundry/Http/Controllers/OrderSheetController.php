@@ -191,6 +191,30 @@ class OrderSheetController extends Controller
         $order_sheet = LaundryOrderSheet::where('business_id', $business_id)->findOrFail($id);
         $transaction = $this->_getOrCreateTransaction($order_sheet);
 
+        $transaction_ids = \App\Transaction::where('laundry_order_sheet_id', $order_sheet->id)->pluck('id')->toArray();
+        if (!in_array($transaction->id, $transaction_ids)) {
+            $transaction_ids[] = $transaction->id;
+        }
+
+        if (request()->ajax()) {
+            $payments_query = \App\TransactionPayment::whereIn('transaction_id', $transaction_ids);
+
+            $accounts_enabled = false;
+            $moduleUtil = new \App\Utils\ModuleUtil();
+            if ($moduleUtil->isModuleEnabled('account')) {
+                $accounts_enabled = true;
+                $payments_query->with(['payment_account']);
+            }
+
+            $payments = $payments_query->get();
+            $location_id = !empty($transaction->location_id) ? $transaction->location_id : null;
+            $transactionUtil = new \App\Utils\TransactionUtil();
+            $payment_types = $transactionUtil->payment_types($location_id, true);
+
+            return view('transaction_payment.show_payments')
+                ->with(compact('transaction', 'payments', 'payment_types', 'accounts_enabled'));
+        }
+
         $transactionPaymentController = app(\App\Http\Controllers\TransactionPaymentController::class);
         return $transactionPaymentController->show($transaction->id);
     }
@@ -592,6 +616,11 @@ class OrderSheetController extends Controller
                 }
             }
 
+            $total_amount = $order_sheet->total_amount;
+            $total_paid = $order_sheet->total_paid;
+            $payment_status = $order_sheet->payment_status;
+            $due_amount = max(0, $total_amount - $total_paid);
+
             return response()->json([
                 'success' => true,
                 'order_sheet_id' => $order_sheet->id,
@@ -600,6 +629,10 @@ class OrderSheetController extends Controller
                 'quantity' => $order_sheet->quantity,
                 'variation_id' => $variation_id,
                 'item_type_name' => $item_type_name,
+                'payment_status' => $payment_status,
+                'total_amount' => $total_amount,
+                'total_paid' => $total_paid,
+                'due_amount' => $due_amount,
             ]);
         } catch (\Exception $e) {
             \Log::error('Error getPosDetails: ' . $e->getMessage());
