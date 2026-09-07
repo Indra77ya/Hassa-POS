@@ -14,6 +14,7 @@ class LaundryModuleTest extends TestCase
     {
         parent::setUp();
 
+        \Illuminate\Support\Facades\Schema::dropIfExists('business');
         \Illuminate\Support\Facades\Schema::dropIfExists('transaction_payments');
         \Illuminate\Support\Facades\Schema::dropIfExists('transactions');
         \Illuminate\Support\Facades\Schema::dropIfExists('laundry_order_sheets');
@@ -147,6 +148,17 @@ class LaundryModuleTest extends TestCase
             'business_id' => 1,
             'actual_name' => 'kg',
             'short_name' => 'kg',
+        ]);
+
+        \Illuminate\Support\Facades\Schema::create('business', function ($table) {
+            $table->id();
+            $table->string('name')->default('Test Business');
+            $table->timestamps();
+        });
+
+        \App\Business::create([
+            'id' => 1,
+            'name' => 'Test Business',
         ]);
 
         \App\BusinessLocation::create([
@@ -507,5 +519,74 @@ class LaundryModuleTest extends TestCase
         $this->assertEquals(60000, $data['total_amount']);
         $this->assertEquals(30000, $data['total_paid']);
         $this->assertEquals(30000, $data['due_amount']);
+    }
+
+    public function test_view_payments_includes_multiple_transactions()
+    {
+        $item_type = LaundryItemType::create([
+            'business_id' => 1,
+            'name' => 'Gorden',
+            'default_price' => 40000,
+        ]);
+
+        $os = \Modules\Laundry\Entities\LaundryOrderSheet::create([
+            'business_id' => 1,
+            'order_no' => 'LND-MULTITX-01',
+            'contact_id' => 10,
+            'laundry_item_type_id' => $item_type->id,
+            'quantity' => 1, // Total = 40,000
+        ]);
+
+        // Transaction 1: Direct payment (Cash Rp 10,000)
+        $tx1 = \App\Transaction::create([
+            'business_id' => 1,
+            'type' => 'sell',
+            'status' => 'final',
+            'payment_status' => 'partial',
+            'laundry_order_sheet_id' => $os->id,
+            'final_total' => 40000,
+        ]);
+
+        $p1 = \App\TransactionPayment::create([
+            'transaction_id' => $tx1->id,
+            'amount' => 10000,
+            'method' => 'cash',
+        ]);
+
+        // Transaction 2: POS / Midtrans payment (Rp 30,000)
+        $tx2 = \App\Transaction::create([
+            'business_id' => 1,
+            'type' => 'sell',
+            'status' => 'final',
+            'payment_status' => 'paid',
+            'laundry_order_sheet_id' => $os->id,
+            'final_total' => 30000,
+        ]);
+
+        $p2 = \App\TransactionPayment::create([
+            'transaction_id' => $tx2->id,
+            'amount' => 30000,
+            'method' => 'midtrans',
+        ]);
+
+        $user = \Mockery::mock(\App\User::class)->makePartial();
+        $user->shouldReceive('permitted_locations')->andReturn('all');
+        $user->shouldReceive('can')->andReturn(true);
+        $this->actingAs($user);
+
+        session(['user.business_id' => 1, 'user.id' => 1]);
+
+        $request = \Illuminate\Http\Request::create('/laundry/order-sheet/' . $os->id . '/view-payments', 'GET');
+        $request->headers->set('X-Requested-With', 'XMLHttpRequest');
+        $request->setLaravelSession(app('session.store'));
+        app()->instance('request', $request);
+
+        $controller = new \Modules\Laundry\Http\Controllers\OrderSheetController();
+        $response = $controller->viewPayments($os->id);
+
+        $view_data = $response->getData();
+        $this->assertArrayHasKey('payments', $view_data);
+        $payments = $view_data['payments'];
+        $this->assertCount(2, $payments);
     }
 }
