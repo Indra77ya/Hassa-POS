@@ -39,7 +39,7 @@
                                 <tr>
                                     <td>{{ $summary->staff_name }}</td>
                                     <td>{{ $summary->total_tasks }}</td>
-                                    <td><strong>{{ number_format($summary->total_points, 2) }}</strong></td>
+                                    <td><strong>@num_format($summary->total_points)</strong></td>
                                 </tr>
                             @empty
                                 <tr>

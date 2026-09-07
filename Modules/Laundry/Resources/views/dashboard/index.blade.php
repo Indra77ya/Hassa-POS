@@ -64,7 +64,7 @@
                             <td><a href="{{ action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'show'], [$order->id]) }}">{{ $order->order_no }}</a></td>
                             <td>{{ optional($order->customer)->name }}</td>
                             <td>{{ optional($order->serviceType)->name }}</td>
-                            <td>{{ number_format($order->quantity, 2) }} {{ $order->unit_name }}</td>
+                            <td>@format_quantity($order->quantity) {{ $order->unit_name }}</td>
                             <td>
                                 @if($order->status)
                                     <span class="label" style="background-color: {{ $order->status->color }}">{{ $order->status->name }}</span>

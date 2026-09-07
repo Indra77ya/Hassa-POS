@@ -174,13 +174,14 @@ class DataController extends Controller
                 ->with(['itemType', 'transactions'])
                 ->get();
 
+            $commonUtil = new \App\Utils\Util();
             $order_sheets = [];
             foreach ($order_sheets_list as $os) {
                 $status_label = '';
                 if ($os->payment_status == 'partial') {
                     $due = $os->total_amount - $os->total_paid;
                     if ($due < 0) $due = 0;
-                    $status_label = ' (' . __('lang_v1.partial') . ' - ' . __('purchase.payment_due') . ': ' . number_format($due, 2) . ')';
+                    $status_label = ' (' . __('lang_v1.partial') . ' - ' . __('purchase.payment_due') . ': ' . $commonUtil->num_f($due) . ')';
                 } elseif ($os->payment_status == 'due') {
                     $status_label = ' (' . __('lang_v1.due') . ')';
                 }

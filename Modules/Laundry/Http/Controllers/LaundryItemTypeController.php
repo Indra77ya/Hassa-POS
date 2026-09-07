@@ -7,9 +7,17 @@ use Illuminate\Http\Request;
 use Modules\Laundry\Entities\LaundryItemType;
 use Modules\Laundry\Entities\LaundryProcess;
 use Yajra\DataTables\Facades\DataTables;
+use App\Utils\Util;
 
 class LaundryItemTypeController extends Controller
 {
+    protected $commonUtil;
+
+    public function __construct(?Util $commonUtil = null)
+    {
+        $this->commonUtil = $commonUtil ?? new Util();
+    }
+
     public function index(Request $request)
     {
         $business_id = request()->session()->get('user.business_id');
@@ -22,6 +30,9 @@ class LaundryItemTypeController extends Controller
                     $html = '<button data-href="' . action([\Modules\Laundry\Http\Controllers\LaundryItemTypeController::class, 'edit'], [$row->id]) . '" class="btn btn-xs btn-primary btn-modal" data-container=".view_modal"><i class="glyphicon glyphicon-edit"></i> ' . __('messages.edit') . '</button> ';
                     $html .= '<button data-href="' . action([\Modules\Laundry\Http\Controllers\LaundryItemTypeController::class, 'destroy'], [$row->id]) . '" class="btn btn-xs btn-danger delete_item_type_button"><i class="glyphicon glyphicon-trash"></i> ' . __('messages.delete') . '</button>';
                     return $html;
+                })
+                ->editColumn('default_price', function ($row) {
+                    return $this->commonUtil->num_f($row->default_price);
                 })
                 ->addColumn('default_processes', function ($row) {
                     if (empty($row->process_ids)) return '-';

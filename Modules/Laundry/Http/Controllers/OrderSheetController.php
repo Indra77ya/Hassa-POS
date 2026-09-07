@@ -16,9 +16,17 @@ use App\User;
 use Yajra\DataTables\Facades\DataTables;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Utils\Util;
 
 class OrderSheetController extends Controller
 {
+    protected $commonUtil;
+
+    public function __construct(?Util $commonUtil = null)
+    {
+        $this->commonUtil = $commonUtil ?? new Util();
+    }
+
     public function index(Request $request)
     {
         $business_id = request()->session()->get('user.business_id');
@@ -100,14 +108,14 @@ class OrderSheetController extends Controller
                     }
 
                     $html = '<span class="label ' . $bg_class . '">' . e($text) . '</span>';
-                    $html .= '<br><small>' . __('sale.total') . ': ' . number_format($total, 2) . '</small>';
+                    $html .= '<br><small>' . __('sale.total') . ': ' . $this->commonUtil->num_f($total) . '</small>';
                     if ($status != 'paid') {
-                        $html .= '<br><small>' . __('purchase.payment_due') . ': ' . number_format($due, 2) . '</small>';
+                        $html .= '<br><small>' . __('purchase.payment_due') . ': ' . $this->commonUtil->num_f($due) . '</small>';
                     }
                     return $html;
                 })
                 ->editColumn('quantity', function ($row) {
-                    return number_format($row->quantity, 2) . ' ' . e($row->unit_name);
+                    return $this->commonUtil->num_f($row->quantity, false, null, true) . ' ' . e($row->unit_name);
                 })
                 ->editColumn('received_at', function ($row) {
                     return $row->received_at ? Carbon::parse($row->received_at)->format('d/m/Y H:i') : '-';
@@ -155,7 +163,7 @@ class OrderSheetController extends Controller
                 if ($os->payment_status == 'partial') {
                     $due = $os->total_amount - $os->total_paid;
                     if ($due < 0) $due = 0;
-                    $status_label = ' (' . __('lang_v1.partial') . ' - ' . __('purchase.payment_due') . ': ' . number_format($due, 2) . ')';
+                    $status_label = ' (' . __('lang_v1.partial') . ' - ' . __('purchase.payment_due') . ': ' . $this->commonUtil->num_f($due) . ')';
                 } elseif ($os->payment_status == 'due') {
                     $status_label = ' (' . __('lang_v1.due') . ')';
                 }

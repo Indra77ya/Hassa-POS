@@ -9,9 +9,17 @@ use App\User;
 use Yajra\DataTables\Facades\DataTables;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Utils\Util;
 
 class LaundryReportController extends Controller
 {
+    protected $commonUtil;
+
+    public function __construct(?Util $commonUtil = null)
+    {
+        $this->commonUtil = $commonUtil ?? new Util();
+    }
+
     public function staffPointsReport(Request $request)
     {
         $business_id = request()->session()->get('user.business_id');
@@ -49,13 +57,13 @@ class LaundryReportController extends Controller
                     return $row->completed_at ? Carbon::parse($row->completed_at)->format('d/m/Y H:i') : '-';
                 })
                 ->editColumn('quantity', function ($row) {
-                    return number_format($row->quantity, 2) . ' ' . e($row->unit_name);
+                    return $this->commonUtil->num_f($row->quantity, false, null, true) . ' ' . e($row->unit_name);
                 })
                 ->editColumn('process_points', function ($row) {
-                    return number_format($row->process_points, 2);
+                    return $this->commonUtil->num_f($row->process_points);
                 })
                 ->editColumn('points_earned', function ($row) {
-                    return '<strong>' . number_format($row->points_earned, 2) . '</strong>';
+                    return '<strong>' . $this->commonUtil->num_f($row->points_earned) . '</strong>';
                 })
                 ->rawColumns(['points_earned'])
                 ->make(true);

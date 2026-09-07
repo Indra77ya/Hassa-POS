@@ -38,7 +38,7 @@
                 <table class="table table-bordered">
                     <tr>
                         <th>@lang('laundry::lang.quantity'):</th>
-                        <td>{{ number_format($order_sheet->quantity, 2) }} {{ $order_sheet->unit_name }}</td>
+                        <td>@format_quantity($order_sheet->quantity) {{ $order_sheet->unit_name }}</td>
                     </tr>
                     <tr>
                         <th>@lang('laundry::lang.status'):</th>
@@ -104,7 +104,7 @@
                                     <span class="label bg-yellow">@lang('laundry::lang.pending')</span>
                                 @endif
                             </td>
-                            <td>{{ number_format($log->points_earned, 2) }}</td>
+                            <td>@num_format($log->points_earned)</td>
                             <td>{{ $log->completed_at ? \Carbon\Carbon::parse($log->completed_at)->format('d/m/Y H:i') : '-' }}</td>
                         </tr>
                     @empty
