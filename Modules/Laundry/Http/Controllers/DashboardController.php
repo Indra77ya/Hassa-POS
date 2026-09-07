@@ -34,7 +34,7 @@ class DashboardController extends Controller
 
         $statuses = LaundryStatus::where('business_id', $business_id)->orderBy('sort_order', 'asc')->get();
         $recent_orders = LaundryOrderSheet::where('business_id', $business_id)
-            ->with(['customer', 'status', 'serviceType', 'itemType'])
+            ->with(['customer', 'status', 'serviceType', 'itemType', 'transactions'])
             ->orderBy('id', 'desc')
             ->limit(10)
             ->get();

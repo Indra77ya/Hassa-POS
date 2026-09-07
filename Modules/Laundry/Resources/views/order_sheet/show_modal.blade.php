@@ -59,6 +59,19 @@
               <th>@lang('laundry::lang.delivery_type'):</th>
               <td>{{ $order_sheet->delivery_type == 'pickup_delivery' ? __('laundry::lang.pickup_delivery') : __('laundry::lang.self_service') }}</td>
             </tr>
+            <tr>
+              <th>@lang('sale.payment_status'):</th>
+              <td>
+                @if($order_sheet->payment_status == 'paid')
+                  <span class="label bg-green">@lang('lang_v1.paid')</span>
+                @elseif($order_sheet->payment_status == 'partial')
+                  <span class="label bg-yellow">@lang('lang_v1.partial')</span>
+                @else
+                  <span class="label bg-red">@lang('lang_v1.due')</span>
+                @endif
+                ({{ __('sale.total') }}: {{ number_format($order_sheet->total_amount, 2) }}, {{ __('sale.paid') }}: {{ number_format($order_sheet->total_paid, 2) }})
+              </td>
+            </tr>
           </table>
         </div>
       </div>

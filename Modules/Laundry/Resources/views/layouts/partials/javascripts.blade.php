@@ -19,6 +19,38 @@
                     }
                     if (typeof pos_product_row === 'function') {
                         pos_product_row(result.variation_id, null, null, result.quantity);
+
+                        if (result.payment_status === 'partial' && result.due_amount >= 0) {
+                            setTimeout(function() {
+                                var last_row = $('#pos_table tbody tr').last();
+                                if (last_row.length) {
+                                    var qty = parseFloat(result.quantity) || 1;
+                                    var due = parseFloat(result.due_amount);
+                                    var new_unit_price = due / qty;
+
+                                    if (typeof __write_number === 'function') {
+                                        __write_number(last_row.find('input.pos_unit_price'), new_unit_price);
+                                        __write_number(last_row.find('input.pos_unit_price_inc_tax'), new_unit_price);
+                                        __write_number(last_row.find('input.pos_line_total'), due, false);
+                                    } else {
+                                        last_row.find('input.pos_unit_price').val(new_unit_price);
+                                        last_row.find('input.pos_unit_price_inc_tax').val(new_unit_price);
+                                        last_row.find('input.pos_line_total').val(due);
+                                    }
+
+                                    if (typeof __currency_trans_from_en === 'function') {
+                                        last_row.find('span.pos_line_total_text').text(__currency_trans_from_en(due, true));
+                                    } else {
+                                        last_row.find('span.pos_line_total_text').text(due);
+                                    }
+
+                                    if (typeof pos_total_row === 'function') {
+                                        pos_total_row();
+                                    }
+                                }
+                            }, 350);
+                        }
+
                         toastr.success('Pesanan laundry berhasil dimasukkan ke keranjang');
                         $('.view_modal').modal('hide');
                     }

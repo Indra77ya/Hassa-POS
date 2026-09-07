@@ -14,6 +14,10 @@ class LaundryModuleTest extends TestCase
     {
         parent::setUp();
 
+        \Illuminate\Support\Facades\Schema::dropIfExists('transaction_payments');
+        \Illuminate\Support\Facades\Schema::dropIfExists('transactions');
+        \Illuminate\Support\Facades\Schema::dropIfExists('laundry_order_sheets');
+        \Illuminate\Support\Facades\Schema::dropIfExists('contacts');
         \Illuminate\Support\Facades\Schema::dropIfExists('laundry_item_types');
         \Illuminate\Support\Facades\Schema::dropIfExists('products');
         \Illuminate\Support\Facades\Schema::dropIfExists('business_locations');
@@ -89,6 +93,51 @@ class LaundryModuleTest extends TestCase
             $table->string('actual_name');
             $table->string('short_name');
             $table->softDeletes();
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('contacts', function ($table) {
+            $table->id();
+            $table->integer('business_id');
+            $table->string('type')->default('customer');
+            $table->string('name');
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('laundry_order_sheets', function ($table) {
+            $table->id();
+            $table->integer('business_id');
+            $table->string('order_no');
+            $table->unsignedBigInteger('contact_id');
+            $table->unsignedBigInteger('laundry_item_type_id')->nullable();
+            $table->decimal('quantity', 15, 2)->default(1.00);
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('transactions', function ($table) {
+            $table->id();
+            $table->integer('business_id');
+            $table->integer('location_id')->nullable();
+            $table->string('type')->default('sell');
+            $table->string('status')->default('final');
+            $table->string('payment_status')->default('due');
+            $table->integer('contact_id')->nullable();
+            $table->unsignedBigInteger('laundry_order_sheet_id')->nullable();
+            $table->string('invoice_no')->nullable();
+            $table->dateTime('transaction_date')->nullable();
+            $table->decimal('total_before_tax', 22, 4)->default(0);
+            $table->decimal('final_total', 22, 4)->default(0);
+            $table->integer('created_by')->default(1);
+            $table->string('sub_type')->nullable();
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('transaction_payments', function ($table) {
+            $table->id();
+            $table->unsignedBigInteger('transaction_id');
+            $table->decimal('amount', 22, 4)->default(0);
+            $table->string('method')->default('cash');
+            $table->boolean('is_return')->default(0);
             $table->timestamps();
         });
 
@@ -255,25 +304,11 @@ class LaundryModuleTest extends TestCase
 
     public function test_get_order_sheets_endpoint_by_customer()
     {
-        if (!\Illuminate\Support\Facades\Schema::hasTable('contacts')) {
-            \Illuminate\Support\Facades\Schema::create('contacts', function ($table) {
-                $table->id();
-                $table->integer('business_id');
-                $table->string('type')->default('customer');
-                $table->string('name');
-                $table->timestamps();
-            });
-        }
-
-        if (!\Illuminate\Support\Facades\Schema::hasTable('laundry_order_sheets')) {
-            \Illuminate\Support\Facades\Schema::create('laundry_order_sheets', function ($table) {
-                $table->id();
-                $table->integer('business_id');
-                $table->string('order_no');
-                $table->unsignedBigInteger('contact_id');
-                $table->timestamps();
-            });
-        }
+        $item_type = LaundryItemType::create([
+            'business_id' => 1,
+            'name' => 'Cuci Lipat Kiloan',
+            'default_price' => 15000,
+        ]);
 
         \App\Contact::create([
             'id' => 10,
@@ -286,12 +321,16 @@ class LaundryModuleTest extends TestCase
             'business_id' => 1,
             'order_no' => 'LND-2026-0001',
             'contact_id' => 10,
+            'laundry_item_type_id' => $item_type->id,
+            'quantity' => 2,
         ]);
 
         $os2 = \Modules\Laundry\Entities\LaundryOrderSheet::create([
             'business_id' => 1,
             'order_no' => 'LND-2026-0002',
             'contact_id' => 20,
+            'laundry_item_type_id' => $item_type->id,
+            'quantity' => 2,
         ]);
 
         session(['user.business_id' => 1, 'user.id' => 1]);
@@ -310,5 +349,109 @@ class LaundryModuleTest extends TestCase
         $this->assertTrue($data['success']);
         $this->assertArrayHasKey($os1->id, $data['order_sheets']);
         $this->assertArrayNotHasKey($os2->id, $data['order_sheets']);
+    }
+
+    public function test_order_sheet_payment_status_and_totals()
+    {
+        $item_type = LaundryItemType::create([
+            'business_id' => 1,
+            'name' => 'Cuci Lipat',
+            'default_price' => 20000,
+        ]);
+
+        $os = \Modules\Laundry\Entities\LaundryOrderSheet::create([
+            'business_id' => 1,
+            'order_no' => 'LND-2026-0005',
+            'contact_id' => 10,
+            'laundry_item_type_id' => $item_type->id,
+            'quantity' => 2, // Total = 40,000
+        ]);
+
+        $this->assertEquals(40000, $os->total_amount);
+        $this->assertEquals(0, $os->total_paid);
+        $this->assertEquals('due', $os->payment_status);
+
+        // Add partial payment of 15,000
+        $tx = \App\Transaction::create([
+            'business_id' => 1,
+            'type' => 'sell',
+            'status' => 'final',
+            'laundry_order_sheet_id' => $os->id,
+            'final_total' => 40000,
+        ]);
+
+        \App\TransactionPayment::create([
+            'transaction_id' => $tx->id,
+            'amount' => 15000,
+            'method' => 'cash',
+        ]);
+
+        $os->refresh();
+        $this->assertEquals(15000, $os->total_paid);
+        $this->assertEquals('partial', $os->payment_status);
+
+        // Add remaining payment of 25,000
+        \App\TransactionPayment::create([
+            'transaction_id' => $tx->id,
+            'amount' => 25000,
+            'method' => 'cash',
+        ]);
+
+        $os->refresh();
+        $this->assertEquals(40000, $os->total_paid);
+        $this->assertEquals('paid', $os->payment_status);
+    }
+
+    public function test_get_order_sheets_excludes_fully_paid_sheets()
+    {
+        $item_type = LaundryItemType::create([
+            'business_id' => 1,
+            'name' => 'Cuci Setrika',
+            'default_price' => 10000,
+        ]);
+
+        $unpaid_os = \Modules\Laundry\Entities\LaundryOrderSheet::create([
+            'business_id' => 1,
+            'order_no' => 'LND-UNPAID',
+            'contact_id' => 10,
+            'laundry_item_type_id' => $item_type->id,
+            'quantity' => 1,
+        ]);
+
+        $paid_os = \Modules\Laundry\Entities\LaundryOrderSheet::create([
+            'business_id' => 1,
+            'order_no' => 'LND-PAID',
+            'contact_id' => 10,
+            'laundry_item_type_id' => $item_type->id,
+            'quantity' => 1,
+        ]);
+
+        $tx = \App\Transaction::create([
+            'business_id' => 1,
+            'type' => 'sell',
+            'status' => 'final',
+            'laundry_order_sheet_id' => $paid_os->id,
+            'final_total' => 10000,
+        ]);
+
+        \App\TransactionPayment::create([
+            'transaction_id' => $tx->id,
+            'amount' => 10000,
+            'method' => 'cash',
+        ]);
+
+        session(['user.business_id' => 1, 'user.id' => 1]);
+
+        $request = \Illuminate\Http\Request::create('/laundry/order-sheet/get-order-sheets', 'GET', ['contact_id' => 10]);
+        $request->merge(['contact_id' => 10]);
+        $request->setLaravelSession(app('session.store'));
+
+        $controller = new \Modules\Laundry\Http\Controllers\OrderSheetController();
+        $response = $controller->getOrderSheets($request);
+
+        $data = $response->getData(true);
+        $this->assertTrue($data['success']);
+        $this->assertArrayHasKey($unpaid_os->id, $data['order_sheets']);
+        $this->assertArrayNotHasKey($paid_os->id, $data['order_sheets']);
     }
 }
