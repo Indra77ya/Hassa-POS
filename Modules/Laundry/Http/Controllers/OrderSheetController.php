@@ -143,9 +143,24 @@ class OrderSheetController extends Controller
             }
 
             // Exclude fully paid order sheets from POS dropdown selection
-            $query->whereRaw("(SELECT COALESCE(SUM(tp.amount), 0) FROM transaction_payments tp JOIN transactions t ON t.id = tp.transaction_id WHERE t.laundry_order_sheet_id = laundry_order_sheets.id AND tp.is_return = 0) < (laundry_order_sheets.quantity * COALESCE((SELECT it.default_price FROM laundry_item_types it WHERE it.id = laundry_order_sheets.laundry_item_type_id), 0))");
+            $query->where(function($q) {
+                $q->whereRaw("(laundry_order_sheets.quantity * COALESCE((SELECT it.default_price FROM laundry_item_types it WHERE it.id = laundry_order_sheets.laundry_item_type_id), 0)) = 0")
+                  ->orWhereRaw("(SELECT COALESCE(SUM(tp.amount), 0) FROM transaction_payments tp JOIN transactions t ON t.id = tp.transaction_id WHERE t.laundry_order_sheet_id = laundry_order_sheets.id AND tp.is_return = 0) < (laundry_order_sheets.quantity * COALESCE((SELECT it.default_price FROM laundry_item_types it WHERE it.id = laundry_order_sheets.laundry_item_type_id), 0))");
+            });
 
-            $order_sheets = $query->pluck('order_no', 'id');
+            $order_sheets_list = $query->with(['itemType', 'transactions'])->get();
+            $order_sheets = [];
+            foreach ($order_sheets_list as $os) {
+                $status_label = '';
+                if ($os->payment_status == 'partial') {
+                    $due = $os->total_amount - $os->total_paid;
+                    if ($due < 0) $due = 0;
+                    $status_label = ' (' . __('lang_v1.partial') . ' - ' . __('purchase.payment_due') . ': ' . number_format($due, 2) . ')';
+                } elseif ($os->payment_status == 'due') {
+                    $status_label = ' (' . __('lang_v1.due') . ')';
+                }
+                $order_sheets[$os->id] = $os->order_no . $status_label;
+            }
 
             return response()->json([
                 'success' => true,

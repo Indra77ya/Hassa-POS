@@ -166,9 +166,26 @@ class DataController extends Controller
             $statuses = LaundryStatus::forDropdown($business_id);
             $service_types = LaundryServiceType::forDropdown($business_id);
             $item_types = LaundryItemType::forDropdown($business_id);
-            $order_sheets = LaundryOrderSheet::where('business_id', $business_id)
-                ->whereRaw("(SELECT COALESCE(SUM(tp.amount), 0) FROM transaction_payments tp JOIN transactions t ON t.id = tp.transaction_id WHERE t.laundry_order_sheet_id = laundry_order_sheets.id AND tp.is_return = 0) < (laundry_order_sheets.quantity * COALESCE((SELECT it.default_price FROM laundry_item_types it WHERE it.id = laundry_order_sheets.laundry_item_type_id), 0))")
-                ->pluck('order_no', 'id');
+            $order_sheets_list = LaundryOrderSheet::where('business_id', $business_id)
+                ->where(function($q) {
+                    $q->whereRaw("(laundry_order_sheets.quantity * COALESCE((SELECT it.default_price FROM laundry_item_types it WHERE it.id = laundry_order_sheets.laundry_item_type_id), 0)) = 0")
+                      ->orWhereRaw("(SELECT COALESCE(SUM(tp.amount), 0) FROM transaction_payments tp JOIN transactions t ON t.id = tp.transaction_id WHERE t.laundry_order_sheet_id = laundry_order_sheets.id AND tp.is_return = 0) < (laundry_order_sheets.quantity * COALESCE((SELECT it.default_price FROM laundry_item_types it WHERE it.id = laundry_order_sheets.laundry_item_type_id), 0))");
+                })
+                ->with(['itemType', 'transactions'])
+                ->get();
+
+            $order_sheets = [];
+            foreach ($order_sheets_list as $os) {
+                $status_label = '';
+                if ($os->payment_status == 'partial') {
+                    $due = $os->total_amount - $os->total_paid;
+                    if ($due < 0) $due = 0;
+                    $status_label = ' (' . __('lang_v1.partial') . ' - ' . __('purchase.payment_due') . ': ' . number_format($due, 2) . ')';
+                } elseif ($os->payment_status == 'due') {
+                    $status_label = ' (' . __('lang_v1.due') . ')';
+                }
+                $order_sheets[$os->id] = $os->order_no . $status_label;
+            }
 
             return [
                 'view_path' => 'laundry::laundry.partials.laundry_pos',

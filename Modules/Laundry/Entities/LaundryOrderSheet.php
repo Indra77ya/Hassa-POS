@@ -74,7 +74,7 @@ class LaundryOrderSheet extends Model
         $paid = $this->total_paid;
 
         if ($total <= 0) {
-            return 'paid';
+            return 'due';
         }
 
         if ($paid >= $total) {
