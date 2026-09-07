@@ -53,6 +53,7 @@
                         <th>@lang('laundry::lang.service_type')</th>
                         <th>@lang('laundry::lang.quantity')</th>
                         <th>@lang('laundry::lang.status')</th>
+                        <th>@lang('sale.payment_status')</th>
                         <th>@lang('laundry::lang.received_at')</th>
                         <th>@lang('laundry::lang.estimated_completion_at')</th>
                     </tr>
@@ -71,12 +72,21 @@
                                     -
                                 @endif
                             </td>
+                            <td>
+                                @if($order->payment_status == 'paid')
+                                    <span class="label bg-green">@lang('lang_v1.paid')</span>
+                                @elseif($order->payment_status == 'partial')
+                                    <span class="label bg-yellow">@lang('lang_v1.partial')</span>
+                                @else
+                                    <span class="label bg-red">@lang('lang_v1.due')</span>
+                                @endif
+                            </td>
                             <td>{{ $order->received_at ? \Carbon\Carbon::parse($order->received_at)->format('d/m/Y H:i') : '-' }}</td>
                             <td>{{ $order->estimated_completion_at ? \Carbon\Carbon::parse($order->estimated_completion_at)->format('d/m/Y H:i') : '-' }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center">@lang('lang_v1.no_data')</td>
+                            <td colspan="8" class="text-center">@lang('lang_v1.no_data')</td>
                         </tr>
                     @endforelse
                 </tbody>
