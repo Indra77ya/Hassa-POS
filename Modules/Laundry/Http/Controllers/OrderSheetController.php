@@ -592,6 +592,11 @@ class OrderSheetController extends Controller
                 }
             }
 
+            $total_amount = $order_sheet->total_amount;
+            $total_paid = $order_sheet->total_paid;
+            $payment_status = $order_sheet->payment_status;
+            $due_amount = max(0, $total_amount - $total_paid);
+
             return response()->json([
                 'success' => true,
                 'order_sheet_id' => $order_sheet->id,
@@ -600,6 +605,10 @@ class OrderSheetController extends Controller
                 'quantity' => $order_sheet->quantity,
                 'variation_id' => $variation_id,
                 'item_type_name' => $item_type_name,
+                'payment_status' => $payment_status,
+                'total_amount' => $total_amount,
+                'total_paid' => $total_paid,
+                'due_amount' => $due_amount,
             ]);
         } catch (\Exception $e) {
             \Log::error('Error getPosDetails: ' . $e->getMessage());

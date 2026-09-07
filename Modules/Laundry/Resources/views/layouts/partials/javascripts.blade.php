@@ -20,7 +20,7 @@
                     if (typeof pos_product_row === 'function') {
                         pos_product_row(result.variation_id, null, null, result.quantity);
 
-                        if (result.payment_status === 'partial' && result.due_amount >= 0) {
+                        if (result.due_amount !== undefined && result.due_amount >= 0) {
                             setTimeout(function() {
                                 var last_row = $('#pos_table tbody tr').last();
                                 if (last_row.length) {

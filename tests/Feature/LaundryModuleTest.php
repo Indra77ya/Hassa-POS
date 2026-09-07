@@ -101,6 +101,7 @@ class LaundryModuleTest extends TestCase
             $table->integer('business_id');
             $table->string('type')->default('customer');
             $table->string('name');
+            $table->softDeletes();
             $table->timestamps();
         });
 
@@ -450,8 +451,61 @@ class LaundryModuleTest extends TestCase
         $response = $controller->getOrderSheets($request);
 
         $data = $response->getData(true);
-        $this->assertTrue($data['success']);
+        $this->assertTrue($data['success'], $data['msg'] ?? 'no msg');
         $this->assertArrayHasKey($unpaid_os->id, $data['order_sheets']);
         $this->assertArrayNotHasKey($paid_os->id, $data['order_sheets']);
+    }
+
+    public function test_get_pos_details_returns_payment_status_and_due_amount()
+    {
+        $item_type = LaundryItemType::create([
+            'business_id' => 1,
+            'name' => 'Sepatu / Sneaker',
+            'default_price' => 30000,
+        ]);
+
+        $os = \Modules\Laundry\Entities\LaundryOrderSheet::create([
+            'business_id' => 1,
+            'order_no' => 'LND-DEMO-0003',
+            'contact_id' => 10,
+            'laundry_item_type_id' => $item_type->id,
+            'quantity' => 2, // Total = 60,000
+        ]);
+
+        $tx = \App\Transaction::create([
+            'business_id' => 1,
+            'type' => 'sell',
+            'status' => 'final',
+            'payment_status' => 'partial',
+            'laundry_order_sheet_id' => $os->id,
+            'final_total' => 60000,
+        ]);
+
+        // Partial payment of 30,000
+        \App\TransactionPayment::create([
+            'transaction_id' => $tx->id,
+            'amount' => 30000,
+            'method' => 'cash',
+        ]);
+
+        $user = \Mockery::mock(\App\User::class)->makePartial();
+        $user->shouldReceive('permitted_locations')->andReturn('all');
+        $this->actingAs($user);
+
+        session(['user.business_id' => 1, 'user.id' => 1]);
+
+        $request = \Illuminate\Http\Request::create('/laundry/order-sheet/' . $os->id . '/get-pos-details', 'GET');
+        $request->setLaravelSession(app('session.store'));
+        app()->instance('request', $request);
+
+        $controller = new \Modules\Laundry\Http\Controllers\OrderSheetController();
+        $response = $controller->getPosDetails($os->id);
+
+        $data = $response->getData(true);
+        $this->assertTrue($data['success'], $data['msg'] ?? 'no msg');
+        $this->assertEquals('partial', $data['payment_status']);
+        $this->assertEquals(60000, $data['total_amount']);
+        $this->assertEquals(30000, $data['total_paid']);
+        $this->assertEquals(30000, $data['due_amount']);
     }
 }
