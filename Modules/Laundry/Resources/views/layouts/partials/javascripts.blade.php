@@ -98,7 +98,8 @@
             $('#laundry_order_sheet_id').select2({
                 placeholder: '{{ __("laundry::lang.select_order_sheet") }}',
                 allowClear: true,
-                width: '100%'
+                width: '100%',
+                minimumResultsForSearch: 0
             });
         }
 
