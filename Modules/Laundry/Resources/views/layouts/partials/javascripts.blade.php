@@ -57,6 +57,40 @@
         });
     }
 
+    function resetLaundryOrderSheetAndCustomer() {
+        if (is_syncing_laundry_customer) return;
+        is_syncing_laundry_customer = true;
+
+        if (typeof set_default_customer === 'function') {
+            set_default_customer();
+        } else if ($('#default_customer_id').length && $('select#customer_id').length) {
+            var default_customer_id = $('#default_customer_id').val();
+            $('select#customer_id').val(default_customer_id).trigger('change');
+        }
+
+        $.ajax({
+            url: '/laundry/order-sheet/get-order-sheets',
+            data: { contact_id: '' },
+            dataType: 'json',
+            success: function(result) {
+                if (result.success) {
+                    var select = $('#laundry_order_sheet_id');
+                    var placeholder = '{{ __("laundry::lang.select_order_sheet") }}';
+                    select.empty().append(new Option(placeholder, '', true, false));
+
+                    $.each(result.order_sheets, function(id, order_no) {
+                        select.append(new Option(order_no, id, false, false));
+                    });
+                    select.val('');
+                }
+                is_syncing_laundry_customer = false;
+            },
+            error: function() {
+                is_syncing_laundry_customer = false;
+            }
+        });
+    }
+
     function filterOrderSheetsByCustomer(contact_id) {
         if (!($('#laundry_order_sheet_id').length) || is_syncing_laundry_customer) return;
         is_syncing_laundry_customer = true;
@@ -107,6 +141,10 @@
             var order_sheet_id = $(this).val();
             if (order_sheet_id) {
                 syncCustomerFromOrderSheet(order_sheet_id);
+            } else {
+                if (!is_syncing_laundry_customer) {
+                    resetLaundryOrderSheetAndCustomer();
+                }
             }
         });
 
