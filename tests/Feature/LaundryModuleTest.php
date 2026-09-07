@@ -247,9 +247,67 @@ class LaundryModuleTest extends TestCase
         ])->render();
 
         $this->assertStringContainsString('laundry_order_sheet_id', $view);
-        $this->assertStringContainsString('fa-plus-circle', $view);
+        $this->assertStringContainsString('add_laundry_order_sheet_quick_btn', $view);
         $this->assertStringContainsString('edit_laundry_order_sheet_btn', $view);
         $this->assertStringContainsString('show_laundry_order_sheet_btn', $view);
         $this->assertStringContainsString('add_laundry_to_cart_btn', $view);
+    }
+
+    public function test_get_order_sheets_endpoint_by_customer()
+    {
+        \Illuminate\Support\Facades\Schema::dropIfExists('laundry_order_sheets');
+        \Illuminate\Support\Facades\Schema::dropIfExists('contacts');
+
+        \Illuminate\Support\Facades\Schema::create('contacts', function ($table) {
+            $table->id();
+            $table->integer('business_id');
+            $table->string('type')->default('customer');
+            $table->string('name');
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('laundry_order_sheets', function ($table) {
+            $table->id();
+            $table->integer('business_id');
+            $table->string('order_no');
+            $table->unsignedBigInteger('contact_id');
+            $table->timestamps();
+        });
+
+        \App\Contact::create([
+            'id' => 10,
+            'business_id' => 1,
+            'type' => 'customer',
+            'name' => 'Budi Santoso',
+        ]);
+
+        $os1 = \Modules\Laundry\Entities\LaundryOrderSheet::create([
+            'business_id' => 1,
+            'order_no' => 'LND-2026-0001',
+            'contact_id' => 10,
+        ]);
+
+        $os2 = \Modules\Laundry\Entities\LaundryOrderSheet::create([
+            'business_id' => 1,
+            'order_no' => 'LND-2026-0002',
+            'contact_id' => 20,
+        ]);
+
+        session(['user.business_id' => 1, 'user.id' => 1]);
+
+        $request = \Illuminate\Http\Request::create('/laundry/order-sheet/get-order-sheets', 'GET', ['contact_id' => 10]);
+        $request->merge(['contact_id' => 10]);
+        $request->setLaravelSession(app('session.store'));
+
+        $controller = new \Modules\Laundry\Http\Controllers\OrderSheetController();
+        $response = $controller->getOrderSheets($request);
+
+        $data = $response->getData(true);
+        if (empty($data['success'])) {
+            $this->fail('getOrderSheets failed: ' . ($data['msg'] ?? ''));
+        }
+        $this->assertTrue($data['success']);
+        $this->assertArrayHasKey($os1->id, $data['order_sheets']);
+        $this->assertArrayNotHasKey($os2->id, $data['order_sheets']);
     }
 }
