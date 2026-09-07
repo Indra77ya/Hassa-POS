@@ -1,7 +1,7 @@
 @php
     $order_sheets = $order_sheets ?? ($view_data['order_sheets'] ?? []);
 @endphp
-<div class="col-md-6 col-sm-12">
+<div class="col-md-12">
     <div class="form-group tw-mb-3">
         <div class="input-group tw-border tw-border-slate-200 tw-rounded-xl tw-overflow-hidden tw-shadow-sm tw-transition-all focus-within:tw-border-indigo-400 focus-within:tw-ring-1 focus-within:tw-ring-indigo-400/20" style="display: table; width: 100% !important;">
             <span class="input-group-addon !tw-bg-slate-50 !tw-border-0 !tw-text-slate-400 !tw-px-3" style="border: 0; vertical-align: middle;">
