@@ -102,7 +102,7 @@ class OrderSheetController extends Controller
                     $html = '<span class="label ' . $bg_class . '">' . e($text) . '</span>';
                     $html .= '<br><small>' . __('sale.total') . ': ' . number_format($total, 2) . '</small>';
                     if ($status != 'paid') {
-                        $html .= '<br><small>' . __('payment.due') . ': ' . number_format($due, 2) . '</small>';
+                        $html .= '<br><small>' . __('purchase.payment_due') . ': ' . number_format($due, 2) . '</small>';
                     }
                     return $html;
                 })
