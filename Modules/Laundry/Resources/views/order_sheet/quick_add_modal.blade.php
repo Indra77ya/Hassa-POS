@@ -19,7 +19,7 @@
         <div class="col-md-4">
           <div class="form-group">
             {!! Form::label('contact_id', __('contact.customer') . ':*') !!}
-            {!! Form::select('contact_id', $customers, null, ['class' => 'form-control select2', 'required', 'placeholder' => __('messages.please_select'), 'style' => 'width:100%']) !!}
+            {!! Form::select('contact_id', $customers, $contact_id ?? null, ['class' => 'form-control select2', 'required', 'placeholder' => __('messages.please_select'), 'style' => 'width:100%']) !!}
           </div>
         </div>
         <div class="col-md-4">

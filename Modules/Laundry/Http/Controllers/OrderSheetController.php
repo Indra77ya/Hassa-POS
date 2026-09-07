@@ -77,6 +77,32 @@ class OrderSheetController extends Controller
         return view('laundry::order_sheet.index', compact('business_locations', 'statuses', 'service_types'));
     }
 
+    public function getOrderSheets(Request $request)
+    {
+        try {
+            $business_id = session()->get('user.business_id') ?? request()->session()->get('user.business_id');
+            $query = LaundryOrderSheet::where('business_id', $business_id);
+
+            $contact_id = $request->get('contact_id');
+            if (!empty($contact_id)) {
+                $query->where('contact_id', $contact_id);
+            }
+
+            $order_sheets = $query->pluck('order_no', 'id');
+
+            return response()->json([
+                'success' => true,
+                'order_sheets' => $order_sheets,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error getOrderSheets: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'msg' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function create()
     {
         $business_id = request()->session()->get('user.business_id');
@@ -90,12 +116,13 @@ class OrderSheetController extends Controller
         $staffs = User::forDropdown($business_id, false);
 
         $quick_add = request()->get('quick_add', false);
+        $contact_id = request()->get('contact_id', null);
 
         if ($quick_add || request()->ajax()) {
-            return view('laundry::order_sheet.quick_add_modal', compact('business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'processes', 'staffs', 'quick_add'));
+            return view('laundry::order_sheet.quick_add_modal', compact('business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'processes', 'staffs', 'quick_add', 'contact_id'));
         }
 
-        return view('laundry::order_sheet.create', compact('business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'processes', 'staffs'));
+        return view('laundry::order_sheet.create', compact('business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'processes', 'staffs', 'contact_id'));
     }
 
     public function store(Request $request)
@@ -143,6 +170,8 @@ class OrderSheetController extends Controller
                     'data' => [
                         'id' => $order_sheet->id,
                         'order_no' => $order_sheet->order_no,
+                        'contact_id' => $order_sheet->contact_id,
+                        'customer_name' => optional($order_sheet->customer)->name,
                     ],
                 ]);
             }
@@ -233,6 +262,8 @@ class OrderSheetController extends Controller
                     'data' => [
                         'id' => $order_sheet->id,
                         'order_no' => $order_sheet->order_no,
+                        'contact_id' => $order_sheet->contact_id,
+                        'customer_name' => optional($order_sheet->customer)->name,
                     ],
                 ]);
             }
