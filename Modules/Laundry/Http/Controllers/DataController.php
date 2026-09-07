@@ -166,7 +166,9 @@ class DataController extends Controller
             $statuses = LaundryStatus::forDropdown($business_id);
             $service_types = LaundryServiceType::forDropdown($business_id);
             $item_types = LaundryItemType::forDropdown($business_id);
-            $order_sheets = LaundryOrderSheet::where('business_id', $business_id)->pluck('order_no', 'id');
+            $order_sheets = LaundryOrderSheet::where('business_id', $business_id)
+                ->whereRaw("(SELECT COALESCE(SUM(tp.amount), 0) FROM transaction_payments tp JOIN transactions t ON t.id = tp.transaction_id WHERE t.laundry_order_sheet_id = laundry_order_sheets.id AND tp.is_return = 0) < (laundry_order_sheets.quantity * COALESCE((SELECT it.default_price FROM laundry_item_types it WHERE it.id = laundry_order_sheets.laundry_item_type_id), 0))")
+                ->pluck('order_no', 'id');
 
             return [
                 'view_path' => 'laundry::laundry.partials.laundry_pos',

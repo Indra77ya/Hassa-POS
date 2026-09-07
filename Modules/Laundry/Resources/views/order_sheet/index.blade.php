@@ -26,6 +26,12 @@
                 {!! Form::select('laundry_service_type_id', $service_types, null, ['class' => 'form-control select2', 'style' => 'width:100%', 'placeholder' => __('lang_v1.all')]) !!}
             </div>
         </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                {!! Form::label('payment_status', __('sale.payment_status') . ':') !!}
+                {!! Form::select('payment_status', $payment_statuses, null, ['class' => 'form-control select2', 'style' => 'width:100%', 'placeholder' => __('lang_v1.all')]) !!}
+            </div>
+        </div>
     @endcomponent
 
     @component('components.widget', ['class' => 'box-primary'])
@@ -54,6 +60,7 @@
                         <th>@lang('laundry::lang.item_type')</th>
                         <th>@lang('laundry::lang.quantity')</th>
                         <th>@lang('laundry::lang.status')</th>
+                        <th>@lang('sale.payment_status')</th>
                         <th>@lang('laundry::lang.received_at')</th>
                         <th>@lang('laundry::lang.estimated_completion_at')</th>
                     </tr>
@@ -61,11 +68,15 @@
             </table>
         </div>
     @endcomponent
+
+    <div class="modal fade payment_modal" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel"></div>
+    <div class="modal fade edit_payment_modal" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel"></div>
 </section>
 @endsection
 
 @section('javascript')
 @include('laundry::layouts.partials.javascripts')
+<script src="{{ asset('js/payment.js?v=' . $asset_v) }}"></script>
 <script type="text/javascript">
 $(document).ready(function() {
     window.order_sheets_table = $('#order_sheets_table').DataTable({
@@ -77,6 +88,7 @@ $(document).ready(function() {
                 d.location_id = $('#location_id').val();
                 d.laundry_status_id = $('#laundry_status_id').val();
                 d.laundry_service_type_id = $('#laundry_service_type_id').val();
+                d.payment_status = $('#payment_status').val();
             }
         },
         columns: [
@@ -88,13 +100,20 @@ $(document).ready(function() {
             { data: 'item_type.name', name: 'item_type.name', defaultContent: '-' },
             { data: 'quantity', name: 'quantity' },
             { data: 'status', name: 'status' },
+            { data: 'payment_status', name: 'payment_status', orderable: false, searchable: false },
             { data: 'received_at', name: 'received_at' },
             { data: 'estimated_completion_at', name: 'estimated_completion_at' }
         ]
     });
 
-    $(document).on('change', '#location_id, #laundry_status_id, #laundry_service_type_id', function() {
+    $(document).on('change', '#location_id, #laundry_status_id, #laundry_service_type_id, #payment_status', function() {
         order_sheets_table.ajax.reload();
+    });
+
+    $(document).on('hidden.bs.modal', '.payment_modal, .edit_payment_modal', function() {
+        if (typeof order_sheets_table != 'undefined') {
+            order_sheets_table.ajax.reload();
+        }
     });
 
     $(document).on('click', 'a.delete_order_sheet_button', function(e) {

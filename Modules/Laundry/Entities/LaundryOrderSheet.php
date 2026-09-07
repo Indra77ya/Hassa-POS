@@ -45,4 +45,44 @@ class LaundryOrderSheet extends Model
     {
         return $this->hasMany(LaundryOrderProcessLog::class, 'order_sheet_id');
     }
+
+    public function transactions()
+    {
+        return $this->hasMany(\App\Transaction::class, 'laundry_order_sheet_id');
+    }
+
+    public function getTotalAmountAttribute()
+    {
+        $price = optional($this->itemType)->default_price ?? 0;
+        return (float) ($this->quantity * $price);
+    }
+
+    public function getTotalPaidAttribute()
+    {
+        $transaction_ids = $this->transactions()->pluck('id')->toArray();
+        if (empty($transaction_ids)) {
+            return 0.00;
+        }
+        return (float) \App\TransactionPayment::whereIn('transaction_id', $transaction_ids)
+            ->where('is_return', 0)
+            ->sum('amount');
+    }
+
+    public function getPaymentStatusAttribute()
+    {
+        $total = $this->total_amount;
+        $paid = $this->total_paid;
+
+        if ($total <= 0) {
+            return 'paid';
+        }
+
+        if ($paid >= $total) {
+            return 'paid';
+        } elseif ($paid > 0) {
+            return 'partial';
+        } else {
+            return 'due';
+        }
+    }
 }

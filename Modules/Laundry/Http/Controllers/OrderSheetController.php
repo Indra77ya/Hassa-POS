@@ -24,17 +24,34 @@ class OrderSheetController extends Controller
         $business_id = request()->session()->get('user.business_id');
 
         if ($request->ajax()) {
-            $orders = LaundryOrderSheet::where('business_id', $business_id)
-                ->with(['customer', 'location', 'status', 'serviceType', 'itemType']);
+            $orders = LaundryOrderSheet::where('laundry_order_sheets.business_id', $business_id)
+                ->with(['customer', 'location', 'status', 'serviceType', 'itemType', 'transactions']);
 
             if (!empty($request->location_id)) {
-                $orders->where('location_id', $request->location_id);
+                $orders->where('laundry_order_sheets.location_id', $request->location_id);
             }
             if (!empty($request->laundry_status_id)) {
-                $orders->where('laundry_status_id', $request->laundry_status_id);
+                $orders->where('laundry_order_sheets.laundry_status_id', $request->laundry_status_id);
             }
             if (!empty($request->laundry_service_type_id)) {
-                $orders->where('laundry_service_type_id', $request->laundry_service_type_id);
+                $orders->where('laundry_order_sheets.laundry_service_type_id', $request->laundry_service_type_id);
+            }
+            if (!empty($request->payment_status)) {
+                if ($request->payment_status == 'paid') {
+                    $orders->where(function($q) {
+                        $q->whereRaw("(SELECT COALESCE(SUM(tp.amount), 0) FROM transaction_payments tp JOIN transactions t ON t.id = tp.transaction_id WHERE t.laundry_order_sheet_id = laundry_order_sheets.id AND tp.is_return = 0) >= (laundry_order_sheets.quantity * COALESCE((SELECT it.default_price FROM laundry_item_types it WHERE it.id = laundry_order_sheets.laundry_item_type_id), 0))");
+                    });
+                } elseif ($request->payment_status == 'due') {
+                    $orders->where(function($q) {
+                        $q->whereRaw("(SELECT COALESCE(SUM(tp.amount), 0) FROM transaction_payments tp JOIN transactions t ON t.id = tp.transaction_id WHERE t.laundry_order_sheet_id = laundry_order_sheets.id AND tp.is_return = 0) = 0")
+                          ->whereRaw("(laundry_order_sheets.quantity * COALESCE((SELECT it.default_price FROM laundry_item_types it WHERE it.id = laundry_order_sheets.laundry_item_type_id), 0)) > 0");
+                    });
+                } elseif ($request->payment_status == 'partial') {
+                    $orders->where(function($q) {
+                        $q->whereRaw("(SELECT COALESCE(SUM(tp.amount), 0) FROM transaction_payments tp JOIN transactions t ON t.id = tp.transaction_id WHERE t.laundry_order_sheet_id = laundry_order_sheets.id AND tp.is_return = 0) > 0")
+                          ->whereRaw("(SELECT COALESCE(SUM(tp.amount), 0) FROM transaction_payments tp JOIN transactions t ON t.id = tp.transaction_id WHERE t.laundry_order_sheet_id = laundry_order_sheets.id AND tp.is_return = 0) < (laundry_order_sheets.quantity * COALESCE((SELECT it.default_price FROM laundry_item_types it WHERE it.id = laundry_order_sheets.laundry_item_type_id), 0))");
+                    });
+                }
             }
 
             return DataTables::of($orders)
@@ -45,6 +62,14 @@ class OrderSheetController extends Controller
                     $html .= '<li><a href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'show'], [$row->id]) . '"><i class="fa fa-eye"></i> ' . __('messages.view') . '</a></li>';
                     $html .= '<li><a href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'edit'], [$row->id]) . '"><i class="glyphicon glyphicon-edit"></i> ' . __('messages.edit') . '</a></li>';
                     $html .= '<li><a href="#" data-href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'getStatusModal'], [$row->id]) . '" class="btn-modal" data-container=".view_modal"><i class="fa fa-edit"></i> ' . __('laundry::lang.change_status') . '</a></li>';
+
+                    if ($row->payment_status != 'paid') {
+                        $html .= '<li><a href="#" data-href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'addPayment'], [$row->id]) . '" class="btn-modal" data-container=".payment_modal"><i class="fa fa-money"></i> ' . __('purchase.add_payment') . '</a></li>';
+                    }
+                    if ($row->total_paid > 0) {
+                        $html .= '<li><a href="#" data-href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'viewPayments'], [$row->id]) . '" class="btn-modal" data-container=".payment_modal"><i class="fa fa-money"></i> ' . __('purchase.view_payments') . '</a></li>';
+                    }
+
                     $html .= '<li><a href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'print'], [$row->id]) . '" target="_blank"><i class="fa fa-print"></i> ' . __('messages.print') . '</a></li>';
                     $html .= '<li><a href="#" data-href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'destroy'], [$row->id]) . '" class="delete_order_sheet_button"><i class="glyphicon glyphicon-trash"></i> ' . __('messages.delete') . '</a></li>';
                     $html .= '</ul></div>';
@@ -57,6 +82,30 @@ class OrderSheetController extends Controller
                     if (!$row->status) return '-';
                     return '<span class="label" style="background-color: ' . e($row->status->color) . ';">' . e($row->status->name) . '</span>';
                 })
+                ->addColumn('payment_status', function ($row) {
+                    $status = $row->payment_status;
+                    $total = $row->total_amount;
+                    $paid = $row->total_paid;
+                    $due = $total - $paid;
+                    if ($due < 0) $due = 0;
+
+                    $bg_class = 'bg-red';
+                    $text = __('lang_v1.due');
+                    if ($status == 'paid') {
+                        $bg_class = 'bg-green';
+                        $text = __('lang_v1.paid');
+                    } elseif ($status == 'partial') {
+                        $bg_class = 'bg-yellow';
+                        $text = __('lang_v1.partial');
+                    }
+
+                    $html = '<span class="label ' . $bg_class . '">' . e($text) . '</span>';
+                    $html .= '<br><small>' . __('sale.total') . ': ' . number_format($total, 2) . '</small>';
+                    if ($status != 'paid') {
+                        $html .= '<br><small>' . __('payment.due') . ': ' . number_format($due, 2) . '</small>';
+                    }
+                    return $html;
+                })
                 ->editColumn('quantity', function ($row) {
                     return number_format($row->quantity, 2) . ' ' . e($row->unit_name);
                 })
@@ -66,15 +115,20 @@ class OrderSheetController extends Controller
                 ->editColumn('estimated_completion_at', function ($row) {
                     return $row->estimated_completion_at ? Carbon::parse($row->estimated_completion_at)->format('d/m/Y H:i') : '-';
                 })
-                ->rawColumns(['action', 'order_no', 'status'])
+                ->rawColumns(['action', 'order_no', 'status', 'payment_status'])
                 ->make(true);
         }
 
         $business_locations = BusinessLocation::forDropdown($business_id);
         $statuses = LaundryStatus::forDropdown($business_id);
         $service_types = LaundryServiceType::forDropdown($business_id);
+        $payment_statuses = [
+            'due' => __('lang_v1.due'),
+            'partial' => __('lang_v1.partial'),
+            'paid' => __('lang_v1.paid'),
+        ];
 
-        return view('laundry::order_sheet.index', compact('business_locations', 'statuses', 'service_types'));
+        return view('laundry::order_sheet.index', compact('business_locations', 'statuses', 'service_types', 'payment_statuses'));
     }
 
     public function getOrderSheets(Request $request)
@@ -87,6 +141,9 @@ class OrderSheetController extends Controller
             if (!empty($contact_id)) {
                 $query->where('contact_id', $contact_id);
             }
+
+            // Exclude fully paid order sheets from POS dropdown selection
+            $query->whereRaw("(SELECT COALESCE(SUM(tp.amount), 0) FROM transaction_payments tp JOIN transactions t ON t.id = tp.transaction_id WHERE t.laundry_order_sheet_id = laundry_order_sheets.id AND tp.is_return = 0) < (laundry_order_sheets.quantity * COALESCE((SELECT it.default_price FROM laundry_item_types it WHERE it.id = laundry_order_sheets.laundry_item_type_id), 0))");
 
             $order_sheets = $query->pluck('order_no', 'id');
 
@@ -101,6 +158,63 @@ class OrderSheetController extends Controller
                 'msg' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function addPayment($id)
+    {
+        $business_id = request()->session()->get('user.business_id');
+        $order_sheet = LaundryOrderSheet::where('business_id', $business_id)->findOrFail($id);
+        $transaction = $this->_getOrCreateTransaction($order_sheet);
+
+        $transactionPaymentController = app(\App\Http\Controllers\TransactionPaymentController::class);
+        return $transactionPaymentController->addPayment($transaction->id);
+    }
+
+    public function viewPayments($id)
+    {
+        $business_id = request()->session()->get('user.business_id');
+        $order_sheet = LaundryOrderSheet::where('business_id', $business_id)->findOrFail($id);
+        $transaction = $this->_getOrCreateTransaction($order_sheet);
+
+        $transactionPaymentController = app(\App\Http\Controllers\TransactionPaymentController::class);
+        return $transactionPaymentController->show($transaction->id);
+    }
+
+    private function _getOrCreateTransaction($order_sheet)
+    {
+        $transaction = \App\Transaction::where('business_id', $order_sheet->business_id)
+            ->where('laundry_order_sheet_id', $order_sheet->id)
+            ->where('type', 'sell')
+            ->first();
+
+        if (!$transaction) {
+            $ref_count = \App\Transaction::where('business_id', $order_sheet->business_id)->where('type', 'sell')->count() + 1;
+            $invoice_no = 'LND-INV-' . str_pad($ref_count, 4, '0', STR_PAD_LEFT);
+
+            $transaction = \App\Transaction::create([
+                'business_id' => $order_sheet->business_id,
+                'location_id' => $order_sheet->location_id,
+                'type' => 'sell',
+                'status' => 'final',
+                'payment_status' => 'due',
+                'contact_id' => $order_sheet->contact_id,
+                'laundry_order_sheet_id' => $order_sheet->id,
+                'invoice_no' => $invoice_no,
+                'transaction_date' => $order_sheet->received_at ?? \Carbon\Carbon::now(),
+                'total_before_tax' => $order_sheet->total_amount,
+                'final_total' => $order_sheet->total_amount,
+                'created_by' => auth()->user()->id ?? $order_sheet->created_by,
+                'sub_type' => 'laundry',
+            ]);
+        } else {
+            if ($transaction->final_total != $order_sheet->total_amount) {
+                $transaction->total_before_tax = $order_sheet->total_amount;
+                $transaction->final_total = $order_sheet->total_amount;
+                $transaction->save();
+            }
+        }
+
+        return $transaction;
     }
 
     public function create()
