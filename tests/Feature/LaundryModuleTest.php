@@ -255,24 +255,25 @@ class LaundryModuleTest extends TestCase
 
     public function test_get_order_sheets_endpoint_by_customer()
     {
-        \Illuminate\Support\Facades\Schema::dropIfExists('laundry_order_sheets');
-        \Illuminate\Support\Facades\Schema::dropIfExists('contacts');
+        if (!\Illuminate\Support\Facades\Schema::hasTable('contacts')) {
+            \Illuminate\Support\Facades\Schema::create('contacts', function ($table) {
+                $table->id();
+                $table->integer('business_id');
+                $table->string('type')->default('customer');
+                $table->string('name');
+                $table->timestamps();
+            });
+        }
 
-        \Illuminate\Support\Facades\Schema::create('contacts', function ($table) {
-            $table->id();
-            $table->integer('business_id');
-            $table->string('type')->default('customer');
-            $table->string('name');
-            $table->timestamps();
-        });
-
-        \Illuminate\Support\Facades\Schema::create('laundry_order_sheets', function ($table) {
-            $table->id();
-            $table->integer('business_id');
-            $table->string('order_no');
-            $table->unsignedBigInteger('contact_id');
-            $table->timestamps();
-        });
+        if (!\Illuminate\Support\Facades\Schema::hasTable('laundry_order_sheets')) {
+            \Illuminate\Support\Facades\Schema::create('laundry_order_sheets', function ($table) {
+                $table->id();
+                $table->integer('business_id');
+                $table->string('order_no');
+                $table->unsignedBigInteger('contact_id');
+                $table->timestamps();
+            });
+        }
 
         \App\Contact::create([
             'id' => 10,

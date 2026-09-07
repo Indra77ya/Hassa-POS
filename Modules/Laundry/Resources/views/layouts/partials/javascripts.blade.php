@@ -94,6 +94,14 @@
     }
 
     $(document).ready(function(){
+        if ($('#laundry_order_sheet_id').length) {
+            $('#laundry_order_sheet_id').select2({
+                placeholder: '{{ __("laundry::lang.select_order_sheet") }}',
+                allowClear: true,
+                width: '100%'
+            });
+        }
+
         $(document).off('change', '#laundry_order_sheet_id').on('change', '#laundry_order_sheet_id', function() {
             var order_sheet_id = $(this).val();
             if (order_sheet_id) {
