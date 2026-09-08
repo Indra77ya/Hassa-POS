@@ -69,7 +69,7 @@
                 @else
                   <span class="label bg-red">@lang('lang_v1.due')</span>
                 @endif
-                ({{ __('sale.total') }}: {{ number_format($order_sheet->total_amount, session('business.currency_precision', 2), session('currency')['decimal_separator'], session('currency')['thousand_separator']) }}, {{ __('sale.paid') }}: {{ number_format($order_sheet->total_paid, session('business.currency_precision', 2), session('currency')['decimal_separator'], session('currency')['thousand_separator']) }})
+                ({{ __('sale.total') }}: {{ number_format($order_sheet->total_amount, session('business.currency_precision', 2), session('currency')['decimal_separator'], session('currency')['thousand_separator']) }}, {{ __('lang_v1.paid') }}: {{ number_format($order_sheet->total_paid, session('business.currency_precision', 2), session('currency')['decimal_separator'], session('currency')['thousand_separator']) }})
               </td>
             </tr>
           </table>
