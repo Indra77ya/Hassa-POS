@@ -127,6 +127,11 @@
         if (!($('#laundry_order_sheet_id').length) || is_syncing_laundry_customer) return;
         is_syncing_laundry_customer = true;
         var current_order_sheet_id = $('#laundry_order_sheet_id').val();
+        var default_customer_id = $('#default_customer_id').length ? $('#default_customer_id').val() : '';
+
+        if (contact_id && contact_id == default_customer_id) {
+            contact_id = '';
+        }
 
         $.ajax({
             url: '/laundry/order-sheet/get-order-sheets',
