@@ -167,10 +167,6 @@ class DataController extends Controller
             $service_types = LaundryServiceType::forDropdown($business_id);
             $item_types = LaundryItemType::forDropdown($business_id);
             $order_sheets_list = LaundryOrderSheet::where('business_id', $business_id)
-                ->where(function($q) {
-                    $q->whereRaw("(laundry_order_sheets.quantity * COALESCE((SELECT it.default_price FROM laundry_item_types it WHERE it.id = laundry_order_sheets.laundry_item_type_id), 0)) = 0")
-                      ->orWhereRaw("(SELECT COALESCE(SUM(tp.amount), 0) FROM transaction_payments tp JOIN transactions t ON t.id = tp.transaction_id WHERE t.laundry_order_sheet_id = laundry_order_sheets.id AND tp.is_return = 0) < (laundry_order_sheets.quantity * COALESCE((SELECT it.default_price FROM laundry_item_types it WHERE it.id = laundry_order_sheets.laundry_item_type_id), 0))");
-                })
                 ->with(['itemType', 'transactions'])
                 ->get();
 
@@ -184,6 +180,8 @@ class DataController extends Controller
                     $status_label = ' (' . __('lang_v1.partial') . ' - ' . __('purchase.payment_due') . ': ' . $commonUtil->num_f($due) . ')';
                 } elseif ($os->payment_status == 'due') {
                     $status_label = ' (' . __('lang_v1.due') . ')';
+                } elseif ($os->payment_status == 'paid') {
+                    $status_label = ' (' . __('lang_v1.paid') . ')';
                 }
                 $order_sheets[$os->id] = $os->order_no . $status_label;
             }
