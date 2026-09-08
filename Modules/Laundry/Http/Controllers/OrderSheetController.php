@@ -199,30 +199,6 @@ class OrderSheetController extends Controller
         $order_sheet = LaundryOrderSheet::where('business_id', $business_id)->findOrFail($id);
         $transaction = $this->_getOrCreateTransaction($order_sheet);
 
-        $transaction_ids = \App\Transaction::where('laundry_order_sheet_id', $order_sheet->id)->pluck('id')->toArray();
-        if (!in_array($transaction->id, $transaction_ids)) {
-            $transaction_ids[] = $transaction->id;
-        }
-
-        if (request()->ajax()) {
-            $payments_query = \App\TransactionPayment::whereIn('transaction_id', $transaction_ids);
-
-            $accounts_enabled = false;
-            $moduleUtil = new \App\Utils\ModuleUtil();
-            if ($moduleUtil->isModuleEnabled('account')) {
-                $accounts_enabled = true;
-                $payments_query->with(['payment_account']);
-            }
-
-            $payments = $payments_query->get();
-            $location_id = !empty($transaction->location_id) ? $transaction->location_id : null;
-            $transactionUtil = new \App\Utils\TransactionUtil();
-            $payment_types = $transactionUtil->payment_types($location_id, true);
-
-            return view('transaction_payment.show_payments')
-                ->with(compact('transaction', 'payments', 'payment_types', 'accounts_enabled'));
-        }
-
         $transactionPaymentController = app(\App\Http\Controllers\TransactionPaymentController::class);
         return $transactionPaymentController->show($transaction->id);
     }

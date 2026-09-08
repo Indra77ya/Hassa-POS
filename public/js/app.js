@@ -45,6 +45,7 @@ $(document).ready(function() {
                 $(container)
                     .html(result)
                     .modal('show');
+                __currency_convert_recursively($(container));
             },
         });
     });

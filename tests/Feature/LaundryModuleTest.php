@@ -14,6 +14,7 @@ class LaundryModuleTest extends TestCase
     {
         parent::setUp();
 
+        \Illuminate\Support\Facades\Schema::dropIfExists('users');
         \Illuminate\Support\Facades\Schema::dropIfExists('business');
         \Illuminate\Support\Facades\Schema::dropIfExists('transaction_payments');
         \Illuminate\Support\Facades\Schema::dropIfExists('transactions');
@@ -85,6 +86,17 @@ class LaundryModuleTest extends TestCase
             $table->string('name')->default('DUMMY');
             $table->unsignedBigInteger('product_id');
             $table->boolean('is_dummy')->default(1);
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('users', function ($table) {
+            $table->id();
+            $table->integer('business_id')->nullable();
+            $table->string('first_name')->nullable();
+            $table->string('last_name')->nullable();
+            $table->string('username')->nullable();
+            $table->string('email')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
 
@@ -521,8 +533,15 @@ class LaundryModuleTest extends TestCase
         $this->assertEquals(30000, $data['due_amount']);
     }
 
-    public function test_view_payments_includes_multiple_transactions()
+    public function test_view_payments_returns_transaction_payments()
     {
+        $contact = \App\Contact::create([
+            'business_id' => 1,
+            'type' => 'customer',
+            'name' => 'Test Customer',
+            'created_by' => 1,
+        ]);
+
         $item_type = LaundryItemType::create([
             'business_id' => 1,
             'name' => 'Gorden',
@@ -532,7 +551,7 @@ class LaundryModuleTest extends TestCase
         $os = \Modules\Laundry\Entities\LaundryOrderSheet::create([
             'business_id' => 1,
             'order_no' => 'LND-MULTITX-01',
-            'contact_id' => 10,
+            'contact_id' => $contact->id,
             'laundry_item_type_id' => $item_type->id,
             'quantity' => 1, // Total = 40,000
         ]);
@@ -543,6 +562,7 @@ class LaundryModuleTest extends TestCase
             'type' => 'sell',
             'status' => 'final',
             'payment_status' => 'partial',
+            'contact_id' => $contact->id,
             'laundry_order_sheet_id' => $os->id,
             'final_total' => 40000,
         ]);
@@ -551,22 +571,6 @@ class LaundryModuleTest extends TestCase
             'transaction_id' => $tx1->id,
             'amount' => 10000,
             'method' => 'cash',
-        ]);
-
-        // Transaction 2: POS / Midtrans payment (Rp 30,000)
-        $tx2 = \App\Transaction::create([
-            'business_id' => 1,
-            'type' => 'sell',
-            'status' => 'final',
-            'payment_status' => 'paid',
-            'laundry_order_sheet_id' => $os->id,
-            'final_total' => 30000,
-        ]);
-
-        $p2 = \App\TransactionPayment::create([
-            'transaction_id' => $tx2->id,
-            'amount' => 30000,
-            'method' => 'midtrans',
         ]);
 
         $user = \Mockery::mock(\App\User::class)->makePartial();
@@ -587,6 +591,6 @@ class LaundryModuleTest extends TestCase
         $view_data = $response->getData();
         $this->assertArrayHasKey('payments', $view_data);
         $payments = $view_data['payments'];
-        $this->assertCount(2, $payments);
+        $this->assertCount(1, $payments);
     }
 }
