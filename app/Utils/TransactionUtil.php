@@ -3046,11 +3046,11 @@ class TransactionUtil extends Util
     public function getTotalPaid($transaction_id)
     {
         $total_paid = TransactionPayment::where('transaction_id', $transaction_id)
-                ->select(DB::raw('SUM(IF( is_return = 0, amount, amount*-1))as total_paid'))
+                ->select(DB::raw('SUM(CASE WHEN is_return = 0 THEN amount ELSE -1 * amount END) as total_paid'))
                 ->first()
                 ->total_paid;
 
-        return $total_paid;
+        return $total_paid ?? 0;
     }
 
     /**

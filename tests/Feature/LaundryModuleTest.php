@@ -14,8 +14,18 @@ class LaundryModuleTest extends TestCase
     {
         parent::setUp();
 
+        \Illuminate\Support\Facades\Schema::dropIfExists('activity_log');
+        \Illuminate\Support\Facades\Schema::dropIfExists('notification_templates');
+        \Illuminate\Support\Facades\Schema::dropIfExists('tax_rates');
+        \Illuminate\Support\Facades\Schema::dropIfExists('currencies');
+        \Illuminate\Support\Facades\Schema::dropIfExists('reference_counts');
+        \Illuminate\Support\Facades\Schema::dropIfExists('transaction_sell_lines');
+        \Illuminate\Support\Facades\Schema::dropIfExists('invoice_schemes');
+        \Illuminate\Support\Facades\Schema::dropIfExists('customer_groups');
         \Illuminate\Support\Facades\Schema::dropIfExists('users');
         \Illuminate\Support\Facades\Schema::dropIfExists('business');
+        \Illuminate\Support\Facades\Schema::dropIfExists('cash_registers');
+        \Illuminate\Support\Facades\Schema::dropIfExists('cash_register_transactions');
         \Illuminate\Support\Facades\Schema::dropIfExists('transaction_payments');
         \Illuminate\Support\Facades\Schema::dropIfExists('transactions');
         \Illuminate\Support\Facades\Schema::dropIfExists('laundry_order_sheets');
@@ -156,6 +166,7 @@ class LaundryModuleTest extends TestCase
             $table->integer('business_id');
             $table->string('type')->default('customer');
             $table->string('name');
+            $table->integer('customer_group_id')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });
@@ -188,6 +199,20 @@ class LaundryModuleTest extends TestCase
             $table->timestamps();
         });
 
+        \Illuminate\Support\Facades\Schema::create('transaction_sell_lines', function ($table) {
+            $table->id();
+            $table->unsignedBigInteger('transaction_id');
+            $table->unsignedBigInteger('product_id')->nullable();
+            $table->unsignedBigInteger('variation_id')->nullable();
+            $table->decimal('quantity', 22, 4)->default(1);
+            $table->decimal('unit_price', 22, 4)->default(0);
+            $table->decimal('unit_price_inc_tax', 22, 4)->default(0);
+            $table->decimal('unit_price_before_discount', 22, 4)->default(0);
+            $table->decimal('item_tax', 22, 4)->default(0);
+            $table->unsignedBigInteger('tax_id')->nullable();
+            $table->timestamps();
+        });
+
         \Illuminate\Support\Facades\Schema::create('transaction_payments', function ($table) {
             $table->id();
             $table->unsignedBigInteger('transaction_id');
@@ -207,6 +232,15 @@ class LaundryModuleTest extends TestCase
         \Illuminate\Support\Facades\Schema::create('business', function ($table) {
             $table->id();
             $table->string('name')->default('Test Business');
+            $table->string('time_zone')->default('Asia/Jakarta');
+            $table->string('accounting_method')->default('fifo');
+            $table->text('keyboard_shortcuts')->nullable();
+            $table->text('pos_settings')->nullable();
+            $table->boolean('enable_rp')->default(0);
+            $table->string('sales_cmsn_agnt')->nullable();
+            $table->decimal('default_sales_discount', 5, 2)->nullable();
+            $table->integer('default_sales_tax')->nullable();
+            $table->integer('currency_id')->nullable();
             $table->timestamps();
         });
 
@@ -214,6 +248,111 @@ class LaundryModuleTest extends TestCase
             'id' => 1,
             'name' => 'Test Business',
         ]);
+
+        \Illuminate\Support\Facades\Schema::create('currencies', function ($table) {
+            $table->id();
+            $table->string('country')->default('Indonesia');
+            $table->string('currency')->default('Rupiah');
+            $table->string('code')->default('IDR');
+            $table->string('symbol')->default('Rp');
+            $table->string('thousand_separator')->default(',');
+            $table->string('decimal_separator')->default('.');
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('tax_rates', function ($table) {
+            $table->id();
+            $table->integer('business_id')->default(1);
+            $table->string('name')->default('VAT');
+            $table->decimal('amount', 22, 4)->default(0);
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('notification_templates', function ($table) {
+            $table->id();
+            $table->integer('business_id')->default(1);
+            $table->string('template_for');
+            $table->text('email_body')->nullable();
+            $table->text('sms_body')->nullable();
+            $table->text('whatsapp_text')->nullable();
+            $table->boolean('auto_send')->default(0);
+            $table->boolean('auto_send_sms')->default(0);
+            $table->boolean('auto_send_wa_notif')->default(0);
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('activity_log', function ($table) {
+            $table->id();
+            $table->integer('business_id')->nullable();
+            $table->string('log_name')->nullable();
+            $table->text('description')->nullable();
+            $table->unsignedBigInteger('subject_id')->nullable();
+            $table->string('subject_type')->nullable();
+            $table->unsignedBigInteger('causer_id')->nullable();
+            $table->string('causer_type')->nullable();
+            $table->text('properties')->nullable();
+            $table->uuid('batch_uuid')->nullable();
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('customer_groups', function ($table) {
+            $table->id();
+            $table->integer('business_id')->default(1);
+            $table->string('name')->default('Default');
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('reference_counts', function ($table) {
+            $table->id();
+            $table->integer('business_id')->default(1);
+            $table->string('ref_type');
+            $table->integer('ref_count')->default(1);
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('invoice_schemes', function ($table) {
+            $table->id();
+            $table->integer('business_id')->default(1);
+            $table->string('name')->default('Default');
+            $table->string('scheme_type')->default('blank');
+            $table->string('prefix')->default('INV');
+            $table->string('number_type')->default('sequential');
+            $table->integer('start_number')->default(1);
+            $table->integer('invoice_count')->default(0);
+            $table->integer('total_digits')->default(4);
+            $table->boolean('is_default')->default(1);
+            $table->timestamps();
+        });
+
+        \App\InvoiceScheme::create([
+            'business_id' => 1,
+            'name' => 'Default Scheme',
+            'is_default' => 1,
+            'number_type' => 'sequential',
+            'total_digits' => 4,
+            'start_number' => 1,
+            'invoice_count' => 0,
+        ]);
+
+        \Illuminate\Support\Facades\Schema::create('cash_registers', function ($table) {
+            $table->id();
+            $table->integer('business_id')->default(1);
+            $table->integer('location_id')->default(1);
+            $table->integer('user_id')->nullable();
+            $table->string('status')->default('open');
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('cash_register_transactions', function ($table) {
+            $table->id();
+            $table->integer('cash_register_id');
+            $table->integer('transaction_id')->nullable();
+            $table->decimal('amount', 22, 4)->default(0);
+            $table->string('pay_method')->default('cash');
+            $table->string('type')->default('credit');
+            $table->string('transaction_type')->default('sell');
+            $table->timestamps();
+        });
 
         \App\BusinessLocation::create([
             'id' => 1,
@@ -674,5 +813,167 @@ class LaundryModuleTest extends TestCase
         // Test GET status with non-existent order_no
         $notFoundResponse = $this->get('/laundry/status/NONEXISTENT');
         $notFoundResponse->assertStatus(200);
+    }
+
+    public function test_laundry_pos_multiple_payments_reuses_single_transaction_and_invoice()
+    {
+        $contact = \App\Contact::create([
+            'business_id' => 1,
+            'type' => 'customer',
+            'name' => 'Rudi',
+            'created_by' => 1,
+        ]);
+
+        $item_type = LaundryItemType::create([
+            'business_id' => 1,
+            'name' => 'Laundry Kiloan Rudi',
+            'default_price' => 60000,
+        ]);
+
+        $os = \Modules\Laundry\Entities\LaundryOrderSheet::create([
+            'business_id' => 1,
+            'order_no' => 'LND-RUDI-01',
+            'contact_id' => $contact->id,
+            'laundry_item_type_id' => $item_type->id,
+            'quantity' => 1, // Total = 60,000
+        ]);
+
+        $user = \Mockery::mock(\App\User::class)->makePartial();
+        $user->id = 1;
+        $user->business_id = 1;
+        $user->shouldReceive('permitted_locations')->andReturn('all');
+        $user->shouldReceive('can')->andReturn(true);
+        $user->shouldReceive('hasPermissionTo')->andReturn(true);
+        $user->shouldReceive('getAuthIdentifier')->andReturn(1);
+        $this->actingAs($user);
+
+        $biz = \App\Business::find(1);
+        $biz->accounting_method = 'fifo';
+        $biz->keyboard_shortcuts = '{}';
+        $biz->pos_settings = json_encode(['enable_midtrans' => 1, 'midtrans_server_key' => 'SB-Mid-server-123', 'midtrans_client_key' => 'SB-Mid-client-123']);
+        $biz->save();
+
+        session([
+            'user.business_id' => 1,
+            'user.id' => 1,
+            'business' => $biz,
+        ]);
+
+        \App\CashRegister::create([
+            'business_id' => 1,
+            'location_id' => 1,
+            'user_id' => $user->id,
+            'status' => 'open',
+        ]);
+
+        // Payment 1: Rudi pays Rp 30,000 Cash via POS store
+        $input1 = [
+            'location_id' => 1,
+            'is_direct_sale' => 0,
+            'contact_id' => $contact->id,
+            'laundry_order_sheet_id' => $os->id,
+            'status' => 'final',
+            'final_total' => 60000,
+            'discount_type' => 'fixed',
+            'discount_amount' => 0,
+            'tax_rate_id' => null,
+            'products' => [
+                [
+                    'product_id' => 1,
+                    'variation_id' => 1,
+                    'quantity' => 1,
+                    'unit_price' => 60000,
+                    'unit_price_inc_tax' => 60000,
+                    'item_tax' => 0,
+                    'tax_id' => null,
+                    'enable_stock' => 0,
+                    'product_type' => 'single',
+                ],
+            ],
+            'payment' => [
+                [
+                    'method' => 'cash',
+                    'amount' => 30000,
+                ],
+            ],
+        ];
+
+        $request1 = \Illuminate\Http\Request::create('/pos', 'POST', $input1);
+        $request1->setLaravelSession(app('session.store'));
+        app()->instance('request', $request1);
+
+        $controller = app(\App\Http\Controllers\SellPosController::class);
+        $res1 = $controller->store($request1);
+
+        $this->assertEquals(1, $res1['success']);
+        $tx_id1 = $res1['transaction_id'];
+
+        // Verify only 1 transaction created for this order sheet
+        $tx_count1 = \App\Transaction::where('laundry_order_sheet_id', $os->id)->where('type', 'sell')->count();
+        $this->assertEquals(1, $tx_count1);
+
+        $tx1 = \App\Transaction::find($tx_id1);
+        $this->assertEquals('partial', $tx1->payment_status);
+        $this->assertEquals(60000, $tx1->final_total);
+
+        // Payment 2: Rudi pays remaining Rp 30,000 via Midtrans
+        // Step A: Midtrans Token request (creates/reuses draft transaction or existing transaction)
+        $input2 = [
+            'location_id' => 1,
+            'is_direct_sale' => 0,
+            'contact_id' => $contact->id,
+            'laundry_order_sheet_id' => $os->id,
+            'status' => 'draft',
+            'final_total' => 30000,
+            'discount_type' => 'fixed',
+            'discount_amount' => 0,
+            'tax_rate_id' => null,
+            'products' => [
+                [
+                    'product_id' => 1,
+                    'variation_id' => 1,
+                    'quantity' => 1,
+                    'unit_price' => 30000,
+                    'unit_price_inc_tax' => 30000,
+                    'item_tax' => 0,
+                    'tax_id' => null,
+                    'enable_stock' => 0,
+                    'product_type' => 'single',
+                ],
+            ],
+            'payment' => [],
+        ];
+
+        $request2 = \Illuminate\Http\Request::create('/pos', 'POST', $input2);
+        $request2->setLaravelSession(app('session.store'));
+        app()->instance('request', $request2);
+
+        $res2 = $controller->store($request2);
+
+        $this->assertEquals(1, $res2['success']);
+        $tx_id2 = $res2['transaction_id'];
+
+        // MUST be the exact same transaction ID (Invoice #1)
+        $this->assertEquals($tx_id1, $tx_id2);
+
+        // Still 1 single transaction/invoice for this order sheet
+        $tx_count2 = \App\Transaction::where('laundry_order_sheet_id', $os->id)->where('type', 'sell')->count();
+        $this->assertEquals(1, $tx_count2);
+
+        // Step B: Finalize Midtrans Payment for remaining Rp 30,000
+        $midtransController = app(\App\Http\Controllers\MidtransController::class);
+        $midtransController->finalizeAndPayTransaction($tx1, 'MID-POS-TEST-RUDI');
+
+        $tx1->refresh();
+        $this->assertEquals('paid', $tx1->payment_status);
+        $this->assertEquals(60000, $tx1->final_total);
+
+        // Verify total payments on Invoice = 60,000 (30,000 cash + 30,000 midtrans)
+        $total_paid = \App\TransactionPayment::where('transaction_id', $tx1->id)->sum('amount');
+        $this->assertEquals(60000, $total_paid);
+
+        // Order Sheet payment status MUST be 'paid'
+        $os->refresh();
+        $this->assertEquals('paid', $os->payment_status);
     }
 }

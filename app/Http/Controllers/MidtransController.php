@@ -66,7 +66,17 @@ class MidtransController extends Controller
                 ? 'https://app.midtrans.com/snap/v1/transactions'
                 : 'https://app.sandbox.midtrans.com/snap/v1/transactions';
 
-            $grossAmount = (int) round($transaction->final_total);
+            $paidAmount = $this->transactionUtil->getTotalPaid($transaction->id);
+            $dueAmount = max(0, $transaction->final_total - $paidAmount);
+            $grossAmount = (int) round($dueAmount > 0 ? $dueAmount : $transaction->final_total);
+
+            if ($grossAmount <= 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Transaksi ini sudah lunas.',
+                ], 400);
+            }
+
             $orderId = 'MID-POS-' . $transaction->id . '-' . time();
 
             $itemDetails = [];
@@ -417,17 +427,22 @@ class MidtransController extends Controller
         }
 
         if ($transaction->payment_status != 'paid') {
-            // Add payment line
-            $payment_data = [
-                'amount' => $transaction->final_total,
-                'method' => 'midtrans',
-                'paid_on' => \Carbon\Carbon::now()->toDateTimeString(),
-                'created_by' => $transaction->created_by,
-                'account_id' => $accountId,
-                'note' => 'Midtrans Order ID: ' . $orderId,
-            ];
-            $this->transactionUtil->createOrUpdatePaymentLines($transaction, [$payment_data], $transaction->business_id, null, false);
-            $this->transactionUtil->updatePaymentStatus($transaction->id, $transaction->final_total);
+            $paidAmount = $this->transactionUtil->getTotalPaid($transaction->id);
+            $paymentAmount = max(0, $transaction->final_total - $paidAmount);
+
+            if ($paymentAmount > 0) {
+                // Add payment line
+                $payment_data = [
+                    'amount' => $paymentAmount,
+                    'method' => 'midtrans',
+                    'paid_on' => \Carbon\Carbon::now()->toDateTimeString(),
+                    'created_by' => $transaction->created_by,
+                    'account_id' => $accountId,
+                    'note' => 'Midtrans Order ID: ' . $orderId,
+                ];
+                $this->transactionUtil->createOrUpdatePaymentLines($transaction, [$payment_data], $transaction->business_id, null, false);
+                $this->transactionUtil->updatePaymentStatus($transaction->id, $transaction->final_total);
+            }
         }
 
         // Fire SellCreatedOrModified event to trigger Accounting Module mapping (Revenue, Cash/Bank, COGS)

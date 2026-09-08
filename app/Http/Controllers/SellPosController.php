@@ -492,12 +492,42 @@ class SellPosController extends Controller
                 //upload document
                 $input['document'] = $this->transactionUtil->uploadFile($request, 'sell_document', 'documents');
 
-                $transaction = $this->transactionUtil->createSellTransaction($business_id, $input, $invoice_total, $user_id);
+                $laundry_order_sheet_id = $input['laundry_order_sheet_id'] ?? null;
+                $transaction = null;
+                $existing_transaction = null;
+
+                if (!empty($laundry_order_sheet_id)) {
+                    $existing_transaction = Transaction::where('business_id', $business_id)
+                        ->where('laundry_order_sheet_id', $laundry_order_sheet_id)
+                        ->where('type', 'sell')
+                        ->first();
+                }
+
+                if (!empty($existing_transaction)) {
+                    $transaction = $existing_transaction;
+                    $order_sheet = \Modules\Laundry\Entities\LaundryOrderSheet::find($laundry_order_sheet_id);
+                    if ($order_sheet) {
+                        $os_total = $order_sheet->total_amount;
+                        if ($os_total > 0 && $transaction->final_total < $os_total) {
+                            $transaction->final_total = $os_total;
+                            $transaction->total_before_tax = $os_total;
+                            $transaction->save();
+                        }
+                    }
+                } else {
+                    $transaction = $this->transactionUtil->createSellTransaction($business_id, $input, $invoice_total, $user_id);
+                    if (!empty($laundry_order_sheet_id)) {
+                        $transaction->laundry_order_sheet_id = $laundry_order_sheet_id;
+                        $transaction->save();
+                    }
+                }
 
                 //Upload Shipping documents
                 Media::uploadMedia($business_id, $transaction, $request, 'shipping_documents', false, 'shipping_document');
 
-                $this->transactionUtil->createOrUpdateSellLines($transaction, $input['products'], $input['location_id']);
+                if (empty($existing_transaction) || $transaction->sell_lines()->count() == 0) {
+                    $this->transactionUtil->createOrUpdateSellLines($transaction, $input['products'], $input['location_id']);
+                }
 
                 $change_return['amount'] = $input['change_return'] ?? 0;
                 $change_return['is_return'] = 1;
