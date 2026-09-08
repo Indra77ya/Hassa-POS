@@ -15,19 +15,160 @@ use Tests\TestCase;
 
 class MidtransPosSyncTest extends TestCase
 {
-    use RefreshDatabase;
-
     protected function setUp(): void
     {
         parent::setUp();
         $this->withoutMiddleware(\App\Http\Middleware\AdminSidebarMenu::class);
+        $this->withoutMiddleware(\App\Http\Middleware\IsInstalled::class);
+        $this->withoutMiddleware(\App\Http\Middleware\SetSessionData::class);
+
+        \Illuminate\Support\Facades\Schema::dropIfExists('system');
+        \Illuminate\Support\Facades\Schema::dropIfExists('users');
+        \Illuminate\Support\Facades\Schema::dropIfExists('business');
+        \Illuminate\Support\Facades\Schema::dropIfExists('business_locations');
+        \Illuminate\Support\Facades\Schema::dropIfExists('contacts');
+        \Illuminate\Support\Facades\Schema::dropIfExists('transaction_sell_lines');
+        \Illuminate\Support\Facades\Schema::dropIfExists('transactions');
+        \Illuminate\Support\Facades\Schema::dropIfExists('transaction_payments');
+        \Illuminate\Support\Facades\Schema::dropIfExists('reference_counts');
+        \Illuminate\Support\Facades\Schema::dropIfExists('invoice_schemes');
+
+        \Illuminate\Support\Facades\Schema::create('system', function ($table) {
+            $table->id();
+            $table->string('key');
+            $table->string('value')->nullable();
+            $table->timestamps();
+        });
+
+        \App\System::create([
+            'key' => 'db_version',
+            'value' => config('author.app_version'),
+        ]);
+
+        \Illuminate\Support\Facades\Schema::create('users', function ($table) {
+            $table->id();
+            $table->integer('business_id')->nullable();
+            $table->string('first_name')->nullable();
+            $table->string('email')->nullable();
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('business', function ($table) {
+            $table->id();
+            $table->integer('owner_id')->nullable();
+            $table->string('name')->default('Test');
+            $table->text('pos_settings')->nullable();
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('business_locations', function ($table) {
+            $table->id();
+            $table->integer('business_id')->default(1);
+            $table->string('name')->default('Main Shop');
+            $table->string('location_id')->nullable();
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('contacts', function ($table) {
+            $table->id();
+            $table->integer('business_id');
+            $table->string('type')->default('customer');
+            $table->string('name');
+            $table->decimal('balance', 22, 4)->default(0);
+            $table->integer('created_by')->default(1);
+            $table->softDeletes();
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('transaction_sell_lines', function ($table) {
+            $table->id();
+            $table->unsignedBigInteger('transaction_id');
+            $table->unsignedBigInteger('product_id')->nullable();
+            $table->unsignedBigInteger('variation_id')->nullable();
+            $table->decimal('quantity', 22, 4)->default(1);
+            $table->decimal('unit_price', 22, 4)->default(0);
+            $table->decimal('unit_price_inc_tax', 22, 4)->default(0);
+            $table->decimal('unit_price_before_discount', 22, 4)->default(0);
+            $table->decimal('item_tax', 22, 4)->default(0);
+            $table->unsignedBigInteger('tax_id')->nullable();
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('transactions', function ($table) {
+            $table->id();
+            $table->integer('business_id');
+            $table->integer('location_id')->nullable();
+            $table->string('type')->default('sell');
+            $table->string('status')->default('final');
+            $table->string('payment_status')->default('due');
+            $table->integer('contact_id')->nullable();
+            $table->unsignedBigInteger('laundry_order_sheet_id')->nullable();
+            $table->string('invoice_no')->nullable();
+            $table->dateTime('transaction_date')->nullable();
+            $table->decimal('total_before_tax', 22, 4)->default(0);
+            $table->decimal('final_total', 22, 4)->default(0);
+            $table->integer('created_by')->default(1);
+            $table->string('sub_type')->nullable();
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('transaction_payments', function ($table) {
+            $table->id();
+            $table->unsignedBigInteger('transaction_id');
+            $table->decimal('amount', 22, 4)->default(0);
+            $table->string('method')->default('cash');
+            $table->boolean('is_return')->default(0);
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('reference_counts', function ($table) {
+            $table->id();
+            $table->integer('business_id')->default(1);
+            $table->string('ref_type');
+            $table->integer('ref_count')->default(1);
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('invoice_schemes', function ($table) {
+            $table->id();
+            $table->integer('business_id')->default(1);
+            $table->string('name')->default('Default');
+            $table->string('scheme_type')->default('blank');
+            $table->string('prefix')->default('INV');
+            $table->string('number_type')->default('sequential');
+            $table->integer('start_number')->default(1);
+            $table->integer('invoice_count')->default(0);
+            $table->integer('total_digits')->default(4);
+            $table->boolean('is_default')->default(1);
+            $table->timestamps();
+        });
+
+        \App\InvoiceScheme::create([
+            'business_id' => 1,
+            'name' => 'Default Scheme',
+            'is_default' => 1,
+            'number_type' => 'sequential',
+            'total_digits' => 4,
+            'start_number' => 1,
+            'invoice_count' => 0,
+        ]);
     }
 
     /** @test */
     public function client_side_sync_payment_finalizes_transaction_and_creates_payment_line()
     {
-        $user = User::factory()->create();
-        $business = Business::factory()->create([
+        $user = \Mockery::mock(\App\User::class)->makePartial();
+        $user->id = 1;
+        $user->business_id = 1;
+        $user->user_type = 'user';
+        $user->status = 'active';
+        $user->shouldReceive('permitted_locations')->andReturn('all');
+        $user->shouldReceive('can')->andReturn(true);
+        $user->shouldReceive('hasPermissionTo')->andReturn(true);
+        $user->shouldReceive('getAuthIdentifier')->andReturn(1);
+
+        $business = Business::create([
+            'id' => 1,
             'owner_id' => $user->id,
             'pos_settings' => json_encode([
                 'enable_midtrans' => '1',
@@ -36,8 +177,6 @@ class MidtransPosSyncTest extends TestCase
                 'midtrans_mode' => 'sandbox',
             ]),
         ]);
-        $user->business_id = $business->id;
-        $user->save();
 
         $location = BusinessLocation::create([
             'business_id' => $business->id,
@@ -67,6 +206,7 @@ class MidtransPosSyncTest extends TestCase
         ]);
 
         $this->actingAs($user);
+        session(['user.business_id' => $business->id, 'user.id' => $user->id]);
 
         $response = $this->postJson(route('midtrans.sync_payment', [$transaction->id]), [
             'order_id' => 'MID-POS-17-1787936711',
@@ -89,10 +229,17 @@ class MidtransPosSyncTest extends TestCase
     /** @test */
     public function sync_payment_is_idempotent()
     {
-        $user = User::factory()->create();
-        $business = Business::factory()->create(['owner_id' => $user->id]);
-        $user->business_id = $business->id;
-        $user->save();
+        $user = \Mockery::mock(\App\User::class)->makePartial();
+        $user->id = 1;
+        $user->business_id = 1;
+        $user->user_type = 'user';
+        $user->status = 'active';
+        $user->shouldReceive('permitted_locations')->andReturn('all');
+        $user->shouldReceive('can')->andReturn(true);
+        $user->shouldReceive('hasPermissionTo')->andReturn(true);
+        $user->shouldReceive('getAuthIdentifier')->andReturn(1);
+
+        $business = Business::create(['id' => 1, 'owner_id' => $user->id]);
 
         $contact = Contact::create([
             'business_id' => $business->id,
@@ -116,6 +263,7 @@ class MidtransPosSyncTest extends TestCase
         ]);
 
         $this->actingAs($user);
+        session(['user.business_id' => $business->id, 'user.id' => $user->id]);
 
         // First call
         $this->postJson(route('midtrans.sync_payment', [$transaction->id]));
