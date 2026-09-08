@@ -16,9 +16,17 @@ use App\User;
 use Yajra\DataTables\Facades\DataTables;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Utils\Util;
 
 class OrderSheetController extends Controller
 {
+    protected $commonUtil;
+
+    public function __construct(?Util $commonUtil = null)
+    {
+        $this->commonUtil = $commonUtil ?? new Util();
+    }
+
     public function index(Request $request)
     {
         $business_id = request()->session()->get('user.business_id');
@@ -64,10 +72,10 @@ class OrderSheetController extends Controller
                     $html .= '<li><a href="#" data-href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'getStatusModal'], [$row->id]) . '" class="btn-modal" data-container=".view_modal"><i class="fa fa-edit"></i> ' . __('laundry::lang.change_status') . '</a></li>';
 
                     if ($row->payment_status != 'paid') {
-                        $html .= '<li><a href="#" data-href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'addPayment'], [$row->id]) . '" class="btn-modal" data-container=".payment_modal"><i class="fa fa-money"></i> ' . __('purchase.add_payment') . '</a></li>';
+                        $html .= '<li><a href="#" data-href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'addPayment'], [$row->id]) . '" class="btn-modal" data-container=".payment_modal"><i class="fas fa-money-bill-alt"></i> ' . __('purchase.add_payment') . '</a></li>';
                     }
                     if ($row->total_paid > 0) {
-                        $html .= '<li><a href="#" data-href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'viewPayments'], [$row->id]) . '" class="btn-modal" data-container=".payment_modal"><i class="fa fa-money"></i> ' . __('purchase.view_payments') . '</a></li>';
+                        $html .= '<li><a href="#" data-href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'viewPayments'], [$row->id]) . '" class="btn-modal" data-container=".payment_modal"><i class="fas fa-money-bill-alt"></i> ' . __('purchase.view_payments') . '</a></li>';
                     }
 
                     $html .= '<li><a href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'print'], [$row->id]) . '" target="_blank"><i class="fa fa-print"></i> ' . __('messages.print') . '</a></li>';
@@ -100,14 +108,14 @@ class OrderSheetController extends Controller
                     }
 
                     $html = '<span class="label ' . $bg_class . '">' . e($text) . '</span>';
-                    $html .= '<br><small>' . __('sale.total') . ': ' . number_format($total, 2) . '</small>';
+                    $html .= '<br><small>' . __('sale.total') . ': ' . $this->commonUtil->num_f($total) . '</small>';
                     if ($status != 'paid') {
-                        $html .= '<br><small>' . __('purchase.payment_due') . ': ' . number_format($due, 2) . '</small>';
+                        $html .= '<br><small>' . __('purchase.payment_due') . ': ' . $this->commonUtil->num_f($due) . '</small>';
                     }
                     return $html;
                 })
                 ->editColumn('quantity', function ($row) {
-                    return number_format($row->quantity, 2) . ' ' . e($row->unit_name);
+                    return $this->commonUtil->num_f($row->quantity, false, null, true) . ' ' . e($row->unit_name);
                 })
                 ->editColumn('received_at', function ($row) {
                     return $row->received_at ? Carbon::parse($row->received_at)->format('d/m/Y H:i') : '-';
@@ -155,7 +163,7 @@ class OrderSheetController extends Controller
                 if ($os->payment_status == 'partial') {
                     $due = $os->total_amount - $os->total_paid;
                     if ($due < 0) $due = 0;
-                    $status_label = ' (' . __('lang_v1.partial') . ' - ' . __('purchase.payment_due') . ': ' . number_format($due, 2) . ')';
+                    $status_label = ' (' . __('lang_v1.partial') . ' - ' . __('purchase.payment_due') . ': ' . $this->commonUtil->num_f($due) . ')';
                 } elseif ($os->payment_status == 'due') {
                     $status_label = ' (' . __('lang_v1.due') . ')';
                 }
@@ -190,30 +198,6 @@ class OrderSheetController extends Controller
         $business_id = request()->session()->get('user.business_id');
         $order_sheet = LaundryOrderSheet::where('business_id', $business_id)->findOrFail($id);
         $transaction = $this->_getOrCreateTransaction($order_sheet);
-
-        $transaction_ids = \App\Transaction::where('laundry_order_sheet_id', $order_sheet->id)->pluck('id')->toArray();
-        if (!in_array($transaction->id, $transaction_ids)) {
-            $transaction_ids[] = $transaction->id;
-        }
-
-        if (request()->ajax()) {
-            $payments_query = \App\TransactionPayment::whereIn('transaction_id', $transaction_ids);
-
-            $accounts_enabled = false;
-            $moduleUtil = new \App\Utils\ModuleUtil();
-            if ($moduleUtil->isModuleEnabled('account')) {
-                $accounts_enabled = true;
-                $payments_query->with(['payment_account']);
-            }
-
-            $payments = $payments_query->get();
-            $location_id = !empty($transaction->location_id) ? $transaction->location_id : null;
-            $transactionUtil = new \App\Utils\TransactionUtil();
-            $payment_types = $transactionUtil->payment_types($location_id, true);
-
-            return view('transaction_payment.show_payments')
-                ->with(compact('transaction', 'payments', 'payment_types', 'accounts_enabled'));
-        }
 
         $transactionPaymentController = app(\App\Http\Controllers\TransactionPaymentController::class);
         return $transactionPaymentController->show($transaction->id);

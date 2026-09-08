@@ -39,7 +39,7 @@
                                 <tr>
                                     <td>{{ $summary->staff_name }}</td>
                                     <td>{{ $summary->total_tasks }}</td>
-                                    <td><strong>{{ number_format($summary->total_points, 2) }}</strong></td>
+                                    <td><strong>{{ number_format($summary->total_points, session('business.currency_precision', 2), session('currency')['decimal_separator'], session('currency')['thousand_separator']) }}</strong></td>
                                 </tr>
                             @empty
                                 <tr>
