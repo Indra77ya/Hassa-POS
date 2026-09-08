@@ -2461,6 +2461,10 @@ function reset_pos_form(){
 	$('select.payment_types_dropdown').val('cash').trigger('change');
 	$('#price_group').trigger('change');
 
+	if ($('#laundry_order_sheet_id').length) {
+		$('#laundry_order_sheet_id').val('').trigger('change');
+	}
+
 	//Reset shipping
 	__write_number($('input#shipping_charges'), $('input#shipping_charges').data('default'));
 	$('input#shipping_details').val($('input#shipping_details').data('default'));

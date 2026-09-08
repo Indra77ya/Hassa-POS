@@ -147,7 +147,14 @@ class OrderSheetController extends Controller
 
             $contact_id = $request->get('contact_id');
             if (!empty($contact_id)) {
-                $query->where('contact_id', $contact_id);
+                $default_customer = Contact::where('business_id', $business_id)
+                    ->where('is_default', 1)
+                    ->first();
+                $default_customer_id = $default_customer ? $default_customer->id : null;
+
+                if ($contact_id != $default_customer_id) {
+                    $query->where('contact_id', $contact_id);
+                }
             }
 
             $order_sheets_list = $query->with(['itemType', 'transactions'])->get();
