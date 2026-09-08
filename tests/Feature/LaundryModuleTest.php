@@ -471,7 +471,7 @@ class LaundryModuleTest extends TestCase
         $this->assertEquals('paid', $os->payment_status);
     }
 
-    public function test_get_order_sheets_excludes_fully_paid_sheets()
+    public function test_get_order_sheets_includes_paid_and_unpaid_sheets()
     {
         $item_type = LaundryItemType::create([
             'business_id' => 1,
@@ -521,7 +521,7 @@ class LaundryModuleTest extends TestCase
         $data = $response->getData(true);
         $this->assertTrue($data['success'], $data['msg'] ?? 'no msg');
         $this->assertArrayHasKey($unpaid_os->id, $data['order_sheets']);
-        $this->assertArrayNotHasKey($paid_os->id, $data['order_sheets']);
+        $this->assertArrayHasKey($paid_os->id, $data['order_sheets']);
     }
 
     public function test_get_pos_details_returns_payment_status_and_due_amount()
