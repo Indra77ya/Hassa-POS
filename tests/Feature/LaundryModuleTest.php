@@ -20,6 +20,10 @@ class LaundryModuleTest extends TestCase
         \Illuminate\Support\Facades\Schema::dropIfExists('transactions');
         \Illuminate\Support\Facades\Schema::dropIfExists('laundry_order_sheets');
         \Illuminate\Support\Facades\Schema::dropIfExists('contacts');
+        \Illuminate\Support\Facades\Schema::dropIfExists('laundry_statuses');
+        \Illuminate\Support\Facades\Schema::dropIfExists('laundry_processes');
+        \Illuminate\Support\Facades\Schema::dropIfExists('laundry_service_types');
+        \Illuminate\Support\Facades\Schema::dropIfExists('laundry_order_process_logs');
         \Illuminate\Support\Facades\Schema::dropIfExists('laundry_item_types');
         \Illuminate\Support\Facades\Schema::dropIfExists('products');
         \Illuminate\Support\Facades\Schema::dropIfExists('business_locations');
@@ -27,6 +31,44 @@ class LaundryModuleTest extends TestCase
         \Illuminate\Support\Facades\Schema::dropIfExists('variations');
         \Illuminate\Support\Facades\Schema::dropIfExists('product_variations');
         \Illuminate\Support\Facades\Schema::dropIfExists('units');
+
+        \Illuminate\Support\Facades\Schema::create('laundry_statuses', function ($table) {
+            $table->id();
+            $table->integer('business_id');
+            $table->string('name');
+            $table->string('color')->default('#3c8dbc');
+            $table->integer('sort_order')->default(1);
+            $table->boolean('is_completed_status')->default(0);
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('laundry_processes', function ($table) {
+            $table->id();
+            $table->integer('business_id');
+            $table->string('name');
+            $table->decimal('points', 8, 2)->default(0);
+            $table->integer('sort_order')->default(1);
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('laundry_service_types', function ($table) {
+            $table->id();
+            $table->integer('business_id');
+            $table->string('name');
+            $table->integer('completion_hours')->default(24);
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('laundry_order_process_logs', function ($table) {
+            $table->id();
+            $table->unsignedBigInteger('order_sheet_id');
+            $table->unsignedBigInteger('laundry_process_id');
+            $table->unsignedBigInteger('staff_id')->nullable();
+            $table->string('status')->default('pending');
+            $table->decimal('points_earned', 8, 2)->default(0);
+            $table->dateTime('completed_at')->nullable();
+            $table->timestamps();
+        });
 
         \Illuminate\Support\Facades\Schema::create('laundry_item_types', function ($table) {
             $table->id();
@@ -178,6 +220,8 @@ class LaundryModuleTest extends TestCase
             'business_id' => 1,
             'name' => 'Main Branch',
         ]);
+
+        app()->register(\Modules\Laundry\Providers\RouteServiceProvider::class);
     }
 
     public function test_laundry_entities_and_points_calculation()
@@ -592,5 +636,43 @@ class LaundryModuleTest extends TestCase
         $this->assertArrayHasKey('payments', $view_data);
         $payments = $view_data['payments'];
         $this->assertCount(1, $payments);
+    }
+
+    public function test_public_status_tracking_page_accessible_by_guest()
+    {
+        \Illuminate\Support\Facades\View::addNamespace('laundry', base_path('Modules/Laundry/Resources/views'));
+
+        $item_type = LaundryItemType::create([
+            'business_id' => 1,
+            'name' => 'Cuci Express',
+            'unit_name' => 'kg',
+            'default_price' => 15000,
+        ]);
+
+        $os = \Modules\Laundry\Entities\LaundryOrderSheet::create([
+            'business_id' => 1,
+            'order_no' => 'LND-2026-0004',
+            'contact_id' => 10,
+            'laundry_item_type_id' => $item_type->id,
+            'quantity' => 3.5,
+            'unit_name' => 'kg',
+        ]);
+
+        // Test GET status with valid order_no without session/auth
+        $response = $this->get('/laundry/status/LND-2026-0004');
+        $response->assertStatus(200);
+        $response->assertSee('LND-2026-0004');
+        $response->assertSee('3.50 kg');
+
+        // Test POST search
+        $searchResponse = $this->post('/laundry/status/search', [
+            'search_key' => 'LND-2026-0004',
+        ]);
+        $searchResponse->assertStatus(200);
+        $searchResponse->assertSee('LND-2026-0004');
+
+        // Test GET status with non-existent order_no
+        $notFoundResponse = $this->get('/laundry/status/NONEXISTENT');
+        $notFoundResponse->assertStatus(200);
     }
 }

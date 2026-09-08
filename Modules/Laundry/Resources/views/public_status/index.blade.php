@@ -34,7 +34,7 @@
                         <h3>@lang('laundry::lang.order_no'): <strong>{{ $order_sheet->order_no }}</strong></h3>
                         <p><strong>@lang('contact.customer'):</strong> {{ optional($order_sheet->customer)->name }}</p>
                         <p><strong>@lang('laundry::lang.service_type'):</strong> {{ optional($order_sheet->serviceType)->name }}</p>
-                        <p><strong>@lang('laundry::lang.item_type'):</strong> {{ optional($order_sheet->itemType)->name }} ({{ number_format($order_sheet->quantity, session('business.quantity_precision', 2), session('currency')['decimal_separator'], session('currency')['thousand_separator']) }} {{ $order_sheet->unit_name }})</p>
+                        <p><strong>@lang('laundry::lang.item_type'):</strong> {{ optional($order_sheet->itemType)->name }} ({{ @format_quantity($order_sheet->quantity) }} {{ optional($order_sheet->itemType)->unit_name }})</p>
                         <p><strong>@lang('laundry::lang.received_at'):</strong> {{ $order_sheet->received_at ? \Carbon\Carbon::parse($order_sheet->received_at)->format('d/m/Y H:i') : '-' }}</p>
                         <p><strong>@lang('laundry::lang.estimated_completion_at'):</strong> {{ $order_sheet->estimated_completion_at ? \Carbon\Carbon::parse($order_sheet->estimated_completion_at)->format('d/m/Y H:i') : '-' }}</p>
                     </div>

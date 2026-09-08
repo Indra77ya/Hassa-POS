@@ -35,7 +35,7 @@
           <table class="table table-bordered">
             <tr>
               <th>@lang('laundry::lang.quantity'):</th>
-              <td>{{ number_format($order_sheet->quantity, session('business.quantity_precision', 2), session('currency')['decimal_separator'], session('currency')['thousand_separator']) }} {{ $order_sheet->unit_name }}</td>
+              <td>{{ @format_quantity($order_sheet->quantity) }} {{ $order_sheet->unit_name }}</td>
             </tr>
             <tr>
               <th>@lang('laundry::lang.status'):</th>
@@ -69,7 +69,7 @@
                 @else
                   <span class="label bg-red">@lang('lang_v1.due')</span>
                 @endif
-                ({{ __('sale.total') }}: {{ number_format($order_sheet->total_amount, session('business.currency_precision', 2), session('currency')['decimal_separator'], session('currency')['thousand_separator']) }}, {{ __('lang_v1.paid') }}: {{ number_format($order_sheet->total_paid, session('business.currency_precision', 2), session('currency')['decimal_separator'], session('currency')['thousand_separator']) }})
+                ({{ __('sale.total') }}: {{ @num_format($order_sheet->total_amount) }}, {{ __('lang_v1.paid') }}: {{ @num_format($order_sheet->total_paid) }})
               </td>
             </tr>
           </table>
@@ -109,7 +109,7 @@
                     <span class="label bg-yellow">@lang('laundry::lang.pending')</span>
                   @endif
                 </td>
-                <td>{{ number_format($log->points_earned, session('business.currency_precision', 2), session('currency')['decimal_separator'], session('currency')['thousand_separator']) }}</td>
+                <td>{{ @num_format($log->points_earned) }}</td>
                 <td>{{ $log->completed_at ? \Carbon\Carbon::parse($log->completed_at)->format('d/m/Y H:i') : '-' }}</td>
               </tr>
             @endforeach

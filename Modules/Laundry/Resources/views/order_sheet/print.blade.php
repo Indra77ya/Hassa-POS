@@ -27,7 +27,7 @@
             <strong>@lang('contact.customer'):</strong> {{ optional($order_sheet->customer)->name }} ({{ optional($order_sheet->customer)->mobile }})<br>
             <strong>@lang('laundry::lang.service_type'):</strong> {{ optional($order_sheet->serviceType)->name }}<br>
             <strong>@lang('laundry::lang.item_type'):</strong> {{ optional($order_sheet->itemType)->name }}<br>
-            <strong>@lang('laundry::lang.quantity'):</strong> {{ number_format($order_sheet->quantity, session('business.quantity_precision', 2), session('currency')['decimal_separator'], session('currency')['thousand_separator']) }} {{ $order_sheet->unit_name }}<br>
+            <strong>@lang('laundry::lang.quantity'):</strong> {{ @format_quantity($order_sheet->quantity) }} {{ $order_sheet->unit_name }}<br>
             <strong>@lang('laundry::lang.status'):</strong> {{ optional($order_sheet->status)->name }}<br>
             <strong>@lang('laundry::lang.received_at'):</strong> {{ $order_sheet->received_at ? \Carbon\Carbon::parse($order_sheet->received_at)->format('d/m/Y H:i') : '-' }}<br>
             <strong>@lang('laundry::lang.estimated_completion_at'):</strong> {{ $order_sheet->estimated_completion_at ? \Carbon\Carbon::parse($order_sheet->estimated_completion_at)->format('d/m/Y H:i') : '-' }}<br>

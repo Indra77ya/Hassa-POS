@@ -59,8 +59,8 @@ class Util
      */
     public function num_f($input_number, $add_symbol = false, $business_details = null, $is_quantity = false)
     {
-        $thousand_separator = ! empty($business_details) ? $business_details->thousand_separator : session('currency')['thousand_separator'];
-        $decimal_separator = ! empty($business_details) ? $business_details->decimal_separator : session('currency')['decimal_separator'];
+        $thousand_separator = ! empty($business_details) ? $business_details->thousand_separator : (session('currency')['thousand_separator'] ?? ',');
+        $decimal_separator = ! empty($business_details) ? $business_details->decimal_separator : (session('currency')['decimal_separator'] ?? '.');
 
         $currency_precision = ! empty($business_details) ? $business_details->currency_precision : session('business.currency_precision', 2);
 
@@ -72,7 +72,7 @@ class Util
 
         if ($add_symbol) {
             $currency_symbol_placement = ! empty($business_details) ? $business_details->currency_symbol_placement : session('business.currency_symbol_placement');
-            $symbol = ! empty($business_details) ? $business_details->currency_symbol : session('currency')['symbol'];
+            $symbol = ! empty($business_details) ? $business_details->currency_symbol : (session('currency')['symbol'] ?? '');
 
             if ($currency_symbol_placement == 'after') {
                 $formatted = $formatted.' '.$symbol;
