@@ -41,6 +41,40 @@ class LaundryModuleTest extends TestCase
         \Illuminate\Support\Facades\Schema::dropIfExists('variations');
         \Illuminate\Support\Facades\Schema::dropIfExists('product_variations');
         \Illuminate\Support\Facades\Schema::dropIfExists('units');
+        \Illuminate\Support\Facades\Schema::dropIfExists('permissions');
+        \Illuminate\Support\Facades\Schema::dropIfExists('roles');
+        \Illuminate\Support\Facades\Schema::dropIfExists('model_has_roles');
+        \Illuminate\Support\Facades\Schema::dropIfExists('notifications');
+
+        \Illuminate\Support\Facades\Schema::create('notifications', function ($table) {
+            $table->uuid('id')->primary();
+            $table->string('type');
+            $table->morphs('notifiable');
+            $table->text('data');
+            $table->timestamp('read_at')->nullable();
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('permissions', function ($table) {
+            $table->id();
+            $table->string('name');
+            $table->string('guard_name')->default('web');
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('roles', function ($table) {
+            $table->id();
+            $table->string('name');
+            $table->string('guard_name')->default('web');
+            $table->integer('business_id')->default(1);
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\Schema::create('model_has_roles', function ($table) {
+            $table->unsignedBigInteger('role_id');
+            $table->string('model_type');
+            $table->unsignedBigInteger('model_id');
+        });
 
         \Illuminate\Support\Facades\Schema::create('laundry_statuses', function ($table) {
             $table->id();
@@ -975,5 +1009,69 @@ class LaundryModuleTest extends TestCase
         // Order Sheet payment status MUST be 'paid'
         $os->refresh();
         $this->assertEquals('paid', $os->payment_status);
+    }
+
+    public function test_laundry_dashboard_view_renders_correctly()
+    {
+        $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+        $_SERVER['HTTP_USER_AGENT'] = 'PHPUnit';
+        \Illuminate\Support\Facades\View::addNamespace('laundry', base_path('Modules/Laundry/Resources/views'));
+
+        $user = \App\User::where('id', 1)->first();
+        if (!$user) {
+            $user = \App\User::create([
+                'id' => 1,
+                'business_id' => 1,
+                'first_name' => 'Admin',
+                'last_name' => 'User',
+                'username' => 'admin',
+                'email' => 'admin@test.com',
+            ]);
+        }
+        $this->actingAs($user);
+
+        $status = LaundryStatus::create([
+            'business_id' => 1,
+            'name' => 'Sedang Pencucian',
+            'color' => '#00c0ef',
+        ]);
+
+        $service_type = LaundryServiceType::create([
+            'business_id' => 1,
+            'name' => 'Express (1 Hari)',
+        ]);
+
+        $item_type = LaundryItemType::create([
+            'business_id' => 1,
+            'name' => 'Kemeja',
+            'unit_name' => 'pcs',
+            'default_price' => 12000,
+        ]);
+
+        $order = \Modules\Laundry\Entities\LaundryOrderSheet::create([
+            'business_id' => 1,
+            'order_no' => 'LND-TEST-0001',
+            'contact_id' => 10,
+            'laundry_service_type_id' => $service_type->id,
+            'laundry_status_id' => $status->id,
+            'laundry_item_type_id' => $item_type->id,
+            'quantity' => 3,
+            'unit_name' => 'pcs',
+        ]);
+
+        $recent_orders = collect([$order]);
+
+        $view = view('laundry::dashboard.index', [
+            'total_orders' => 5,
+            'pending_orders' => 3,
+            'completed_orders' => 2,
+            'recent_orders' => $recent_orders,
+        ])->render();
+
+        $this->assertStringContainsString('info-box-new-style', $view);
+        $this->assertStringContainsString('LND-TEST-0001', $view);
+        $this->assertStringContainsString('bg-aqua', $view);
+        $this->assertStringContainsString('bg-yellow', $view);
+        $this->assertStringContainsString('bg-green', $view);
     }
 }

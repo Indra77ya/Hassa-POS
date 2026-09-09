@@ -15,29 +15,29 @@
 <section class="content">
     <div class="row">
         <div class="col-md-4 col-sm-6 col-xs-12">
-            <div class="info-box bg-aqua">
-                <span class="info-box-icon"><i class="fa fa-shopping-basket"></i></span>
+            <div class="info-box info-box-new-style">
+                <span class="info-box-icon bg-aqua"><i class="fa fa-shopping-basket"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">@lang('laundry::lang.total_orders')</span>
-                    <span class="info-box-number">{{ $total_orders }}</span>
+                    <span class="info-box-text text-muted" style="font-size: 13px; font-weight: 600; text-transform: uppercase;">@lang('laundry::lang.total_orders')</span>
+                    <span class="info-box-number" style="font-size: 24px; font-weight: bold;">{{ $total_orders }}</span>
                 </div>
             </div>
         </div>
         <div class="col-md-4 col-sm-6 col-xs-12">
-            <div class="info-box bg-yellow">
-                <span class="info-box-icon"><i class="fa fa-clock-o"></i></span>
+            <div class="info-box info-box-new-style">
+                <span class="info-box-icon bg-yellow"><i class="fas fa-clock"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">@lang('laundry::lang.pending_orders')</span>
-                    <span class="info-box-number">{{ $pending_orders }}</span>
+                    <span class="info-box-text text-muted" style="font-size: 13px; font-weight: 600; text-transform: uppercase;">@lang('laundry::lang.pending_orders')</span>
+                    <span class="info-box-number" style="font-size: 24px; font-weight: bold;">{{ $pending_orders }}</span>
                 </div>
             </div>
         </div>
         <div class="col-md-4 col-sm-6 col-xs-12">
-            <div class="info-box bg-green">
-                <span class="info-box-icon"><i class="fa fa-check-circle"></i></span>
+            <div class="info-box info-box-new-style">
+                <span class="info-box-icon bg-green"><i class="fa fa-check-circle"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">@lang('laundry::lang.completed_orders')</span>
-                    <span class="info-box-number">{{ $completed_orders }}</span>
+                    <span class="info-box-text text-muted" style="font-size: 13px; font-weight: 600; text-transform: uppercase;">@lang('laundry::lang.completed_orders')</span>
+                    <span class="info-box-number" style="font-size: 24px; font-weight: bold;">{{ $completed_orders }}</span>
                 </div>
             </div>
         </div>
@@ -61,24 +61,24 @@
                 <tbody>
                     @forelse($recent_orders as $order)
                         <tr>
-                            <td><a href="{{ action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'show'], [$order->id]) }}">{{ $order->order_no }}</a></td>
+                            <td><a href="{{ action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'show'], [$order->id]) }}" style="font-weight: 600;">{{ $order->order_no }}</a></td>
                             <td>{{ optional($order->customer)->name }}</td>
                             <td>{{ optional($order->serviceType)->name }}</td>
                             <td>{{ @format_quantity($order->quantity) }} {{ $order->unit_name }}</td>
                             <td>
                                 @if($order->status)
-                                    <span class="label" style="background-color: {{ $order->status->color }}">{{ $order->status->name }}</span>
+                                    <span class="label" style="background-color: {{ $order->status->color }}; color: #ffffff; padding: 4px 8px; font-size: 11px; font-weight: 600; border-radius: 4px; display: inline-block;">{{ $order->status->name }}</span>
                                 @else
                                     -
                                 @endif
                             </td>
                             <td>
                                 @if($order->payment_status == 'paid')
-                                    <span class="label bg-green">@lang('lang_v1.paid')</span>
+                                    <span class="label bg-green" style="padding: 4px 8px; font-size: 11px; font-weight: 600; border-radius: 4px; display: inline-block;">@lang('lang_v1.paid')</span>
                                 @elseif($order->payment_status == 'partial')
-                                    <span class="label bg-yellow">@lang('lang_v1.partial')</span>
+                                    <span class="label bg-yellow" style="padding: 4px 8px; font-size: 11px; font-weight: 600; border-radius: 4px; display: inline-block; color: #ffffff;">@lang('lang_v1.partial')</span>
                                 @else
-                                    <span class="label bg-red">@lang('lang_v1.due')</span>
+                                    <span class="label bg-red" style="padding: 4px 8px; font-size: 11px; font-weight: 600; border-radius: 4px; display: inline-block;">@lang('lang_v1.due')</span>
                                 @endif
                             </td>
                             <td>{{ $order->received_at ? \Carbon\Carbon::parse($order->received_at)->format('d/m/Y H:i') : '-' }}</td>
