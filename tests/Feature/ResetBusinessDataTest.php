@@ -121,6 +121,64 @@ class ResetBusinessDataTest extends TestCase
             $table->timestamps();
         });
 
+        // Laundry tables
+        Schema::dropIfExists('laundry_order_process_logs');
+        Schema::dropIfExists('laundry_order_sheets');
+        Schema::dropIfExists('laundry_item_types');
+        Schema::dropIfExists('laundry_service_types');
+        Schema::dropIfExists('laundry_processes');
+        Schema::dropIfExists('laundry_statuses');
+
+        Schema::create('laundry_statuses', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->integer('business_id');
+            $table->string('name');
+            $table->timestamps();
+        });
+
+        Schema::create('laundry_processes', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->integer('business_id');
+            $table->string('name');
+            $table->timestamps();
+        });
+
+        Schema::create('laundry_service_types', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->integer('business_id');
+            $table->string('name');
+            $table->timestamps();
+        });
+
+        Schema::create('laundry_item_types', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->integer('business_id');
+            $table->string('name');
+            $table->timestamps();
+        });
+
+        Schema::create('laundry_order_sheets', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->integer('business_id');
+            $table->integer('location_id')->nullable();
+            $table->string('order_no')->nullable();
+            $table->integer('contact_id')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('laundry_order_process_logs', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('order_sheet_id');
+            $table->unsignedBigInteger('laundry_process_id')->nullable();
+            $table->timestamps();
+        });
+
+        if (!Schema::hasColumn('transactions', 'laundry_order_sheet_id')) {
+            Schema::table('transactions', function (Blueprint $table) {
+                $table->unsignedBigInteger('laundry_order_sheet_id')->nullable();
+            });
+        }
+
         // Accounts
         Schema::dropIfExists('accounts');
         Schema::create('accounts', function (Blueprint $table) {
@@ -455,5 +513,99 @@ class ResetBusinessDataTest extends TestCase
         // Assert both categories are deleted
         $this->assertNull(DB::table('categories')->find($prod_cat));
         $this->assertNull(DB::table('expense_categories')->find($exp_cat));
+    }
+
+    /**
+     * Test that resetting Laundry module deletes order sheets, logs, item types, service types, processes, statuses and unlinks transactions.
+     */
+    public function testResetLaundryDeletesAllLaundryDataAndUnlinksTransactions()
+    {
+        // Seed Laundry master data
+        $status_id = DB::table('laundry_statuses')->insertGetId([
+            'business_id' => 1,
+            'name' => 'Diproses'
+        ]);
+        $process_id = DB::table('laundry_processes')->insertGetId([
+            'business_id' => 1,
+            'name' => 'Cuci'
+        ]);
+        $service_id = DB::table('laundry_service_types')->insertGetId([
+            'business_id' => 1,
+            'name' => 'Reguler'
+        ]);
+        $item_id = DB::table('laundry_item_types')->insertGetId([
+            'business_id' => 1,
+            'name' => 'Kiloan'
+        ]);
+
+        // Seed Laundry order sheet
+        $sheet_id = DB::table('laundry_order_sheets')->insertGetId([
+            'business_id' => 1,
+            'location_id' => 1,
+            'order_no' => 'LND-0001',
+            'contact_id' => 1
+        ]);
+
+        // Seed Laundry process log
+        $log_id = DB::table('laundry_order_process_logs')->insertGetId([
+            'order_sheet_id' => $sheet_id,
+            'laundry_process_id' => $process_id
+        ]);
+
+        // Seed Transaction linked to laundry sheet
+        $tx_id = DB::table('transactions')->insertGetId([
+            'business_id' => 1,
+            'location_id' => 1,
+            'type' => 'sell',
+            'laundry_order_sheet_id' => $sheet_id
+        ]);
+
+        // Seed data for another business (should NOT be deleted)
+        $sheet_other = DB::table('laundry_order_sheets')->insertGetId([
+            'business_id' => 2,
+            'location_id' => 1,
+            'order_no' => 'LND-0002',
+            'contact_id' => 2
+        ]);
+        $status_other = DB::table('laundry_statuses')->insertGetId([
+            'business_id' => 2,
+            'name' => 'Selesai'
+        ]);
+
+        // Mock login as superadmin
+        $user = \Mockery::mock(\App\User::class)->makePartial();
+        $user->shouldReceive('can')->with('superadmin')->andReturn(true);
+        $user->id = 1;
+        $user->business_id = 1;
+        $this->actingAs($user);
+
+        // Call postResetData for laundry module
+        $controller = new BusinessController(app(BusinessUtil::class), app(ModuleUtil::class));
+        $request = new Request();
+        $request->merge([
+            'reset_modules' => ['laundry']
+        ]);
+
+        $response = $controller->postResetData($request, 1);
+        $result = $response->getData(true);
+
+        $this->assertTrue($result['success']);
+
+        // Assert business 1 laundry data deleted
+        $this->assertNull(DB::table('laundry_order_process_logs')->find($log_id));
+        $this->assertNull(DB::table('laundry_order_sheets')->find($sheet_id));
+        $this->assertNull(DB::table('laundry_item_types')->find($item_id));
+        $this->assertNull(DB::table('laundry_service_types')->find($service_id));
+        $this->assertNull(DB::table('laundry_processes')->find($process_id));
+        $this->assertNull(DB::table('laundry_statuses')->find($status_id));
+
+        // Assert transaction's laundry_order_sheet_id is set to null
+        $tx = DB::table('transactions')->find($tx_id);
+        $this->assertNotNull($tx);
+        $this->assertNull($tx->laundry_order_sheet_id);
+
+        // Assert business 2 data preserved
+        $this->assertNotNull(DB::table('laundry_order_sheets')->find($sheet_other));
+        $this->assertNotNull(DB::table('laundry_statuses')->find($status_other));
     }
 }
