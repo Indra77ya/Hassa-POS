@@ -56,6 +56,7 @@ return [
     'select_staff' => '-- Pilih Petugas --',
     'select_process' => '-- Pilih Proses --',
     'points' => 'Poin',
+    'process_points' => 'Poin Proses',
     'change_status' => 'Ubah Status',
     'process_history' => 'Riwayat Proses & Petugas',
     'process_name' => 'Nama Proses',
