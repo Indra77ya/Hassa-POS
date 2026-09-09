@@ -167,6 +167,9 @@
                 @if(isModuleEnabled('Repair'))
                     @includeIf('repair::layouts.partials.header')
                 @endif
+                @if(isModuleEnabled('Laundry'))
+                    @includeIf('laundry::layouts.partials.header')
+                @endif
                 @can('profit_loss_report.view')
                     <button type="button" type="button" id="view_todays_profit" title="{{ __('home.todays_profit') }}"
                         data-toggle="tooltip" data-placement="bottom"
