@@ -37,7 +37,7 @@ class DataController extends Controller
 
         $is_assetmanagement_enabled = (bool) $module_util->hasThePermissionInSubscription($business_id, 'assetmanagement_module');
 
-        if (auth()->user()->can('asset.view') || auth()->user()->can('asset.create') || $is_assetmanagement_enabled) {
+        if ($is_assetmanagement_enabled && (auth()->user()->can('superadmin') || auth()->user()->can('asset.view') || auth()->user()->can('asset.create'))) {
             Menu::modify(
                 'admin-sidebar-menu',
                 function ($menu) {
