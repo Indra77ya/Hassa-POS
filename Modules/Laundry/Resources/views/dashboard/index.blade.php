@@ -1,6 +1,18 @@
 @extends('layouts.app')
 @section('title', __('laundry::lang.laundry_dashboard'))
 
+@section('css')
+<style>
+    .info-box-new-style {
+        transform: none !important;
+        transition: none !important;
+    }
+    .info-box-new-style:hover {
+        transform: none !important;
+    }
+</style>
+@endsection
+
 @section('content')
 <section class="content-header">
     <h1>@lang('laundry::lang.laundry_dashboard')
