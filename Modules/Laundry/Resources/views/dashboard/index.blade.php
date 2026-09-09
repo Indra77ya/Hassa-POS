@@ -25,7 +25,7 @@
         </div>
         <div class="col-md-4 col-sm-6 col-xs-12">
             <div class="info-box info-box-new-style">
-                <span class="info-box-icon bg-yellow"><i class="fa fa-clock-o"></i></span>
+                <span class="info-box-icon bg-yellow"><i class="fas fa-clock"></i></span>
                 <div class="info-box-content">
                     <span class="info-box-text text-muted" style="font-size: 13px; font-weight: 600; text-transform: uppercase;">@lang('laundry::lang.pending_orders')</span>
                     <span class="info-box-number" style="font-size: 24px; font-weight: bold;">{{ $pending_orders }}</span>
