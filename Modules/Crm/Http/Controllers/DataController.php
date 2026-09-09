@@ -142,7 +142,21 @@ class DataController extends Controller
         $commonUtil = new Util();
         $is_admin = $commonUtil->is_admin(auth()->user(), $business_id);
 
-        if ($is_crm_enabled) {
+        $can_view_crm = auth()->check() && (
+            auth()->user()->can('superadmin') ||
+            auth()->user()->can('crm.access_all_schedule') ||
+            auth()->user()->can('crm.access_own_schedule') ||
+            auth()->user()->can('crm.access_all_leads') ||
+            auth()->user()->can('crm.access_own_leads') ||
+            auth()->user()->can('crm.access_all_campaigns') ||
+            auth()->user()->can('crm.access_own_campaigns') ||
+            auth()->user()->can('crm.access_contact_login') ||
+            auth()->user()->can('crm.access_sources') ||
+            auth()->user()->can('crm.access_life_stage') ||
+            auth()->user()->can('crm.access_proposal_template')
+        );
+
+        if ($is_crm_enabled && $can_view_crm) {
             Menu::modify(
                 'admin-sidebar-menu',
                 function ($menu) {

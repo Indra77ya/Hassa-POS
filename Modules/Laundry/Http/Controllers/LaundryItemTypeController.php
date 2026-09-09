@@ -16,6 +16,12 @@ class LaundryItemTypeController extends Controller
     public function __construct(?Util $commonUtil = null)
     {
         $this->commonUtil = $commonUtil ?? new Util();
+        $this->middleware(function ($request, $next) {
+            if (! (auth()->user()->can('superadmin') || auth()->user()->can('laundry.manage_master_data'))) {
+                abort(403, 'Unauthorized action.');
+            }
+            return $next($request);
+        });
     }
 
     public function index(Request $request)
