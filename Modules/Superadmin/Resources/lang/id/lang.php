@@ -294,6 +294,7 @@ return [
     'reset_repair' => 'Perbaikan (Repair)',
     'reset_essentials' => 'HR & Essentials',
     'reset_crm' => 'CRM',
+    'reset_laundry' => 'Laundry',
     'reset_selected' => 'Setel Ulang Data Terpilih',
     'reset_success' => 'Data berhasil disetel ulang!',
 

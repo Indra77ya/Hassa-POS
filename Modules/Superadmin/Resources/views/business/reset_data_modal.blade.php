@@ -177,6 +177,12 @@
                                     @lang('superadmin::lang.reset_crm')
                                 </label>
                             </div>
+                            <div class="checkbox">
+                                <label style="font-size: 13px; cursor: pointer;">
+                                    {!! Form::checkbox('reset_modules[]', 'laundry', false, ['class' => 'module_child child_checkbox']) !!}
+                                    @lang('superadmin::lang.reset_laundry')
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>

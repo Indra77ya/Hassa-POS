@@ -1191,6 +1191,37 @@ class BusinessController extends BaseController
                 }
             }
 
+            // Sub-category: laundry
+            if ($reset_all_mod || in_array('laundry', $reset_modules)) {
+                if (\Illuminate\Support\Facades\Schema::hasColumn('transactions', 'laundry_order_sheet_id')) {
+                    DB::table('transactions')
+                        ->where('business_id', $business_id)
+                        ->whereNotNull('laundry_order_sheet_id')
+                        ->update(['laundry_order_sheet_id' => null]);
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('laundry_order_sheets')) {
+                    $order_sheet_ids = DB::table('laundry_order_sheets')->where('business_id', $business_id)->pluck('id')->toArray();
+                    if (!empty($order_sheet_ids)) {
+                        if (\Illuminate\Support\Facades\Schema::hasTable('laundry_order_process_logs')) {
+                            DB::table('laundry_order_process_logs')->whereIn('order_sheet_id', $order_sheet_ids)->delete();
+                        }
+                        DB::table('laundry_order_sheets')->whereIn('id', $order_sheet_ids)->delete();
+                    }
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('laundry_item_types')) {
+                    DB::table('laundry_item_types')->where('business_id', $business_id)->delete();
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('laundry_service_types')) {
+                    DB::table('laundry_service_types')->where('business_id', $business_id)->delete();
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('laundry_processes')) {
+                    DB::table('laundry_processes')->where('business_id', $business_id)->delete();
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('laundry_statuses')) {
+                    DB::table('laundry_statuses')->where('business_id', $business_id)->delete();
+                }
+            }
+
             DB::commit();
 
             $output = [

@@ -301,6 +301,7 @@ return [
     'reset_repair' => 'Repair',
     'reset_essentials' => 'HR & Essentials',
     'reset_crm' => 'CRM',
+    'reset_laundry' => 'Laundry',
     'reset_selected' => 'Reset Selected Data',
     'reset_success' => 'Data successfully reset!',
 
