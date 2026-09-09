@@ -1016,6 +1016,101 @@
                 @endif --}}
             </div>
         </div>
+    @else
+        <div class="tw-px-5 tw-py-8">
+            <div class="tw-max-w-4xl tw-mx-auto">
+                <div class="tw-bg-white tw-shadow-sm tw-rounded-2xl tw-ring-1 tw-ring-gray-200 tw-p-6 sm:tw-p-8 tw-text-center">
+                    <div class="tw-inline-flex tw-items-center tw-justify-center tw-w-16 tw-h-16 tw-rounded-full tw-bg-primary-100 tw-text-primary-600 tw-mb-4">
+                        <svg class="tw-w-8 tw-h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                        </svg>
+                    </div>
+                    <h2 class="tw-text-xl sm:tw-text-2xl tw-font-bold tw-text-gray-900 tw-mb-2">
+                        Selamat Datang, {{ Session::get('user.first_name') }}! 👋
+                    </h2>
+                    <p class="tw-text-sm sm:tw-text-base tw-text-gray-600 tw-max-w-xl tw-mx-auto tw-mb-6">
+                        Anda telah berhasil masuk ke sistem. Gunakan pintasan di bawah ini atau navigasi menu di sebelah kiri untuk mulai bekerja.
+                    </p>
+
+                    <div class="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 md:tw-grid-cols-3 tw-gap-4 tw-mt-6">
+                        @if (auth()->user()->can('laundry.view') || auth()->user()->can('laundry.create') || auth()->user()->can('laundry.update_status') || auth()->user()->can('laundry.log_process'))
+                            <a href="{{ action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'index']) }}"
+                               class="tw-flex tw-items-center tw-gap-3 tw-p-4 tw-rounded-xl tw-border tw-border-gray-200 hover:tw-border-primary-500 hover:tw-bg-primary-50/50 tw-transition-all tw-group">
+                                <div class="tw-w-10 tw-h-10 tw-rounded-lg tw-bg-blue-100 tw-text-blue-600 tw-flex tw-items-center tw-justify-center tw-shrink-0 group-hover:tw-bg-blue-600 group-hover:tw-text-white tw-transition-colors">
+                                    <svg class="tw-w-5 tw-h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                                    </svg>
+                                </div>
+                                <div class="tw-text-left">
+                                    <span class="tw-block tw-font-semibold tw-text-gray-900 group-hover:tw-text-primary-600">Pesanan Laundry</span>
+                                    <span class="tw-block tw-text-xs tw-text-gray-500">Lihat & kelola lembar pesanan</span>
+                                </div>
+                            </a>
+                        @endif
+
+                        @if (auth()->user()->can('sell.create') || auth()->user()->can('pos.create'))
+                            <a href="{{ action([\App\Http\Controllers\SellPosController::class, 'create']) }}"
+                               class="tw-flex tw-items-center tw-gap-3 tw-p-4 tw-rounded-xl tw-border tw-border-gray-200 hover:tw-border-primary-500 hover:tw-bg-primary-50/50 tw-transition-all tw-group">
+                                <div class="tw-w-10 tw-h-10 tw-rounded-lg tw-bg-emerald-100 tw-text-emerald-600 tw-flex tw-items-center tw-justify-center tw-shrink-0 group-hover:tw-bg-emerald-600 group-hover:tw-text-white tw-transition-colors">
+                                    <svg class="tw-w-5 tw-h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                                    </svg>
+                                </div>
+                                <div class="tw-text-left">
+                                    <span class="tw-block tw-font-semibold tw-text-gray-900 group-hover:tw-text-primary-600">Layar Kasir (POS)</span>
+                                    <span class="tw-block tw-text-xs tw-text-gray-500">Buka transaksi kasir</span>
+                                </div>
+                            </a>
+                        @endif
+
+                        @if (auth()->user()->can('repair.view') || auth()->user()->can('job_sheet.create'))
+                            <a href="{{ action([\Modules\Repair\Http\Controllers\JobSheetController::class, 'index']) }}"
+                               class="tw-flex tw-items-center tw-gap-3 tw-p-4 tw-rounded-xl tw-border tw-border-gray-200 hover:tw-border-primary-500 hover:tw-bg-primary-50/50 tw-transition-all tw-group">
+                                <div class="tw-w-10 tw-h-10 tw-rounded-lg tw-bg-amber-100 tw-text-amber-600 tw-flex tw-items-center tw-justify-center tw-shrink-0 group-hover:tw-bg-amber-600 group-hover:tw-text-white tw-transition-colors">
+                                    <svg class="tw-w-5 tw-h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.83-5.83M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l5.654-4.654m0 0l3.03-2.496c.384-.317.626-.74.766-1.208" />
+                                    </svg>
+                                </div>
+                                <div class="tw-text-left">
+                                    <span class="tw-block tw-font-semibold tw-text-gray-900 group-hover:tw-text-primary-600">Servis / Repair</span>
+                                    <span class="tw-block tw-text-xs tw-text-gray-500">Kelola job sheet servis</span>
+                                </div>
+                            </a>
+                        @endif
+
+                        @if (auth()->user()->can('product.view') || auth()->user()->can('product.create'))
+                            <a href="{{ action([\App\Http\Controllers\ProductController::class, 'index']) }}"
+                               class="tw-flex tw-items-center tw-gap-3 tw-p-4 tw-rounded-xl tw-border tw-border-gray-200 hover:tw-border-primary-500 hover:tw-bg-primary-50/50 tw-transition-all tw-group">
+                                <div class="tw-w-10 tw-h-10 tw-rounded-lg tw-bg-purple-100 tw-text-purple-600 tw-flex tw-items-center tw-justify-center tw-shrink-0 group-hover:tw-bg-purple-600 group-hover:tw-text-white tw-transition-colors">
+                                    <svg class="tw-w-5 tw-h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25" />
+                                    </svg>
+                                </div>
+                                <div class="tw-text-left">
+                                    <span class="tw-block tw-font-semibold tw-text-gray-900 group-hover:tw-text-primary-600">Daftar Produk</span>
+                                    <span class="tw-block tw-text-xs tw-text-gray-500">Kelola katalog & stok produk</span>
+                                </div>
+                            </a>
+                        @endif
+
+                        @if (auth()->user()->can('customer.view') || auth()->user()->can('customer.create'))
+                            <a href="{{ action([\App\Http\Controllers\ContactController::class, 'index'], ['type' => 'customer']) }}"
+                               class="tw-flex tw-items-center tw-gap-3 tw-p-4 tw-rounded-xl tw-border tw-border-gray-200 hover:tw-border-primary-500 hover:tw-bg-primary-50/50 tw-transition-all tw-group">
+                                <div class="tw-w-10 tw-h-10 tw-rounded-lg tw-bg-indigo-100 tw-text-indigo-600 tw-flex tw-items-center tw-justify-center tw-shrink-0 group-hover:tw-bg-indigo-600 group-hover:tw-text-white tw-transition-colors">
+                                    <svg class="tw-w-5 tw-h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                                    </svg>
+                                </div>
+                                <div class="tw-text-left">
+                                    <span class="tw-block tw-font-semibold tw-text-gray-900 group-hover:tw-text-primary-600">Pelanggan</span>
+                                    <span class="tw-block tw-text-xs tw-text-gray-500">Kelola kontak pelanggan</span>
+                                </div>
+                            </a>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
     @endif
 
 @endsection
