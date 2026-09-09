@@ -24,6 +24,21 @@ class DataController extends Controller
     }
 
     /**
+     * Defines user permissions for the module.
+     * @return array
+     */
+    public function user_permissions()
+    {
+        return [
+            [
+                'value' => 'productcatalogue.view',
+                'label' => __('productcatalogue::lang.catalogue_qr'),
+                'default' => false,
+            ],
+        ];
+    }
+
+    /**
      * Adds Catalogue QR menus
      * @return null
      */
@@ -33,7 +48,12 @@ class DataController extends Controller
         $module_util = new ModuleUtil();
         $is_productcatalogue_enabled = (boolean)$module_util->hasThePermissionInSubscription($business_id, 'productcatalogue_module', 'superadmin_package');
 
-        if ($is_productcatalogue_enabled) {
+        $can_view_catalogue = auth()->check() && (
+            auth()->user()->can('superadmin') ||
+            auth()->user()->can('productcatalogue.view')
+        );
+
+        if ($is_productcatalogue_enabled && $can_view_catalogue) {
             Menu::modify('admin-sidebar-menu', function ($menu) {
                 $menu->url(
                         action('\Modules\ProductCatalogue\Http\Controllers\ProductCatalogueController@generateQr'),

@@ -29,6 +29,10 @@ class OrderSheetController extends Controller
 
     public function index(Request $request)
     {
+        if (! (auth()->user()->can('superadmin') || auth()->user()->can('laundry.view') || auth()->user()->can('laundry.create') || auth()->user()->can('laundry.update') || auth()->user()->can('laundry.delete') || auth()->user()->can('laundry.update_status') || auth()->user()->can('laundry.log_process'))) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $business_id = request()->session()->get('user.business_id');
 
         if ($request->ajax()) {
@@ -245,6 +249,10 @@ class OrderSheetController extends Controller
 
     public function create()
     {
+        if (! (auth()->user()->can('superadmin') || auth()->user()->can('laundry.create'))) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $business_id = request()->session()->get('user.business_id');
 
         $business_locations = BusinessLocation::forDropdown($business_id);
@@ -267,6 +275,10 @@ class OrderSheetController extends Controller
 
     public function store(Request $request)
     {
+        if (! (auth()->user()->can('superadmin') || auth()->user()->can('laundry.create'))) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $business_id = request()->session()->get('user.business_id');
         $user_id = request()->session()->get('user.id');
 
@@ -343,6 +355,10 @@ class OrderSheetController extends Controller
 
     public function edit($id)
     {
+        if (! (auth()->user()->can('superadmin') || auth()->user()->can('laundry.update'))) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $business_id = request()->session()->get('user.business_id');
         $order_sheet = LaundryOrderSheet::where('business_id', $business_id)->with('processLogs')->findOrFail($id);
 
@@ -363,6 +379,10 @@ class OrderSheetController extends Controller
 
     public function update(Request $request, $id)
     {
+        if (! (auth()->user()->can('superadmin') || auth()->user()->can('laundry.update'))) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $business_id = request()->session()->get('user.business_id');
         $user_id = request()->session()->get('user.id');
 
@@ -421,6 +441,10 @@ class OrderSheetController extends Controller
 
     public function destroy($id)
     {
+        if (! (auth()->user()->can('superadmin') || auth()->user()->can('laundry.delete'))) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $business_id = request()->session()->get('user.business_id');
 
         try {
@@ -435,6 +459,10 @@ class OrderSheetController extends Controller
 
     public function getStatusModal($id)
     {
+        if (! (auth()->user()->can('superadmin') || auth()->user()->can('laundry.update_status') || auth()->user()->can('laundry.update') || auth()->user()->can('laundry.log_process') || auth()->user()->can('laundry.create'))) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $business_id = request()->session()->get('user.business_id');
         $order_sheet = LaundryOrderSheet::where('business_id', $business_id)->with(['status', 'processLogs'])->findOrFail($id);
 
@@ -447,6 +475,10 @@ class OrderSheetController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
+        if (! (auth()->user()->can('superadmin') || auth()->user()->can('laundry.update_status') || auth()->user()->can('laundry.update') || auth()->user()->can('laundry.log_process') || auth()->user()->can('laundry.create'))) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $business_id = request()->session()->get('user.business_id');
         $user_id = request()->session()->get('user.id');
 

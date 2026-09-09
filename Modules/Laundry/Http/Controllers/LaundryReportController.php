@@ -18,6 +18,12 @@ class LaundryReportController extends Controller
     public function __construct(?Util $commonUtil = null)
     {
         $this->commonUtil = $commonUtil ?? new Util();
+        $this->middleware(function ($request, $next) {
+            if (! (auth()->user()->can('superadmin') || auth()->user()->can('laundry.view_staff_points'))) {
+                abort(403, 'Unauthorized action.');
+            }
+            return $next($request);
+        });
     }
 
     public function staffPointsReport(Request $request)

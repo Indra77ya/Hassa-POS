@@ -9,6 +9,16 @@ use Yajra\DataTables\Facades\DataTables;
 
 class LaundryProcessController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            if (! (auth()->user()->can('superadmin') || auth()->user()->can('laundry.manage_master_data'))) {
+                abort(403, 'Unauthorized action.');
+            }
+            return $next($request);
+        });
+    }
+
     public function index(Request $request)
     {
         $business_id = request()->session()->get('user.business_id');

@@ -121,7 +121,15 @@ class DataController extends Controller
 
         $is_project_enabled = (bool) $module_util->hasThePermissionInSubscription($business_id, 'project_module');
 
-        if ($is_project_enabled) {
+        $can_view_project = auth()->check() && (
+            auth()->user()->can('superadmin') ||
+            auth()->user()->can('project.view_project') ||
+            auth()->user()->can('project.create_project') ||
+            auth()->user()->can('project.edit_project') ||
+            auth()->user()->can('project.delete_project')
+        );
+
+        if ($is_project_enabled && $can_view_project) {
             Menu::modify(
                 'admin-sidebar-menu',
                 function ($menu) {
@@ -178,6 +186,11 @@ class DataController extends Controller
     public function user_permissions()
     {
         return [
+            [
+                'value' => 'project.view_project',
+                'label' => __('project::lang.view_project'),
+                'default' => false,
+            ],
             [
                 'value' => 'project.create_project',
                 'label' => __('project::lang.create_project'),

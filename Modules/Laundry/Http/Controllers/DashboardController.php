@@ -20,6 +20,10 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
+        if (! (auth()->user()->can('superadmin') || auth()->user()->can('laundry.view_dashboard') || auth()->user()->can('laundry.view'))) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $business_id = request()->session()->get('user.business_id');
 
         $total_orders = LaundryOrderSheet::where('business_id', $business_id)->count();
@@ -44,6 +48,10 @@ class DashboardController extends Controller
 
     public function importDemoData(Request $request)
     {
+        if (! (auth()->user()->can('superadmin') || auth()->user()->can('laundry.manage_master_data'))) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $business_id = request()->session()->get('user.business_id');
         $user_id = request()->session()->get('user.id');
 

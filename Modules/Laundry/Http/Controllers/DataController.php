@@ -40,6 +40,11 @@ class DataController extends Controller
     {
         return [
             [
+                'value' => 'laundry.view_dashboard',
+                'label' => __('laundry::lang.view_laundry_dashboard'),
+                'default' => false,
+            ],
+            [
                 'value' => 'laundry.view',
                 'label' => __('laundry::lang.view_laundry'),
                 'default' => false,
@@ -57,6 +62,16 @@ class DataController extends Controller
             [
                 'value' => 'laundry.delete',
                 'label' => __('laundry::lang.delete_laundry_order'),
+                'default' => false,
+            ],
+            [
+                'value' => 'laundry.update_status',
+                'label' => __('laundry::lang.update_laundry_status'),
+                'default' => false,
+            ],
+            [
+                'value' => 'laundry.log_process',
+                'label' => __('laundry::lang.log_laundry_process'),
                 'default' => false,
             ],
             [
@@ -99,46 +114,67 @@ class DataController extends Controller
         $module_util = new ModuleUtil();
         $is_laundry_enabled = (bool) $module_util->hasThePermissionInSubscription($business_id, 'laundry_module');
 
-        if ($is_laundry_enabled && auth()->check() && (auth()->user()->can('superadmin') || auth()->user()->can('laundry.view') || auth()->user()->can('laundry.create'))) {
+        $can_view_laundry_menu = auth()->check() && (
+            auth()->user()->can('superadmin') ||
+            auth()->user()->can('laundry.view_dashboard') ||
+            auth()->user()->can('laundry.view') ||
+            auth()->user()->can('laundry.create') ||
+            auth()->user()->can('laundry.update') ||
+            auth()->user()->can('laundry.delete') ||
+            auth()->user()->can('laundry.update_status') ||
+            auth()->user()->can('laundry.log_process') ||
+            auth()->user()->can('laundry.manage_master_data') ||
+            auth()->user()->can('laundry.view_staff_points')
+        );
+
+        if ($is_laundry_enabled && $can_view_laundry_menu) {
             Menu::modify('admin-sidebar-menu', function ($menu) {
                 $menu->dropdown(
                     __('laundry::lang.laundry'),
                     function ($sub) {
-                        $sub->url(
-                            action([\Modules\Laundry\Http\Controllers\DashboardController::class, 'index']),
-                            __('laundry::lang.dashboard'),
-                            ['active' => request()->segment(1) == 'laundry' && request()->segment(2) == 'dashboard']
-                        );
-                        $sub->url(
-                            action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'index']),
-                            __('laundry::lang.order_sheets'),
-                            ['active' => request()->segment(1) == 'laundry' && request()->segment(2) == 'order-sheet']
-                        );
-                        $sub->url(
-                            action([\Modules\Laundry\Http\Controllers\LaundryStatusController::class, 'index']),
-                            __('laundry::lang.statuses'),
-                            ['active' => request()->segment(1) == 'laundry' && request()->segment(2) == 'statuses']
-                        );
-                        $sub->url(
-                            action([\Modules\Laundry\Http\Controllers\LaundryProcessController::class, 'index']),
-                            __('laundry::lang.processes'),
-                            ['active' => request()->segment(1) == 'laundry' && request()->segment(2) == 'processes']
-                        );
-                        $sub->url(
-                            action([\Modules\Laundry\Http\Controllers\LaundryServiceTypeController::class, 'index']),
-                            __('laundry::lang.service_types'),
-                            ['active' => request()->segment(1) == 'laundry' && request()->segment(2) == 'service-types']
-                        );
-                        $sub->url(
-                            action([\Modules\Laundry\Http\Controllers\LaundryItemTypeController::class, 'index']),
-                            __('laundry::lang.item_types'),
-                            ['active' => request()->segment(1) == 'laundry' && request()->segment(2) == 'item-types']
-                        );
-                        $sub->url(
-                            action([\Modules\Laundry\Http\Controllers\LaundryReportController::class, 'staffPointsReport']),
-                            __('laundry::lang.staff_points_report'),
-                            ['active' => request()->segment(1) == 'laundry' && request()->segment(2) == 'reports']
-                        );
+                        if (auth()->user()->can('superadmin') || auth()->user()->can('laundry.view_dashboard')) {
+                            $sub->url(
+                                action([\Modules\Laundry\Http\Controllers\DashboardController::class, 'index']),
+                                __('laundry::lang.dashboard'),
+                                ['active' => request()->segment(1) == 'laundry' && request()->segment(2) == 'dashboard']
+                            );
+                        }
+                        if (auth()->user()->can('superadmin') || auth()->user()->can('laundry.view') || auth()->user()->can('laundry.create') || auth()->user()->can('laundry.update') || auth()->user()->can('laundry.delete') || auth()->user()->can('laundry.update_status') || auth()->user()->can('laundry.log_process')) {
+                            $sub->url(
+                                action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'index']),
+                                __('laundry::lang.order_sheets'),
+                                ['active' => request()->segment(1) == 'laundry' && request()->segment(2) == 'order-sheet']
+                            );
+                        }
+                        if (auth()->user()->can('superadmin') || auth()->user()->can('laundry.manage_master_data')) {
+                            $sub->url(
+                                action([\Modules\Laundry\Http\Controllers\LaundryStatusController::class, 'index']),
+                                __('laundry::lang.statuses'),
+                                ['active' => request()->segment(1) == 'laundry' && request()->segment(2) == 'statuses']
+                            );
+                            $sub->url(
+                                action([\Modules\Laundry\Http\Controllers\LaundryProcessController::class, 'index']),
+                                __('laundry::lang.processes'),
+                                ['active' => request()->segment(1) == 'laundry' && request()->segment(2) == 'processes']
+                            );
+                            $sub->url(
+                                action([\Modules\Laundry\Http\Controllers\LaundryServiceTypeController::class, 'index']),
+                                __('laundry::lang.service_types'),
+                                ['active' => request()->segment(1) == 'laundry' && request()->segment(2) == 'service-types']
+                            );
+                            $sub->url(
+                                action([\Modules\Laundry\Http\Controllers\LaundryItemTypeController::class, 'index']),
+                                __('laundry::lang.item_types'),
+                                ['active' => request()->segment(1) == 'laundry' && request()->segment(2) == 'item-types']
+                            );
+                        }
+                        if (auth()->user()->can('superadmin') || auth()->user()->can('laundry.view_staff_points')) {
+                            $sub->url(
+                                action([\Modules\Laundry\Http\Controllers\LaundryReportController::class, 'staffPointsReport']),
+                                __('laundry::lang.staff_points_report'),
+                                ['active' => request()->segment(1) == 'laundry' && request()->segment(2) == 'reports']
+                            );
+                        }
                     },
                     [
                         'icon' => '<svg class="tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">

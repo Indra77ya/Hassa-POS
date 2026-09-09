@@ -175,9 +175,10 @@ class LaundryModuleTest extends TestCase
             $table->timestamps();
         });
 
+
         \Illuminate\Support\Facades\Schema::create('users', function ($table) {
             $table->id();
-            $table->integer('business_id')->nullable();
+            $table->integer('business_id')->default(1);
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
             $table->string('username')->nullable();
@@ -263,6 +264,27 @@ class LaundryModuleTest extends TestCase
             'short_name' => 'kg',
         ]);
 
+        \Illuminate\Support\Facades\Schema::create('currencies', function ($table) {
+            $table->id();
+            $table->string('country')->default('Indonesia');
+            $table->string('currency')->default('Rupiah');
+            $table->string('code')->default('IDR');
+            $table->string('symbol')->default('Rp');
+            $table->string('thousand_separator')->default(',');
+            $table->string('decimal_separator')->default('.');
+            $table->timestamps();
+        });
+
+        \Illuminate\Support\Facades\DB::table('currencies')->insert([
+            'id' => 1,
+            'country' => 'Indonesia',
+            'currency' => 'Rupiah',
+            'code' => 'IDR',
+            'symbol' => 'Rp',
+            'thousand_separator' => ',',
+            'decimal_separator' => '.',
+        ]);
+
         \Illuminate\Support\Facades\Schema::create('business', function ($table) {
             $table->id();
             $table->string('name')->default('Test Business');
@@ -281,18 +303,8 @@ class LaundryModuleTest extends TestCase
         \App\Business::create([
             'id' => 1,
             'name' => 'Test Business',
+            'currency_id' => 1,
         ]);
-
-        \Illuminate\Support\Facades\Schema::create('currencies', function ($table) {
-            $table->id();
-            $table->string('country')->default('Indonesia');
-            $table->string('currency')->default('Rupiah');
-            $table->string('code')->default('IDR');
-            $table->string('symbol')->default('Rp');
-            $table->string('thousand_separator')->default(',');
-            $table->string('decimal_separator')->default('.');
-            $table->timestamps();
-        });
 
         \Illuminate\Support\Facades\Schema::create('tax_rates', function ($table) {
             $table->id();
@@ -1073,5 +1085,30 @@ class LaundryModuleTest extends TestCase
         $this->assertStringContainsString('bg-aqua', $view);
         $this->assertStringContainsString('bg-yellow', $view);
         $this->assertStringContainsString('bg-green', $view);
+    }
+
+    public function test_laundry_granular_permissions_and_sidebar_visibility()
+    {
+        $user = \App\User::where('id', 2)->first();
+        if (!$user) {
+            $user = \App\User::create([
+                'id' => 2,
+                'business_id' => 1,
+                'first_name' => 'Laundry',
+                'last_name' => 'Staff',
+                'username' => 'laundry_staff',
+                'email' => 'laundry_staff@test.com',
+            ]);
+        }
+
+        // User without master data, dashboard, or report permissions should be forbidden
+        $response1 = $this->actingAs($user)->get('/laundry/dashboard');
+        $response1->assertStatus(403);
+
+        $response2 = $this->actingAs($user)->get('/laundry/statuses');
+        $response2->assertStatus(403);
+
+        $response3 = $this->actingAs($user)->get('/laundry/reports/staff-points');
+        $response3->assertStatus(403);
     }
 }
