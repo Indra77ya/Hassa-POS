@@ -26,7 +26,7 @@
         <div class="col-md-12">
             @component('components.widget', ['class' => 'box-info', 'title' => __('laundry::lang.staff_points_summary')])
                 <div class="table-responsive">
-                    <table class="table table-bordered table-striped">
+                    <table class="table table-bordered table-striped" id="staff_summary_table">
                         <thead>
                             <tr>
                                 <th>@lang('laundry::lang.staff_name')</th>
@@ -86,6 +86,12 @@ $(document).ready(function() {
     $('#staff_points_date_range').on('cancel.daterangepicker', function(ev, picker) {
         $('#staff_points_date_range').val('');
         staff_points_table.ajax.reload();
+    });
+
+    $('#staff_summary_table').DataTable({
+        searching: false,
+        paging: false,
+        info: false
     });
 
     var staff_points_table = $('#staff_points_table').DataTable({
