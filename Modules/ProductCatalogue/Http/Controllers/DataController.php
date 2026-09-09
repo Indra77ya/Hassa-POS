@@ -32,7 +32,7 @@ class DataController extends Controller
         return [
             [
                 'value' => 'productcatalogue.view',
-                'label' => __('productcatalogue::lang.productcatalogue'),
+                'label' => __('productcatalogue::lang.catalogue_qr'),
                 'default' => false,
             ],
         ];

@@ -1,6 +1,7 @@
 <?php
 return [
 	'productcatalogue_module' => 'Modul Katalog Produk',
+	'productcatalogue' => 'QR Katalog',
 	'catalogue_qr' => 'QR Katalog',
 	'generate_qr' => 'Buat QR',
 	'select_business_location' => 'Pilih Lokasi Bisnis',

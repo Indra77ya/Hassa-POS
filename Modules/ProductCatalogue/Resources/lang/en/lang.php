@@ -1,6 +1,7 @@
 <?php
 return [
 	'productcatalogue_module' => 'Product Catalogue Module',
+	'productcatalogue' => 'Catalogue QR',
 	'catalogue_qr' => 'Catalogue QR',
 	'generate_qr' => 'Generate QR',
 	'select_business_location' => 'Select Business Location',
