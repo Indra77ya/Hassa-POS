@@ -171,13 +171,13 @@ class ModuleUtil extends Util
     public function hasThePermissionInSubscription($business_id, $permission, $callback_function = null)
     {
         if ($this->isSuperadminInstalled()) {
-            if (auth()->user()->can('superadmin')) {
-                return true;
-            }
-
             $package = \Modules\Superadmin\Entities\Subscription::active_subscription($business_id);
 
             if (empty($package)) {
+                if (auth()->check() && auth()->user()->can('superadmin')) {
+                    return true;
+                }
+
                 return false;
             } elseif (isset($package['package_details'][$permission])) {
                 if (! is_null($callback_function)) {
@@ -192,12 +192,12 @@ class ModuleUtil extends Util
                     }
 
                     if (isset($permission_formatted[$permission])) {
-                        return $package['package_details'][$permission];
+                        return (bool) $package['package_details'][$permission];
                     } else {
                         return false;
                     }
                 } else {
-                    return $package['package_details'][$permission];
+                    return (bool) $package['package_details'][$permission];
                 }
             } else {
                 return false;
