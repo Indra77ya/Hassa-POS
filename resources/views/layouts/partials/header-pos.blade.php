@@ -170,8 +170,8 @@
                 </strong>
             </button>
 
-            <button type="button" id="toggle-dark-mode" title="Toggle Dark Mode"
-                class="tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-rounded-xl tw-w-9 tw-h-9 tw-text-gray-600 tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95">
+            <button type="button" id="toggle-dark-mode" title="Toggle Dark Mode" style="display: none !important;"
+                class="tw-hidden tw-shadow-sm tw-bg-slate-50 hover:tw-bg-slate-100 tw-cursor-pointer tw-border tw-border-slate-100 tw-flex tw-items-center tw-justify-center tw-rounded-xl tw-w-9 tw-h-9 tw-text-gray-600 tw-transition-all tw-duration-200 hover:-tw-translate-y-px active:tw-scale-95">
                 <span class="tw-sr-only">Toggle Dark Mode</span>
                 <svg id="dark-mode-icon-moon" class="tw-size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
