@@ -56,6 +56,7 @@ return [
     'select_staff' => '-- Select Staff --',
     'select_process' => '-- Select Process --',
     'points' => 'Points',
+    'process_points' => 'Process Points',
     'change_status' => 'Change Status',
     'process_history' => 'Process History & Staff',
     'process_name' => 'Process Name',

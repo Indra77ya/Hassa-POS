@@ -301,12 +301,12 @@ class DataController extends Controller
             ],
             [
                 'value' => 'essentials.edit_knowledge_base',
-                'label' => __('essentials::lang.edit_enowledge_base'),
+                'label' => __('essentials::lang.edit_knowledge_base'),
                 'default' => false,
             ],
             [
                 'value' => 'essentials.delete_knowledge_base',
-                'label' => __('essentials::lang.delete_enowledge_base'),
+                'label' => __('essentials::lang.delete_knowledge_base'),
                 'default' => false,
             ],
         ];
