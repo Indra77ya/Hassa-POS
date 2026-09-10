@@ -163,14 +163,17 @@
     })
 
     $(document).on('shown.bs.modal', '#create_account_modal', function(){
+        var $modalContent = $(this).find('.modal-content');
+        var $parent = $modalContent.length ? $modalContent : $(this);
+
         $(this).find('#account_sub_type').select2({
-            dropdownParent: $('#create_account_modal')
+            dropdownParent: $parent
         });
         $(this).find('#detail_type').select2({
-            dropdownParent: $('#create_account_modal')
+            dropdownParent: $parent
         });
         $(this).find('#parent_account').select2({
-            dropdownParent: $('#create_account_modal')
+            dropdownParent: $parent
         });
         $('#as_of').datepicker({
             autoclose: true,
@@ -188,13 +191,20 @@
                 url: '/accounting/get-account-sub-types?account_primary_type=' + $(this).val(),
                 dataType: 'json',
                 success: function(result) {
-                    $('#account_sub_type').select2('destroy')
-                        .empty()
+                    var $modalContent = $('#create_account_modal .modal-content');
+                    var $parent = $modalContent.length ? $modalContent : $('#create_account_modal');
+
+                    if ($('#account_sub_type').data('select2')) {
+                        $('#account_sub_type').select2('destroy');
+                    }
+
+                    $('#account_sub_type').empty()
                         .select2({
                             data: result.sub_types,
-                            dropdownParent: $('#create_account_modal'),
-                        }).on('change', function() {
-                            if($(this).select2('data')[0].show_balance==1) {
+                            dropdownParent: $parent,
+                        }).off('change.show_bal').on('change.show_bal', function() {
+                            var data = $(this).select2('data');
+                            if(data && data[0] && data[0].show_balance == 1) {
                                 $('#bal_div').removeClass('hide');
                             } else {
                                 $('#bal_div').addClass('hide');
@@ -206,32 +216,46 @@
         }
     });
     $(document).on('change', '#account_sub_type', function(){
-        if($(this).val() !== '') {
+        var val = $(this).val();
+        if(val !== '' && val !== 'null' && val !== null) {
             $.ajax({
-                url: '/accounting/get-account-details-types?account_type_id=' + $(this).val(),
+                url: '/accounting/get-account-details-types?account_type_id=' + val,
                 dataType: 'json',
                 success: function(result) {
-                    $('#detail_type').select2('destroy')
-                            .empty()
+                    var $modalContent = $('#create_account_modal .modal-content');
+                    var $parent = $modalContent.length ? $modalContent : $('#create_account_modal');
+
+                    if ($('#detail_type').data('select2')) {
+                        $('#detail_type').select2('destroy');
+                    }
+
+                    $('#detail_type').empty()
                             .select2({
                                 data: result.detail_types,
-                                dropdownParent: $('#create_account_modal'),
-                            }).on('change', function() {
-                                if($(this).val() !== '') {
-                                    var desc = $(this).select2('data')[0].description;
+                                dropdownParent: $parent,
+                            }).off('change.desc').on('change.desc', function() {
+                                var data = $(this).select2('data');
+                                if($(this).val() !== '' && $(this).val() !== 'null' && data && data[0] && data[0].description) {
+                                    var desc = data[0].description;
                                     $('#detail_type_desc').html(desc);
+                                } else {
+                                    $('#detail_type_desc').html('');
                                 }
                             });
-                        $('#parent_account').select2('destroy')
-                        .empty()
+
+                    if ($('#parent_account').data('select2')) {
+                        $('#parent_account').select2('destroy');
+                    }
+
+                    $('#parent_account').empty()
                         .select2({
                             data: result.parent_accounts,
-                            dropdownParent: $('#create_account_modal'),
+                            dropdownParent: $parent,
                         });
                 },
             });
         }
-    })
+    });
 
     $(document).on('click', 'a.activate-deactivate-btn', function(e) {
         e.preventDefault();
