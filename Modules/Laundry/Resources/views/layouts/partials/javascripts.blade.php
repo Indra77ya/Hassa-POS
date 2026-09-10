@@ -378,7 +378,7 @@
             '<div class="modal-content">' +
               '<div class="modal-header">' +
                 '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>' +
-                '<h4 class="modal-title" id="laundry_whatsapp_modal_label"><i class="fab fa-whatsapp text-success"></i> Kirim Nota WhatsApp</h4>' +
+                '<h4 class="modal-title" id="laundry_whatsapp_modal_label"><i class="fab fa-whatsapp fa-fw text-success"></i> Kirim Nota WhatsApp</h4>' +
               '</div>' +
               '<form id="send_laundry_whatsapp_form" method="POST" action="">' +
                 '<div class="modal-body">' +

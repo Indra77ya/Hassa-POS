@@ -83,7 +83,7 @@ class OrderSheetController extends Controller
                     }
 
                     $html .= '<li><a href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'print'], [$row->id]) . '" target="_blank"><i class="fa fa-print"></i> ' . __('messages.print') . '</a></li>';
-                    $html .= '<li><a href="#" data-href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'getWhatsappLink'], [$row->id]) . '" data-id="' . $row->id . '" class="send_laundry_whatsapp"><i class="fab fa-whatsapp text-success"></i> Kirim WhatsApp</a></li>';
+                    $html .= '<li><a href="#" data-href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'getWhatsappLink'], [$row->id]) . '" data-id="' . $row->id . '" class="send_laundry_whatsapp"><i class="fab fa-whatsapp fa-fw text-success"></i> Kirim WhatsApp</a></li>';
                     $html .= '<li><a href="#" data-href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'destroy'], [$row->id]) . '" class="delete_order_sheet_button"><i class="glyphicon glyphicon-trash"></i> ' . __('messages.delete') . '</a></li>';
                     $html .= '</ul></div>';
                     return $html;
