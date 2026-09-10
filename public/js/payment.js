@@ -99,6 +99,9 @@ $(document).ready(function() {
                             if (typeof project_invoice_datatable != 'undefined') {
                                 project_invoice_datatable.ajax.reload();
                             }
+                            if (typeof order_sheets_table != 'undefined') {
+                                order_sheets_table.ajax.reload();
+                            }
                             
                             if ($('#contact_payments_table').length) {
                                 get_contact_payments();
