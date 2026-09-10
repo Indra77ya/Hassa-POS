@@ -60,6 +60,16 @@
               <td>{{ $order_sheet->delivery_type == 'pickup_delivery' ? __('laundry::lang.pickup_delivery') : __('laundry::lang.self_service') }}</td>
             </tr>
             <tr>
+              <th>Status WA:</th>
+              <td>
+                @if($order_sheet->whatsapp_sent_at)
+                  <span class="label bg-green"><i class="fab fa-whatsapp"></i> Terkirim</span> ({{ \Carbon\Carbon::parse($order_sheet->whatsapp_sent_at)->format('d/m/Y H:i') }})
+                @else
+                  <span class="label bg-gray"><i class="fab fa-whatsapp"></i> Belum Dikirim</span>
+                @endif
+              </td>
+            </tr>
+            <tr>
               <th>@lang('sale.payment_status'):</th>
               <td>
                 @if($order_sheet->payment_status == 'paid')
@@ -128,6 +138,7 @@
     </div>
 
     <div class="modal-footer">
+      <button type="button" class="btn btn-success send_laundry_whatsapp" data-href="{{ action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'getWhatsappLink'], [$order_sheet->id]) }}" data-id="{{ $order_sheet->id }}"><i class="fab fa-whatsapp fa-fw"></i> Kirim WhatsApp</button>
       <button type="button" class="btn btn-success add-laundry-to-cart-modal" data-id="{{ $order_sheet->id }}"><i class="fa fa-shopping-cart"></i> Masukkan ke Keranjang</button>
       <a href="{{ action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'print'], [$order_sheet->id]) }}" class="btn btn-primary" target="_blank"><i class="fa fa-print"></i> @lang('messages.print')</a>
       <button type="button" class="btn btn-default" data-dismiss="modal">@lang('messages.close')</button>

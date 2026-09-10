@@ -62,6 +62,17 @@
                         <th>@lang('laundry::lang.delivery_type'):</th>
                         <td>{{ $order_sheet->delivery_type == 'pickup_delivery' ? __('laundry::lang.pickup_delivery') : __('laundry::lang.self_service') }}</td>
                     </tr>
+                    <tr>
+                        <th>Status WhatsApp:</th>
+                        <td>
+                            @if($order_sheet->whatsapp_sent_at)
+                                <span class="label bg-green"><i class="fab fa-whatsapp"></i> Terkirim</span>
+                                <br><small class="text-muted">{{ \Carbon\Carbon::parse($order_sheet->whatsapp_sent_at)->format('d/m/Y H:i') }}</small>
+                            @else
+                                <span class="label bg-gray"><i class="fab fa-whatsapp"></i> Belum Dikirim</span>
+                            @endif
+                        </td>
+                    </tr>
                 </table>
             </div>
         </div>
@@ -118,6 +129,7 @@
 
         <div class="row no-print">
             <div class="col-md-12 text-center">
+                <button type="button" class="btn btn-success send_laundry_whatsapp" data-href="{{ action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'getWhatsappLink'], [$order_sheet->id]) }}" data-id="{{ $order_sheet->id }}"><i class="fab fa-whatsapp fa-fw"></i> Kirim WhatsApp</button>
                 <a href="{{ action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'print'], [$order_sheet->id]) }}" target="_blank" class="btn btn-default"><i class="fa fa-print"></i> @lang('messages.print')</a>
                 <a href="{{ action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'edit'], [$order_sheet->id]) }}" class="btn btn-primary"><i class="glyphicon glyphicon-edit"></i> @lang('messages.edit')</a>
             </div>

@@ -37,6 +37,7 @@ class OrderSheetController extends Controller
 
         if ($request->ajax()) {
             $orders = LaundryOrderSheet::where('laundry_order_sheets.business_id', $business_id)
+                ->select('laundry_order_sheets.*')
                 ->with(['customer', 'location', 'status', 'serviceType', 'itemType', 'transactions']);
 
             if (!empty($request->location_id)) {
@@ -82,13 +83,28 @@ class OrderSheetController extends Controller
                         $html .= '<li><a href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'viewPayments'], [$row->id]) . '" class="view_payment_modal"><i class="fas fa-money-bill-alt"></i> ' . __('purchase.view_payments') . '</a></li>';
                     }
 
+                    $wa_action_label = !empty($row->whatsapp_sent_at) ? 'Kirim Ulang WA' : 'Kirim WhatsApp';
                     $html .= '<li><a href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'print'], [$row->id]) . '" target="_blank"><i class="fa fa-print"></i> ' . __('messages.print') . '</a></li>';
+                    $html .= '<li><a href="#" data-href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'getWhatsappLink'], [$row->id]) . '" data-id="' . $row->id . '" class="send_laundry_whatsapp"><i class="fab fa-whatsapp fa-fw text-success"></i> ' . e($wa_action_label) . '</a></li>';
                     $html .= '<li><a href="#" data-href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'destroy'], [$row->id]) . '" class="delete_order_sheet_button"><i class="glyphicon glyphicon-trash"></i> ' . __('messages.delete') . '</a></li>';
                     $html .= '</ul></div>';
                     return $html;
                 })
                 ->editColumn('order_no', function ($row) {
-                    return '<a href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'show'], [$row->id]) . '">' . e($row->order_no) . '</a>';
+                    $html = '<a href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'show'], [$row->id]) . '">' . e($row->order_no) . '</a>';
+                    if (!empty($row->whatsapp_sent_at)) {
+                        $formatted_time = Carbon::parse($row->whatsapp_sent_at)->format('d/m/Y H:i');
+                        $html .= ' <span class="label bg-green" title="WA Terkirim: ' . e($formatted_time) . '"><i class="fab fa-whatsapp"></i> WA Terkirim</span>';
+                    }
+                    return $html;
+                })
+                ->addColumn('wa_status', function ($row) {
+                    if (!empty($row->whatsapp_sent_at)) {
+                        $formatted_time = Carbon::parse($row->whatsapp_sent_at)->format('d/m/Y H:i');
+                        return '<span class="label bg-green" title="Terkirim pada ' . e($formatted_time) . '"><i class="fab fa-whatsapp"></i> Terkirim</span><br><small class="text-muted">' . e($formatted_time) . '</small>';
+                    } else {
+                        return '<span class="label bg-gray"><i class="fab fa-whatsapp"></i> Belum Dikirim</span>';
+                    }
                 })
                 ->editColumn('status', function ($row) {
                     if (!$row->status) return '-';
@@ -127,7 +143,7 @@ class OrderSheetController extends Controller
                 ->editColumn('estimated_completion_at', function ($row) {
                     return $row->estimated_completion_at ? Carbon::parse($row->estimated_completion_at)->format('d/m/Y H:i') : '-';
                 })
-                ->rawColumns(['action', 'order_no', 'status', 'payment_status'])
+                ->rawColumns(['action', 'order_no', 'status', 'payment_status', 'wa_status'])
                 ->make(true);
         }
 
@@ -669,6 +685,144 @@ class OrderSheetController extends Controller
                 'msg' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function getWhatsappLink($id)
+    {
+        if (! (auth()->user()->can('superadmin') || auth()->user()->can('laundry.view') || auth()->user()->can('laundry.create') || auth()->user()->can('laundry.update'))) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $business_id = request()->session()->get('user.business_id');
+        $order_sheet = LaundryOrderSheet::where('business_id', $business_id)
+            ->with(['customer', 'location', 'status', 'serviceType', 'itemType'])
+            ->findOrFail($id);
+
+        $customer = $order_sheet->customer;
+        $mobile = $customer ? trim($customer->mobile) : '';
+
+        if (empty($mobile)) {
+            return response()->json([
+                'success' => true,
+                'has_mobile' => false,
+                'contact_id' => $order_sheet->contact_id,
+                'customer_name' => optional($customer)->name ?? '-',
+                'order_no' => $order_sheet->order_no,
+                'mobile' => $mobile,
+                'msg' => __('Pelanggan belum memiliki nomor telepon/WhatsApp.'),
+            ]);
+        }
+
+        $order_sheet->whatsapp_sent_at = Carbon::now();
+        $order_sheet->save();
+
+        $text = $this->_buildWhatsappText($order_sheet);
+        $whatsapp_link = $this->commonUtil->getWhatsappNotificationLink([
+            'mobile_number' => $mobile,
+            'whatsapp_text' => $text,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'has_mobile' => true,
+            'mobile' => $mobile,
+            'whatsapp_link' => $whatsapp_link,
+            'whatsapp_sent_at' => Carbon::parse($order_sheet->whatsapp_sent_at)->format('d/m/Y H:i'),
+        ]);
+    }
+
+    public function sendWhatsappMobile(Request $request, $id)
+    {
+        if (! (auth()->user()->can('superadmin') || auth()->user()->can('laundry.view') || auth()->user()->can('laundry.create') || auth()->user()->can('laundry.update'))) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $request->validate([
+            'mobile' => 'required|string',
+        ]);
+
+        $business_id = request()->session()->get('user.business_id');
+        $order_sheet = LaundryOrderSheet::where('business_id', $business_id)
+            ->with(['customer', 'location', 'status', 'serviceType', 'itemType'])
+            ->findOrFail($id);
+
+        $mobile = trim($request->mobile);
+
+        if ($request->get('save_to_contact', 0) == 1 && !empty($order_sheet->contact_id)) {
+            Contact::where('business_id', $business_id)
+                ->where('id', $order_sheet->contact_id)
+                ->update(['mobile' => $mobile]);
+        }
+
+        $order_sheet->whatsapp_sent_at = Carbon::now();
+        $order_sheet->save();
+
+        $text = $this->_buildWhatsappText($order_sheet);
+        $whatsapp_link = $this->commonUtil->getWhatsappNotificationLink([
+            'mobile_number' => $mobile,
+            'whatsapp_text' => $text,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'has_mobile' => true,
+            'whatsapp_link' => $whatsapp_link,
+            'whatsapp_sent_at' => Carbon::parse($order_sheet->whatsapp_sent_at)->format('d/m/Y H:i'),
+            'msg' => __('Link WhatsApp berhasil dibuat.'),
+        ]);
+    }
+
+    private function _buildWhatsappText($order_sheet)
+    {
+        $business = \App\Business::find($order_sheet->business_id);
+        $business_name = $business ? $business->name : '';
+
+        $customer_name = optional($order_sheet->customer)->name ?? '-';
+        $service_name = optional($order_sheet->serviceType)->name ?? '-';
+        $item_name = optional($order_sheet->itemType)->name ?? '-';
+        $status_name = optional($order_sheet->status)->name ?? '-';
+
+        $quantity = $this->commonUtil->num_f($order_sheet->quantity, false, null, true) . ' ' . $order_sheet->unit_name;
+
+        $total = $order_sheet->total_amount;
+        $paid = $order_sheet->total_paid;
+        $due = max(0, $total - $paid);
+
+        $payment_status_label = 'Belum Dibayar';
+        if ($order_sheet->payment_status == 'paid') {
+            $payment_status_label = 'Lunas';
+        } elseif ($order_sheet->payment_status == 'partial') {
+            $payment_status_label = 'Sebagian';
+        }
+
+        $tracking_url = url('/laundry/status/' . $order_sheet->order_no);
+
+        $text = "*{$business_name}*\n";
+        $text .= "*NOTA LAUNDRY*\n";
+        $text .= "----------------------------------------\n";
+        $text .= "No. Order : {$order_sheet->order_no}\n";
+        $text .= "Pelanggan : {$customer_name}\n";
+        $text .= "Tanggal   : " . ($order_sheet->received_at ? Carbon::parse($order_sheet->received_at)->format('d/m/Y H:i') : '-') . "\n";
+        $text .= "Estimasi  : " . ($order_sheet->estimated_completion_at ? Carbon::parse($order_sheet->estimated_completion_at)->format('d/m/Y H:i') : '-') . "\n";
+        $text .= "----------------------------------------\n";
+        $text .= "Layanan  : {$service_name}\n";
+        $text .= "Jenis    : {$item_name}\n";
+        $text .= "Jumlah   : {$quantity}\n";
+        if (!empty($order_sheet->items_detail)) {
+            $text .= "Rincian  : {$order_sheet->items_detail}\n";
+        }
+        $text .= "Status   : {$status_name}\n";
+        $text .= "----------------------------------------\n";
+        $text .= "Total Tagihan : Rp " . $this->commonUtil->num_f($total) . "\n";
+        $text .= "Sudah Dibayar : Rp " . $this->commonUtil->num_f($paid) . "\n";
+        $text .= "Sisa Tagihan  : Rp " . $this->commonUtil->num_f($due) . "\n";
+        $text .= "Status Bayar  : {$payment_status_label}\n";
+        $text .= "----------------------------------------\n";
+        $text .= "Lacak Status Laundry Anda:\n";
+        $text .= "{$tracking_url}\n\n";
+        $text .= "Terima kasih telah menggunakan jasa laundry kami!";
+
+        return $text;
     }
 
     private function _createProductForItemType($business_id, $item_type)

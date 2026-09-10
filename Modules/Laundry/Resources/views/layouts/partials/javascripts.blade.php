@@ -304,5 +304,124 @@
             var id = $(this).data('id');
             addOrderSheetToCart(id);
         });
+
+        $(document).off('click', '.send_laundry_whatsapp').on('click', '.send_laundry_whatsapp', function(e) {
+            e.preventDefault();
+            var href = $(this).data('href') || $(this).attr('href');
+            var id = $(this).data('id');
+            if (!href && id) {
+                href = '/laundry/order-sheet/' + id + '/get-whatsapp-link';
+            }
+
+            var wa_window = window.open('', '_blank');
+
+            $.ajax({
+                url: href,
+                dataType: 'json',
+                success: function(result) {
+                    if (result.success) {
+                        if (result.has_mobile && result.whatsapp_link) {
+                            if (wa_window) {
+                                wa_window.location.href = result.whatsapp_link;
+                            }
+                            if (typeof order_sheets_table !== 'undefined') {
+                                order_sheets_table.ajax.reload();
+                            }
+                        } else {
+                            if (wa_window) wa_window.close();
+                            if ($('#laundry_whatsapp_modal').length === 0) {
+                                $('body').append(getLaundryWhatsappModalHtml());
+                            }
+                            $('#laundry_wa_order_id').val(id);
+                            $('#send_laundry_whatsapp_form').attr('action', '/laundry/order-sheet/' + id + '/send-whatsapp-mobile');
+                            $('#laundry_wa_customer_info').html('Nomor WhatsApp pelanggan <strong>' + (result.customer_name || '') + '</strong> belum terdaftar. Silakan masukkan nomor WhatsApp untuk mengirim nota order <strong>' + (result.order_no || '') + '</strong>:');
+                            if (result.mobile) {
+                                $('#laundry_wa_mobile').val(result.mobile);
+                            } else {
+                                $('#laundry_wa_mobile').val('');
+                            }
+                            $('#laundry_whatsapp_modal').modal('show');
+                        }
+                    } else {
+                        if (wa_window) wa_window.close();
+                        toastr.error(result.msg || 'Gagal mengambil data WhatsApp');
+                    }
+                },
+                error: function() {
+                    if (wa_window) wa_window.close();
+                    toastr.error('Terjadi kesalahan saat menghubungi server');
+                }
+            });
+        });
+
+        $(document).off('submit', '#send_laundry_whatsapp_form').on('submit', '#send_laundry_whatsapp_form', function(e) {
+            e.preventDefault();
+            var form = $(this);
+            var action = form.attr('action');
+            var data = form.serialize();
+
+            var wa_window = window.open('', '_blank');
+
+            $.ajax({
+                method: 'POST',
+                url: action,
+                data: data,
+                dataType: 'json',
+                success: function(result) {
+                    if (result.success && result.whatsapp_link) {
+                        if (wa_window) {
+                            wa_window.location.href = result.whatsapp_link;
+                        }
+                        $('#laundry_whatsapp_modal').modal('hide');
+                        if (result.msg) {
+                            toastr.success(result.msg);
+                        }
+                        if (typeof order_sheets_table !== 'undefined') {
+                            order_sheets_table.ajax.reload();
+                        }
+                    } else {
+                        if (wa_window) wa_window.close();
+                        toastr.error(result.msg || 'Gagal membuat link WhatsApp');
+                    }
+                },
+                error: function() {
+                    if (wa_window) wa_window.close();
+                    toastr.error('Gagal mengirim data nomor WhatsApp');
+                }
+            });
+        });
     });
+
+    function getLaundryWhatsappModalHtml() {
+        return '<div class="modal fade" id="laundry_whatsapp_modal" tabindex="-1" role="dialog" aria-labelledby="laundry_whatsapp_modal_label">' +
+          '<div class="modal-dialog" role="document">' +
+            '<div class="modal-content">' +
+              '<div class="modal-header">' +
+                '<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>' +
+                '<h4 class="modal-title" id="laundry_whatsapp_modal_label"><i class="fab fa-whatsapp fa-fw text-success"></i> Kirim Nota WhatsApp</h4>' +
+              '</div>' +
+              '<form id="send_laundry_whatsapp_form" method="POST" action="">' +
+                '<div class="modal-body">' +
+                  '<input type="hidden" id="laundry_wa_order_id" name="order_sheet_id" value="">' +
+                  '<p id="laundry_wa_customer_info" class="text-muted"></p>' +
+                  '<div class="form-group">' +
+                    '<label for="laundry_wa_mobile">Nomor WhatsApp Pelanggan: <span class="text-danger">*</span></label>' +
+                    '<input type="text" class="form-control" id="laundry_wa_mobile" name="mobile" placeholder="Contoh: 08123456789" required>' +
+                  '</div>' +
+                  '<div class="checkbox">' +
+                    '<label>' +
+                      '<input type="checkbox" id="laundry_wa_save_to_contact" name="save_to_contact" value="1" checked> ' +
+                      'Simpan nomor HP ini ke data kontak pelanggan' +
+                    '</label>' +
+                  '</div>' +
+                '</div>' +
+                '<div class="modal-footer">' +
+                  '<button type="submit" class="btn btn-success" id="laundry_wa_submit_btn"><i class="fab fa-whatsapp"></i> Kirim Ke WhatsApp</button>' +
+                  '<button type="button" class="btn btn-default" data-dismiss="modal">Tutup</button>' +
+                '</div>' +
+              '</form>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+    }
 </script>
