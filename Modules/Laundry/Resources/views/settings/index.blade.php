@@ -27,8 +27,10 @@
                     <div class="col-md-6">
                         @if(!empty($laundry_settings['laundry_logo']) && file_exists(public_path('uploads/laundry_logos/' . $laundry_settings['laundry_logo'])))
                             <div class="form-group">
-                                <label>@lang('lang_v1.current_image'):</label><br>
-                                <img src="{{ asset('uploads/laundry_logos/' . $laundry_settings['laundry_logo']) }}" class="img-thumbnail" style="max-height: 120px;" alt="Laundry Logo">
+                                <label>@lang('laundry::lang.current_image'):</label><br>
+                                <div style="margin-bottom: 10px;">
+                                    <img src="{{ asset('uploads/laundry_logos/' . $laundry_settings['laundry_logo']) }}" style="max-height: 100px; max-width: 100%; object-fit: contain;" alt="Laundry Logo">
+                                </div>
                                 <div class="checkbox">
                                     <label>
                                         {!! Form::checkbox('remove_laundry_logo', 1, false) !!} @lang('laundry::lang.remove_laundry_logo')

@@ -115,4 +115,5 @@ return [
     'laundry_logo' => 'Logo Laundry',
     'laundry_logo_help' => 'Upload logo khusus laundry. Format gambar yang diperbolehkan: jpeg, png, gif.',
     'remove_laundry_logo' => 'Hapus Logo Laundry',
+    'current_image' => 'Gambar Saat Ini',
 ];
