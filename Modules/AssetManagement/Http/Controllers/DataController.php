@@ -20,7 +20,7 @@ class DataController extends Controller
             [
                 'name' => 'assetmanagement_module',
                 'label' => __('assetmanagement::lang.assetmanagement_module'),
-                'default' => true,
+                'default' => false,
             ],
         ];
     }
