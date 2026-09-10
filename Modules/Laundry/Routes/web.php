@@ -15,6 +15,8 @@ Route::middleware(['web', 'auth', 'SetSessionData', 'language', 'timezone', 'Adm
     Route::post('order-sheet/{id}/update-status', [\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'updateStatus'])->name('laundry.order_sheet.update_status');
     Route::get('order-sheet/{id}/get-status-modal', [\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'getStatusModal'])->name('laundry.order_sheet.get_status_modal');
     Route::get('order-sheet/{id}/get-pos-details', [\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'getPosDetails'])->name('laundry.order_sheet.get_pos_details');
+    Route::get('order-sheet/{id}/get-whatsapp-link', [\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'getWhatsappLink'])->name('laundry.order_sheet.get_whatsapp_link');
+    Route::post('order-sheet/{id}/send-whatsapp-mobile', [\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'sendWhatsappMobile'])->name('laundry.order_sheet.send_whatsapp_mobile');
     Route::get('order-sheet/{id}/add-payment', [\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'addPayment'])->name('laundry.order_sheet.add_payment');
     Route::get('order-sheet/{id}/view-payments', [\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'viewPayments'])->name('laundry.order_sheet.view_payments');
 

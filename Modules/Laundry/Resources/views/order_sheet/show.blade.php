@@ -118,6 +118,7 @@
 
         <div class="row no-print">
             <div class="col-md-12 text-center">
+                <button type="button" class="btn btn-success send_laundry_whatsapp" data-href="{{ action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'getWhatsappLink'], [$order_sheet->id]) }}" data-id="{{ $order_sheet->id }}"><i class="fab fa-whatsapp"></i> Kirim WhatsApp</button>
                 <a href="{{ action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'print'], [$order_sheet->id]) }}" target="_blank" class="btn btn-default"><i class="fa fa-print"></i> @lang('messages.print')</a>
                 <a href="{{ action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'edit'], [$order_sheet->id]) }}" class="btn btn-primary"><i class="glyphicon glyphicon-edit"></i> @lang('messages.edit')</a>
             </div>

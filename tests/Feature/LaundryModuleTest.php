@@ -212,6 +212,7 @@ class LaundryModuleTest extends TestCase
             $table->integer('business_id');
             $table->string('type')->default('customer');
             $table->string('name');
+            $table->string('mobile')->nullable();
             $table->integer('customer_group_id')->nullable();
             $table->softDeletes();
             $table->timestamps();
@@ -1228,5 +1229,115 @@ class LaundryModuleTest extends TestCase
         $settings = json_decode($business->laundry_settings, true);
         $this->assertNull($settings['laundry_logo']);
         $this->assertFalse(file_exists(public_path('uploads/laundry_logos/' . $logo_filename)));
+    }
+
+    public function test_laundry_whatsapp_link_generation_and_mobile_update()
+    {
+        $user = \App\User::first();
+        if (!$user) {
+            $user = \App\User::create([
+                'surname' => 'Admin',
+                'first_name' => 'Laundry',
+                'last_name' => 'User',
+                'username' => 'laundry_wa_tester',
+                'email' => 'laundry_wa@example.com',
+                'password' => bcrypt('password'),
+                'business_id' => 1,
+            ]);
+        }
+
+        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'superadmin', 'guard_name' => 'web']);
+        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'laundry.view', 'guard_name' => 'web']);
+        $user->givePermissionTo('superadmin');
+        $user->givePermissionTo('laundry.view');
+
+        $customer_with_mobile = \App\Contact::create([
+            'business_id' => 1,
+            'type' => 'customer',
+            'name' => 'Customer With Mobile',
+            'mobile' => '081299998888',
+            'contact_status' => 'active',
+            'contact_id' => 'CO_WA_01',
+            'created_by' => $user->id,
+        ]);
+
+        $item_type = LaundryItemType::create([
+            'business_id' => 1,
+            'name' => 'Cuci Kemeja WA',
+            'unit_name' => 'pcs',
+            'default_price' => 20000,
+        ]);
+
+        $os1 = \Modules\Laundry\Entities\LaundryOrderSheet::create([
+            'business_id' => 1,
+            'order_no' => 'LND-WA-0001',
+            'contact_id' => $customer_with_mobile->id,
+            'laundry_item_type_id' => $item_type->id,
+            'quantity' => 2,
+        ]);
+
+        // 1. Test get-whatsapp-link for customer WITH mobile number
+        $response1 = $this->actingAs($user)
+            ->withSession(['user.business_id' => 1, 'user.id' => $user->id])
+            ->get(route('laundry.order_sheet.get_whatsapp_link', [$os1->id]));
+
+        $response1->assertStatus(200);
+        $response1->assertJson([
+            'success' => true,
+            'has_mobile' => true,
+            'mobile' => '081299998888',
+        ]);
+        $this->assertStringContainsString('wa.me/6281299998888', $response1->json('whatsapp_link'));
+        $this->assertStringContainsString('LND-WA-0001', $response1->json('whatsapp_link'));
+
+        // 2. Test get-whatsapp-link for customer WITHOUT mobile number
+        $customer_no_mobile = \App\Contact::create([
+            'business_id' => 1,
+            'type' => 'customer',
+            'name' => 'Customer No Mobile',
+            'mobile' => null,
+            'contact_status' => 'active',
+            'contact_id' => 'CO_WA_02',
+            'created_by' => $user->id,
+        ]);
+
+        $os2 = \Modules\Laundry\Entities\LaundryOrderSheet::create([
+            'business_id' => 1,
+            'order_no' => 'LND-WA-0002',
+            'contact_id' => $customer_no_mobile->id,
+            'laundry_item_type_id' => $item_type->id,
+            'quantity' => 1,
+        ]);
+
+        $response2 = $this->actingAs($user)
+            ->withSession(['user.business_id' => 1, 'user.id' => $user->id])
+            ->get(route('laundry.order_sheet.get_whatsapp_link', [$os2->id]));
+
+        $response2->assertStatus(200);
+        $response2->assertJson([
+            'success' => true,
+            'has_mobile' => false,
+            'contact_id' => $customer_no_mobile->id,
+            'order_no' => 'LND-WA-0002',
+        ]);
+
+        // 3. Test send-whatsapp-mobile to update mobile and return link
+        $response3 = $this->actingAs($user)
+            ->withSession(['user.business_id' => 1, 'user.id' => $user->id])
+            ->post(route('laundry.order_sheet.send_whatsapp_mobile', [$os2->id]), [
+                'mobile' => '081377776666',
+                'save_to_contact' => 1,
+            ]);
+
+        $response3->assertStatus(200);
+        $response3->assertJson([
+            'success' => true,
+            'has_mobile' => true,
+        ]);
+        $this->assertStringContainsString('wa.me/6281377776666', $response3->json('whatsapp_link'));
+
+        // Verify contact's mobile was updated in DB
+        $customer_no_mobile->refresh();
+        $this->assertEquals('081377776666', $customer_no_mobile->mobile);
     }
 }
