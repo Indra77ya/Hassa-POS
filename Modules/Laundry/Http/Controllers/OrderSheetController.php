@@ -37,6 +37,7 @@ class OrderSheetController extends Controller
 
         if ($request->ajax()) {
             $orders = LaundryOrderSheet::where('laundry_order_sheets.business_id', $business_id)
+                ->select('laundry_order_sheets.*')
                 ->with(['customer', 'location', 'status', 'serviceType', 'itemType', 'transactions']);
 
             if (!empty($request->location_id)) {
@@ -707,6 +708,7 @@ class OrderSheetController extends Controller
                 'contact_id' => $order_sheet->contact_id,
                 'customer_name' => optional($customer)->name ?? '-',
                 'order_no' => $order_sheet->order_no,
+                'mobile' => $mobile,
                 'msg' => __('Pelanggan belum memiliki nomor telepon/WhatsApp.'),
             ]);
         }

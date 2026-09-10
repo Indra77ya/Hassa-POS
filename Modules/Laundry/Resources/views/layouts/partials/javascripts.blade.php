@@ -313,31 +313,42 @@
                 href = '/laundry/order-sheet/' + id + '/get-whatsapp-link';
             }
 
+            var wa_window = window.open('', '_blank');
+
             $.ajax({
                 url: href,
                 dataType: 'json',
                 success: function(result) {
                     if (result.success) {
                         if (result.has_mobile && result.whatsapp_link) {
-                            window.open(result.whatsapp_link, '_blank');
+                            if (wa_window) {
+                                wa_window.location.href = result.whatsapp_link;
+                            }
                             if (typeof order_sheets_table !== 'undefined') {
                                 order_sheets_table.ajax.reload();
                             }
                         } else {
+                            if (wa_window) wa_window.close();
                             if ($('#laundry_whatsapp_modal').length === 0) {
                                 $('body').append(getLaundryWhatsappModalHtml());
                             }
                             $('#laundry_wa_order_id').val(id);
                             $('#send_laundry_whatsapp_form').attr('action', '/laundry/order-sheet/' + id + '/send-whatsapp-mobile');
                             $('#laundry_wa_customer_info').html('Nomor WhatsApp pelanggan <strong>' + (result.customer_name || '') + '</strong> belum terdaftar. Silakan masukkan nomor WhatsApp untuk mengirim nota order <strong>' + (result.order_no || '') + '</strong>:');
-                            $('#laundry_wa_mobile').val('');
+                            if (result.mobile) {
+                                $('#laundry_wa_mobile').val(result.mobile);
+                            } else {
+                                $('#laundry_wa_mobile').val('');
+                            }
                             $('#laundry_whatsapp_modal').modal('show');
                         }
                     } else {
+                        if (wa_window) wa_window.close();
                         toastr.error(result.msg || 'Gagal mengambil data WhatsApp');
                     }
                 },
                 error: function() {
+                    if (wa_window) wa_window.close();
                     toastr.error('Terjadi kesalahan saat menghubungi server');
                 }
             });
@@ -349,6 +360,8 @@
             var action = form.attr('action');
             var data = form.serialize();
 
+            var wa_window = window.open('', '_blank');
+
             $.ajax({
                 method: 'POST',
                 url: action,
@@ -356,19 +369,23 @@
                 dataType: 'json',
                 success: function(result) {
                     if (result.success && result.whatsapp_link) {
+                        if (wa_window) {
+                            wa_window.location.href = result.whatsapp_link;
+                        }
                         $('#laundry_whatsapp_modal').modal('hide');
                         if (result.msg) {
                             toastr.success(result.msg);
                         }
-                        window.open(result.whatsapp_link, '_blank');
                         if (typeof order_sheets_table !== 'undefined') {
                             order_sheets_table.ajax.reload();
                         }
                     } else {
+                        if (wa_window) wa_window.close();
                         toastr.error(result.msg || 'Gagal membuat link WhatsApp');
                     }
                 },
                 error: function() {
+                    if (wa_window) wa_window.close();
                     toastr.error('Gagal mengirim data nomor WhatsApp');
                 }
             });
