@@ -22,6 +22,11 @@ $(document).ready(function () {
                 settings.url = base_path + settings.url;
             }
         },
+        error: function (jqXHR, textStatus, errorThrown) {
+            if (jqXHR.status === 403) {
+                toastr.error('Akses Ditolak: Anda tidak memiliki izin untuk melakukan aksi ini.');
+            }
+        }
     });
 
     update_font_size();
