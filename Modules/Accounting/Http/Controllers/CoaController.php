@@ -1361,12 +1361,12 @@ class CoaController extends Controller
                                             ->select('name as text', 'id')
                                             ->get();
             $parent_accounts->prepend([
-                'id' => 'null',
+                'id' => '',
                 'text' => __('messages.please_select'),
             ]);
 
             $detail_types = [[
-                'id' => 'null',
+                'id' => '',
                 'text' => __('messages.please_select'),
                 'description' => '',
             ]];
@@ -1401,7 +1401,7 @@ class CoaController extends Controller
                                         ->get();
 
             $sub_types = [[
-                'id' => 'null',
+                'id' => '',
                 'text' => __('messages.please_select'),
                 'show_balance' => 0,
             ]];
