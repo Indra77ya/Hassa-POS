@@ -11,11 +11,6 @@
                                 class="tw-text-2xl md:tw-text-4xl tw-tracking-tight tw-font-bold tw-text-white tw-mb-2 md:tw-mb-0">
                                 {{ __('home.welcome_message', ['name' => Session::get('user.first_name')]) }}
                             </h1>
-                            @if (!auth()->user()->can('dashboard.data'))
-                                <p class="tw-text-sm sm:tw-text-base tw-text-white tw-opacity-90 tw-font-medium tw-mt-1">
-                                    Selamat bekerja! Akses cepat ke fitur-fitur kerja Anda tersedia di bawah ini.
-                                </p>
-                            @endif
                         </div>
     
                         @if (auth()->user()->can('dashboard.data'))
