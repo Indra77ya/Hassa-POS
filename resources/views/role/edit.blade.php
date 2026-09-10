@@ -13,6 +13,7 @@
     @php
       $pos_settings = !empty(session('business.pos_settings')) ? json_decode(session('business.pos_settings'), true) : [];
       $role_permissions = $role_permissions ?? [];
+      $role_name = str_replace('#' . session('user.business_id'), '', $role->name);
 
       $permission_groups = [
           'user_role' => [
