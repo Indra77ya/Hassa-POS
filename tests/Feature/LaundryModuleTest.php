@@ -225,6 +225,7 @@ class LaundryModuleTest extends TestCase
             $table->unsignedBigInteger('contact_id');
             $table->unsignedBigInteger('laundry_item_type_id')->nullable();
             $table->decimal('quantity', 15, 2)->default(1.00);
+            $table->dateTime('whatsapp_sent_at')->nullable();
             $table->timestamps();
         });
 
@@ -1339,5 +1340,25 @@ class LaundryModuleTest extends TestCase
         // Verify contact's mobile was updated in DB
         $customer_no_mobile->refresh();
         $this->assertEquals('081377776666', $customer_no_mobile->mobile);
+
+        // 4. Verify whatsapp_sent_at timestamp and DataTables rendering
+        $os1->refresh();
+        $this->assertNotNull($os1->whatsapp_sent_at);
+
+        $os2->refresh();
+        $this->assertNotNull($os2->whatsapp_sent_at);
+
+        $dtResponse = $this->actingAs($user)
+            ->withSession(['user.business_id' => 1, 'user.id' => $user->id])
+            ->get(action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'index']), ['HTTP_X-Requested-With' => 'XMLHttpRequest']);
+
+        $dtResponse->assertStatus(200);
+        $dtData = $dtResponse->json('data');
+        $this->assertNotEmpty($dtData);
+
+        $os1Row = collect($dtData)->firstWhere('order_no', '<a href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'show'], [$os1->id]) . '">LND-WA-0001</a> <span class="label bg-green" title="WA Terkirim: ' . \Carbon\Carbon::parse($os1->whatsapp_sent_at)->format('d/m/Y H:i') . '"><i class="fab fa-whatsapp"></i> WA Terkirim</span>');
+        $this->assertNotNull($os1Row);
+        $this->assertStringContainsString('Kirim Ulang WA', $os1Row['action']);
+        $this->assertStringContainsString('Terkirim', $os1Row['wa_status']);
     }
 }

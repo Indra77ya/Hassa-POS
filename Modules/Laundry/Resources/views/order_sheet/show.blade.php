@@ -62,6 +62,17 @@
                         <th>@lang('laundry::lang.delivery_type'):</th>
                         <td>{{ $order_sheet->delivery_type == 'pickup_delivery' ? __('laundry::lang.pickup_delivery') : __('laundry::lang.self_service') }}</td>
                     </tr>
+                    <tr>
+                        <th>Status WhatsApp:</th>
+                        <td>
+                            @if($order_sheet->whatsapp_sent_at)
+                                <span class="label bg-green"><i class="fab fa-whatsapp"></i> Terkirim</span>
+                                <br><small class="text-muted">{{ \Carbon\Carbon::parse($order_sheet->whatsapp_sent_at)->format('d/m/Y H:i') }}</small>
+                            @else
+                                <span class="label bg-gray"><i class="fab fa-whatsapp"></i> Belum Dikirim</span>
+                            @endif
+                        </td>
+                    </tr>
                 </table>
             </div>
         </div>

@@ -82,14 +82,28 @@ class OrderSheetController extends Controller
                         $html .= '<li><a href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'viewPayments'], [$row->id]) . '" class="view_payment_modal"><i class="fas fa-money-bill-alt"></i> ' . __('purchase.view_payments') . '</a></li>';
                     }
 
+                    $wa_action_label = !empty($row->whatsapp_sent_at) ? 'Kirim Ulang WA' : 'Kirim WhatsApp';
                     $html .= '<li><a href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'print'], [$row->id]) . '" target="_blank"><i class="fa fa-print"></i> ' . __('messages.print') . '</a></li>';
-                    $html .= '<li><a href="#" data-href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'getWhatsappLink'], [$row->id]) . '" data-id="' . $row->id . '" class="send_laundry_whatsapp"><i class="fab fa-whatsapp fa-fw text-success"></i> Kirim WhatsApp</a></li>';
+                    $html .= '<li><a href="#" data-href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'getWhatsappLink'], [$row->id]) . '" data-id="' . $row->id . '" class="send_laundry_whatsapp"><i class="fab fa-whatsapp fa-fw text-success"></i> ' . e($wa_action_label) . '</a></li>';
                     $html .= '<li><a href="#" data-href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'destroy'], [$row->id]) . '" class="delete_order_sheet_button"><i class="glyphicon glyphicon-trash"></i> ' . __('messages.delete') . '</a></li>';
                     $html .= '</ul></div>';
                     return $html;
                 })
                 ->editColumn('order_no', function ($row) {
-                    return '<a href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'show'], [$row->id]) . '">' . e($row->order_no) . '</a>';
+                    $html = '<a href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'show'], [$row->id]) . '">' . e($row->order_no) . '</a>';
+                    if (!empty($row->whatsapp_sent_at)) {
+                        $formatted_time = Carbon::parse($row->whatsapp_sent_at)->format('d/m/Y H:i');
+                        $html .= ' <span class="label bg-green" title="WA Terkirim: ' . e($formatted_time) . '"><i class="fab fa-whatsapp"></i> WA Terkirim</span>';
+                    }
+                    return $html;
+                })
+                ->addColumn('wa_status', function ($row) {
+                    if (!empty($row->whatsapp_sent_at)) {
+                        $formatted_time = Carbon::parse($row->whatsapp_sent_at)->format('d/m/Y H:i');
+                        return '<span class="label bg-green" title="Terkirim pada ' . e($formatted_time) . '"><i class="fab fa-whatsapp"></i> Terkirim</span><br><small class="text-muted">' . e($formatted_time) . '</small>';
+                    } else {
+                        return '<span class="label bg-gray"><i class="fab fa-whatsapp"></i> Belum Dikirim</span>';
+                    }
                 })
                 ->editColumn('status', function ($row) {
                     if (!$row->status) return '-';
@@ -128,7 +142,7 @@ class OrderSheetController extends Controller
                 ->editColumn('estimated_completion_at', function ($row) {
                     return $row->estimated_completion_at ? Carbon::parse($row->estimated_completion_at)->format('d/m/Y H:i') : '-';
                 })
-                ->rawColumns(['action', 'order_no', 'status', 'payment_status'])
+                ->rawColumns(['action', 'order_no', 'status', 'payment_status', 'wa_status'])
                 ->make(true);
         }
 
@@ -697,6 +711,9 @@ class OrderSheetController extends Controller
             ]);
         }
 
+        $order_sheet->whatsapp_sent_at = Carbon::now();
+        $order_sheet->save();
+
         $text = $this->_buildWhatsappText($order_sheet);
         $whatsapp_link = $this->commonUtil->getWhatsappNotificationLink([
             'mobile_number' => $mobile,
@@ -708,6 +725,7 @@ class OrderSheetController extends Controller
             'has_mobile' => true,
             'mobile' => $mobile,
             'whatsapp_link' => $whatsapp_link,
+            'whatsapp_sent_at' => Carbon::parse($order_sheet->whatsapp_sent_at)->format('d/m/Y H:i'),
         ]);
     }
 
@@ -734,6 +752,9 @@ class OrderSheetController extends Controller
                 ->update(['mobile' => $mobile]);
         }
 
+        $order_sheet->whatsapp_sent_at = Carbon::now();
+        $order_sheet->save();
+
         $text = $this->_buildWhatsappText($order_sheet);
         $whatsapp_link = $this->commonUtil->getWhatsappNotificationLink([
             'mobile_number' => $mobile,
@@ -744,6 +765,7 @@ class OrderSheetController extends Controller
             'success' => true,
             'has_mobile' => true,
             'whatsapp_link' => $whatsapp_link,
+            'whatsapp_sent_at' => Carbon::parse($order_sheet->whatsapp_sent_at)->format('d/m/Y H:i'),
             'msg' => __('Link WhatsApp berhasil dibuat.'),
         ]);
     }

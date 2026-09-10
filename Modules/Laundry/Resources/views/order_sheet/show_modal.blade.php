@@ -60,6 +60,16 @@
               <td>{{ $order_sheet->delivery_type == 'pickup_delivery' ? __('laundry::lang.pickup_delivery') : __('laundry::lang.self_service') }}</td>
             </tr>
             <tr>
+              <th>Status WA:</th>
+              <td>
+                @if($order_sheet->whatsapp_sent_at)
+                  <span class="label bg-green"><i class="fab fa-whatsapp"></i> Terkirim</span> ({{ \Carbon\Carbon::parse($order_sheet->whatsapp_sent_at)->format('d/m/Y H:i') }})
+                @else
+                  <span class="label bg-gray"><i class="fab fa-whatsapp"></i> Belum Dikirim</span>
+                @endif
+              </td>
+            </tr>
+            <tr>
               <th>@lang('sale.payment_status'):</th>
               <td>
                 @if($order_sheet->payment_status == 'paid')

@@ -61,6 +61,7 @@
                         <th>@lang('laundry::lang.quantity')</th>
                         <th>@lang('laundry::lang.status')</th>
                         <th>@lang('sale.payment_status')</th>
+                        <th>Status WA</th>
                         <th>@lang('laundry::lang.received_at')</th>
                         <th>@lang('laundry::lang.estimated_completion_at')</th>
                     </tr>
@@ -101,6 +102,7 @@ $(document).ready(function() {
             { data: 'quantity', name: 'quantity' },
             { data: 'status', name: 'status' },
             { data: 'payment_status', name: 'payment_status', orderable: false, searchable: false },
+            { data: 'wa_status', name: 'wa_status', orderable: false, searchable: false },
             { data: 'received_at', name: 'received_at' },
             { data: 'estimated_completion_at', name: 'estimated_completion_at' }
         ]

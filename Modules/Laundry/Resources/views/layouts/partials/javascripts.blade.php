@@ -320,6 +320,9 @@
                     if (result.success) {
                         if (result.has_mobile && result.whatsapp_link) {
                             window.open(result.whatsapp_link, '_blank');
+                            if (typeof order_sheets_table !== 'undefined') {
+                                order_sheets_table.ajax.reload();
+                            }
                         } else {
                             if ($('#laundry_whatsapp_modal').length === 0) {
                                 $('body').append(getLaundryWhatsappModalHtml());
