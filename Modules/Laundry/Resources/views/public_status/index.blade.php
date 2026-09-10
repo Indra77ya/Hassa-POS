@@ -15,6 +15,11 @@
 <body>
     <div class="container" style="max-width: 800px;">
         <div class="card text-center">
+            @if(!empty($laundry_logo))
+                <div style="margin-bottom: 15px;">
+                    <img src="{{ $laundry_logo }}" alt="Laundry Logo" style="max-height: 100px; max-width: 100%;">
+                </div>
+            @endif
             <h2 class="text-primary"><i class="glyphicon glyphicon-search"></i> @lang('laundry::lang.laundry_status_lookup')</h2>
             <p class="text-muted">@lang('laundry::lang.enter_order_no_or_phone')</p>
 

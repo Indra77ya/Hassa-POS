@@ -595,7 +595,16 @@ class OrderSheetController extends Controller
             ->with(['customer', 'location', 'status', 'serviceType', 'itemType', 'createdBy', 'processLogs.process', 'processLogs.staff'])
             ->findOrFail($id);
 
-        return view('laundry::order_sheet.print', compact('order_sheet'));
+        $business = \App\Business::find($business_id);
+        $laundry_logo = null;
+        if ($business && !empty($business->laundry_settings)) {
+            $laundry_settings = json_decode($business->laundry_settings, true);
+            if (!empty($laundry_settings['laundry_logo']) && file_exists(public_path('uploads/laundry_logos/' . $laundry_settings['laundry_logo']))) {
+                $laundry_logo = asset('uploads/laundry_logos/' . $laundry_settings['laundry_logo']);
+            }
+        }
+
+        return view('laundry::order_sheet.print', compact('order_sheet', 'laundry_logo'));
     }
 
     public function getPosDetails($id)

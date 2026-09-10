@@ -27,6 +27,9 @@ Route::middleware(['web', 'auth', 'SetSessionData', 'language', 'timezone', 'Adm
 
     Route::get('reports/staff-points', [\Modules\Laundry\Http\Controllers\LaundryReportController::class, 'staffPointsReport'])->name('laundry.reports.staff_points');
 
+    Route::get('settings', [\Modules\Laundry\Http\Controllers\LaundrySettingsController::class, 'index'])->name('laundry.settings');
+    Route::post('settings', [\Modules\Laundry\Http\Controllers\LaundrySettingsController::class, 'store'])->name('laundry.settings.store');
+
     Route::get('/install', [\Modules\Laundry\Http\Controllers\InstallController::class, 'index']);
     Route::post('/install', [\Modules\Laundry\Http\Controllers\InstallController::class, 'install']);
     Route::get('/install/uninstall', [\Modules\Laundry\Http\Controllers\InstallController::class, 'uninstall']);

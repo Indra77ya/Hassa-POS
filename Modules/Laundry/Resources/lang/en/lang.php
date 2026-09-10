@@ -111,4 +111,9 @@ return [
     'select_order_sheet' => 'Select Laundry Order Sheet',
     'yes' => 'Yes',
     'no' => 'No',
+    'laundry_settings' => 'Laundry Settings',
+    'laundry_logo' => 'Laundry Logo',
+    'laundry_logo_help' => 'Upload custom laundry logo. Allowed image formats: jpeg, png, gif.',
+    'remove_laundry_logo' => 'Remove Laundry Logo',
+    'current_image' => 'Current Image',
 ];
