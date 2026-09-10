@@ -1024,7 +1024,7 @@
             </div>
         </div>
     @else
-        <div class="tw-px-5 tw-py-8">
+        <div class="tw-px-5 tw-pt-8 tw-pb-12">
             <div class="tw-max-w-6xl tw-mx-auto">
                 {{-- Operational Shortcuts Section --}}
                 <div class="tw-mb-6 tw-flex tw-items-center tw-justify-between">
