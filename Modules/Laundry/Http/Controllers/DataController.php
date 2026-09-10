@@ -175,6 +175,13 @@ class DataController extends Controller
                                 ['active' => request()->segment(1) == 'laundry' && request()->segment(2) == 'reports']
                             );
                         }
+                        if (auth()->user()->can('superadmin') || auth()->user()->can('laundry.manage_master_data')) {
+                            $sub->url(
+                                action([\Modules\Laundry\Http\Controllers\LaundrySettingsController::class, 'index']),
+                                __('laundry::lang.laundry_settings'),
+                                ['active' => request()->segment(1) == 'laundry' && request()->segment(2) == 'settings']
+                            );
+                        }
                     },
                     [
                         'icon' => '<svg class="tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">

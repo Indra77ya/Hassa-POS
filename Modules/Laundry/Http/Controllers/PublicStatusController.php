@@ -4,10 +4,27 @@ namespace Modules\Laundry\Http\Controllers;
 
 use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
+use App\Business;
 use Modules\Laundry\Entities\LaundryOrderSheet;
 
 class PublicStatusController extends Controller
 {
+    private function getLaundryLogo($business_id)
+    {
+        if (empty($business_id)) {
+            return null;
+        }
+        $business = Business::find($business_id);
+        if (!$business || empty($business->laundry_settings)) {
+            return null;
+        }
+        $laundry_settings = json_decode($business->laundry_settings, true);
+        if (!empty($laundry_settings['laundry_logo']) && file_exists(public_path('uploads/laundry_logos/' . $laundry_settings['laundry_logo']))) {
+            return asset('uploads/laundry_logos/' . $laundry_settings['laundry_logo']);
+        }
+        return null;
+    }
+
     public function index($order_no = null)
     {
         $order_sheet = null;
@@ -17,7 +34,9 @@ class PublicStatusController extends Controller
                 ->first();
         }
 
-        return view('laundry::public_status.index', compact('order_sheet', 'order_no'));
+        $laundry_logo = !empty($order_sheet) ? $this->getLaundryLogo($order_sheet->business_id) : null;
+
+        return view('laundry::public_status.index', compact('order_sheet', 'order_no', 'laundry_logo'));
     }
 
     public function search(Request $request)
@@ -34,6 +53,8 @@ class PublicStatusController extends Controller
             ->latest()
             ->first();
 
-        return view('laundry::public_status.index', compact('order_sheet', 'search'));
+        $laundry_logo = !empty($order_sheet) ? $this->getLaundryLogo($order_sheet->business_id) : null;
+
+        return view('laundry::public_status.index', compact('order_sheet', 'search', 'laundry_logo'));
     }
 }

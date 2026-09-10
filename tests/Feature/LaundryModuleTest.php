@@ -76,6 +76,17 @@ class LaundryModuleTest extends TestCase
             $table->unsignedBigInteger('model_id');
         });
 
+        \Illuminate\Support\Facades\Schema::create('model_has_permissions', function ($table) {
+            $table->unsignedBigInteger('permission_id');
+            $table->string('model_type');
+            $table->unsignedBigInteger('model_id');
+        });
+
+        \Illuminate\Support\Facades\Schema::create('role_has_permissions', function ($table) {
+            $table->unsignedBigInteger('permission_id');
+            $table->unsignedBigInteger('role_id');
+        });
+
         \Illuminate\Support\Facades\Schema::create('laundry_statuses', function ($table) {
             $table->id();
             $table->integer('business_id');
@@ -275,6 +286,17 @@ class LaundryModuleTest extends TestCase
             $table->timestamps();
         });
 
+        \Illuminate\Support\Facades\Schema::create('subscriptions', function ($table) {
+            $table->id();
+            $table->integer('business_id');
+            $table->integer('package_id')->default(1);
+            $table->text('package_details');
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
+            $table->string('status')->default('approved');
+            $table->timestamps();
+        });
+
         \Illuminate\Support\Facades\DB::table('currencies')->insert([
             'id' => 1,
             'country' => 'Indonesia',
@@ -292,6 +314,7 @@ class LaundryModuleTest extends TestCase
             $table->string('accounting_method')->default('fifo');
             $table->text('keyboard_shortcuts')->nullable();
             $table->text('pos_settings')->nullable();
+            $table->text('laundry_settings')->nullable();
             $table->boolean('enable_rp')->default(0);
             $table->string('sales_cmsn_agnt')->nullable();
             $table->decimal('default_sales_discount', 5, 2)->nullable();
@@ -1040,7 +1063,20 @@ class LaundryModuleTest extends TestCase
                 'email' => 'admin@test.com',
             ]);
         }
+        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'superadmin', 'guard_name' => 'web']);
+        $user->givePermissionTo('superadmin');
         $this->actingAs($user);
+
+        \Illuminate\Support\Facades\DB::table('subscriptions')->insert([
+            'business_id' => 1,
+            'package_id' => 1,
+            'package_details' => json_encode(['laundry_module' => 1]),
+            'start_date' => date('Y-m-d'),
+            'end_date' => date('Y-m-d', strtotime('+1 year')),
+            'status' => 'approved',
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
 
         $status = LaundryStatus::create([
             'business_id' => 1,
@@ -1110,5 +1146,87 @@ class LaundryModuleTest extends TestCase
 
         $response3 = $this->actingAs($user)->get('/laundry/reports/staff-points');
         $response3->assertStatus(403);
+    }
+
+    public function test_laundry_settings_logo_upload_and_rendering()
+    {
+        \Illuminate\Support\Facades\View::addNamespace('laundry', base_path('Modules/Laundry/Resources/views'));
+
+        $user = \App\User::where('id', 1)->first();
+        if (!$user) {
+            $user = \App\User::create([
+                'id' => 1,
+                'business_id' => 1,
+                'first_name' => 'Admin',
+                'last_name' => 'User',
+                'username' => 'admin',
+                'email' => 'admin@test.com',
+            ]);
+        }
+        $this->actingAs($user);
+
+        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'superadmin', 'guard_name' => 'web']);
+        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'laundry.manage_master_data', 'guard_name' => 'web']);
+        $user->givePermissionTo('superadmin');
+        $user->givePermissionTo('laundry.manage_master_data');
+
+        // Test settings page GET
+        $response = $this->actingAs($user)
+            ->withSession(['user.business_id' => 1, 'user.id' => 1])
+            ->get(route('laundry.settings'));
+
+        $response->assertStatus(200);
+
+        // Test updating settings with laundry logo filename
+        $logo_filename = 'test_logo_' . time() . '.png';
+        if (!file_exists(public_path('uploads/laundry_logos'))) {
+            mkdir(public_path('uploads/laundry_logos'), 0777, true);
+        }
+        file_put_contents(public_path('uploads/laundry_logos/' . $logo_filename), 'test logo content');
+
+        $business = \App\Business::find(1);
+        $business->laundry_settings = json_encode(['laundry_logo' => $logo_filename]);
+        $business->save();
+
+        // Test rendering on public status page
+        $item_type = LaundryItemType::create([
+            'business_id' => 1,
+            'name' => 'Cuci Jas',
+            'unit_name' => 'pcs',
+            'default_price' => 50000,
+        ]);
+
+        $os = \Modules\Laundry\Entities\LaundryOrderSheet::create([
+            'business_id' => 1,
+            'order_no' => 'LND-LOGO-TEST',
+            'contact_id' => 10,
+            'laundry_item_type_id' => $item_type->id,
+            'quantity' => 1,
+        ]);
+
+        $statusResponse = $this->get(route('laundry.public_status', [$os->order_no]));
+        $statusResponse->assertStatus(200);
+        $statusResponse->assertSee('uploads/laundry_logos/' . $logo_filename);
+
+        // Test rendering on print order sheet
+        $printResponse = $this->actingAs($user)
+            ->withSession(['user.business_id' => 1, 'user.id' => 1])
+            ->get(route('laundry.order_sheet.print', [$os->id]));
+        $printResponse->assertStatus(200);
+        $printResponse->assertSee('uploads/laundry_logos/' . $logo_filename);
+
+        // Test removing logo
+        $removeResponse = $this->actingAs($user)
+            ->withSession(['user.business_id' => 1, 'user.id' => 1])
+            ->post(route('laundry.settings.store'), [
+                'remove_laundry_logo' => 1,
+            ]);
+
+        $removeResponse->assertRedirect();
+
+        $business->refresh();
+        $settings = json_decode($business->laundry_settings, true);
+        $this->assertNull($settings['laundry_logo']);
+        $this->assertFalse(file_exists(public_path('uploads/laundry_logos/' . $logo_filename)));
     }
 }

@@ -16,6 +16,11 @@
 </head>
 <body onload="window.print();">
     <div class="header">
+        @if(!empty($laundry_logo))
+            <div style="margin-bottom: 10px;">
+                <img src="{{ $laundry_logo }}" alt="Laundry Logo" style="max-height: 80px; max-width: 100%;">
+            </div>
+        @endif
         <h2>{{ optional($order_sheet->location)->name }}</h2>
         <p>{{ optional($order_sheet->location)->landmark }} {{ optional($order_sheet->location)->city }}</p>
         <h3>@lang('laundry::lang.laundry_receipt')</h3>
