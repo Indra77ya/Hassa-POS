@@ -76,10 +76,10 @@ class OrderSheetController extends Controller
                     $html .= '<li><a href="#" data-href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'getStatusModal'], [$row->id]) . '" class="btn-modal" data-container=".view_modal"><i class="fa fa-edit"></i> ' . __('laundry::lang.change_status') . '</a></li>';
 
                     if ($row->payment_status != 'paid') {
-                        $html .= '<li><a href="#" data-href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'addPayment'], [$row->id]) . '" class="btn-modal" data-container=".payment_modal"><i class="fas fa-money-bill-alt"></i> ' . __('purchase.add_payment') . '</a></li>';
+                        $html .= '<li><a href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'addPayment'], [$row->id]) . '" class="add_payment_modal"><i class="fas fa-money-bill-alt"></i> ' . __('purchase.add_payment') . '</a></li>';
                     }
                     if ($row->total_paid > 0) {
-                        $html .= '<li><a href="#" data-href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'viewPayments'], [$row->id]) . '" class="btn-modal" data-container=".payment_modal"><i class="fas fa-money-bill-alt"></i> ' . __('purchase.view_payments') . '</a></li>';
+                        $html .= '<li><a href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'viewPayments'], [$row->id]) . '" class="view_payment_modal"><i class="fas fa-money-bill-alt"></i> ' . __('purchase.view_payments') . '</a></li>';
                     }
 
                     $html .= '<li><a href="' . action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'print'], [$row->id]) . '" target="_blank"><i class="fa fa-print"></i> ' . __('messages.print') . '</a></li>';
