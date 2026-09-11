@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('role_templates', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('business_id');
+            $table->integer('business_id')->unsigned();
             $table->string('name');
             $table->text('description')->nullable();
             $table->json('permissions')->nullable();
