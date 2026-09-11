@@ -1042,18 +1042,41 @@ $(document).ready(function() {
         pos_total_row();
     });
 
-    $(document).on('click', '.add_new_customer', function() {
-        $('#customer_id').select2('close');
-        var name = $(this).data('name');
-        $('.contact_modal')
-            .find('input#name')
-            .val(name);
-        $('.contact_modal')
-            .find('select#contact_type')
-            .val('customer')
-            .closest('div.contact_type_div')
-            .addClass('hide');
-        $('.contact_modal').modal('show');
+    $(document).on('click', '.add_new_customer', function(e) {
+        if ($('select#customer_id').length) {
+            try { $('select#customer_id').select2('close'); } catch(err) {}
+        }
+        if ($('select#contact_id').length) {
+            try { $('select#contact_id').select2('close'); } catch(err) {}
+        }
+
+        var $targetModal = $('.contact_modal').last();
+        if ($targetModal.length && $targetModal.parents('.modal').length) {
+            $targetModal.appendTo('body');
+        }
+
+        var name = $(this).data('name') || '';
+        $targetModal.find('input#name').val(name);
+        $targetModal.find('select#contact_type').val('customer').closest('div.contact_type_div').addClass('hide');
+        $targetModal.modal('show');
+    });
+
+    $(document).on('show.bs.modal', '.contact_modal', function () {
+        var maxZ = 1050;
+        $('.modal:visible').each(function() {
+            var z = parseInt($(this).css('z-index')) || 1050;
+            if (z > maxZ) maxZ = z;
+        });
+        $(this).css('z-index', maxZ + 20);
+        setTimeout(function() {
+            $('.modal-backdrop').not('.modal-stack').css('z-index', maxZ + 10).addClass('modal-stack');
+        }, 0);
+    });
+
+    $(document).on('hidden.bs.modal', '.contact_modal', function () {
+        if ($('.modal:visible').length) {
+            $('body').addClass('modal-open');
+        }
     });
     $('form#quick_add_contact')
         .submit(function(e) {
