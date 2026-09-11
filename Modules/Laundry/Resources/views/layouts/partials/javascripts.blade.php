@@ -221,16 +221,50 @@
                         $('div.view_modal').modal('hide');
                         toastr.success(result.msg);
                         if (result.data && result.data.id && $('#laundry_order_sheet_id').length) {
-                            if (result.data.contact_id && $('select#customer_id').length) {
-                                if ($('select#customer_id option[value="' + result.data.contact_id + '"]').length) {
-                                    $('select#customer_id').val(result.data.contact_id).trigger('change');
+                            var new_order_sheet_id = result.data.id;
+                            var new_contact_id = result.data.contact_id;
+                            var display_order_no = result.data.display_order_no || result.data.order_no;
+
+                            is_syncing_laundry_customer = true;
+
+                            if (new_contact_id && $('select#customer_id').length) {
+                                if ($('select#customer_id option[value="' + new_contact_id + '"]').length) {
+                                    $('select#customer_id').val(new_contact_id);
                                 } else if (result.data.customer_name) {
-                                    var newCustomerOption = new Option(result.data.customer_name, result.data.contact_id, true, true);
-                                    $('select#customer_id').append(newCustomerOption).trigger('change');
+                                    var newCustomerOption = new Option(result.data.customer_name, new_contact_id, true, true);
+                                    $('select#customer_id').append(newCustomerOption);
                                 }
                             }
-                            var newOption = new Option(result.data.order_no, result.data.id, true, true);
-                            $('#laundry_order_sheet_id').append(newOption).trigger('change');
+
+                            $.ajax({
+                                url: '/laundry/order-sheet/get-order-sheets',
+                                data: { contact_id: new_contact_id || '' },
+                                dataType: 'json',
+                                success: function(res) {
+                                    if (res.success) {
+                                        var select = $('#laundry_order_sheet_id');
+                                        var placeholder = '{{ __("laundry::lang.select_order_sheet") }}';
+                                        select.empty().append(new Option(placeholder, '', false, false));
+
+                                        var found_new = false;
+                                        $.each(res.order_sheets, function(id, order_no) {
+                                            var is_sel = (id == new_order_sheet_id);
+                                            if (is_sel) found_new = true;
+                                            select.append(new Option(order_no, id, is_sel, is_sel));
+                                        });
+
+                                        if (!found_new) {
+                                            select.append(new Option(display_order_no, new_order_sheet_id, true, true));
+                                        }
+
+                                        select.val(new_order_sheet_id).trigger('change');
+                                    }
+                                    is_syncing_laundry_customer = false;
+                                },
+                                error: function() {
+                                    is_syncing_laundry_customer = false;
+                                }
+                            });
                         }
                         if (typeof statuses_table !== 'undefined') {
                             statuses_table.ajax.reload();
