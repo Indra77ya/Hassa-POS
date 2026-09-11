@@ -1042,7 +1042,7 @@ $(document).ready(function() {
         pos_total_row();
     });
 
-    $(document).on('click', '.add_new_customer', function() {
+    $(document).on('click', '.add_new_customer', function(e) {
         if ($('#customer_id').length) {
             $('#customer_id').select2('close');
         }
@@ -1050,48 +1050,76 @@ $(document).ready(function() {
             $('#contact_id').select2('close');
         }
         var name = $(this).data('name');
-        $('.contact_modal')
-            .find('input#name')
-            .val(name);
-        $('.contact_modal')
-            .find('select#contact_type')
-            .val('customer')
-            .closest('div.contact_type_div')
-            .addClass('hide');
-        $('.contact_modal').modal('show');
-    });
-    $('form#quick_add_contact')
-        .submit(function(e) {
+
+        if (!$('.contact_modal').length) {
+            $('body').append('<div class="modal fade contact_modal" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel"></div>');
+        }
+
+        var href = $(this).data('href');
+        if (href && (!$('.contact_modal').find('form#quick_add_contact').length || $('.contact_modal').is(':empty'))) {
             e.preventDefault();
-        })
-        .validate({
-            rules: {
-                contact_id: {
-                    remote: {
-                        url: '/contacts/check-contacts-id',
-                        type: 'post',
-                        data: {
-                            contact_id: function() {
-                                return $('#contact_id').val();
-                            },
-                            hidden_id: function() {
-                                return $('#hidden_id').val() || '';
+            $.ajax({
+                url: href,
+                dataType: 'html',
+                success: function(result) {
+                    $('.contact_modal').html(result);
+                    $('.contact_modal').find('input#name').val(name);
+                    $('.contact_modal').find('select#contact_type').val('customer').closest('div.contact_type_div').addClass('hide');
+                    initQuickAddContactForm();
+                    $('.contact_modal').modal('show');
+                }
+            });
+        } else {
+            $('.contact_modal').find('input#name').val(name);
+            $('.contact_modal').find('select#contact_type').val('customer').closest('div.contact_type_div').addClass('hide');
+            initQuickAddContactForm();
+            $('.contact_modal').modal('show');
+        }
+    });
+
+    $(document).on('show.bs.modal', '.contact_modal', function() {
+        setTimeout(function() {
+            $('.modal-backdrop').last().css('z-index', 1055);
+        }, 10);
+    });
+
+    function initQuickAddContactForm() {
+        if ($('form#quick_add_contact').length) {
+            $('form#quick_add_contact')
+                .off('submit')
+                .submit(function(e) {
+                    e.preventDefault();
+                })
+                .validate({
+                    rules: {
+                        contact_id: {
+                            remote: {
+                                url: '/contacts/check-contacts-id',
+                                type: 'post',
+                                data: {
+                                    contact_id: function() {
+                                        return $('#contact_id').val();
+                                    },
+                                    hidden_id: function() {
+                                        return $('#hidden_id').val() || '';
+                                    },
+                                },
                             },
                         },
                     },
-                },
-                // tax_number remote validation removed - now handled with sweet alert
-            },
-            messages: {
-                contact_id: {
-                    required: LANG.contact_id_required,
-                    remote: LANG.contact_id_already_exists,
-                },
-            },
-            submitHandler: function(form) {
-                checkTaxNumberAndSubmitQuick(form);
-            },
-        });
+                    messages: {
+                        contact_id: {
+                            required: LANG.contact_id_required,
+                            remote: LANG.contact_id_already_exists,
+                        },
+                    },
+                    submitHandler: function(form) {
+                        checkTaxNumberAndSubmitQuick(form);
+                    },
+                });
+        }
+    }
+    initQuickAddContactForm();
 
     function checkTaxNumberAndSubmitQuick(form) {
         // Check if tax_number field exists and has a value

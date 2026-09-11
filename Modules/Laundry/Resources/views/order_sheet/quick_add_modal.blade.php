@@ -22,7 +22,7 @@
             <div class="input-group">
               {!! Form::select('contact_id', $customers, $contact_id ?? null, ['class' => 'form-control select2', 'id' => 'contact_id', 'required', 'placeholder' => __('messages.please_select'), 'style' => 'width:100%']) !!}
               <span class="input-group-btn">
-                <button type="button" class="btn btn-default bg-white btn-flat add_new_customer" data-name="" @if(!auth()->user()->can('customer.create')) disabled @endif><i class="fa fa-plus-circle text-primary fa-lg"></i></button>
+                <button type="button" class="btn btn-default bg-white btn-flat add_new_customer btn-modal" data-href="{{ action([\App\Http\Controllers\ContactController::class, 'create'], ['type' => 'customer']) }}" data-container=".contact_modal" data-name="" @if(!auth()->user()->can('customer.create')) disabled @endif><i class="fa fa-plus-circle text-primary fa-lg"></i></button>
               </span>
             </div>
           </div>
