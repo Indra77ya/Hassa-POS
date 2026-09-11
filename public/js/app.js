@@ -532,6 +532,11 @@ $(document).ready(function() {
                 $('div.business').show();
             }
         });
+        if ($('input[type=radio][name="contact_type_radio"]:checked').length) {
+            $('input[type=radio][name="contact_type_radio"]:checked').trigger('change');
+        } else {
+            $('input[type=radio][name="contact_type_radio"][value="individual"]').prop('checked', true).trigger('change');
+        }
         if ($('#is_customer_export').is(':checked')) {
             $('div.export_div').show();
         }
