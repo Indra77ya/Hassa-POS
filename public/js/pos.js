@@ -3555,23 +3555,22 @@ function submitQuickContactForm(form) {
                     name += result.data.supplier_business_name;
                 }
                 
-                $('select#customer_id').append(
-                    $('<option>', { value: result.data.id, text: name })
-                );
-                $('select#customer_id')
-                    .val(result.data.id)
-                    .trigger('change');
-
-                if ($('select#contact_id').length) {
-                    if (!$('select#contact_id option[value="' + result.data.id + '"]').length) {
-                        $('select#contact_id').append(
-                            $('<option>', { value: result.data.id, text: name })
-                        );
+                if ($('select#customer_id').length) {
+                    if (!$('select#customer_id option[value="' + result.data.id + '"]').length) {
+                        var newCustomerOpt = new Option(name, result.data.id, true, true);
+                        $('select#customer_id').append(newCustomerOpt);
                     }
-                    $('select#contact_id')
-                        .val(result.data.id)
-                        .trigger('change');
+                    $('select#customer_id').val(result.data.id).trigger('change');
                 }
+
+                $('select#contact_id, select[name="contact_id"]').each(function() {
+                    var $select = $(this);
+                    if (!$select.find('option[value="' + result.data.id + '"]').length) {
+                        var newOpt = new Option(name, result.data.id, true, true);
+                        $select.append(newOpt);
+                    }
+                    $select.val(result.data.id).trigger('change');
+                });
 
                 $('div.contact_modal').modal('hide');
                 update_shipping_address(result.data)
