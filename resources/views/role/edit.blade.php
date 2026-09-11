@@ -16,17 +16,58 @@
     @component('components.widget', ['class' => 'box-primary'])
         {!! Form::open(['url' => action([\App\Http\Controllers\RoleController::class, 'update'], [$role->id]), 'method' => 'PUT', 'id' => 'role_form' ]) !!}
         <div class="row">
-          <div class="col-md-6">
+          <div class="col-md-4">
             <div class="form-group">
               {!! Form::label('name', __( 'user.role_name' ) . ':*') !!}
                 {!! Form::text('name', $role_name, ['class' => 'form-control', 'required', 'placeholder' => __( 'user.role_name' ) ]); !!}
             </div>
           </div>
 
-          <div class="col-md-6">
+          <div class="col-md-4">
+            <div class="form-group">
+              {!! Form::label('preset_role', __( 'role.preset_role' ) . ':') !!}
+              <select name="preset_role" class="form-control select2" id="preset_role_select">
+                <option value="">@lang('messages.please_select')</option>
+                <optgroup label="@lang('role.system_presets')">
+                  <option value="cashier">@lang('role.preset_cashier')</option>
+                  <option value="accountant">@lang('role.preset_accountant')</option>
+                  <option value="warehouse">@lang('role.preset_warehouse')</option>
+                  <option value="sales_supervisor">@lang('role.preset_sales_supervisor')</option>
+                  <option value="store_manager">@lang('role.preset_store_manager')</option>
+                  <option value="cs">@lang('role.preset_cs')</option>
+                </optgroup>
+                @if(!empty($custom_templates) && count($custom_templates) > 0)
+                  <optgroup label="@lang('role.custom_templates')">
+                    @foreach($custom_templates as $tmpl)
+                      <option value="custom_{{ $tmpl->id }}">⭐ {{ $tmpl->name }}</option>
+                    @endforeach
+                  </optgroup>
+                @endif
+              </select>
+            </div>
+          </div>
+
+          <div class="col-md-4">
             <div class="form-group">
               {!! Form::label('description', __( 'role.description' ) . ':') !!}
               {!! Form::textarea('description', $role->description, ['class' => 'form-control', 'rows' => 1, 'placeholder' => __( 'role.description_placeholder' ) ]); !!}
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-12 tw-mb-4">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('save_as_template', 1, false, ['class' => 'input-icheck', 'id' => 'save_as_template_chk']) !!}
+                <strong>@lang('role.save_as_custom_template')</strong>
+              </label>
+            </div>
+            <div id="template_name_box" class="tw-mt-2" style="display: none;">
+              <div class="form-group col-md-4 tw-pl-0">
+                {!! Form::label('template_name', __('role.template_name') . ':') !!}
+                {!! Form::text('template_name', null, ['class' => 'form-control', 'placeholder' => __('role.template_name_placeholder')]) !!}
+              </div>
             </div>
           </div>
         </div>
@@ -1803,4 +1844,75 @@
     @endcomponent
 </section>
 <!-- /.content -->
+@endsection
+
+@section('javascript')
+<script type="text/javascript">
+  $(document).ready(function(){
+    var presetPermissions = {
+      'cashier': [
+        'sell.view', 'sell.create', 'sell.update', 'direct_sell.access', 'view_cash_register', 'close_cash_register',
+        'access_all_locations', 'print_invoice'
+      ],
+      'accountant': [
+        'account.access', 'view_purchase_price', 'sell.view', 'purchase.view', 'expense.access',
+        'access_all_locations'
+      ],
+      'warehouse': [
+        'product.view', 'product.create', 'product.update', 'purchase.view', 'purchase.create', 'purchase.update',
+        'access_all_locations'
+      ],
+      'sales_supervisor': [
+        'sell.view', 'sell.create', 'sell.update', 'sell.delete', 'edit_sell_price', 'discount.access',
+        'view_own_sell_only', 'access_all_locations'
+      ],
+      'store_manager': [
+        'user.view', 'user.create', 'user.update', 'supplier.view', 'supplier.create', 'customer.view', 'customer.create',
+        'product.view', 'product.create', 'product.update', 'purchase.view', 'purchase.create', 'purchase.update',
+        'sell.view', 'sell.create', 'sell.update', 'sell.delete', 'access_all_locations'
+      ],
+      'cs': [
+        'customer.view', 'customer.create', 'customer.update', 'sell.view', 'view_own_sell_only'
+      ]
+    };
+
+    var customTemplates = {
+      @if(!empty($custom_templates))
+        @foreach($custom_templates as $tmpl)
+          'custom_{{ $tmpl->id }}': {!! json_encode($tmpl->permissions ?? []) !!},
+        @endforeach
+      @endif
+    };
+
+    $('#preset_role_select').on('change', function(){
+      var val = $(this).val();
+      var perms = null;
+
+      if (val && presetPermissions[val]) {
+        perms = presetPermissions[val];
+      } else if (val && customTemplates[val]) {
+        perms = customTemplates[val];
+      }
+
+      if (perms) {
+        $('input.input-icheck').each(function(){
+          var permName = $(this).val();
+          if (perms.includes(permName)) {
+            $(this).iCheck('check');
+          } else if ($(this).attr('name') === 'permissions[]') {
+            $(this).iCheck('uncheck');
+          }
+        });
+      }
+    });
+
+    $('#save_as_template_chk').on('ifChanged', function(event){
+      if(event.target.checked) {
+        $('#template_name_box').slideDown();
+      } else {
+        $('#template_name_box').slideUp();
+      }
+    });
+  });
+</script>
 @endsection

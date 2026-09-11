@@ -125,10 +125,12 @@ class RoleController extends Controller
 
         $module_permissions = $this->moduleUtil->getModuleData('user_permissions');
 
+        $custom_templates = \App\RoleTemplate::where('business_id', $business_id)->get();
+
         $common_settings = ! empty(session('business.common_settings')) ? session('business.common_settings') : [];
 
         return view('role.create')
-                ->with(compact('selling_price_groups', 'module_permissions', 'common_settings'));
+                ->with(compact('selling_price_groups', 'module_permissions', 'custom_templates', 'common_settings'));
     }
 
     /**
@@ -186,6 +188,17 @@ class RoleController extends Controller
                 if (! empty($permissions)) {
                     $role->syncPermissions($permissions);
                 }
+
+                if ($request->input('save_as_template') == 1) {
+                    $template_name = $request->input('template_name') ?: $role_name;
+                    \App\RoleTemplate::create([
+                        'business_id' => $business_id,
+                        'name' => $template_name,
+                        'description' => $request->input('description'),
+                        'permissions' => $permissions ?? [],
+                    ]);
+                }
+
                 db::commit();
                 $output = ['success' => 1,
                     'msg' => __('user.role_added'),
@@ -261,10 +274,12 @@ class RoleController extends Controller
 
         $role_name = str_replace('#' . $business_id, '', $role->name);
 
+        $custom_templates = \App\RoleTemplate::where('business_id', $business_id)->get();
+
         $common_settings = ! empty(session('business.common_settings')) ? session('business.common_settings') : [];
 
         return view('role.edit')
-            ->with(compact('role', 'role_name', 'role_permissions', 'selling_price_groups', 'module_permissions', 'common_settings'));
+            ->with(compact('role', 'role_name', 'role_permissions', 'selling_price_groups', 'module_permissions', 'custom_templates', 'common_settings'));
     }
 
     /**
@@ -325,6 +340,16 @@ class RoleController extends Controller
 
                     if (! empty($permissions)) {
                         $role->syncPermissions($permissions);
+                    }
+
+                    if ($request->input('save_as_template') == 1) {
+                        $template_name = $request->input('template_name') ?: $role_name;
+                        \App\RoleTemplate::create([
+                            'business_id' => $business_id,
+                            'name' => $template_name,
+                            'description' => $request->input('description'),
+                            'permissions' => $permissions ?? [],
+                        ]);
                     }
 
                     $output = ['success' => 1,

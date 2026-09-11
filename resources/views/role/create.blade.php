@@ -26,15 +26,24 @@
           <div class="col-md-4">
             <div class="form-group">
               {!! Form::label('preset_role', __( 'role.preset_role' ) . ':') !!}
-              {!! Form::select('preset_role', [
-                  '' => __('messages.please_select'),
-                  'cashier' => __('role.preset_cashier'),
-                  'accountant' => __('role.preset_accountant'),
-                  'warehouse' => __('role.preset_warehouse'),
-                  'sales_supervisor' => __('role.preset_sales_supervisor'),
-                  'store_manager' => __('role.preset_store_manager'),
-                  'cs' => __('role.preset_cs'),
-              ], null, ['class' => 'form-control select2', 'id' => 'preset_role_select']) !!}
+              <select name="preset_role" class="form-control select2" id="preset_role_select">
+                <option value="">@lang('messages.please_select')</option>
+                <optgroup label="@lang('role.system_presets')">
+                  <option value="cashier">@lang('role.preset_cashier')</option>
+                  <option value="accountant">@lang('role.preset_accountant')</option>
+                  <option value="warehouse">@lang('role.preset_warehouse')</option>
+                  <option value="sales_supervisor">@lang('role.preset_sales_supervisor')</option>
+                  <option value="store_manager">@lang('role.preset_store_manager')</option>
+                  <option value="cs">@lang('role.preset_cs')</option>
+                </optgroup>
+                @if(!empty($custom_templates) && count($custom_templates) > 0)
+                  <optgroup label="@lang('role.custom_templates')">
+                    @foreach($custom_templates as $tmpl)
+                      <option value="custom_{{ $tmpl->id }}">⭐ {{ $tmpl->name }}</option>
+                    @endforeach
+                  </optgroup>
+                @endif
+              </select>
             </div>
           </div>
 
@@ -42,6 +51,23 @@
             <div class="form-group">
               {!! Form::label('description', __( 'role.description' ) . ':') !!}
               {!! Form::textarea('description', null, ['class' => 'form-control', 'rows' => 1, 'placeholder' => __( 'role.description_placeholder' ) ]); !!}
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-12 tw-mb-4">
+            <div class="checkbox">
+              <label>
+                {!! Form::checkbox('save_as_template', 1, false, ['class' => 'input-icheck', 'id' => 'save_as_template_chk']) !!}
+                <strong>@lang('role.save_as_custom_template')</strong>
+              </label>
+            </div>
+            <div id="template_name_box" class="tw-mt-2" style="display: none;">
+              <div class="form-group col-md-4 tw-pl-0">
+                {!! Form::label('template_name', __('role.template_name') . ':') !!}
+                {!! Form::text('template_name', null, ['class' => 'form-control', 'placeholder' => __('role.template_name_placeholder')]) !!}
+              </div>
             </div>
           </div>
         </div>
@@ -1857,10 +1883,25 @@
       ]
     };
 
+    var customTemplates = {
+      @if(!empty($custom_templates))
+        @foreach($custom_templates as $tmpl)
+          'custom_{{ $tmpl->id }}': {!! json_encode($tmpl->permissions ?? []) !!},
+        @endforeach
+      @endif
+    };
+
     $('#preset_role_select').on('change', function(){
       var val = $(this).val();
+      var perms = null;
+
       if (val && presetPermissions[val]) {
-        var perms = presetPermissions[val];
+        perms = presetPermissions[val];
+      } else if (val && customTemplates[val]) {
+        perms = customTemplates[val];
+      }
+
+      if (perms) {
         $('input.input-icheck').each(function(){
           var permName = $(this).val();
           if (perms.includes(permName)) {
@@ -1869,6 +1910,14 @@
             $(this).iCheck('uncheck');
           }
         });
+      }
+    });
+
+    $('#save_as_template_chk').on('ifChanged', function(event){
+      if(event.target.checked) {
+        $('#template_name_box').slideDown();
+      } else {
+        $('#template_name_box').slideUp();
       }
     });
   });
