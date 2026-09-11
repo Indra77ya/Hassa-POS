@@ -1361,4 +1361,55 @@ class LaundryModuleTest extends TestCase
         $this->assertStringContainsString('Kirim Ulang WA', $os1Row['action']);
         $this->assertStringContainsString('Terkirim', $os1Row['wa_status']);
     }
+
+    public function test_laundry_order_sheet_quick_add_customer_button_rendering()
+    {
+        \Illuminate\Support\Facades\View::addNamespace('laundry', base_path('Modules/Laundry/Resources/views'));
+
+        $user = \App\User::first();
+        if (!$user) {
+            $user = \App\User::create([
+                'id' => 1,
+                'business_id' => 1,
+                'first_name' => 'Admin',
+                'last_name' => 'User',
+                'username' => 'admin_quick_cust',
+                'email' => 'admin_quick_cust@test.com',
+            ]);
+        }
+
+        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'customer.create', 'guard_name' => 'web']);
+        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'laundry.create', 'guard_name' => 'web']);
+
+        $user->givePermissionTo('customer.create');
+        $user->givePermissionTo('laundry.create');
+        $this->actingAs($user);
+
+        $view_data = [
+            'business_locations' => [1 => 'Main Branch'],
+            'customers' => [10 => 'Budi'],
+            'statuses' => [1 => 'Diterima'],
+            'service_types' => [1 => 'Regular'],
+            'item_types' => [1 => 'Kiloan'],
+            'processes' => collect([]),
+            'staffs' => [],
+        ];
+
+        // Case 1: User with customer.create permission
+        $renderedCreate1 = view('laundry::order_sheet.create', $view_data)->render();
+        $this->assertStringContainsString('add_new_customer', $renderedCreate1);
+        $this->assertStringContainsString('contact_modal', $renderedCreate1);
+        $this->assertMatchesRegularExpression('/class="[^"]*add_new_customer[^"]*"(?![^>]*disabled)/', $renderedCreate1);
+
+        $renderedModal1 = view('laundry::order_sheet.quick_add_modal', $view_data)->render();
+        $this->assertStringContainsString('add_new_customer', $renderedModal1);
+        $this->assertMatchesRegularExpression('/class="[^"]*add_new_customer[^"]*"(?![^>]*disabled)/', $renderedModal1);
+
+        // Case 2: User without customer.create permission
+        $user->revokePermissionTo('customer.create');
+
+        $renderedCreate2 = view('laundry::order_sheet.create', $view_data)->render();
+        $this->assertStringContainsString('add_new_customer', $renderedCreate2);
+        $this->assertMatchesRegularExpression('/class="[^"]*add_new_customer[^"]*"[^>]*disabled/', $renderedCreate2);
+    }
 }
