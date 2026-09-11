@@ -332,12 +332,23 @@ class OrderSheetController extends Controller
             DB::commit();
 
             if ($request->ajax()) {
+                $status_label = '';
+                if ($order_sheet->payment_status == 'partial') {
+                    $due = max(0, $order_sheet->total_amount - $order_sheet->total_paid);
+                    $status_label = ' (' . __('lang_v1.partial') . ' - ' . __('purchase.payment_due') . ': ' . $this->commonUtil->num_f($due) . ')';
+                } elseif ($order_sheet->payment_status == 'due') {
+                    $status_label = ' (' . __('lang_v1.due') . ')';
+                } elseif ($order_sheet->payment_status == 'paid') {
+                    $status_label = ' (' . __('lang_v1.paid') . ')';
+                }
+
                 return response()->json([
                     'success' => true,
                     'msg' => __('laundry::lang.order_sheet_added_success'),
                     'data' => [
                         'id' => $order_sheet->id,
                         'order_no' => $order_sheet->order_no,
+                        'display_order_no' => $order_sheet->order_no . $status_label,
                         'contact_id' => $order_sheet->contact_id,
                         'customer_name' => optional($order_sheet->customer)->name,
                     ],
