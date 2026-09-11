@@ -314,6 +314,13 @@
                 dataType: 'html',
                 success: function(result) {
                     $('.view_modal').html(result).modal('show');
+                },
+                error: function(jqXHR) {
+                    if (jqXHR.status == 403) {
+                        toastr.error('Akses Ditolak: Anda tidak memiliki izin untuk membuat order laundry.');
+                    } else {
+                        toastr.error('Gagal memuat form tambah order laundry.');
+                    }
                 }
             });
         });
@@ -385,6 +392,13 @@
                 dataType: 'html',
                 success: function(result) {
                     $('.view_modal').html(result).modal('show');
+                },
+                error: function(jqXHR) {
+                    if (jqXHR.status == 403) {
+                        toastr.error('Akses Ditolak: Anda tidak memiliki izin untuk mengedit order laundry.');
+                    } else {
+                        toastr.error('Gagal memuat form edit order laundry.');
+                    }
                 }
             });
         });
@@ -401,6 +415,13 @@
                 dataType: 'html',
                 success: function(result) {
                     $('.view_modal').html(result).modal('show');
+                },
+                error: function(jqXHR) {
+                    if (jqXHR.status == 403) {
+                        toastr.error('Akses Ditolak: Anda tidak memiliki izin untuk melihat detail order laundry.');
+                    } else {
+                        toastr.error('Gagal memuat detail order laundry.');
+                    }
                 }
             });
         });
