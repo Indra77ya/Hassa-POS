@@ -1237,6 +1237,7 @@ class LaundryModuleTest extends TestCase
         $user = \App\User::first();
         if (!$user) {
             $user = \App\User::create([
+                'id' => 1,
                 'surname' => 'Admin',
                 'first_name' => 'Laundry',
                 'last_name' => 'User',
@@ -1360,5 +1361,82 @@ class LaundryModuleTest extends TestCase
         $this->assertNotNull($os1Row);
         $this->assertStringContainsString('Kirim Ulang WA', $os1Row['action']);
         $this->assertStringContainsString('Terkirim', $os1Row['wa_status']);
+    }
+
+    public function test_add_customer_button_and_contact_modal_rendered_in_order_sheet_views()
+    {
+        \Illuminate\Support\Facades\View::addNamespace('laundry', base_path('Modules/Laundry/Resources/views'));
+
+        $user = \App\User::first();
+        if (!$user) {
+            $user = \App\User::create([
+                'surname' => 'Admin',
+                'first_name' => 'Laundry',
+                'last_name' => 'User',
+                'username' => 'laundry_tester',
+                'email' => 'laundry_tester@example.com',
+                'password' => bcrypt('password'),
+                'business_id' => 1,
+            ]);
+        }
+
+        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'superadmin', 'guard_name' => 'web']);
+        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'customer.create', 'guard_name' => 'web']);
+        $user->givePermissionTo('superadmin');
+        $user->givePermissionTo('customer.create');
+
+        $this->actingAs($user);
+        session(['user.business_id' => 1, 'user.id' => $user->id]);
+
+        $item_type = LaundryItemType::create([
+            'business_id' => 1,
+            'name' => 'Kiloan Regular',
+            'unit_name' => 'kg',
+            'default_price' => 10000,
+        ]);
+
+        $os = \Modules\Laundry\Entities\LaundryOrderSheet::create([
+            'business_id' => 1,
+            'order_no' => 'LND-CUST-0001',
+            'contact_id' => 10,
+            'laundry_item_type_id' => $item_type->id,
+            'quantity' => 1,
+        ]);
+
+        $viewData = [
+            'business_locations' => [1 => 'Main Location'],
+            'customers' => [10 => 'Test Customer'],
+            'statuses' => [1 => 'Diterima'],
+            'service_types' => [1 => 'Express'],
+            'item_types' => [$item_type->id => 'Kiloan Regular'],
+            'processes' => [],
+            'staffs' => [],
+            'types' => ['customer' => 'Customer'],
+            'customer_groups' => [],
+            'sources' => [],
+            'life_stages' => [],
+            'users' => [],
+        ];
+
+        // 1. Create Order Sheet Full Page View
+        $createHtml = view('laundry::order_sheet.create', $viewData)->render();
+        $this->assertStringContainsString('add_new_customer', $createHtml);
+        $this->assertStringContainsString('contact_modal', $createHtml);
+
+        // 2. Quick Add Order Sheet Modal View
+        $quickAddHtml = view('laundry::order_sheet.quick_add_modal', $viewData)->render();
+        $this->assertStringContainsString('add_new_customer', $quickAddHtml);
+        $this->assertStringContainsString('contact_modal', $quickAddHtml);
+
+        // 3. Edit Order Sheet Page View
+        $viewData['order_sheet'] = $os;
+        $editHtml = view('laundry::order_sheet.edit', $viewData)->render();
+        $this->assertStringContainsString('add_new_customer', $editHtml);
+        $this->assertStringContainsString('contact_modal', $editHtml);
+
+        // 4. Edit Order Sheet Modal View
+        $editModalHtml = view('laundry::order_sheet.edit_modal', $viewData)->render();
+        $this->assertStringContainsString('add_new_customer', $editModalHtml);
+        $this->assertStringContainsString('contact_modal', $editModalHtml);
     }
 }

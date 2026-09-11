@@ -1,3 +1,9 @@
+<style>
+.contact_modal {
+    z-index: 1060 !important;
+}
+</style>
+
 <script type="text/javascript">
     function addOrderSheetToCart(order_sheet_id) {
         if (!order_sheet_id) {
@@ -188,6 +194,84 @@
         $(document).off('change', 'select#customer_id').on('change', 'select#customer_id', function() {
             var contact_id = $(this).val();
             filterOrderSheetsByCustomer(contact_id);
+        });
+
+        $(document).off('click', '.add_new_customer').on('click', '.add_new_customer', function() {
+            if ($('#contact_id').length) {
+                $('#contact_id').select2('close');
+            }
+            if ($('#customer_id').length) {
+                $('#customer_id').select2('close');
+            }
+            var name = $(this).data('name');
+            $('.contact_modal')
+                .find('input#name')
+                .val(name);
+            $('.contact_modal')
+                .find('select#contact_type')
+                .val('customer')
+                .closest('div.contact_type_div')
+                .addClass('hide');
+            $('.contact_modal').modal('show');
+        });
+
+        $(document).off('submit', 'form#quick_add_contact').on('submit', 'form#quick_add_contact', function(e) {
+            e.preventDefault();
+            var form = $(this);
+            var data = form.serialize();
+
+            $.ajax({
+                method: 'POST',
+                url: form.attr('action'),
+                dataType: 'json',
+                data: data,
+                beforeSend: function(xhr) {
+                    if (typeof __disable_submit_button === 'function') {
+                        __disable_submit_button(form.find('button[type="submit"]'));
+                    } else {
+                        form.find('button[type="submit"]').attr('disabled', 'disabled');
+                    }
+                },
+                success: function(result) {
+                    if (result.success == true) {
+                        var name = result.data.name;
+                        if (result.data.supplier_business_name) {
+                            name += result.data.supplier_business_name;
+                        }
+
+                        if ($('select#contact_id').length) {
+                            var newOption = new Option(name, result.data.id, true, true);
+                            $('select#contact_id').append(newOption).trigger('change');
+                        }
+                        if ($('select#customer_id').length) {
+                            var newOption = new Option(name, result.data.id, true, true);
+                            $('select#customer_id').append(newOption).trigger('change');
+                        }
+
+                        $('div.contact_modal').modal('hide');
+                        if (typeof update_shipping_address === 'function') {
+                            update_shipping_address(result.data);
+                        }
+                        toastr.success(result.msg);
+                    } else {
+                        toastr.error(result.msg);
+                    }
+                },
+                error: function(jqXHR) {
+                    if (jqXHR.responseJSON && jqXHR.responseJSON.msg) {
+                        toastr.error(jqXHR.responseJSON.msg);
+                    } else {
+                        toastr.error('Terjadi kesalahan saat menyimpan kontak');
+                    }
+                },
+                complete: function() {
+                    if (typeof __enable_submit_button === 'function') {
+                        __enable_submit_button(form.find('button[type="submit"]'));
+                    } else {
+                        form.find('button[type="submit"]').removeAttr('disabled');
+                    }
+                }
+            });
         });
 
         $(document).off('click', '#add_laundry_order_sheet_quick_btn').on('click', '#add_laundry_order_sheet_quick_btn', function(e) {

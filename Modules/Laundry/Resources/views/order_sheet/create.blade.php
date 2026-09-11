@@ -19,7 +19,15 @@
             <div class="col-md-4">
                 <div class="form-group">
                     {!! Form::label('contact_id', __('contact.customer') . ':*') !!}
-                    {!! Form::select('contact_id', $customers, null, ['class' => 'form-control select2', 'required', 'placeholder' => __('messages.please_select')]) !!}
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <i class="fa fa-user"></i>
+                        </span>
+                        {!! Form::select('contact_id', $customers, null, ['class' => 'form-control select2', 'required', 'placeholder' => __('messages.please_select'), 'style' => 'width: 100%;']) !!}
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-default bg-white btn-flat add_new_customer" data-name="" @if(auth()->check() && !auth()->user()->can('customer.create')) disabled @endif><i class="fa fa-plus-circle text-primary fa-lg"></i></button>
+                        </span>
+                    </div>
                 </div>
             </div>
             <div class="col-md-4">
@@ -155,10 +163,15 @@
         </div>
     @endcomponent
     {!! Form::close() !!}
+
+    <div class="modal fade contact_modal" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel">
+        @include('contact.create', ['quick_add' => true])
+    </div>
 </section>
 @endsection
 
 @section('javascript')
+<script src="{{ asset('js/pos.js?v=' . $asset_v) }}"></script>
 <script type="text/javascript">
 $(document).ready(function() {
     var process_options_html = `<option value="">{{ __('laundry::lang.select_process') }}</option>`;
