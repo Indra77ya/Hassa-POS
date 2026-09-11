@@ -47,4 +47,5 @@ return [
     'print_detailed' => 'Cetak Rinci',
     'print_mini' => 'Cetak Mini',
     'opening' => 'Pembukaan',
+    'access_denied' => 'Akses Ditolak',
 ];
