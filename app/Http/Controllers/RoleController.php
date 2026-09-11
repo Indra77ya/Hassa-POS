@@ -42,20 +42,29 @@ class RoleController extends Controller
             $business_id = request()->session()->get('user.business_id');
 
             $roles = Role::where('business_id', $business_id)
-                        ->select(['name', 'id', 'is_default', 'business_id']);
+                        ->select(['name', 'id', 'is_default', 'business_id', 'description'])
+                        ->withCount('users');
 
             return DataTables::of($roles)
                 ->addColumn('action', function ($row) {
-                    if (! $row->is_default || $row->name == 'Cashier#'.$row->business_id) {
-                        $action = '<div class="btn-group">
-                            <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info dropdown-toggle"
-                                data-toggle="dropdown" aria-expanded="false">'.
-                                __('messages.actions').
-                                '<span class="caret"></span>
-                                <span class="sr-only">Toggle Dropdown</span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-left" role="menu">';
+                    $action = '<div class="btn-group">
+                        <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info dropdown-toggle"
+                            data-toggle="dropdown" aria-expanded="false">'.
+                            __('messages.actions').
+                            '<span class="caret"></span>
+                            <span class="sr-only">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-left" role="menu">';
 
+                    if (auth()->user()->can('roles.view')) {
+                        $action .= '<li>
+                            <button data-href="'.action([\App\Http\Controllers\RoleController::class, 'show'], [$row->id]).'" class="btn-modal tw-block tw-w-full tw-text-left tw-px-4 tw-py-2 tw-text-sm tw-text-gray-700 hover:tw-bg-gray-100 hover:tw-text-gray-900 tw-bg-transparent tw-border-none tw-outline-none" data-container=".view_modal">
+                                <i class="fa fa-eye" aria-hidden="true"></i> '.__('messages.view').'
+                            </button>
+                        </li>';
+                    }
+
+                    if (! $row->is_default || $row->name == 'Cashier#'.$row->business_id) {
                         if (auth()->user()->can('roles.update')) {
                             $action .= '<li>
                                 <a href="'.action([\App\Http\Controllers\RoleController::class, 'edit'], [$row->id]).'">
@@ -70,13 +79,11 @@ class RoleController extends Controller
                                 </button>
                             </li>';
                         }
-
-                        $action .= '</ul></div>';
-
-                        return $action;
-                    } else {
-                        return '';
                     }
+
+                    $action .= '</ul></div>';
+
+                    return $action;
                 })
                 ->editColumn('name', function ($row) use ($business_id) {
                     $role_name = str_replace('#'.$business_id, '', $row->name);
@@ -86,11 +93,14 @@ class RoleController extends Controller
 
                     return $role_name;
                 })
-                ->removeColumn('id')
-                ->removeColumn('is_default')
-                ->removeColumn('business_id')
-                ->rawColumns([1])
-                ->make(false);
+                ->addColumn('users_count', function ($row) {
+                    return $row->users_count;
+                })
+                ->editColumn('description', function ($row) {
+                    return $row->description ?? '-';
+                })
+                ->rawColumns(['action'])
+                ->make(true);
         }
 
         return view('role.index');
@@ -152,6 +162,7 @@ class RoleController extends Controller
                     'name' => $role_name.'#'.$business_id,
                     'business_id' => $business_id,
                     'is_service_staff' => $is_service_staff,
+                    'description' => $request->input('description'),
                 ]);
 
                 //Include selling price group permissions
@@ -204,7 +215,21 @@ class RoleController extends Controller
      */
     public function show($id)
     {
-        //
+        if (! auth()->user()->can('roles.view')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $business_id = request()->session()->get('user.business_id');
+        $role = Role::where('business_id', $business_id)
+                    ->with(['permissions', 'users'])
+                    ->findOrFail($id);
+
+        $role_name = str_replace('#'.$business_id, '', $role->name);
+        if (in_array($role_name, ['Admin', 'Cashier'])) {
+            $role_name = __('lang_v1.'.$role_name);
+        }
+
+        return view('role.show')->with(compact('role', 'role_name'));
     }
 
     /**
@@ -234,10 +259,12 @@ class RoleController extends Controller
 
         $module_permissions = $this->moduleUtil->getModuleData('user_permissions');
 
+        $role_name = str_replace('#' . $business_id, '', $role->name);
+
         $common_settings = ! empty(session('business.common_settings')) ? session('business.common_settings') : [];
 
         return view('role.edit')
-            ->with(compact('role', 'role_permissions', 'selling_price_groups', 'module_permissions', 'common_settings'));
+            ->with(compact('role', 'role_name', 'role_permissions', 'selling_price_groups', 'module_permissions', 'common_settings'));
     }
 
     /**
@@ -276,6 +303,7 @@ class RoleController extends Controller
                     }
                     $role->is_service_staff = $is_service_staff;
                     $role->name = $role_name.'#'.$business_id;
+                    $role->description = $request->input('description');
                     $role->save();
 
                     //Include selling price group permissions

@@ -39,6 +39,8 @@
                 <thead>
                     <tr>
                         <th>@lang( 'user.roles' )</th>
+                        <th>@lang( 'role.description' )</th>
+                        <th>@lang( 'role.assigned_users' )</th>
                         <th class="not-export">@lang( 'messages.action' )</th>
                     </tr>
                 </thead>
@@ -59,11 +61,12 @@
                     fixedHeader:false,
                     ajax: '/roles',
                     buttons:[],
-                    columnDefs: [ {
-                        "targets": 1,
-                        "orderable": false,
-                        "searchable": false
-                    } ]
+                    columns: [
+                        { data: 'name', name: 'name' },
+                        { data: 'description', name: 'description' },
+                        { data: 'users_count', name: 'users_count', searchable: false },
+                        { data: 'action', name: 'action', orderable: false, searchable: false }
+                    ]
                 });
         $(document).on('click', 'button.delete_role_button', function(){
             swal({

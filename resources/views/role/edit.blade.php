@@ -16,12 +16,19 @@
     @component('components.widget', ['class' => 'box-primary'])
         {!! Form::open(['url' => action([\App\Http\Controllers\RoleController::class, 'update'], [$role->id]), 'method' => 'PUT', 'id' => 'role_form' ]) !!}
         <div class="row">
-        <div class="col-md-4">
-          <div class="form-group">
-            {!! Form::label('name', __( 'user.role_name' ) . ':*') !!}
-              {!! Form::text('name', str_replace( '#' . auth()->user()->business_id, '', $role->name) , ['class' => 'form-control', 'required', 'placeholder' => __( 'user.role_name' ) ]); !!}
+          <div class="col-md-6">
+            <div class="form-group">
+              {!! Form::label('name', __( 'user.role_name' ) . ':*') !!}
+                {!! Form::text('name', $role_name, ['class' => 'form-control', 'required', 'placeholder' => __( 'user.role_name' ) ]); !!}
+            </div>
           </div>
-        </div>
+
+          <div class="col-md-6">
+            <div class="form-group">
+              {!! Form::label('description', __( 'role.description' ) . ':') !!}
+              {!! Form::textarea('description', $role->description, ['class' => 'form-control', 'rows' => 1, 'placeholder' => __( 'role.description_placeholder' ) ]); !!}
+            </div>
+          </div>
         </div>
         <div class="row">
         <div class="col-md-3">

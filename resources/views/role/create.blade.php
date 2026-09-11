@@ -16,12 +16,34 @@
     @component('components.widget', ['class' => 'box-primary'])
         {!! Form::open(['url' => action([\App\Http\Controllers\RoleController::class, 'store']), 'method' => 'post', 'id' => 'role_add_form' ]) !!}
         <div class="row">
-        <div class="col-md-4">
-          <div class="form-group">
-            {!! Form::label('name', __( 'user.role_name' ) . ':*') !!}
-              {!! Form::text('name', null, ['class' => 'form-control', 'required', 'placeholder' => __( 'user.role_name' ) ]); !!}
+          <div class="col-md-4">
+            <div class="form-group">
+              {!! Form::label('name', __( 'user.role_name' ) . ':*') !!}
+                {!! Form::text('name', null, ['class' => 'form-control', 'required', 'placeholder' => __( 'user.role_name' ) ]); !!}
+            </div>
           </div>
-        </div>
+
+          <div class="col-md-4">
+            <div class="form-group">
+              {!! Form::label('preset_role', __( 'role.preset_role' ) . ':') !!}
+              {!! Form::select('preset_role', [
+                  '' => __('messages.please_select'),
+                  'cashier' => __('role.preset_cashier'),
+                  'accountant' => __('role.preset_accountant'),
+                  'warehouse' => __('role.preset_warehouse'),
+                  'sales_supervisor' => __('role.preset_sales_supervisor'),
+                  'store_manager' => __('role.preset_store_manager'),
+                  'cs' => __('role.preset_cs'),
+              ], null, ['class' => 'form-control select2', 'id' => 'preset_role_select']) !!}
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="form-group">
+              {!! Form::label('description', __( 'role.description' ) . ':') !!}
+              {!! Form::textarea('description', null, ['class' => 'form-control', 'rows' => 1, 'placeholder' => __( 'role.description_placeholder' ) ]); !!}
+            </div>
+          </div>
         </div>
         <div class="row">
         <div class="col-md-3">
@@ -1803,4 +1825,52 @@
     @endcomponent
 </section>
 <!-- /.content -->
+@endsection
+
+@section('javascript')
+<script type="text/javascript">
+  $(document).ready(function(){
+    var presetPermissions = {
+      'cashier': [
+        'sell.view', 'sell.create', 'sell.update', 'direct_sell.access', 'view_cash_register', 'close_cash_register',
+        'access_all_locations', 'print_invoice'
+      ],
+      'accountant': [
+        'account.access', 'view_purchase_price', 'sell.view', 'purchase.view', 'expense.access',
+        'access_all_locations'
+      ],
+      'warehouse': [
+        'product.view', 'product.create', 'product.update', 'purchase.view', 'purchase.create', 'purchase.update',
+        'access_all_locations'
+      ],
+      'sales_supervisor': [
+        'sell.view', 'sell.create', 'sell.update', 'sell.delete', 'edit_sell_price', 'discount.access',
+        'view_own_sell_only', 'access_all_locations'
+      ],
+      'store_manager': [
+        'user.view', 'user.create', 'user.update', 'supplier.view', 'supplier.create', 'customer.view', 'customer.create',
+        'product.view', 'product.create', 'product.update', 'purchase.view', 'purchase.create', 'purchase.update',
+        'sell.view', 'sell.create', 'sell.update', 'sell.delete', 'access_all_locations'
+      ],
+      'cs': [
+        'customer.view', 'customer.create', 'customer.update', 'sell.view', 'view_own_sell_only'
+      ]
+    };
+
+    $('#preset_role_select').on('change', function(){
+      var val = $(this).val();
+      if (val && presetPermissions[val]) {
+        var perms = presetPermissions[val];
+        $('input.input-icheck').each(function(){
+          var permName = $(this).val();
+          if (perms.includes(permName)) {
+            $(this).iCheck('check');
+          } else if ($(this).attr('name') === 'permissions[]') {
+            $(this).iCheck('uncheck');
+          }
+        });
+      }
+    });
+  });
+</script>
 @endsection
