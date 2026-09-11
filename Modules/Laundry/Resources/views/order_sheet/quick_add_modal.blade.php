@@ -19,7 +19,15 @@
         <div class="col-md-4">
           <div class="form-group">
             {!! Form::label('contact_id', __('contact.customer') . ':*') !!}
-            {!! Form::select('contact_id', $customers, $contact_id ?? null, ['class' => 'form-control select2', 'required', 'placeholder' => __('messages.please_select'), 'style' => 'width:100%']) !!}
+            <div class="input-group">
+              <span class="input-group-addon">
+                <i class="fa fa-user"></i>
+              </span>
+              {!! Form::select('contact_id', $customers, $contact_id ?? null, ['class' => 'form-control', 'id' => 'contact_id', 'required', 'placeholder' => __('messages.please_select'), 'style' => 'width:100%']) !!}
+              <span class="input-group-btn">
+                <button type="button" class="btn btn-default bg-white btn-flat add_new_customer" data-name="" @if(!auth()->user()->can('customer.create')) disabled @endif><i class="fa fa-plus-circle text-primary fa-lg"></i></button>
+              </span>
+            </div>
           </div>
         </div>
         <div class="col-md-4">
@@ -159,6 +167,16 @@
 
   </div><!-- /.modal-content -->
 </div><!-- /.modal-dialog -->
+
+<div class="modal fade contact_modal" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel">
+  @include('contact.create', ['quick_add' => true])
+</div>
+
+<style>
+.contact_modal {
+  z-index: 1060 !important;
+}
+</style>
 
 <script type="text/javascript">
 $(document).ready(function() {

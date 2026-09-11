@@ -164,6 +164,36 @@
         });
     }
 
+        function __escape_html(str) {
+            return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+
+        function initLaundryContactSelect2($element) {
+            if (!$element || !$element.length) return;
+            $element.select2({
+                language: {
+                    noResults: function() {
+                        var name = '';
+                        if ($element.data('select2') && $element.data('select2').dropdown && $element.data('select2').dropdown.$search) {
+                            name = $element.data('select2').dropdown.$search.val();
+                        }
+                        var safe_name = __escape_html(name);
+                        var label = (typeof __translate === 'function') ? __translate('add_name_as_new_customer', { name: safe_name }) : 'Tambah "' + safe_name + '" sebagai pelanggan baru';
+                        return (
+                            '<button type="button" data-name="' +
+                            safe_name +
+                            '" class="btn btn-link add_new_customer"><i class="fa fa-plus-circle fa-lg" aria-hidden="true"></i>&nbsp; ' +
+                            label +
+                            '</button>'
+                        );
+                    }
+                },
+                escapeMarkup: function(markup) {
+                    return markup;
+                }
+            });
+        }
+
     $(document).ready(function(){
         if ($('#laundry_order_sheet_id').length) {
             $('#laundry_order_sheet_id').select2({
@@ -173,6 +203,88 @@
                 minimumResultsForSearch: 0
             });
         }
+
+            if ($('#add_order_sheet_form #contact_id').length) {
+                initLaundryContactSelect2($('#add_order_sheet_form #contact_id'));
+            }
+
+            $(document).on('shown.bs.modal', '.view_modal', function() {
+                if ($('.view_modal #contact_id').length) {
+                    initLaundryContactSelect2($('.view_modal #contact_id'));
+                }
+            });
+
+            $(document).off('click', '.add_new_customer').on('click', '.add_new_customer', function() {
+                if ($('#contact_id').length && $('#contact_id').data('select2')) {
+                    $('#contact_id').select2('close');
+                }
+                if ($('select#customer_id').length && $('select#customer_id').data('select2')) {
+                    $('select#customer_id').select2('close');
+                }
+                var name = $(this).data('name') || '';
+                $('.contact_modal').find('input#name').val(name);
+                $('.contact_modal').find('select#contact_type').val('customer').closest('div.contact_type_div').addClass('hide');
+                $('.contact_modal').modal('show');
+            });
+
+            $(document).off('submit', 'form#quick_add_contact').on('submit', 'form#quick_add_contact', function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var data = form.serialize();
+
+                $.ajax({
+                    method: 'POST',
+                    url: form.attr('action'),
+                    dataType: 'json',
+                    data: data,
+                    beforeSend: function() {
+                        if (typeof __disable_submit_button === 'function') {
+                            __disable_submit_button(form.find('button[type="submit"]'));
+                        } else {
+                            form.find('button[type="submit"]').attr('disabled', 'disabled');
+                        }
+                    },
+                    success: function(result) {
+                        if (result.success == true) {
+                            var name = result.data.name;
+                            if (result.data.supplier_business_name) {
+                                name += ' ' + result.data.supplier_business_name;
+                            }
+
+                            if ($('select#contact_id').length) {
+                                var newOption = new Option(name, result.data.id, true, true);
+                                $('select#contact_id').append(newOption).trigger('change');
+                            }
+                            if ($('select#customer_id').length) {
+                                var newCustomerOption = new Option(name, result.data.id, true, true);
+                                $('select#customer_id').append(newCustomerOption).trigger('change');
+                            }
+
+                            $('.contact_modal').modal('hide');
+                            toastr.success(result.msg);
+                        } else {
+                            toastr.error(result.msg);
+                        }
+                    },
+                    error: function(jqXHR) {
+                        if (jqXHR.responseJSON && jqXHR.responseJSON.msg) {
+                            toastr.error(jqXHR.responseJSON.msg);
+                        } else {
+                            toastr.error('Gagal menambahkan pelanggan');
+                        }
+                    },
+                    complete: function() {
+                        form.find('button[type="submit"]').removeAttr('disabled');
+                    }
+                });
+            });
+
+            $(document).on('hidden.bs.modal', '.contact_modal', function() {
+                if ($('form#quick_add_contact').length) {
+                    $('form#quick_add_contact').find('button[type="submit"]').removeAttr('disabled');
+                    $('form#quick_add_contact')[0].reset();
+                }
+            });
 
         $(document).off('change', '#laundry_order_sheet_id').on('change', '#laundry_order_sheet_id', function() {
             var order_sheet_id = $(this).val();
