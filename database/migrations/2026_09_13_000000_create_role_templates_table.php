@@ -13,16 +13,18 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('role_templates', function (Blueprint $table) {
-            $table->id();
-            $table->integer('business_id')->unsigned();
-            $table->string('name');
-            $table->text('description')->nullable();
-            $table->json('permissions')->nullable();
-            $table->timestamps();
+        if (! Schema::hasTable('role_templates')) {
+            Schema::create('role_templates', function (Blueprint $table) {
+                $table->id();
+                $table->integer('business_id')->unsigned();
+                $table->string('name');
+                $table->text('description')->nullable();
+                $table->json('permissions')->nullable();
+                $table->timestamps();
 
-            $table->foreign('business_id')->references('id')->on('business')->onDelete('cascade');
-        });
+                $table->foreign('business_id')->references('id')->on('business')->onDelete('cascade');
+            });
+        }
     }
 
     /**
