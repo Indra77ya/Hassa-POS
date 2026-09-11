@@ -219,6 +219,29 @@
                 }
             });
         });
+
+        // Global multi-modal z-index and backdrop stacking handler for contact_modal
+        $(document).on('show.bs.modal', '.contact_modal', function () {
+            var $modal = $(this);
+            if ($modal.parents('.modal').length) {
+                $modal.appendTo('body');
+            }
+            var maxZ = 1050;
+            $('.modal:visible').each(function() {
+                var z = parseInt($(this).css('z-index')) || 1050;
+                if (z > maxZ) maxZ = z;
+            });
+            $modal.css('z-index', maxZ + 20);
+            setTimeout(function() {
+                $('.modal-backdrop').not('.modal-stack').css('z-index', maxZ + 10).addClass('modal-stack');
+            }, 0);
+        });
+
+        $(document).on('hidden.bs.modal', '.contact_modal', function () {
+            if ($('.modal:visible').length) {
+                $('body').addClass('modal-open');
+            }
+        });
     });
 </script>
 
