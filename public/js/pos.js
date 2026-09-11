@@ -3528,6 +3528,17 @@ function submitQuickContactForm(form) {
                 $('select#customer_id')
                     .val(result.data.id)
                     .trigger('change');
+
+                if ($('select#contact_id').length) {
+                    if (!$('select#contact_id option[value="' + result.data.id + '"]').length) {
+                        $('select#contact_id').append(
+                            $('<option>', { value: result.data.id, text: name })
+                        );
+                    }
+                    $('select#contact_id')
+                        .val(result.data.id)
+                        .trigger('change');
+                }
                 $('div.contact_modal').modal('hide');
                 update_shipping_address(result.data)
                 toastr.success(result.msg);

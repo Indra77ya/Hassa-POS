@@ -19,7 +19,12 @@
         <div class="col-md-4">
           <div class="form-group">
             {!! Form::label('contact_id', __('contact.customer') . ':*') !!}
-            {!! Form::select('contact_id', $customers, $order_sheet->contact_id, ['class' => 'form-control select2', 'required', 'style' => 'width:100%']) !!}
+            <div class="input-group">
+              {!! Form::select('contact_id', $customers, $order_sheet->contact_id, ['class' => 'form-control select2', 'required', 'style' => 'width:100%']) !!}
+              <span class="input-group-btn">
+                <button type="button" class="btn btn-default bg-white btn-flat add_new_customer" data-name="" @if(auth()->check() && !auth()->user()->can('customer.create')) disabled @endif><i class="fa fa-plus-circle text-primary fa-lg"></i></button>
+              </span>
+            </div>
           </div>
         </div>
         <div class="col-md-4">

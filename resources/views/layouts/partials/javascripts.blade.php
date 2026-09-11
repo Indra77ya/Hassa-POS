@@ -219,6 +219,120 @@
                 }
             });
         });
+
+        // Quick add customer modal handler for general pages (like Laundry Order Sheet)
+        $(document).on('click', '.add_new_customer', function() {
+            if ($('select#contact_id').length) {
+                $('select#contact_id').select2('close');
+            }
+            if ($('select#customer_id').length) {
+                $('select#customer_id').select2('close');
+            }
+            var name = $(this).data('name') || '';
+
+            // Ensure contact_modal element exists in body if not present
+            if (!$('.contact_modal').length) {
+                $('body').append('<div class="modal fade contact_modal" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel"></div>');
+            }
+
+            var $contactModal = $('.contact_modal');
+            var $openViewModal = $('.view_modal.in, .view_modal.show');
+
+            if ($openViewModal.length) {
+                // If contact_modal is inside .view_modal or separate, move it to body for clear stacking
+                if ($contactModal.parent().is(':not(body)')) {
+                    $contactModal.appendTo('body');
+                }
+            }
+
+            if ($contactModal.html().trim() === '') {
+                $.ajax({
+                    url: '/contacts/create?type=customer',
+                    dataType: 'html',
+                    success: function(result) {
+                        $contactModal.html(result).modal('show');
+                        $contactModal.find('input#name').val(name);
+                        $contactModal.find('select#contact_type').val('customer').closest('div.contact_type_div').addClass('hide');
+                    }
+                });
+            } else {
+                $contactModal.find('input#name').val(name);
+                $contactModal.find('select#contact_type').val('customer').closest('div.contact_type_div').addClass('hide');
+                $contactModal.modal('show');
+            }
+        });
+
+        // Handle z-index stacking when contact_modal opens while another modal (like view_modal) is active
+        $(document).on('show.bs.modal', '.contact_modal', function () {
+            var zIndex = 1050 + (10 * $('.modal:visible').length);
+            $(this).css('z-index', zIndex);
+            setTimeout(function() {
+                $('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass('modal-stack');
+            }, 0);
+        });
+
+        // Global quick add contact form submission handler for non-POS pages
+        $(document).on('submit', 'form#quick_add_contact', function(e) {
+            var $form = $(this);
+            // If pos.js is handling it (in POS screen), let pos.js submit Handler run
+            if (typeof submitQuickContactForm === 'function' && $('#customer_id').length > 0) {
+                return;
+            }
+
+            e.preventDefault();
+            var data = $form.serialize();
+            $.ajax({
+                method: 'POST',
+                url: $form.attr('action'),
+                dataType: 'json',
+                data: data,
+                beforeSend: function() {
+                    __disable_submit_button($form.find('button[type="submit"]'));
+                },
+                success: function(result) {
+                    if (result.success == true) {
+                        var name = result.data.name;
+                        if (result.data.supplier_business_name) {
+                            name += ' - ' + result.data.supplier_business_name;
+                        }
+
+                        if ($('select#contact_id').length) {
+                            if (!$('select#contact_id option[value="' + result.data.id + '"]').length) {
+                                $('select#contact_id').append(
+                                    $('<option>', { value: result.data.id, text: name })
+                                );
+                            }
+                            $('select#contact_id').val(result.data.id).trigger('change');
+                        }
+
+                        if ($('select#customer_id').length) {
+                            if (!$('select#customer_id option[value="' + result.data.id + '"]').length) {
+                                $('select#customer_id').append(
+                                    $('<option>', { value: result.data.id, text: name })
+                                );
+                            }
+                            $('select#customer_id').val(result.data.id).trigger('change');
+                        }
+
+                        $('.contact_modal').modal('hide');
+                        if (typeof toastr !== 'undefined') {
+                            toastr.success(result.msg);
+                        } else {
+                            alert(result.msg);
+                        }
+                    } else {
+                        if (typeof toastr !== 'undefined') {
+                            toastr.error(result.msg);
+                        } else {
+                            alert(result.msg);
+                        }
+                    }
+                },
+                complete: function() {
+                    $form.find('button[type="submit"]').removeAttr('disabled');
+                }
+            });
+        });
     });
 </script>
 
