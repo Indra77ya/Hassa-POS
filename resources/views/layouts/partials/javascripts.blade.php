@@ -263,12 +263,21 @@
         });
 
         // Handle z-index stacking when contact_modal opens while another modal (like view_modal) is active
-        $(document).on('show.bs.modal', '.contact_modal', function () {
-            var zIndex = 1050 + (10 * $('.modal:visible').length);
-            $(this).css('z-index', zIndex);
+        $(document).on('show.bs.modal', '.modal', function () {
+            var zIndex = 1040 + (10 * $('.modal:visible').length);
+            $(this).css('z-index', zIndex + 10);
             setTimeout(function() {
-                $('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass('modal-stack');
+                $('.modal-backdrop').not('.modal-stack').css('z-index', zIndex + 5).addClass('modal-stack');
             }, 0);
+        });
+
+        // Re-enable scrolling and focus on parent modal when a child modal is closed
+        $(document).on('hidden.bs.modal', '.modal', function () {
+            if ($('.modal:visible').length > 0) {
+                setTimeout(function() {
+                    $(document.body).addClass('modal-open');
+                }, 0);
+            }
         });
 
         // Global quick add contact form submission handler for non-POS pages
