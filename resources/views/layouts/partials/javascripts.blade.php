@@ -60,6 +60,16 @@
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            statusCode: {
+                403: function(xhr) {
+                    var msg = (xhr.responseJSON && xhr.responseJSON.msg) ? xhr.responseJSON.msg : 'Akses Ditolak: Anda tidak memiliki izin untuk melakukan aksi ini.';
+                    if (typeof toastr !== 'undefined') {
+                        toastr.error(msg);
+                    } else {
+                        alert(msg);
+                    }
+                }
             }
         });
 
