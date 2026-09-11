@@ -1043,7 +1043,12 @@ $(document).ready(function() {
     });
 
     $(document).on('click', '.add_new_customer', function() {
-        $('#customer_id').select2('close');
+        if ($('#customer_id').length) {
+            $('#customer_id').select2('close');
+        }
+        if ($('#contact_id').length) {
+            $('#contact_id').select2('close');
+        }
         var name = $(this).data('name');
         $('.contact_modal')
             .find('input#name')
@@ -3528,6 +3533,18 @@ function submitQuickContactForm(form) {
                 $('select#customer_id')
                     .val(result.data.id)
                     .trigger('change');
+
+                if ($('select#contact_id').length) {
+                    if (!$('select#contact_id option[value="' + result.data.id + '"]').length) {
+                        $('select#contact_id').append(
+                            $('<option>', { value: result.data.id, text: name })
+                        );
+                    }
+                    $('select#contact_id')
+                        .val(result.data.id)
+                        .trigger('change');
+                }
+
                 $('div.contact_modal').modal('hide');
                 update_shipping_address(result.data)
                 toastr.success(result.msg);

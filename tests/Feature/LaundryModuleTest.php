@@ -581,6 +581,29 @@ class LaundryModuleTest extends TestCase
         $this->assertStringContainsString('add_laundry_to_cart_btn', $view);
     }
 
+    public function test_quick_add_modal_has_add_customer_button()
+    {
+        \Illuminate\Support\Facades\View::addNamespace('laundry', base_path('Modules/Laundry/Resources/views'));
+
+        $user = \Mockery::mock(\App\User::class)->makePartial();
+        $user->shouldReceive('can')->andReturn(true);
+        $this->actingAs($user);
+
+        $view = view('laundry::order_sheet.quick_add_modal', [
+            'business_locations' => [1 => 'Main Location'],
+            'customers' => [1 => 'Walk-In Customer'],
+            'statuses' => [1 => 'Diterima'],
+            'service_types' => [1 => 'Regular'],
+            'item_types' => [1 => 'Kiloan'],
+            'processes' => [],
+            'staffs' => [],
+        ])->render();
+
+        $this->assertStringContainsString('add_new_customer', $view);
+        $this->assertStringContainsString('id="contact_id"', $view);
+        $this->assertStringContainsString('input-group', $view);
+    }
+
     public function test_get_order_sheets_endpoint_by_customer()
     {
         $item_type = LaundryItemType::create([

@@ -744,6 +744,11 @@
     }
   </style>
   <style>
+    .contact_modal {
+      z-index: 1060 !important;
+    }
+  </style>
+  <style>
     .account_model .modal-body {
       max-height: 70vh;
       overflow-y: auto;
