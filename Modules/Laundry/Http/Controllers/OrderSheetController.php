@@ -265,7 +265,7 @@ class OrderSheetController extends Controller
 
     public function create()
     {
-        if (! (auth()->user()->can('superadmin') || auth()->user()->can('laundry.create'))) {
+        if (! (auth()->user()->can('superadmin') || auth()->user()->can('laundry.create') || auth()->user()->can('sell.create'))) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -291,7 +291,7 @@ class OrderSheetController extends Controller
 
     public function store(Request $request)
     {
-        if (! (auth()->user()->can('superadmin') || auth()->user()->can('laundry.create'))) {
+        if (! (auth()->user()->can('superadmin') || auth()->user()->can('laundry.create') || auth()->user()->can('sell.create'))) {
             abort(403, 'Unauthorized action.');
         }
 
