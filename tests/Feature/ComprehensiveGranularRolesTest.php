@@ -160,4 +160,16 @@ class ComprehensiveGranularRolesTest extends TestCase
         $this->assertTrue($gudang_role->hasPermissionTo('product.view'));
         $this->assertTrue($gudang_role->hasPermissionTo('purchase.view'));
     }
+
+    public function test_custom_403_view_renders_correctly()
+    {
+        \Illuminate\Support\Facades\Route::get('/test-403', function () {
+            abort(403, 'Akses Ditolak: Testing 403 response.');
+        });
+
+        $response = $this->get('/test-403');
+        $response->assertStatus(403);
+        $response->assertSee('403 | Akses Ditolak');
+        $response->assertSee('Kembali ke Dashboard');
+    }
 }
