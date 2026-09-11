@@ -1,9 +1,3 @@
-<style>
-.contact_modal {
-    z-index: 1060 !important;
-}
-</style>
-
 <script type="text/javascript">
     function addOrderSheetToCart(order_sheet_id) {
         if (!order_sheet_id) {
