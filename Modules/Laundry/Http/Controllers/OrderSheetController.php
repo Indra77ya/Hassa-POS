@@ -279,14 +279,20 @@ class OrderSheetController extends Controller
         $processes = LaundryProcess::where('business_id', $business_id)->where('is_active', true)->orderBy('sort_order', 'asc')->get();
         $staffs = User::forDropdown($business_id, false);
 
+        $types = ['customer' => __('contact.customer'), 'supplier' => __('contact.supplier'), 'both' => __('contact.both')];
+        $customer_groups = \App\CustomerGroup::forDropdown($business_id);
+        $sources = [];
+        $life_stages = [];
+        $users = User::forDropdown($business_id, false);
+
         $quick_add = request()->get('quick_add', false);
         $contact_id = request()->get('contact_id', null);
 
         if ($quick_add || request()->ajax()) {
-            return view('laundry::order_sheet.quick_add_modal', compact('business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'processes', 'staffs', 'quick_add', 'contact_id'));
+            return view('laundry::order_sheet.quick_add_modal', compact('business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'processes', 'staffs', 'quick_add', 'contact_id', 'types', 'customer_groups', 'sources', 'life_stages', 'users'));
         }
 
-        return view('laundry::order_sheet.create', compact('business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'processes', 'staffs', 'contact_id'));
+        return view('laundry::order_sheet.create', compact('business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'processes', 'staffs', 'contact_id', 'types', 'customer_groups', 'sources', 'life_stages', 'users'));
     }
 
     public function store(Request $request)
@@ -386,11 +392,17 @@ class OrderSheetController extends Controller
         $processes = LaundryProcess::where('business_id', $business_id)->where('is_active', true)->orderBy('sort_order', 'asc')->get();
         $staffs = User::forDropdown($business_id, false);
 
+        $types = ['customer' => __('contact.customer'), 'supplier' => __('contact.supplier'), 'both' => __('contact.both')];
+        $customer_groups = \App\CustomerGroup::forDropdown($business_id);
+        $sources = [];
+        $life_stages = [];
+        $users = User::forDropdown($business_id, false);
+
         if (request()->ajax()) {
-            return view('laundry::order_sheet.edit_modal', compact('order_sheet', 'business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'processes', 'staffs'));
+            return view('laundry::order_sheet.edit_modal', compact('order_sheet', 'business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'processes', 'staffs', 'types', 'customer_groups', 'sources', 'life_stages', 'users'));
         }
 
-        return view('laundry::order_sheet.edit', compact('order_sheet', 'business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'processes', 'staffs'));
+        return view('laundry::order_sheet.edit', compact('order_sheet', 'business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'processes', 'staffs', 'types', 'customer_groups', 'sources', 'life_stages', 'users'));
     }
 
     public function update(Request $request, $id)

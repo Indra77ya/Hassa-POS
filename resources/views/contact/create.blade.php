@@ -9,12 +9,21 @@
     if(isset($store_action)) {
       $url = $store_action;
       $type = 'lead';
-      $customer_groups = [];
+      $customer_groups = isset($customer_groups) ? $customer_groups : [];
     } else {
       $url = action([\App\Http\Controllers\ContactController::class, 'store']);
       $type = isset($selected_type) ? $selected_type : '';
-      $sources = [];
-      $life_stages = [];
+      $sources = isset($sources) ? $sources : [];
+      $life_stages = isset($life_stages) ? $life_stages : [];
+    }
+    if(!isset($types)) {
+      $types = ['customer' => __('contact.customer'), 'supplier' => __('contact.supplier'), 'both' => __('contact.both')];
+    }
+    if(!isset($customer_groups)) {
+      $customer_groups = [];
+    }
+    if(!isset($users)) {
+      $users = [];
     }
   @endphp
     {!! Form::open(['url' => $url, 'method' => 'post', 'id' => $form_id ]) !!}
