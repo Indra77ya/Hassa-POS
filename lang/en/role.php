@@ -7,7 +7,7 @@ return [
     | Role Language Lines
     |--------------------------------------------------------------------------
     |
-    | The following language lines are used for Brand CRUD operations.
+    | The following language lines are used for Role CRUD operations.
     |
     */
 
@@ -25,6 +25,12 @@ return [
     'preset_sales_supervisor' => 'Sales Supervisor',
     'preset_store_manager' => 'Store Manager',
     'preset_cs' => 'Customer Service (CS) Admin',
+    'preset_laundry_admin' => 'Laundry Admin',
+    'preset_repair_tech' => 'Repair Technician',
+    'preset_mfg_supervisor' => 'Manufacturing Supervisor',
+    'preset_procurement' => 'Purchasing / Procurement Staff',
+    'preset_hrm_admin' => 'HRM / Payroll Admin',
+    'preset_asset_manager' => 'Asset Manager',
     'system_presets' => 'System Presets',
     'custom_templates' => 'My Custom Templates',
     'save_as_custom_template' => 'Save these permissions as a Custom Template',
@@ -33,7 +39,7 @@ return [
     'user' => 'User',
     'supplier' => 'Supplier',
     'customer' => 'Customer',
-    
+    'purchase' => 'Purchase',
     'report' => 'Report',
 
     'user.view' => 'View user',
@@ -63,13 +69,12 @@ return [
     'purchase.update' => 'Edit purchase',
     'purchase.delete' => 'Delete purchase',
     
+    'stock_adjustment' => 'Stock Adjustment',
     'stock_adjustment.view' => 'View all stock adjustment',
     'stock_adjustment.view_own' => 'View own stock adjustment',
     'stock_adjustment.create' => 'Add stock adjustment',
     'stock_adjustment.update' => 'Edit stock adjustment',
     'stock_adjustment.delete' => 'Delete stock adjustment',
-    'purchase' => 'Purchase',
-    'stock_adjustment' => 'Stock Adjustment',
 
     // Stock Transfer permissions
     'stock_transfer' => 'Stock Transfer',
@@ -83,6 +88,8 @@ return [
     'sell.create' => 'Add POS sell',
     'sell.update' => 'Edit POS sell',
     'sell.delete' => 'Delete POS sell',
+    'sell.print' => 'Print Sell / Invoice',
+    'sell.send_whatsapp' => 'Send / Resend WA Sell',
 
     'purchase_n_sell_report.view' => 'View purchase & sell report',
     'contacts_report.view' => 'View Supplier & Customer report',
@@ -127,4 +134,72 @@ return [
     'dashboard.data' => 'View Home data',
     'profit_loss_report.view' => 'View profit/loss report',
     'direct_sell.access' => 'Access sell',
+
+    // Granular Module Labels
+    'laundry' => 'Laundry Module',
+    'laundry.view_dashboard' => 'View Laundry Dashboard',
+    'laundry.view' => 'View Laundry Order Sheets',
+    'laundry.create' => 'Add Laundry Order Sheet',
+    'laundry.update' => 'Edit Laundry Order Sheet',
+    'laundry.delete' => 'Delete Laundry Order Sheet',
+    'laundry.update_status' => 'Change Laundry Order Status',
+    'laundry.log_process' => 'Log Laundry Staff Process Work',
+    'laundry.manage_master_data' => 'Manage Laundry Master Data',
+    'laundry.view_staff_points' => 'View Laundry Staff Points Report',
+    'laundry.add_payment' => 'Add Laundry Payment',
+    'laundry.print' => 'Print Laundry Receipt',
+    'laundry.send_whatsapp' => 'Send / Resend WA Laundry',
+
+    'repair' => 'Repair / Service Module',
+    'repair.view' => 'View Repair Ticket',
+    'repair.create' => 'Create Repair Ticket',
+    'repair.update' => 'Edit Repair Ticket',
+    'repair.delete' => 'Delete Repair Ticket',
+    'repair_status.update' => 'Change Repair Status',
+    'repair_status.access' => 'Manage Repair Master Status',
+    'repair.add_payment' => 'Add Repair Payment',
+    'repair.print' => 'Print Repair Receipt / Ticket',
+    'repair.send_whatsapp' => 'Send Repair WA Notification',
+
+    'manufacturing' => 'Manufacturing Module',
+    'manufacturing.access_recipe' => 'View Production Recipe',
+    'manufacturing.add_recipe' => 'Add Production Recipe',
+    'manufacturing.edit_recipe' => 'Edit Production Recipe',
+    'manufacturing.delete_recipe' => 'Delete Production Recipe',
+    'manufacturing.access_production' => 'View Production Entry',
+    'manufacturing.add_production' => 'Add Production Entry',
+    'manufacturing.edit_production' => 'Edit Production Entry',
+    'manufacturing.delete_production' => 'Delete Production Entry',
+
+    'asset' => 'Asset Management Module',
+    'asset.view' => 'View Fixed Assets',
+    'asset.create' => 'Add Fixed Asset',
+    'asset.update' => 'Edit Fixed Asset',
+    'asset.delete' => 'Delete Fixed Asset',
+    'asset.revoke' => 'Revoke / Allocate Asset',
+    'asset.maintenance' => 'Manage Asset Maintenance',
+
+    'essentials' => 'HRM & Essentials Module',
+    'essentials.view_all_attendance' => 'View All Staff Attendance',
+    'essentials.view_own_attendance' => 'View Own Attendance',
+    'essentials.crud_all_attendance' => 'Manage All Attendance',
+    'essentials.crud_own_attendance' => 'Manage Own Attendance',
+    'essentials.approve_leave' => 'Approve Leave Applications',
+    'essentials.create_message' => 'Send Internal Message',
+    'essentials.view_message' => 'View Internal Messages',
+    'essentials.assign_todos' => 'Assign To-Do Tasks',
+    'essentials.crud_payroll' => 'Manage Payroll',
+
+    'crm' => 'CRM Module',
+    'crm.view_all_leads' => 'View All Leads',
+    'crm.view_own_leads' => 'View Own Leads',
+    'crm.access_all_schedule' => 'Manage All Follow-Up Schedules',
+    'crm.access_own_schedule' => 'Manage Own Follow-Up Schedules',
+    'crm.access_all_campaigns' => 'Manage CRM Campaigns',
+
+    'project' => 'Project Management Module',
+    'project.view_project' => 'View Project',
+    'project.create_project' => 'Create Project',
+    'project.edit_project' => 'Edit Project',
+    'project.delete_project' => 'Delete Project',
 ];

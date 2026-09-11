@@ -208,6 +208,10 @@ class OrderSheetController extends Controller
 
     public function addPayment($id)
     {
+        if (! (auth()->user()->can('superadmin') || auth()->user()->can('laundry.add_payment') || auth()->user()->can('laundry.update') || auth()->user()->can('sell.payments'))) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $business_id = request()->session()->get('user.business_id');
         $order_sheet = LaundryOrderSheet::where('business_id', $business_id)->findOrFail($id);
         $transaction = $this->_getOrCreateTransaction($order_sheet);
@@ -617,6 +621,10 @@ class OrderSheetController extends Controller
 
     public function print($id)
     {
+        if (! (auth()->user()->can('superadmin') || auth()->user()->can('laundry.print') || auth()->user()->can('laundry.view') || auth()->user()->can('print_invoice'))) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $business_id = request()->session()->get('user.business_id');
         $order_sheet = LaundryOrderSheet::where('business_id', $business_id)
             ->with(['customer', 'location', 'status', 'serviceType', 'itemType', 'createdBy', 'processLogs.process', 'processLogs.staff'])
@@ -700,7 +708,7 @@ class OrderSheetController extends Controller
 
     public function getWhatsappLink($id)
     {
-        if (! (auth()->user()->can('superadmin') || auth()->user()->can('laundry.view') || auth()->user()->can('laundry.create') || auth()->user()->can('laundry.update'))) {
+        if (! (auth()->user()->can('superadmin') || auth()->user()->can('laundry.send_whatsapp') || auth()->user()->can('laundry.view') || auth()->user()->can('laundry.create') || auth()->user()->can('laundry.update'))) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -744,7 +752,7 @@ class OrderSheetController extends Controller
 
     public function sendWhatsappMobile(Request $request, $id)
     {
-        if (! (auth()->user()->can('superadmin') || auth()->user()->can('laundry.view') || auth()->user()->can('laundry.create') || auth()->user()->can('laundry.update'))) {
+        if (! (auth()->user()->can('superadmin') || auth()->user()->can('laundry.send_whatsapp') || auth()->user()->can('laundry.view') || auth()->user()->can('laundry.create') || auth()->user()->can('laundry.update'))) {
             abort(403, 'Unauthorized action.');
         }
 
