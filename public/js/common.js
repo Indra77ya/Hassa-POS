@@ -866,7 +866,7 @@ $(function () {
         $('.overlay').fadeIn('slow');
     });
 
-    $(document).on('click', '.overlay', function () {
+    $(document).on('click', '.overlay, .close-sidebar-btn', function () {
         $('.overlay').fadeOut('slow');
         $('.side-bar').removeClass('small-view-side-active');
     });

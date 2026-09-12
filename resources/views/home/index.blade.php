@@ -3,215 +3,193 @@
 
 @section('content')
 
-    <div class="tw-pb-6 theme-header-bg xl:tw-pb-0">
-        <div class="tw-px-5 tw-pt-3">
-                    <div class="sm:tw-flex sm:tw-items-center sm:tw-justify-between sm:tw-gap-12">
-                        <div class="tw-mt-2 sm:tw-w-1/2 md:tw-w-1/2">
-                            <h1
-                                class="tw-text-2xl md:tw-text-4xl tw-tracking-tight tw-font-bold tw-text-white tw-mb-2 md:tw-mb-0">
-                                {{ __('home.welcome_message', ['name' => Session::get('user.first_name')]) }}
-                            </h1>
+    @php
+        $now = \Carbon\Carbon::now();
+        $hour = $now->hour;
+        if ($hour < 11) {
+            $time_greeting = 'Selamat Pagi';
+        } elseif ($hour < 15) {
+            $time_greeting = 'Selamat Siang';
+        } elseif ($hour < 18) {
+            $time_greeting = 'Selamat Sore';
+        } else {
+            $time_greeting = 'Selamat Malam';
+        }
+        $user_role_name = auth()->user()->roles->pluck('name')->first() ?? '';
+        if ($user_role_name && session('user.business_id')) {
+            $user_role_name = str_replace('#' . session('user.business_id'), '', $user_role_name);
+        }
+        $user_first_name = Session::get('user.first_name');
+        $show_role_badge = !empty($user_role_name) && strtolower(trim($user_role_name)) !== strtolower(trim($user_first_name));
+    @endphp
+
+    @if (auth()->user()->can('dashboard.data'))
+        <div class="tw-pb-6 theme-header-bg xl:tw-pb-0">
+            <div class="tw-px-5 tw-pt-3">
+                <div class="sm:tw-flex sm:tw-items-center sm:tw-justify-between sm:tw-gap-12">
+                    <div class="tw-mt-2 sm:tw-w-1/2 md:tw-w-1/2">
+                        <h1 class="tw-text-2xl md:tw-text-3xl tw-tracking-tight tw-font-bold tw-text-white tw-mb-1 md:tw-mb-0">
+                            {{ __('home.welcome_message', ['name' => $user_first_name]) }} 👋
+                        </h1>
+                    </div>
+                    @if ($is_admin)
+                        <div class="tw-mt-2 sm:tw-w-1/3 md:tw-w-1/4 ">
+                            @if (count($all_locations) > 1)
+                                {!! Form::select('dashboard_location', $all_locations, null, [
+                                    'class' => 'form-control select2',
+                                    'placeholder' => __('lang_v1.select_location'),
+                                    'id' => 'dashboard_location',
+                                ]) !!}
+                            @endif
                         </div>
     
-                        @if (auth()->user()->can('dashboard.data'))
-                            @if ($is_admin)
-                                <div class="tw-mt-2 sm:tw-w-1/3 md:tw-w-1/4 ">
-                                    @if (count($all_locations) > 1)
-                                        {!! Form::select('dashboard_location', $all_locations, null, [
-                                            'class' => 'form-control select2',
-                                            'placeholder' => __('lang_v1.select_location'),
-                                            'id' => 'dashboard_location',
-                                        ]) !!}
-                                    @endif
-                                </div>
-            
-                                <div class="tw-mt-2 sm:tw-w-1/3 md:tw-w-1/4 tw-text-right">
-                                    @if ($is_admin)
-                                        <button type="button" id="dashboard_date_filter"
-                                            class="tw-inline-flex tw-items-center tw-justify-center tw-w-full tw-gap-1 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-gray-900 tw-transition-all tw-duration-200 tw-bg-white tw-rounded-lg sm:tw-w-auto hover:tw-bg-primary-50">
-                                            <svg aria-hidden="true" class="tw-size-5" xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none"
-                                                stroke-linecap="round" stroke-linejoin="round">
-                                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                                <path
-                                                    d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" />
-                                                <path d="M16 3v4" />
-                                                <path d="M8 3v4" />
-                                                <path d="M4 11h16" />
-                                                <path d="M7 14h.013" />
-                                                <path d="M10.01 14h.005" />
-                                                <path d="M13.01 14h.005" />
-                                                <path d="M16.015 14h.005" />
-                                                <path d="M13.015 17h.005" />
-                                                <path d="M7.01 17h.005" />
-                                                <path d="M10.01 17h.005" />
-                                            </svg>
-                                            <span>
-                                                {{ __('messages.filter_by_date') }}
-                                            </span>
-                                            <svg aria-hidden="true" class="tw-size-4" xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-                                                stroke-linecap="round" stroke-linejoin="round">
-                                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                                <path d="M6 9l6 6l6 -6" />
-                                            </svg>
-                                        </button>
-                                    @endif
-                                </div>
-                            @endif
-                        @else
-                            <div class="tw-mt-3 sm:tw-mt-0 tw-inline-flex tw-items-center tw-gap-2 tw-bg-white/10 tw-backdrop-blur-md tw-px-4 tw-py-2 tw-rounded-xl tw-text-white tw-text-sm tw-font-medium">
-                                <svg class="tw-w-5 tw-h-5 tw-text-white/80" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                        <div class="tw-mt-2 sm:tw-w-1/3 md:tw-w-1/4 tw-text-right">
+                            <button type="button" id="dashboard_date_filter"
+                                class="tw-inline-flex tw-items-center tw-justify-center tw-w-full tw-gap-1 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-gray-900 tw-transition-all tw-duration-200 tw-bg-white tw-rounded-lg sm:tw-w-auto hover:tw-bg-primary-50">
+                                <svg aria-hidden="true" class="tw-size-5" xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" />
+                                    <path d="M16 3v4" />
+                                    <path d="M8 3v4" />
+                                    <path d="M4 11h16" />
+                                    <path d="M7 14h.013" />
+                                    <path d="M10.01 14h.005" />
+                                    <path d="M13.01 14h.005" />
+                                    <path d="M16.015 14h.005" />
+                                    <path d="M13.015 17h.005" />
+                                    <path d="M7.01 17h.005" />
+                                    <path d="M10.01 17h.005" />
                                 </svg>
-                                <span>{{ \Carbon\Carbon::now()->format('d F Y') }}</span>
-                            </div>
-                        @endif
-                    </div>
-                    @if (auth()->user()->can('dashboard.data'))
-                        @if ($is_admin)
-                            <div class="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-6 sm:tw-grid-cols-2 xl:tw-grid-cols-4 sm:tw-gap-5">
-                            
-                                <div
-                                    class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm hover:tw-shadow-md tw-rounded-xl  tw-ring-1 tw-ring-gray-200">
-                                    <div class="tw-p-4 sm:tw-p-5">
-                                        <div class="tw-flex tw-items-center tw-gap-4">
-                                            <div
-                                                class="tw-inline-flex tw-items-center tw-justify-center tw-w-10 tw-h-10 tw-rounded-full sm:tw-w-12 sm:tw-h-12 tw-shrink-0 tw-bg-sky-100 tw-text-sky-500">
-                                                <svg aria-hidden="true" class="tw-w-6 tw-h-6" xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-                                                    stroke-linecap="round" stroke-linejoin="round">
-                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                                    <path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-                                                    <path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-                                                    <path d="M17 17h-11v-14h-2" />
-                                                    <path d="M6 5l14 1l-1 7h-13" />
-                                                </svg>
-                                            </div>
-
-                                            <div class="tw-flex-1 tw-min-w-0">
-                                                <p
-                                                    class="tw-text-sm tw-font-medium tw-text-gray-500 tw-truncate tw-whitespace-nowrap">
-                                                    {{ __('home.total_sell') }}
-                                                </p>
-                                                <p
-                                                    class="total_sell tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div
-                                    class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm hover:tw-shadow-md tw-rounded-xl hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
-                                    <div class="tw-p-4 sm:tw-p-5">
-                                        <div class="tw-flex tw-items-center tw-gap-4">
-                                            <div
-                                                class="tw-inline-flex tw-items-center tw-justify-center tw-w-10 tw-h-10 tw-text-green-500 tw-bg-green-100 tw-rounded-full sm:tw-w-12 sm:tw-h-12 tw-shrink-0">
-                                                <svg aria-hidden="true" class="tw-w-6 tw-h-6" xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-                                                    stroke-linecap="round" stroke-linejoin="round">
-                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                                    <path
-                                                        d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16l-3 -2l-2 2l-2 -2l-2 2l-2 -2l-3 2">
-                                                    </path>
-                                                    <path
-                                                        d="M14.8 8a2 2 0 0 0 -1.8 -1h-2a2 2 0 1 0 0 4h2a2 2 0 1 1 0 4h-2a2 2 0 0 1 -1.8 -1">
-                                                    </path>
-                                                    <path d="M12 6v10"></path>
-                                                </svg>
-                                            </div>
-
-                                            <div class="tw-flex-1 tw-min-w-0">
-                                                <p
-                                                    class="tw-text-sm tw-font-medium tw-text-gray-500 tw-truncate tw-whitespace-nowrap">
-                                                    {{ __('lang_v1.net') }} @show_tooltip(__('lang_v1.net_home_tooltip'))
-                                                </p>
-                                                <p
-                                                    class="net tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div
-                                    class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm hover:tw-shadow-md tw-rounded-xl hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
-                                    <div class="tw-p-4 sm:tw-p-5">
-                                        <div class="tw-flex tw-items-center tw-gap-4">
-                                            <div
-                                                class="tw-inline-flex tw-items-center tw-justify-center tw-w-10 tw-h-10 tw-text-yellow-500 tw-bg-yellow-100 tw-rounded-full sm:tw-w-12 sm:tw-h-12 shrink-0">
-                                                <svg aria-hidden="true" class="tw-w-6 tw-h-6" xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-                                                    stroke-linecap="round" stroke-linejoin="round">
-                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                                    <path d="M14 3v4a1 1 0 0 0 1 1h4" />
-                                                    <path
-                                                        d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
-                                                    <path d="M9 7l1 0" />
-                                                    <path d="M9 13l6 0" />
-                                                    <path d="M13 17l2 0" />
-                                                </svg>
-                                            </div>
-
-                                            <div class="tw-flex-1 tw-min-w-0">
-                                                <p
-                                                    class="tw-text-sm tw-font-medium tw-text-gray-500 tw-truncate tw-whitespace-nowrap">
-                                                    {{ __('home.invoice_due') }}
-                                                </p>
-                                                <p
-                                                    class="invoice_due tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div
-                                    class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm hover:tw-shadow-md tw-rounded-xl hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
-                                    <div class="tw-p-4 sm:tw-p-5">
-                                        <div class="tw-flex tw-items-center tw-gap-4">
-                                            <div
-                                                class="tw-inline-flex tw-items-center tw-justify-center tw-w-10 tw-h-10 tw-text-red-500 tw-bg-red-100 tw-rounded-full sm:tw-w-12 sm:tw-h-12 shrink-0">
-                                                <svg aria-hidden="true" class="tw-w-6 tw-h-6" xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-                                                    stroke-linecap="round" stroke-linejoin="round">
-                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                                    <path d="M21 7l-18 0" />
-                                                    <path d="M18 10l3 -3l-3 -3" />
-                                                    <path d="M6 20l-3 -3l3 -3" />
-                                                    <path d="M3 17l18 0" />
-                                                </svg>
-                                            </div>
-
-                                            <div class="tw-flex-1 tw-min-w-0">
-                                                <p
-                                                    class="tw-text-sm tw-font-medium tw-text-gray-500 tw-truncate tw-whitespace-nowrap">
-                                                    {{ __('lang_v1.total_sell_return') }}
-                                                    <i class="fa fa-info-circle text-info hover-q no-print" aria-hidden="true" data-container="body"
-                                                    data-toggle="popover" data-placement="auto bottom" id="total_srp"
-                                                    data-value="{{ __('lang_v1.total_sell_return') }}-{{ __('lang_v1.total_sell_return_paid') }}"
-                                                    data-content="" data-html="true" data-trigger="hover"></i>
-                                                </p>
-                                                <p
-                                                    class="total_sell_return tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
-                                                </p>
-                                                {{-- <p class="mb-0 text-muted fs-10 mt-5">{{ __('lang_v1.total_sell_return') }}: <span
-                                                        class="total_sr"></span><br>
-                                                    {{ __('lang_v1.total_sell_return_paid') }}<span class="total_srp"></span></p> --}}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
+                                <span>
+                                    {{ __('messages.filter_by_date') }}
+                                </span>
+                                <svg aria-hidden="true" class="tw-size-4" xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M6 9l6 6l6 -6" />
+                                </svg>
+                            </button>
+                        </div>
                     @endif
-              
-        </div>
-        @if (auth()->user()->can('dashboard.data'))
+                </div>
+
+                @if ($is_admin)
+                    <div class="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-6 sm:tw-grid-cols-2 xl:tw-grid-cols-4 sm:tw-gap-5">
+
+                        <div class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm hover:tw-shadow-md tw-rounded-xl tw-ring-1 tw-ring-gray-200">
+                            <div class="tw-p-4 sm:tw-p-5">
+                                <div class="tw-flex tw-items-center tw-gap-4">
+                                    <div class="tw-inline-flex tw-items-center tw-justify-center tw-w-10 tw-h-10 tw-rounded-full sm:tw-w-12 sm:tw-h-12 tw-shrink-0 tw-bg-sky-100 tw-text-sky-500">
+                                        <svg aria-hidden="true" class="tw-w-6 tw-h-6" xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                            <path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                                            <path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                                            <path d="M17 17h-11v-14h-2" />
+                                            <path d="M6 5l14 1l-1 7h-13" />
+                                        </svg>
+                                    </div>
+
+                                    <div class="tw-flex-1 tw-min-w-0">
+                                        <p class="tw-text-sm tw-font-medium tw-text-gray-500 tw-truncate tw-whitespace-nowrap">
+                                            {{ __('home.total_sell') }}
+                                        </p>
+                                        <p class="total_sell tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm hover:tw-shadow-md tw-rounded-xl hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
+                            <div class="tw-p-4 sm:tw-p-5">
+                                <div class="tw-flex tw-items-center tw-gap-4">
+                                    <div class="tw-inline-flex tw-items-center tw-justify-center tw-w-10 tw-h-10 tw-text-green-500 tw-bg-green-100 tw-rounded-full sm:tw-w-12 sm:tw-h-12 tw-shrink-0">
+                                        <svg aria-hidden="true" class="tw-w-6 tw-h-6" xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                            <path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16l-3 -2l-2 2l-2 -2l-2 2l-2 -2l-3 2"></path>
+                                            <path d="M14.8 8a2 2 0 0 0 -1.8 -1h-2a2 2 0 1 0 0 4h2a2 2 0 1 1 0 4h-2a2 2 0 0 1 -1.8 -1"></path>
+                                            <path d="M12 6v10"></path>
+                                        </svg>
+                                    </div>
+
+                                    <div class="tw-flex-1 tw-min-w-0">
+                                        <p class="tw-text-sm tw-font-medium tw-text-gray-500 tw-truncate tw-whitespace-nowrap">
+                                            {{ __('lang_v1.net') }} @show_tooltip(__('lang_v1.net_home_tooltip'))
+                                        </p>
+                                        <p class="net tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm hover:tw-shadow-md tw-rounded-xl hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
+                            <div class="tw-p-4 sm:tw-p-5">
+                                <div class="tw-flex tw-items-center tw-gap-4">
+                                    <div class="tw-inline-flex tw-items-center tw-justify-center tw-w-10 tw-h-10 tw-text-yellow-500 tw-bg-yellow-100 tw-rounded-full sm:tw-w-12 sm:tw-h-12 shrink-0">
+                                        <svg aria-hidden="true" class="tw-w-6 tw-h-6" xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                            <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+                                            <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
+                                            <path d="M9 7l1 0" />
+                                            <path d="M9 13l6 0" />
+                                            <path d="M13 17l2 0" />
+                                        </svg>
+                                    </div>
+
+                                    <div class="tw-flex-1 tw-min-w-0">
+                                        <p class="tw-text-sm tw-font-medium tw-text-gray-500 tw-truncate tw-whitespace-nowrap">
+                                            {{ __('home.invoice_due') }}
+                                        </p>
+                                        <p class="invoice_due tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm hover:tw-shadow-md tw-rounded-xl hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
+                            <div class="tw-p-4 sm:tw-p-5">
+                                <div class="tw-flex tw-items-center tw-gap-4">
+                                    <div class="tw-inline-flex tw-items-center tw-justify-center tw-w-10 tw-h-10 tw-text-red-500 tw-bg-red-100 tw-rounded-full sm:tw-w-12 sm:tw-h-12 shrink-0">
+                                        <svg aria-hidden="true" class="tw-w-6 tw-h-6" xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                            <path d="M21 7l-18 0" />
+                                            <path d="M18 10l3 -3l-3 -3" />
+                                            <path d="M6 20l-3 -3l3 -3" />
+                                            <path d="M3 17l18 0" />
+                                        </svg>
+                                    </div>
+
+                                    <div class="tw-flex-1 tw-min-w-0">
+                                        <p class="tw-text-sm tw-font-medium tw-text-gray-500 tw-truncate tw-whitespace-nowrap">
+                                            {{ __('lang_v1.total_sell_return') }}
+                                            <i class="fa fa-info-circle text-info hover-q no-print" aria-hidden="true" data-container="body"
+                                            data-toggle="popover" data-placement="auto bottom" id="total_srp"
+                                            data-value="{{ __('lang_v1.total_sell_return') }}-{{ __('lang_v1.total_sell_return_paid') }}"
+                                            data-content="" data-html="true" data-trigger="hover"></i>
+                                        </p>
+                                        <p class="total_sell_return tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            </div>
+
             @if ($is_admin)
                 <div class="tw-relative">
                     <div class="tw-absolute tw-inset-0 tw-grid" aria-hidden="true">
@@ -219,19 +197,15 @@
                         <div class="tw-hidden sm:tw-block tw-bg-gray-100"></div>
                     </div>
                     <div class="tw-px-5 tw-isolate">
-                        <div
-                            class="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4 sm:tw-mt-6 sm:tw-grid-cols-2 xl:tw-grid-cols-4 sm:tw-gap-5">
-                            <div
-                                class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
+                        <div class="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-4 sm:tw-mt-6 sm:tw-grid-cols-2 xl:tw-grid-cols-4 sm:tw-gap-5">
+                            <div class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
                                 <div class="tw-p-4 sm:tw-p-5">
                                     <div class="tw-flex tw-items-center tw-gap-4">
-                                        <div
-                                            class="tw-inline-flex tw-items-center tw-justify-center tw-w-10 tw-h-10 tw-rounded-full sm:tw-w-12 sm:tw-h-12 shrink-0 bg-sky-100 tw-text-sky-500">
+                                        <div class="tw-inline-flex tw-items-center tw-justify-center tw-w-10 tw-h-10 tw-rounded-full sm:tw-w-12 sm:tw-h-12 shrink-0 bg-sky-100 tw-text-sky-500">
                                             <svg aria-hidden="true" class="tw-w-6 tw-h-6"
                                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
                                                 stroke="currentColor" fill="none" stroke-linecap="round"
                                                 stroke-linejoin="round">
-                                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                                                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                                                 <path d="M12 3v12"></path>
                                                 <path d="M16 11l-4 4l-4 -4"></path>
@@ -240,31 +214,27 @@
                                         </div>
 
                                         <div class="tw-flex-1 tw-min-w-0">
-                                            <p
-                                                class="tw-text-sm tw-font-medium tw-text-gray-500 tw-truncate tw-whitespace-nowrap">
+                                            <p class="tw-text-sm tw-font-medium tw-text-gray-500 tw-truncate tw-whitespace-nowrap">
                                                 {{ __('home.total_purchase') }}
                                             </p>
-                                            <p
-                                                class="total_purchase tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
+                                            <p class="total_purchase tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
                                             </p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div
-                                class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
+
+                            <div class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
                                 <div class="tw-p-4 sm:tw-p-5">
                                     <div class="tw-flex tw-items-center tw-gap-4">
-                                        <div
-                                            class="tw-inline-flex tw-items-center tw-justify-center tw-w-10 tw-h-10 tw-text-yellow-500 tw-bg-yellow-100 tw-rounded-full sm:tw-w-12 sm:tw-h-12 shrink-0">
+                                        <div class="tw-inline-flex tw-items-center tw-justify-center tw-w-10 tw-h-10 tw-text-yellow-500 tw-bg-yellow-100 tw-rounded-full sm:tw-w-12 sm:tw-h-12 shrink-0">
                                             <svg aria-hidden="true" class="tw-w-6 tw-h-6"
                                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
                                                 stroke="currentColor" fill="none" stroke-linecap="round"
                                                 stroke-linejoin="round">
                                                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                                 <path d="M12 9v4" />
-                                                <path
-                                                    d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" />
+                                                <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" />
                                                 <path d="M12 16h.01" />
                                             </svg>
                                         </div>
@@ -273,84 +243,62 @@
                                             <p class="tw-text-sm tw-font-medium tw-text-gray-500">
                                                 {{ __('home.purchase_due') }}
                                             </p>
-                                            <p
-                                                class="purchase_due tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
-
+                                            <p class="purchase_due tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
                                             </p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div
-                                class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
+                            <div class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
                                 <div class="tw-p-4 sm:tw-p-5">
                                     <div class="tw-flex tw-items-center tw-gap-4">
-                                        <div
-                                            class="tw-inline-flex tw-items-center tw-justify-center tw-w-10 tw-h-10 tw-text-red-500 tw-bg-red-100 tw-rounded-full sm:tw-w-12 sm:tw-h-12 shrink-0">
+                                        <div class="tw-inline-flex tw-items-center tw-justify-center tw-w-10 tw-h-10 tw-text-red-500 tw-bg-red-100 tw-rounded-full sm:tw-w-12 sm:tw-h-12 shrink-0">
                                             <svg aria-hidden="true" class="tw-w-6 tw-h-6"
                                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
                                                 stroke="currentColor" fill="none" stroke-linecap="round"
                                                 stroke-linejoin="round">
                                                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                                <path
-                                                    d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16l-3 -2l-2 2l-2 -2l-2 2l-2 -2l-3 2" />
+                                                <path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16l-3 -2l-2 2l-2 -2l-2 2l-2 -2l-3 2" />
                                                 <path d="M15 14v-2a2 2 0 0 0 -2 -2h-4l2 -2m0 4l-2 -2" />
                                             </svg>
                                         </div>
 
                                         <div class="tw-flex-1 tw-min-w-0">
-                                            <p
-                                                class="tw-text-sm tw-font-medium tw-text-gray-500 tw-truncate tw-whitespace-nowrap">
+                                            <p class="tw-text-sm tw-font-medium tw-text-gray-500 tw-truncate tw-whitespace-nowrap">
                                                 {{ __('lang_v1.total_purchase_return') }}
                                                 <i class="fa fa-info-circle text-info hover-q no-print" aria-hidden="true" data-container="body"
                                                 data-toggle="popover" data-placement="auto bottom" id="total_prp"
                                                 data-value="{{ __('lang_v1.total_purchase_return') }}-{{ __('lang_v1.total_purchase_return_paid') }}"
                                                 data-content="" data-html="true" data-trigger="hover"></i>
                                             </p>
-                                            <p
-                                                class="total_purchase_return tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
+                                            <p class="total_purchase_return tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
                                             </p>
-                                            {{-- <p class="mb-0 text-muted fs-10 mt-5">
-                                                {{ __('lang_v1.total_purchase_return') }}: <span
-                                                    class="total_pr"></span><br>
-                                                {{ __('lang_v1.total_purchase_return_paid') }}<span
-                                                    class="total_prp"></span></p> --}}
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div
-                                class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
+                            <div class="tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-1 tw-ring-gray-200">
                                 <div class="tw-p-4 sm:tw-p-5">
                                     <div class="tw-flex tw-items-center tw-gap-4">
-                                        <div
-                                            class="tw-inline-flex tw-items-center tw-justify-center tw-w-10 tw-h-10 tw-text-red-500 tw-bg-red-100 tw-rounded-full sm:tw-w-12 sm:tw-h-12 shrink-0">
+                                        <div class="tw-inline-flex tw-items-center tw-justify-center tw-w-10 tw-h-10 tw-text-red-500 tw-bg-red-100 tw-rounded-full sm:tw-w-12 sm:tw-h-12 shrink-0">
                                             <svg aria-hidden="true" class="tw-w-6 tw-h-6"
                                                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
                                                 stroke="currentColor" fill="none" stroke-linecap="round"
                                                 stroke-linejoin="round">
                                                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                                <path
-                                                    d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16l-3 -2l-2 2l-2 -2l-2 2l-2 -2l-3 2">
-                                                </path>
-                                                <path
-                                                    d="M14.8 8a2 2 0 0 0 -1.8 -1h-2a2 2 0 1 0 0 4h2a2 2 0 1 1 0 4h-2a2 2 0 0 1 -1.8 -1">
-                                                </path>
+                                                <path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16l-3 -2l-2 2l-2 -2l-2 2l-2 -2l-3 2"></path>
+                                                <path d="M14.8 8a2 2 0 0 0 -1.8 -1h-2a2 2 0 1 0 0 4h2a2 2 0 1 1 0 4h-2a2 2 0 0 1 -1.8 -1"></path>
                                                 <path d="M12 6v10"></path>
                                             </svg>
                                         </div>
 
                                         <div class="tw-flex-1 tw-min-w-0">
-                                            <p
-                                                class="tw-text-sm tw-font-medium tw-text-gray-500 tw-truncate tw-whitespace-nowrap">
+                                            <p class="tw-text-sm tw-font-medium tw-text-gray-500 tw-truncate tw-whitespace-nowrap">
                                                 {{ __('lang_v1.expense') }}
                                             </p>
-                                            <p
-                                                class="total_expense tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
-
+                                            <p class="total_expense tw-mt-0.5 tw-text-gray-900 tw-text-xl tw-truncate tw-font-semibold tw-tracking-tight tw-font-mono">
                                             </p>
                                         </div>
                                     </div>
@@ -359,25 +307,17 @@
                         </div>
                     </div>
                 </div>
-                {{-- @if (!empty($widgets['after_sale_purchase_totals']))
-                    @foreach ($widgets['after_sale_purchase_totals'] as $widget)
-                        {!! $widget !!}
-                    @endforeach
-                @endif --}}
             @endif
-        @endif
-    </div>
-    @if (auth()->user()->can('dashboard.data'))
+        </div>
+
         <div class="tw-px-5 tw-py-6">
             <div class="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-gap-5 lg:tw-grid-cols-2">
                 @if (auth()->user()->can('sell.view') || auth()->user()->can('direct_sell.view'))
                     @if (!empty($all_locations))
-                        <div
-                            class="tw-transition-all lg:tw-col-span-2 xl:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
+                        <div class="tw-transition-all lg:tw-col-span-2 xl:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
                             <div class="tw-p-4 sm:tw-p-5">
                                 <div class="tw-flex tw-items-center tw-gap-2.5">
-                                    <div
-                                        class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
+                                    <div class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
                                         <svg aria-hidden="true" class="tw-size-5 tw-text-sky-500 tw-shrink-0"
                                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
                                             stroke="currentColor" fill="none" stroke-linecap="round"
@@ -389,14 +329,12 @@
                                             <path d="M6 5l14 1l-1 7h-13"></path>
                                         </svg>
                                     </div>
-
                                     <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
                                         {{ __('home.sells_last_30_days') }}
                                     </h3>
                                 </div>
                                 <div class="tw-mt-5">
-                                    <div
-                                        class="tw-grid tw-w-full tw-h-100 tw-border tw-border-gray-200 tw-border-dashed tw-rounded-xl tw-bg-gray-50 ">
+                                    <div class="tw-grid tw-w-full tw-h-100 tw-border tw-border-gray-200 tw-border-dashed tw-rounded-xl tw-bg-gray-50">
                                         <p class="tw-text-sm tw-italic tw-font-normal tw-text-gray-400">
                                             {!! $sells_chart_1->container() !!}
                                         </p>
@@ -404,20 +342,11 @@
                                 </div>
                             </div>
                         </div>
-                    @endif
 
-                    {{-- @if (!empty($widgets['after_sales_last_30_days']))
-                        @foreach ($widgets['after_sales_last_30_days'] as $widget)
-                            {!! $widget !!}
-                        @endforeach
-                    @endif --}}
-                    @if (!empty($all_locations))
-                        <div
-                            class="tw-transition-all lg:tw-col-span-2 xl:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
+                        <div class="tw-transition-all lg:tw-col-span-2 xl:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
                             <div class="tw-p-4 sm:tw-p-5">
                                 <div class="tw-flex tw-items-center tw-gap-2.5">
-                                    <div
-                                        class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
+                                    <div class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
                                         <svg aria-hidden="true" class="tw-size-5 tw-text-sky-500 tw-shrink-0"
                                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
                                             stroke="currentColor" fill="none" stroke-linecap="round"
@@ -434,8 +363,7 @@
                                     </h3>
                                 </div>
                                 <div class="tw-mt-5">
-                                    <div
-                                        class="tw-grid tw-w-full tw-h-100 tw-border tw-border-gray-200 tw-border-dashed tw-rounded-xl tw-bg-gray-50 ">
+                                    <div class="tw-grid tw-w-full tw-h-100 tw-border tw-border-gray-200 tw-border-dashed tw-rounded-xl tw-bg-gray-50">
                                         <p class="tw-text-sm tw-italic tw-font-normal tw-text-gray-400">
                                             {!! $sells_chart_2->container() !!}
                                         </p>
@@ -444,28 +372,18 @@
                             </div>
                         </div>
                     @endif
-                @endif
-                {{-- @if (!empty($widgets['after_sales_current_fy']))
-                    @foreach ($widgets['after_sales_current_fy'] as $widget)
-                        {!! $widget !!}
-                    @endforeach
-                @endif --}}
-                @if (auth()->user()->can('sell.view') || auth()->user()->can('direct_sell.view'))
-                    <div
-                        class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
+
+                    <div class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
                         <div class="tw-p-4 sm:tw-p-5">
                             <div class="tw-flex tw-items-center tw-gap-2.5">
-                                <div
-                                    class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
+                                <div class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
                                     <svg aria-hidden="true" class="tw-text-yellow-500 tw-size-5 tw-shrink-0"
                                         xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
                                         stroke="currentColor" fill="none" stroke-linecap="round"
                                         stroke-linejoin="round">
                                         <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                                         <path d="M12 9v4"></path>
-                                        <path
-                                            d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z">
-                                        </path>
+                                        <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"></path>
                                         <path d="M12 16h.01"></path>
                                     </svg>
                                 </div>
@@ -486,12 +404,10 @@
                                 </div>
                             </div>
 
-
-                            <div class="tw-flow-root tw-mt-5  tw-border-gray-200">
+                            <div class="tw-flow-root tw-mt-5 tw-border-gray-200">
                                 <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
                                     <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
-                                        <table class="table table-bordered table-striped" id="sales_payment_dues_table"
-                                            style="width: 100%;">
+                                        <table class="table table-bordered table-striped" id="sales_payment_dues_table" style="width: 100%;">
                                             <thead>
                                                 <tr>
                                                     <th style="white-space: nowrap !important;">@lang('contact.customer')</th>
@@ -507,21 +423,18 @@
                         </div>
                     </div>
                 @endif
+
                 @can('purchase.view')
-                    <div
-                        class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
+                    <div class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
                         <div class="tw-p-4 sm:tw-p-5">
                             <div class="tw-flex tw-items-center tw-gap-2.5">
-                                <div
-                                    class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
+                                <div class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
                                     <svg aria-hidden="true" class="tw-text-yellow-500 tw-size-5 tw-shrink-0"
                                         xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
                                         stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                         <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                                         <path d="M12 9v4"></path>
-                                        <path
-                                            d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z">
-                                        </path>
+                                        <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"></path>
                                         <path d="M12 16h.01"></path>
                                     </svg>
                                 </div>
@@ -542,13 +455,11 @@
                                         @endif
                                     </div>
                                 </div>
-
                             </div>
-                            <div class="tw-flow-root tw-mt-5  tw-border-gray-200">
+                            <div class="tw-flow-root tw-mt-5 tw-border-gray-200">
                                 <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
                                     <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
-                                        <table class="table table-bordered table-striped" id="purchase_payment_dues_table"
-                                            style="width: 100%;">
+                                        <table class="table table-bordered table-striped" id="purchase_payment_dues_table" style="width: 100%;">
                                             <thead>
                                                 <tr>
                                                     <th style="white-space: nowrap !important;">@lang('purchase.supplier')</th>
@@ -564,13 +475,12 @@
                         </div>
                     </div>
                 @endcan
+
                 @can('stock_report.view')
-                    <div
-                        class="tw-transition-all lg:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
+                    <div class="tw-transition-all lg:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
                         <div class="tw-p-4 sm:tw-p-5">
                             <div class="tw-flex tw-items-center tw-gap-2.5">
-                                <div
-                                    class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
+                                <div class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
                                     <svg aria-hidden="true" class="tw-text-yellow-500 tw-size-5 tw-shrink-0"
                                         xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
                                         stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -598,11 +508,10 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="tw-flow-root tw-mt-5  tw-border-gray-200">
+                            <div class="tw-flow-root tw-mt-5 tw-border-gray-200">
                                 <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
                                     <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
-                                        <table class="table table-bordered table-striped" id="stock_alert_table"
-                                            style="width: 100%;">
+                                        <table class="table table-bordered table-striped" id="stock_alert_table" style="width: 100%;">
                                             <thead>
                                                 <tr>
                                                     <th style="white-space: nowrap !important;">@lang('sale.product')</th>
@@ -616,571 +525,317 @@
                             </div>
                         </div>
                     </div>
-                    @if (session('business.enable_product_expiry') == 1)
-                        <div
-                            class="tw-transition-all lg:tw-col-span-1 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
-                            <div class="tw-p-4 sm:tw-p-5">
-                                <div class="tw-flex tw-items-center tw-gap-2.5">
-                                    <div
-                                        class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
-                                        <svg aria-hidden="true" class="tw-text-yellow-500 tw-size-5 tw-shrink-0"
-                                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
-                                            stroke="currentColor" fill="none" stroke-linecap="round"
-                                            stroke-linejoin="round">
-                                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                            <path d="M12 9v4"></path>
-                                            <path
-                                                d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z">
-                                            </path>
-                                            <path d="M12 16h.01"></path>
-                                        </svg>
-                                    </div>
-                                    <div class="tw-flex tw-items-center tw-flex-1 tw-min-w-0 tw-gap-1">
-                                        <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                            <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
-                                                {{ __('home.stock_expiry_alert') }}
-                                                @show_tooltip(
-                                                __('tooltip.stock_expiry_alert', [
-                                                'days'
-                                                =>session('business.stock_expiry_alert_days', 30) ]) )
-                                            </h3>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="tw-flow-root tw-mt-5  tw-border-gray-200">
-                                    <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
-                                        <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
-                                            <input type="hidden" id="stock_expiry_alert_days"
-                                                value="{{ \Carbon::now()->addDays(session('business.stock_expiry_alert_days', 30))->format('Y-m-d') }}">
-                                            <table class="table table-bordered table-striped" id="stock_expiry_alert_table">
-                                                <thead>
-                                                    <tr>
-                                                        <th>@lang('business.product')</th>
-                                                        <th>@lang('business.location')</th>
-                                                        <th>@lang('report.stock_left')</th>
-                                                        <th>@lang('product.expires_in')</th>
-                                                    </tr>
-                                                </thead>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
                 @endcan
-                @if (auth()->user()->can('so.view_all') || auth()->user()->can('so.view_own'))
-                    <div
-                        class="tw-transition-all lg:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
-                        <div class="tw-p-4 sm:tw-p-5">
-                            <div class="tw-flex tw-items-center tw-gap-2.5">
-                                <div
-                                    class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
-                                    <svg aria-hidden="true" class="tw-text-yellow-500 tw-size-5 tw-shrink-0"
-                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
-                                        stroke="currentColor" fill="none" stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                        <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path>
-                                        <path d="M12 8v4"></path>
-                                        <path d="M12 16h.01"></path>
-                                    </svg>
-                                </div>
-                                <div class="tw-flex tw-items-center tw-flex-1 tw-min-w-0 tw-gap-1">
-                                    <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                        <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
-                                            {{ __('lang_v1.sales_order') }}
-                                        </h3>
-                                    </div>
-                                    <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                        @if (count($all_locations) > 1)
-                                            {!! Form::select('so_location', $all_locations, null, [
-                                                'class' => 'form-control select2',
-                                                'placeholder' => __('lang_v1.select_location'),
-                                                'id' => 'so_location',
-                                            ]) !!}
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="tw-flow-root tw-mt-5  tw-border-gray-200">
-                                <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
-                                    <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
-                                        @php
-                                            $so_custom_labels = json_decode(session('business.custom_labels'), true);
-                                        @endphp
-                                        <table class="table table-bordered table-striped ajax_view"
-                                            id="sales_order_table" style="width: 100%;">
-                                            <thead>
-                                                <tr>
-                                                    <th class="not-export" style="white-space: nowrap !important;">@lang('messages.action')</th>
-                                                    <th style="white-space: nowrap !important;">@lang('messages.date')</th>
-                                                    <th style="white-space: nowrap !important;">@lang('restaurant.order_no')</th>
-                                                    <th style="white-space: nowrap !important;">@lang('sale.customer_name')</th>
-                                                    <th style="white-space: nowrap !important;">@lang('lang_v1.contact_no')</th>
-                                                    <th style="white-space: nowrap !important;">@lang('sale.location')</th>
-                                                    <th style="white-space: nowrap !important;">@lang('sale.status')</th>
-                                                    <th style="white-space: nowrap !important;">@lang('lang_v1.shipping_status')</th>
-                                                    <th style="white-space: nowrap !important;">@lang('lang_v1.quantity_remaining')</th>
-                                                    <th style="white-space: nowrap !important;">{{ $so_custom_labels['sell']['custom_field_1'] ?? '' }}</th>
-                                                    <th style="white-space: nowrap !important;">{{ $so_custom_labels['sell']['custom_field_2'] ?? '' }}</th>
-                                                    <th style="white-space: nowrap !important;">{{ $so_custom_labels['sell']['custom_field_3'] ?? '' }}</th>
-                                                    <th style="white-space: nowrap !important;">{{ $so_custom_labels['sell']['custom_field_4'] ?? '' }}</th>
-                                                    <th style="white-space: nowrap !important;">@lang('lang_v1.added_by')</th>
-                                                </tr>
-                                            </thead>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-                @if (
-                    !empty($common_settings['enable_purchase_requisition']) &&
-                        (auth()->user()->can('purchase_requisition.view_all') || auth()->user()->can('purchase_requisition.view_own')))
-                    <div
-                        class="tw-transition-all lg:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
-                        <div class="tw-p-4 sm:tw-p-5">
-                            <div class="tw-flex tw-items-center tw-gap-2.5">
-                                <div
-                                    class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
-                                    <svg aria-hidden="true" class="tw-text-yellow-500 tw-size-5 tw-shrink-0"
-                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
-                                        stroke="currentColor" fill="none" stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                        <path d="M10 10v4a1 1 0 0 0 1 1h2a1 1 0 0 0 1 -1v-4"></path>
-                                        <path d="M9 6h6"></path>
-                                        <path d="M10 6v-2a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v2"></path>
-                                        <circle cx="12" cy="16" r="2"></circle>
-                                        <path d="M5 20h14a2 2 0 0 0 2 -2v-10"></path>
-                                        <path d="M15 16v4"></path>
-                                        <path d="M9 20v-4"></path>
-                                    </svg>
-                                </div>
-                                <div class="tw-flex tw-items-center tw-flex-1 tw-min-w-0 tw-gap-1">
-                                    <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                        <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
-                                            @lang('lang_v1.purchase_requisition')
-                                        </h3>
-                                    </div>
-                                    <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                        @if (count($all_locations) > 1)
-                                            @if (count($all_locations) > 1)
-                                                {!! Form::select('pr_location', $all_locations, null, [
-                                                    'class' => 'form-control select2',
-                                                    'placeholder' => __('lang_v1.select_location'),
-                                                    'id' => 'pr_location',
-                                                ]) !!}
-                                            @endif
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="tw-flow-root tw-mt-5  tw-border-gray-200">
-                                <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
-                                    <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
-                                        <table class="table table-bordered table-striped ajax_view"
-                                            id="purchase_requisition_table" style="width: 100%;">
-                                            <thead>
-                                                <tr>
-                                                    <th class="not-export">@lang('messages.action')</th>
-                                                    <th>@lang('messages.date')</th>
-                                                    <th>@lang('purchase.ref_no')</th>
-                                                    <th>@lang('purchase.location')</th>
-                                                    <th>@lang('sale.status')</th>
-                                                    <th>@lang('lang_v1.required_by_date')</th>
-                                                    <th>@lang('lang_v1.added_by')</th>
-                                                </tr>
-                                            </thead>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-
-                @if (
-                    !empty($common_settings['enable_purchase_order']) &&
-                        (auth()->user()->can('purchase_order.view_all') || auth()->user()->can('purchase_order.view_own')))
-
-                    <div
-                        class="tw-transition-all lg:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
-                        <div class="tw-p-4 sm:tw-p-5">
-                            <div class="tw-flex tw-items-center tw-gap-2.5">
-                                <div
-                                    class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
-                                    <svg aria-hidden="true" class="tw-text-yellow-500 tw-size-5 tw-shrink-0"
-                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
-                                        stroke="currentColor" fill="none" stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                        <rect x="4" y="4" width="16" height="16" rx="2" />
-                                        <line x1="4" y1="10" x2="20" y2="10" />
-                                        <line x1="12" y1="4" x2="12" y2="20" />
-                                        <line x1="12" y1="10" x2="16" y2="10" />
-                                    </svg>
-                                </div>
-                                <div class="tw-flex tw-items-center tw-flex-1 tw-min-w-0 tw-gap-1">
-                                    <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                        <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
-                                            @lang('lang_v1.purchase_order')
-                                        </h3>
-                                    </div>
-                                    <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                        @if (count($all_locations) > 1)
-                                            {!! Form::select('po_location', $all_locations, null, [
-                                                'class' => 'form-control select2',
-                                                'placeholder' => __('lang_v1.select_location'),
-                                                'id' => 'po_location',
-                                            ]) !!}
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="tw-flow-root tw-mt-5  tw-border-gray-200">
-                                <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
-                                    <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
-                                        <table class="table table-bordered table-striped ajax_view"
-                                            id="purchase_order_table" style="width: 100%;">
-                                            <thead>
-                                                <tr>
-                                                    <th class="not-export">@lang('messages.action')</th>
-                                                    <th>@lang('messages.date')</th>
-                                                    <th>@lang('purchase.ref_no')</th>
-                                                    <th>@lang('purchase.location')</th>
-                                                    <th>@lang('purchase.supplier')</th>
-                                                    <th>@lang('sale.status')</th>
-                                                    <th>@lang('lang_v1.quantity_remaining')</th>
-                                                    <th>@lang('lang_v1.added_by')</th>
-                                                </tr>
-                                            </thead>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                @endif
-                @if (auth()->user()->can('access_pending_shipments_only') ||
-                        auth()->user()->can('access_shipping') ||
-                        auth()->user()->can('access_own_shipping'))
-                    <div
-                        class="tw-transition-all lg:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
-                        <div class="tw-p-4 sm:tw-p-5">
-                            <div class="tw-flex tw-items-center tw-gap-2.5">
-                                <div
-                                    class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
-                                    <svg aria-hidden="true" class="tw-text-yellow-500 tw-size-5 tw-shrink-0"
-                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
-                                        stroke="currentColor" fill="none" stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                        <path d="M7 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
-                                        <path d="M17 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
-                                        <path d="M5 17h-2v-4m-1 -8h11v12m-4 0h6m4 0h2v-6h-8m0 -5h5l3 5"></path>
-                                        <path d="M3 9l4 0"></path>
-                                    </svg>
-                                </div>
-                                <div class="tw-flex tw-items-center tw-flex-1 tw-min-w-0 tw-gap-1">
-                                    <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                        <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
-                                            @lang('lang_v1.pending_shipments')
-                                        </h3>
-                                    </div>
-                                    <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                        @if (count($all_locations) > 1)
-                                            {!! Form::select('pending_shipments_location', $all_locations, null, [
-                                                'class' => 'form-control select2 ',
-                                                'placeholder' => __('lang_v1.select_location'),
-                                                'id' => 'pending_shipments_location',
-                                            ]) !!}
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="tw-flow-root tw-mt-5  tw-border-gray-200">
-                                <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
-                                    <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
-                                        <table class="table table-bordered table-striped ajax_view" id="shipments_table" style="width: 100%;">
-                                            <thead>
-                                                <tr>
-                                                    <th class="not-export" style="white-space: nowrap !important;">@lang('messages.action')</th>
-                                                    <th style="white-space: nowrap !important;">@lang('messages.date')</th>
-                                                    <th style="white-space: nowrap !important;">@lang('sale.invoice_no')</th>
-                                                    <th style="white-space: nowrap !important;">@lang('sale.customer_name')</th>
-                                                    <th style="white-space: nowrap !important;">@lang('lang_v1.contact_no')</th>
-                                                    <th style="white-space: nowrap !important;">@lang('sale.location')</th>
-                                                    <th style="white-space: nowrap !important;">@lang('lang_v1.shipping_status')</th>
-                                                    @if (!empty($custom_labels['shipping']['custom_field_1']))
-                                                        <th style="white-space: nowrap !important;">
-                                                            {{ $custom_labels['shipping']['custom_field_1'] }}
-                                                        </th>
-                                                    @endif
-                                                    @if (!empty($custom_labels['shipping']['custom_field_2']))
-                                                        <th style="white-space: nowrap !important;">
-                                                            {{ $custom_labels['shipping']['custom_field_2'] }}
-                                                        </th>
-                                                    @endif
-                                                    @if (!empty($custom_labels['shipping']['custom_field_3']))
-                                                        <th style="white-space: nowrap !important;">
-                                                            {{ $custom_labels['shipping']['custom_field_3'] }}
-                                                        </th>
-                                                    @endif
-                                                    @if (!empty($custom_labels['shipping']['custom_field_4']))
-                                                        <th style="white-space: nowrap !important;">
-                                                            {{ $custom_labels['shipping']['custom_field_4'] }}
-                                                        </th>
-                                                    @endif
-                                                    @if (!empty($custom_labels['shipping']['custom_field_5']))
-                                                        <th style="white-space: nowrap !important;">
-                                                            {{ $custom_labels['shipping']['custom_field_5'] }}
-                                                        </th>
-                                                    @endif
-                                                    <th style="white-space: nowrap !important;">@lang('sale.payment_status')</th>
-                                                    <th style="white-space: nowrap !important;">@lang('restaurant.service_staff')</th>
-                                                </tr>
-                                            </thead>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-                @if (auth()->user()->can('account.access') && config('constants.show_payments_recovered_today') == true)
-                    <div
-                        class="tw-transition-all lg:tw-col-span-2 tw-duration-200 tw-bg-white tw-shadow-sm tw-rounded-xl tw-ring-1 hover:tw-shadow-md hover:tw--translate-y-0.5 tw-ring-gray-200">
-                        <div class="tw-p-4 sm:tw-p-5">
-                            <div class="tw-flex tw-items-center tw-gap-2.5">
-                                <div
-                                    class="tw-border-2 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-w-10 tw-h-10">
-                                    <svg aria-hidden="true" class="tw-text-yellow-500 tw-size-5 tw-shrink-0"
-                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2"
-                                        stroke="currentColor" fill="none" stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                        <path d="M12 9v4"></path>
-                                        <path
-                                            d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z">
-                                        </path>
-                                        <path d="M12 16h.01"></path>
-                                    </svg>
-                                </div>
-                                <div class="tw-flex tw-items-center tw-flex-1 tw-min-w-0 tw-gap-1">
-                                    <div class="tw-w-full sm:tw-w-1/2 md:tw-w-1/2">
-                                        <h3 class="tw-font-bold tw-text-base lg:tw-text-xl">
-                                            @lang('lang_v1.payment_recovered_today')
-                                        </h3>
-                                    </div>
-
-                                </div>
-                            </div>
-                            <div class="tw-flow-root tw-mt-5  tw-border-gray-200">
-                                <div class="tw--mx-4 tw--my-2 tw-overflow-x-auto sm:tw--mx-5">
-                                    <div class="tw-inline-block tw-min-w-full tw-py-2 tw-align-middle sm:tw-px-5">
-                                        <table class="table table-bordered table-striped" id="cash_flow_table">
-                                            <thead>
-                                                <tr>
-                                                    <th>@lang('messages.date')</th>
-                                                    <th>@lang('account.account')</th>
-                                                    <th>@lang('lang_v1.description')</th>
-                                                    <th>@lang('lang_v1.payment_method')</th>
-                                                    <th>@lang('lang_v1.payment_details')</th>
-                                                    <th>@lang('account.credit')</th>
-                                                    <th>@lang('lang_v1.account_balance')
-                                                        @show_tooltip(__('lang_v1.account_balance_tooltip'))</th>
-                                                    <th>@lang('lang_v1.total_balance')
-                                                        @show_tooltip(__('lang_v1.total_balance_tooltip'))</th>
-                                                </tr>
-                                            </thead>
-                                            <tfoot>
-                                                <tr class="bg-gray font-17 footer-total text-center">
-                                                    <td colspan="5"><strong>@lang('sale.total'):</strong></td>
-                                                    <td class="footer_total_credit"></td>
-                                                    <td colspan="2"></td>
-                                                </tr>
-                                            </tfoot>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-                {{-- @if (!empty($widgets['after_dashboard_reports']))
-                    @foreach ($widgets['after_dashboard_reports'] as $widget)
-                        {!! $widget !!}
-                    @endforeach
-                @endif --}}
             </div>
         </div>
     @else
-        <div class="tw-px-5 tw-pt-8 tw-pb-12">
-            <div class="tw-max-w-6xl tw-mx-auto">
-                {{-- Operational Shortcuts Section --}}
-                <div class="tw-mb-6 tw-flex tw-items-center tw-justify-between">
-                    <div>
-                        <h2 class="tw-text-xl sm:tw-text-2xl tw-font-bold tw-text-gray-900 dark:tw-text-white tw-flex tw-items-center tw-gap-2.5">
-                            <span class="tw-inline-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-rounded-xl tw-bg-primary-500 tw-text-white tw-shadow-sm">
-                                <svg class="tw-w-5 tw-h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
-                                </svg>
-                            </span>
-                            Pintasan Operasional
-                        </h2>
-                        <p class="tw-text-sm tw-text-gray-600 dark:tw-text-gray-300 tw-mt-1">
-                            Pilih modul kerja di bawah ini untuk langsung mengakses tugas harian Anda
-                        </p>
+        {{-- Modern Staff Dashboard View --}}
+        <div class="tw-px-4 sm:tw-px-6 tw-py-6">
+            <div class="tw-max-w-7xl tw-mx-auto">
+
+                {{-- Welcome Banner Header Card --}}
+                <div class="tw-bg-white tw-rounded-2xl tw-p-5 sm:tw-p-6 tw-border tw-border-gray-200 tw-shadow-sm tw-mb-6">
+                    <div class="tw-flex tw-flex-col md:tw-flex-row md:tw-items-center md:tw-justify-between tw-gap-4">
+                        <div class="tw-flex-1">
+                            <div class="tw-flex tw-items-center tw-flex-wrap tw-gap-2 tw-mb-2">
+                                <span class="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-bold tw-text-emerald-800 tw-bg-emerald-50 tw-px-3 tw-py-1 tw-rounded-full tw-border tw-border-emerald-200">
+                                    <span class="tw-w-2 tw-h-2 tw-rounded-full tw-bg-emerald-500"></span>
+                                    {{ $time_greeting }}
+                                </span>
+                                @if ($show_role_badge)
+                                    <span class="tw-inline-flex tw-items-center tw-text-xs tw-font-bold tw-text-blue-800 tw-bg-blue-50 tw-px-3 tw-py-1 tw-rounded-full tw-border tw-border-blue-200">
+                                        <i class="fa fa-user-tag tw-mr-1.5" style="font-size: 11px;"></i>
+                                        {{ $user_role_name }}
+                                    </span>
+                                @endif
+                            </div>
+                            <h1 class="tw-text-2xl sm:tw-text-3xl tw-font-extrabold tw-text-gray-900 tw-tracking-tight">
+                                Halo, {{ $user_first_name }}!
+                            </h1>
+                            <p class="tw-text-sm tw-text-gray-600 tw-mt-1">
+                                Pilih modul kerja di bawah untuk langsung mengakses tugas & transaksi harian Anda.
+                            </p>
+                        </div>
+                        <div class="tw-inline-flex tw-items-center tw-gap-3 tw-bg-gray-50 tw-px-4 tw-py-3 tw-rounded-xl tw-border tw-border-gray-200 tw-self-start md:tw-self-center">
+                            <div class="tw-w-10 tw-h-10 tw-rounded-lg tw-bg-blue-600 tw-text-white tw-flex tw-items-center tw-justify-center tw-shadow-sm">
+                                <i class="fa fa-calendar-alt" style="font-size: 18px;"></i>
+                            </div>
+                            <div>
+                                <span class="tw-block tw-text-xs tw-font-semibold tw-text-gray-600">Hari ini</span>
+                                <span class="tw-block tw-text-sm tw-font-bold tw-text-gray-900">{{ $now->format('d F Y') }}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-6">
+                {{-- Operational Shortcuts Section Header --}}
+                <div class="tw-mb-5 tw-flex tw-items-center tw-justify-between">
+                    <div>
+                        <h2 class="tw-text-lg sm:tw-text-xl tw-font-bold tw-text-gray-900 tw-flex tw-items-center tw-gap-2.5">
+                            <span class="tw-inline-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-rounded-xl tw-bg-blue-600 tw-text-white tw-shadow-sm">
+                                <i class="fa fa-th-large" style="font-size: 16px;"></i>
+                            </span>
+                            Pintasan Operasional
+                        </h2>
+                    </div>
+                </div>
+
+                {{-- Grid Cards --}}
+                <div class="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-5">
+
                     @if (auth()->user()->can('laundry.view') || auth()->user()->can('laundry.create') || auth()->user()->can('laundry.update_status') || auth()->user()->can('laundry.log_process'))
-                        <a href="{{ action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'index']) }}"
-                           class="tw-group tw-relative tw-bg-white dark:tw-bg-slate-800 tw-rounded-2xl tw-p-6 tw-ring-1 tw-ring-gray-200 dark:tw-ring-slate-700 tw-shadow-sm hover:tw-shadow-xl hover:tw-ring-blue-400 hover:-tw-translate-y-1 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
+                        <div class="tw-group tw-bg-white tw-rounded-2xl tw-p-5 tw-border tw-border-gray-200 tw-shadow-sm hover:tw-shadow-md hover:tw-border-blue-400 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
                             <div>
-                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
-                                    <div class="tw-w-14 tw-h-14 tw-rounded-2xl tw-bg-blue-100 dark:tw-bg-blue-900/50 tw-text-blue-600 dark:tw-text-blue-300 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
-                                        <svg class="tw-w-7 tw-h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                                        </svg>
+                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-3.5">
+                                    <div class="tw-w-12 tw-h-12 tw-rounded-xl tw-bg-blue-100 tw-text-blue-600 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
+                                        <i class="fas fa-tshirt" style="font-size: 22px;"></i>
                                     </div>
-                                    <span class="tw-text-xs tw-font-bold tw-text-blue-700 dark:tw-text-blue-300 tw-bg-blue-100/80 dark:tw-bg-blue-900/50 tw-px-3 tw-py-1 tw-rounded-full">Laundry</span>
+                                    <span class="tw-text-xs tw-font-bold tw-text-blue-700 tw-bg-blue-50 tw-px-3 tw-py-1 tw-rounded-full tw-border tw-border-blue-100">Laundry</span>
                                 </div>
-                                <h3 class="tw-text-lg tw-font-bold tw-text-gray-900 dark:tw-text-white group-hover:tw-text-blue-600 tw-transition-colors">Pesanan Laundry</h3>
-                                <p class="tw-text-sm tw-text-gray-600 dark:tw-text-gray-300 tw-mt-2 tw-leading-relaxed">Lihat, kelola, dan catat lembar pesanan laundry pelanggan dengan cepat.</p>
+                                <h3 class="tw-text-base tw-font-bold tw-text-gray-900 group-hover:tw-text-blue-600 tw-transition-colors">Pesanan Laundry</h3>
+                                <p class="tw-text-xs tw-text-gray-600 tw-mt-1.5 tw-leading-relaxed">Lihat, kelola, dan catat lembar pesanan laundry pelanggan dengan cepat.</p>
                             </div>
-                            <div class="tw-mt-6 tw-pt-4 tw-border-t tw-border-gray-100 dark:tw-border-slate-700 tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-bold tw-text-blue-600 dark:tw-text-blue-400">
-                                <span>Buka Pesanan</span>
-                                <svg class="tw-w-5 tw-h-5 group-hover:tw-translate-x-1.5 tw-transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                                </svg>
+                            <div class="tw-mt-5 tw-pt-3.5 tw-border-t tw-border-gray-100 tw-flex tw-items-center tw-gap-2">
+                                <a href="{{ action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'index']) }}"
+                                   class="tw-flex-1 shortcut-btn shortcut-btn-blue">
+                                    <span>Lihat Pesanan</span>
+                                    <i class="fa fa-arrow-right" style="font-size: 11px;"></i>
+                                </a>
+                                @if (auth()->user()->can('laundry.create'))
+                                    <a href="{{ action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'create']) }}"
+                                       class="shortcut-btn-icon shortcut-btn-icon-blue"
+                                       title="Buat Pesanan Laundry Baru">
+                                        <i class="fa fa-plus" style="font-size: 13px;"></i>
+                                    </a>
+                                @endif
                             </div>
-                        </a>
+                        </div>
                     @endif
 
                     @if (auth()->user()->can('sell.create') || auth()->user()->can('pos.create'))
-                        <a href="{{ action([\App\Http\Controllers\SellPosController::class, 'create']) }}"
-                           class="tw-group tw-relative tw-bg-white dark:tw-bg-slate-800 tw-rounded-2xl tw-p-6 tw-ring-1 tw-ring-gray-200 dark:tw-ring-slate-700 tw-shadow-sm hover:tw-shadow-xl hover:tw-ring-emerald-400 hover:-tw-translate-y-1 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
+                        <div class="tw-group tw-bg-white tw-rounded-2xl tw-p-5 tw-border tw-border-gray-200 tw-shadow-sm hover:tw-shadow-md hover:tw-border-emerald-400 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
                             <div>
-                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
-                                    <div class="tw-w-14 tw-h-14 tw-rounded-2xl tw-bg-emerald-100 dark:tw-bg-emerald-900/50 tw-text-emerald-600 dark:tw-text-emerald-300 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
-                                        <svg class="tw-w-7 tw-h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
-                                        </svg>
+                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-3.5">
+                                    <div class="tw-w-12 tw-h-12 tw-rounded-xl tw-bg-emerald-100 tw-text-emerald-600 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
+                                        <i class="fa fa-shopping-cart" style="font-size: 22px;"></i>
                                     </div>
-                                    <span class="tw-text-xs tw-font-bold tw-text-emerald-700 dark:tw-text-emerald-300 tw-bg-emerald-100/80 dark:tw-bg-emerald-900/50 tw-px-3 tw-py-1 tw-rounded-full">POS</span>
+                                    <span class="tw-text-xs tw-font-bold tw-text-emerald-700 tw-bg-emerald-50 tw-px-3 tw-py-1 tw-rounded-full tw-border tw-border-emerald-100">POS</span>
                                 </div>
-                                <h3 class="tw-text-lg tw-font-bold tw-text-gray-900 dark:tw-text-white group-hover:tw-text-emerald-600 tw-transition-colors">Layar Kasir (POS)</h3>
-                                <p class="tw-text-sm tw-text-gray-600 dark:tw-text-gray-300 tw-mt-2 tw-leading-relaxed">Buka terminal kasir penjualan untuk melayani pembayaran transaksi secara langsung.</p>
+                                <h3 class="tw-text-base tw-font-bold tw-text-gray-900 group-hover:tw-text-emerald-600 tw-transition-colors">Layar Kasir (POS)</h3>
+                                <p class="tw-text-xs tw-text-gray-600 tw-mt-1.5 tw-leading-relaxed">Buka terminal kasir penjualan untuk melayani pembayaran transaksi secara langsung.</p>
                             </div>
-                            <div class="tw-mt-6 tw-pt-4 tw-border-t tw-border-gray-100 dark:tw-border-slate-700 tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-bold tw-text-emerald-600 dark:tw-text-emerald-400">
-                                <span>Buka Kasir</span>
-                                <svg class="tw-w-5 tw-h-5 group-hover:tw-translate-x-1.5 tw-transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                                </svg>
+                            <div class="tw-mt-5 tw-pt-3.5 tw-border-t tw-border-gray-100 tw-flex tw-items-center tw-gap-2">
+                                <a href="{{ action([\App\Http\Controllers\SellPosController::class, 'create']) }}"
+                                   class="tw-flex-1 shortcut-btn shortcut-btn-emerald">
+                                    <span>Buka Terminal Kasir</span>
+                                    <i class="fa fa-arrow-right" style="font-size: 11px;"></i>
+                                </a>
                             </div>
-                        </a>
+                        </div>
                     @endif
 
                     @if (auth()->user()->can('repair.view') || auth()->user()->can('job_sheet.create'))
-                        <a href="{{ action([\Modules\Repair\Http\Controllers\JobSheetController::class, 'index']) }}"
-                           class="tw-group tw-relative tw-bg-white dark:tw-bg-slate-800 tw-rounded-2xl tw-p-6 tw-ring-1 tw-ring-gray-200 dark:tw-ring-slate-700 tw-shadow-sm hover:tw-shadow-xl hover:tw-ring-amber-400 hover:-tw-translate-y-1 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
+                        <div class="tw-group tw-bg-white tw-rounded-2xl tw-p-5 tw-border tw-border-gray-200 tw-shadow-sm hover:tw-shadow-md hover:tw-border-amber-400 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
                             <div>
-                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
-                                    <div class="tw-w-14 tw-h-14 tw-rounded-2xl tw-bg-amber-100 dark:tw-bg-amber-900/50 tw-text-amber-600 dark:tw-text-amber-300 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
-                                        <svg class="tw-w-7 tw-h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.83-5.83M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l5.654-4.654m0 0l3.03-2.496c.384-.317.626-.74.766-1.208" />
-                                        </svg>
+                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-3.5">
+                                    <div class="tw-w-12 tw-h-12 tw-rounded-xl tw-bg-amber-100 tw-text-amber-600 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
+                                        <i class="fa fa-wrench" style="font-size: 22px;"></i>
                                     </div>
-                                    <span class="tw-text-xs tw-font-bold tw-text-amber-700 dark:tw-text-amber-300 tw-bg-amber-100/80 dark:tw-bg-amber-900/50 tw-px-3 tw-py-1 tw-rounded-full">Servis</span>
+                                    <span class="tw-text-xs tw-font-bold tw-text-amber-700 tw-bg-amber-50 tw-px-3 tw-py-1 tw-rounded-full tw-border tw-border-amber-100">Servis</span>
                                 </div>
-                                <h3 class="tw-text-lg tw-font-bold tw-text-gray-900 dark:tw-text-white group-hover:tw-text-amber-600 tw-transition-colors">Servis & Repair</h3>
-                                <p class="tw-text-sm tw-text-gray-600 dark:tw-text-gray-300 tw-mt-2 tw-leading-relaxed">Kelola job sheet penerimaan dan status pengerjaan servis barang.</p>
+                                <h3 class="tw-text-base tw-font-bold tw-text-gray-900 group-hover:tw-text-amber-600 tw-transition-colors">Servis & Repair</h3>
+                                <p class="tw-text-xs tw-text-gray-600 tw-mt-1.5 tw-leading-relaxed">Kelola job sheet penerimaan dan status pengerjaan servis barang.</p>
                             </div>
-                            <div class="tw-mt-6 tw-pt-4 tw-border-t tw-border-gray-100 dark:tw-border-slate-700 tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-bold tw-text-amber-600 dark:tw-text-amber-400">
-                                <span>Buka Modul</span>
-                                <svg class="tw-w-5 tw-h-5 group-hover:tw-translate-x-1.5 tw-transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                                </svg>
+                            <div class="tw-mt-5 tw-pt-3.5 tw-border-t tw-border-gray-100 tw-flex tw-items-center tw-gap-2">
+                                <a href="{{ action([\Modules\Repair\Http\Controllers\JobSheetController::class, 'index']) }}"
+                                   class="tw-flex-1 shortcut-btn shortcut-btn-amber">
+                                    <span>Job Sheet Servis</span>
+                                    <i class="fa fa-arrow-right" style="font-size: 11px;"></i>
+                                </a>
+                                @if (auth()->user()->can('job_sheet.create'))
+                                    <a href="{{ action([\Modules\Repair\Http\Controllers\JobSheetController::class, 'create']) }}"
+                                       class="shortcut-btn-icon shortcut-btn-icon-amber"
+                                       title="Buat Job Sheet Baru">
+                                        <i class="fa fa-plus" style="font-size: 13px;"></i>
+                                    </a>
+                                @endif
                             </div>
-                        </a>
+                        </div>
                     @endif
 
                     @if (auth()->user()->can('product.view') || auth()->user()->can('product.create'))
-                        <a href="{{ action([\App\Http\Controllers\ProductController::class, 'index']) }}"
-                           class="tw-group tw-relative tw-bg-white dark:tw-bg-slate-800 tw-rounded-2xl tw-p-6 tw-ring-1 tw-ring-gray-200 dark:tw-ring-slate-700 tw-shadow-sm hover:tw-shadow-xl hover:tw-ring-purple-400 hover:-tw-translate-y-1 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
+                        <div class="tw-group tw-bg-white tw-rounded-2xl tw-p-5 tw-border tw-border-gray-200 tw-shadow-sm hover:tw-shadow-md hover:tw-border-purple-400 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
                             <div>
-                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
-                                    <div class="tw-w-14 tw-h-14 tw-rounded-2xl tw-bg-purple-100 dark:tw-bg-purple-900/50 tw-text-purple-600 dark:tw-text-purple-300 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
-                                        <svg class="tw-w-7 tw-h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25" />
-                                        </svg>
+                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-3.5">
+                                    <div class="tw-w-12 tw-h-12 tw-rounded-xl tw-bg-purple-100 tw-text-purple-600 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
+                                        <i class="fa fa-cubes" style="font-size: 22px;"></i>
                                     </div>
-                                    <span class="tw-text-xs tw-font-bold tw-text-purple-700 dark:tw-text-purple-300 tw-bg-purple-100/80 dark:tw-bg-purple-900/50 tw-px-3 tw-py-1 tw-rounded-full">Produk</span>
+                                    <span class="tw-text-xs tw-font-bold tw-text-purple-700 tw-bg-purple-50 tw-px-3 tw-py-1 tw-rounded-full tw-border tw-border-purple-100">Produk</span>
                                 </div>
-                                <h3 class="tw-text-lg tw-font-bold tw-text-gray-900 dark:tw-text-white group-hover:tw-text-purple-600 tw-transition-colors">Daftar Produk</h3>
-                                <p class="tw-text-sm tw-text-gray-600 dark:tw-text-gray-300 tw-mt-2 tw-leading-relaxed">Lihat & periksa katalog barang, harga variasi, serta posisi stok terkini.</p>
+                                <h3 class="tw-text-base tw-font-bold tw-text-gray-900 group-hover:tw-text-purple-600 tw-transition-colors">Daftar Produk</h3>
+                                <p class="tw-text-xs tw-text-gray-600 tw-mt-1.5 tw-leading-relaxed">Lihat & periksa katalog barang, harga variasi, serta posisi stok terkini.</p>
                             </div>
-                            <div class="tw-mt-6 tw-pt-4 tw-border-t tw-border-gray-100 dark:tw-border-slate-700 tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-bold tw-text-purple-600 dark:tw-text-purple-400">
-                                <span>Buka Produk</span>
-                                <svg class="tw-w-5 tw-h-5 group-hover:tw-translate-x-1.5 tw-transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                                </svg>
+                            <div class="tw-mt-5 tw-pt-3.5 tw-border-t tw-border-gray-100 tw-flex tw-items-center tw-gap-2">
+                                <a href="{{ action([\App\Http\Controllers\ProductController::class, 'index']) }}"
+                                   class="tw-flex-1 shortcut-btn shortcut-btn-purple">
+                                    <span>Katalog Produk</span>
+                                    <i class="fa fa-arrow-right" style="font-size: 11px;"></i>
+                                </a>
+                                @if (auth()->user()->can('product.create'))
+                                    <a href="{{ action([\App\Http\Controllers\ProductController::class, 'create']) }}"
+                                       class="shortcut-btn-icon shortcut-btn-icon-purple"
+                                       title="Tambah Produk Baru">
+                                        <i class="fa fa-plus" style="font-size: 13px;"></i>
+                                    </a>
+                                @endif
                             </div>
-                        </a>
+                        </div>
                     @endif
 
                     @if (auth()->user()->can('customer.view') || auth()->user()->can('customer.create'))
-                        <a href="{{ action([\App\Http\Controllers\ContactController::class, 'index'], ['type' => 'customer']) }}"
-                           class="tw-group tw-relative tw-bg-white dark:tw-bg-slate-800 tw-rounded-2xl tw-p-6 tw-ring-1 tw-ring-gray-200 dark:tw-ring-slate-700 tw-shadow-sm hover:tw-shadow-xl hover:tw-ring-indigo-400 hover:-tw-translate-y-1 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
+                        <div class="tw-group tw-bg-white tw-rounded-2xl tw-p-5 tw-border tw-border-gray-200 tw-shadow-sm hover:tw-shadow-md hover:tw-border-indigo-400 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
                             <div>
-                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
-                                    <div class="tw-w-14 tw-h-14 tw-rounded-2xl tw-bg-indigo-100 dark:tw-bg-indigo-900/50 tw-text-indigo-600 dark:tw-text-indigo-300 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
-                                        <svg class="tw-w-7 tw-h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-                                        </svg>
+                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-3.5">
+                                    <div class="tw-w-12 tw-h-12 tw-rounded-xl tw-bg-indigo-100 tw-text-indigo-600 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
+                                        <i class="fa fa-users" style="font-size: 22px;"></i>
                                     </div>
-                                    <span class="tw-text-xs tw-font-bold tw-text-indigo-700 dark:tw-text-indigo-300 tw-bg-indigo-100/80 dark:tw-bg-indigo-900/50 tw-px-3 tw-py-1 tw-rounded-full">Kontak</span>
+                                    <span class="tw-text-xs tw-font-bold tw-text-indigo-700 tw-bg-indigo-50 tw-px-3 tw-py-1 tw-rounded-full tw-border tw-border-indigo-100">Kontak</span>
                                 </div>
-                                <h3 class="tw-text-lg tw-font-bold tw-text-gray-900 dark:tw-text-white group-hover:tw-text-indigo-600 tw-transition-colors">Data Pelanggan</h3>
-                                <p class="tw-text-sm tw-text-gray-600 dark:tw-text-gray-300 tw-mt-2 tw-leading-relaxed">Kelola informasi data pelanggan, nomor kontak, dan riwayat transaksi.</p>
+                                <h3 class="tw-text-base tw-font-bold tw-text-gray-900 group-hover:tw-text-indigo-600 tw-transition-colors">Data Pelanggan</h3>
+                                <p class="tw-text-xs tw-text-gray-600 tw-mt-1.5 tw-leading-relaxed">Kelola informasi data pelanggan, nomor kontak, dan riwayat transaksi.</p>
                             </div>
-                            <div class="tw-mt-6 tw-pt-4 tw-border-t tw-border-gray-100 dark:tw-border-slate-700 tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-bold tw-text-indigo-600 dark:tw-text-indigo-400">
-                                <span>Buka Pelanggan</span>
-                                <svg class="tw-w-5 tw-h-5 group-hover:tw-translate-x-1.5 tw-transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                                </svg>
+                            <div class="tw-mt-5 tw-pt-3.5 tw-border-t tw-border-gray-100 tw-flex tw-items-center tw-gap-2">
+                                <a href="{{ action([\App\Http\Controllers\ContactController::class, 'index'], ['type' => 'customer']) }}"
+                                   class="tw-flex-1 shortcut-btn shortcut-btn-indigo">
+                                    <span>Data Pelanggan</span>
+                                    <i class="fa fa-arrow-right" style="font-size: 11px;"></i>
+                                </a>
+                                @if (auth()->user()->can('customer.create'))
+                                    <button type="button" data-href="{{ action([\App\Http\Controllers\ContactController::class, 'create'], ['type' => 'customer']) }}"
+                                            class="shortcut-btn-icon shortcut-btn-icon-indigo btn-modal"
+                                            data-container=".contact_modal"
+                                            title="Tambah Pelanggan Baru">
+                                        <i class="fa fa-plus" style="font-size: 13px;"></i>
+                                    </button>
+                                @endif
                             </div>
-                        </a>
+                        </div>
                     @endif
 
                     @if (auth()->user()->can('sell.view') || auth()->user()->can('direct_sell.view'))
-                        <a href="{{ action([\App\Http\Controllers\SellController::class, 'index']) }}"
-                           class="tw-group tw-relative tw-bg-white dark:tw-bg-slate-800 tw-rounded-2xl tw-p-6 tw-ring-1 tw-ring-gray-200 dark:tw-ring-slate-700 tw-shadow-sm hover:tw-shadow-xl hover:tw-ring-teal-400 hover:-tw-translate-y-1 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
+                        <div class="tw-group tw-bg-white tw-rounded-2xl tw-p-5 tw-border tw-border-gray-200 tw-shadow-sm hover:tw-shadow-md hover:tw-border-teal-400 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
                             <div>
-                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
-                                    <div class="tw-w-14 tw-h-14 tw-rounded-2xl tw-bg-teal-100 dark:tw-bg-teal-900/50 tw-text-teal-600 dark:tw-text-teal-300 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
-                                        <svg class="tw-w-7 tw-h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                                        </svg>
+                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-3.5">
+                                    <div class="tw-w-12 tw-h-12 tw-rounded-xl tw-bg-teal-100 tw-text-teal-600 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
+                                        <i class="fa fa-file-invoice" style="font-size: 22px;"></i>
                                     </div>
-                                    <span class="tw-text-xs tw-font-bold tw-text-teal-700 dark:tw-text-teal-300 tw-bg-teal-100/80 dark:tw-bg-teal-900/50 tw-px-3 tw-py-1 tw-rounded-full">Penjualan</span>
+                                    <span class="tw-text-xs tw-font-bold tw-text-teal-700 tw-bg-teal-50 tw-px-3 tw-py-1 tw-rounded-full tw-border tw-border-teal-100">Penjualan</span>
                                 </div>
-                                <h3 class="tw-text-lg tw-font-bold tw-text-gray-900 dark:tw-text-white group-hover:tw-text-teal-600 tw-transition-colors">Daftar Penjualan</h3>
-                                <p class="tw-text-sm tw-text-gray-600 dark:tw-text-gray-300 tw-mt-2 tw-leading-relaxed">Lihat, periksa, dan cetak riwayat faktur transaksi penjualan toko.</p>
+                                <h3 class="tw-text-base tw-font-bold tw-text-gray-900 group-hover:tw-text-teal-600 tw-transition-colors">Daftar Penjualan</h3>
+                                <p class="tw-text-xs tw-text-gray-600 tw-mt-1.5 tw-leading-relaxed">Lihat, periksa, dan cetak riwayat faktur transaksi penjualan toko.</p>
                             </div>
-                            <div class="tw-mt-6 tw-pt-4 tw-border-t tw-border-gray-100 dark:tw-border-slate-700 tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-bold tw-text-teal-600 dark:tw-text-teal-400">
-                                <span>Buka Penjualan</span>
-                                <svg class="tw-w-5 tw-h-5 group-hover:tw-translate-x-1.5 tw-transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                                </svg>
+                            <div class="tw-mt-5 tw-pt-3.5 tw-border-t tw-border-gray-100 tw-flex tw-items-center tw-gap-2">
+                                <a href="{{ action([\App\Http\Controllers\SellController::class, 'index']) }}"
+                                   class="tw-flex-1 shortcut-btn shortcut-btn-teal">
+                                    <span>Riwayat Penjualan</span>
+                                    <i class="fa fa-arrow-right" style="font-size: 11px;"></i>
+                                </a>
+                                @if (auth()->user()->can('sell.create'))
+                                    <a href="{{ action([\App\Http\Controllers\SellController::class, 'create']) }}"
+                                       class="shortcut-btn-icon shortcut-btn-icon-teal"
+                                       title="Tambah Penjualan Baru">
+                                        <i class="fa fa-plus" style="font-size: 13px;"></i>
+                                    </a>
+                                @endif
                             </div>
-                        </a>
+                        </div>
+                    @endif
+
+                    @if (auth()->user()->can('purchase.view') || auth()->user()->can('purchase.create'))
+                        <div class="tw-group tw-bg-white tw-rounded-2xl tw-p-5 tw-border tw-border-gray-200 tw-shadow-sm hover:tw-shadow-md hover:tw-border-sky-400 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
+                            <div>
+                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-3.5">
+                                    <div class="tw-w-12 tw-h-12 tw-rounded-xl tw-bg-sky-100 tw-text-sky-600 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
+                                        <i class="fa fa-truck" style="font-size: 22px;"></i>
+                                    </div>
+                                    <span class="tw-text-xs tw-font-bold tw-text-sky-700 tw-bg-sky-50 tw-px-3 tw-py-1 tw-rounded-full tw-border tw-border-sky-100">Pembelian</span>
+                                </div>
+                                <h3 class="tw-text-base tw-font-bold tw-text-gray-900 group-hover:tw-text-sky-600 tw-transition-colors">Pembelian Stok</h3>
+                                <p class="tw-text-xs tw-text-gray-600 tw-mt-1.5 tw-leading-relaxed">Catat transaksi pembelian stok barang dari pemasok / supplier.</p>
+                            </div>
+                            <div class="tw-mt-5 tw-pt-3.5 tw-border-t tw-border-gray-100 tw-flex tw-items-center tw-gap-2">
+                                <a href="{{ action([\App\Http\Controllers\PurchaseController::class, 'index']) }}"
+                                   class="tw-flex-1 shortcut-btn shortcut-btn-sky">
+                                    <span>Riwayat Pembelian</span>
+                                    <i class="fa fa-arrow-right" style="font-size: 11px;"></i>
+                                </a>
+                                @if (auth()->user()->can('purchase.create'))
+                                    <a href="{{ action([\App\Http\Controllers\PurchaseController::class, 'create']) }}"
+                                       class="shortcut-btn-icon shortcut-btn-icon-sky"
+                                       title="Tambah Pembelian Baru">
+                                        <i class="fa fa-plus" style="font-size: 13px;"></i>
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+
+                    @if (auth()->user()->can('expense.access') || auth()->user()->can('expense.add'))
+                        <div class="tw-group tw-bg-white tw-rounded-2xl tw-p-5 tw-border tw-border-gray-200 tw-shadow-sm hover:tw-shadow-md hover:tw-border-rose-400 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
+                            <div>
+                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-3.5">
+                                    <div class="tw-w-12 tw-h-12 tw-rounded-xl tw-bg-rose-100 tw-text-rose-600 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
+                                        <i class="fa fa-receipt" style="font-size: 22px;"></i>
+                                    </div>
+                                    <span class="tw-text-xs tw-font-bold tw-text-rose-700 tw-bg-rose-50 tw-px-3 tw-py-1 tw-rounded-full tw-border tw-border-rose-100">Pengeluaran</span>
+                                </div>
+                                <h3 class="tw-text-base tw-font-bold tw-text-gray-900 group-hover:tw-text-rose-600 tw-transition-colors">Biaya Operasional</h3>
+                                <p class="tw-text-xs tw-text-gray-600 tw-mt-1.5 tw-leading-relaxed">Catat dan pantau pengeluaran biaya operasional harian usaha.</p>
+                            </div>
+                            <div class="tw-mt-5 tw-pt-3.5 tw-border-t tw-border-gray-100 tw-flex tw-items-center tw-gap-2">
+                                <a href="{{ action([\App\Http\Controllers\ExpenseController::class, 'index']) }}"
+                                   class="tw-flex-1 shortcut-btn shortcut-btn-rose">
+                                    <span>Riwayat Biaya</span>
+                                    <i class="fa fa-arrow-right" style="font-size: 11px;"></i>
+                                </a>
+                                @if (auth()->user()->can('expense.add'))
+                                    <a href="{{ action([\App\Http\Controllers\ExpenseController::class, 'create']) }}"
+                                       class="shortcut-btn-icon shortcut-btn-icon-rose"
+                                       title="Catat Pengeluaran Baru">
+                                        <i class="fa fa-plus" style="font-size: 13px;"></i>
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+
+                    @if (auth()->user()->can('stock_adjustment.view') || auth()->user()->can('stock_adjustment.create'))
+                        <div class="tw-group tw-bg-white tw-rounded-2xl tw-p-5 tw-border tw-border-gray-200 tw-shadow-sm hover:tw-shadow-md hover:tw-border-orange-400 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
+                            <div>
+                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-3.5">
+                                    <div class="tw-w-12 tw-h-12 tw-rounded-xl tw-bg-orange-100 tw-text-orange-600 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
+                                        <i class="fa fa-sliders-h" style="font-size: 22px;"></i>
+                                    </div>
+                                    <span class="tw-text-xs tw-font-bold tw-text-orange-700 tw-bg-orange-50 tw-px-3 tw-py-1 tw-rounded-full tw-border tw-border-orange-100">Stok</span>
+                                </div>
+                                <h3 class="tw-text-base tw-font-bold tw-text-gray-900 group-hover:tw-text-orange-600 tw-transition-colors">Penyesuaian Stok</h3>
+                                <p class="tw-text-xs tw-text-gray-600 tw-mt-1.5 tw-leading-relaxed">Sesuaikan fisik stok barang rusak, hilang, atau opname inventaris.</p>
+                            </div>
+                            <div class="tw-mt-5 tw-pt-3.5 tw-border-t tw-border-gray-100 tw-flex tw-items-center tw-gap-2">
+                                <a href="{{ action([\App\Http\Controllers\StockAdjustmentController::class, 'index']) }}"
+                                   class="tw-flex-1 shortcut-btn shortcut-btn-orange">
+                                    <span>Riwayat Penyesuaian</span>
+                                    <i class="fa fa-arrow-right" style="font-size: 11px;"></i>
+                                </a>
+                                @if (auth()->user()->can('stock_adjustment.create'))
+                                    <a href="{{ action([\App\Http\Controllers\StockAdjustmentController::class, 'create']) }}"
+                                       class="shortcut-btn-icon shortcut-btn-icon-orange"
+                                       title="Buat Penyesuaian Stok">
+                                        <i class="fa fa-plus" style="font-size: 13px;"></i>
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
                     @endif
                 </div>
             </div>
@@ -1201,6 +856,75 @@
         .select2-container {
             width: 100% !important;
         }
+
+        .shortcut-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: none !important;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .shortcut-btn span, .shortcut-btn i {
+            color: #ffffff !important;
+        }
+
+        .shortcut-btn-blue { background-color: #2563eb !important; color: #ffffff !important; }
+        .shortcut-btn-blue:hover, .shortcut-btn-blue:focus, .shortcut-btn-blue:active { background-color: #1d4ed8 !important; color: #ffffff !important; }
+
+        .shortcut-btn-emerald { background-color: #059669 !important; color: #ffffff !important; }
+        .shortcut-btn-emerald:hover, .shortcut-btn-emerald:focus, .shortcut-btn-emerald:active { background-color: #047857 !important; color: #ffffff !important; }
+
+        .shortcut-btn-amber { background-color: #d97706 !important; color: #ffffff !important; }
+        .shortcut-btn-amber:hover, .shortcut-btn-amber:focus, .shortcut-btn-amber:active { background-color: #b45309 !important; color: #ffffff !important; }
+
+        .shortcut-btn-purple { background-color: #9333ea !important; color: #ffffff !important; }
+        .shortcut-btn-purple:hover, .shortcut-btn-purple:focus, .shortcut-btn-purple:active { background-color: #7e22ce !important; color: #ffffff !important; }
+
+        .shortcut-btn-indigo { background-color: #4f46e5 !important; color: #ffffff !important; }
+        .shortcut-btn-indigo:hover, .shortcut-btn-indigo:focus, .shortcut-btn-indigo:active { background-color: #4338ca !important; color: #ffffff !important; }
+
+        .shortcut-btn-teal { background-color: #0d9488 !important; color: #ffffff !important; }
+        .shortcut-btn-teal:hover, .shortcut-btn-teal:focus, .shortcut-btn-teal:active { background-color: #0f766e !important; color: #ffffff !important; }
+
+        .shortcut-btn-sky { background-color: #0284c7 !important; color: #ffffff !important; }
+        .shortcut-btn-sky:hover, .shortcut-btn-sky:focus, .shortcut-btn-sky:active { background-color: #0369a1 !important; color: #ffffff !important; }
+
+        .shortcut-btn-rose { background-color: #e11d48 !important; color: #ffffff !important; }
+        .shortcut-btn-rose:hover, .shortcut-btn-rose:focus, .shortcut-btn-rose:active { background-color: #be123c !important; color: #ffffff !important; }
+
+        .shortcut-btn-orange { background-color: #ea580c !important; color: #ffffff !important; }
+        .shortcut-btn-orange:hover, .shortcut-btn-orange:focus, .shortcut-btn-orange:active { background-color: #c2410c !important; color: #ffffff !important; }
+
+        .shortcut-btn-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            background-color: #f3f4f6 !important;
+            color: #374151 !important;
+            border: 1px solid #e5e7eb !important;
+            text-decoration: none !important;
+            transition: all 0.2s ease-in-out;
+        }
+        .shortcut-btn-icon i { color: #374151 !important; }
+        .shortcut-btn-icon:hover i { color: #ffffff !important; }
+        .shortcut-btn-icon-blue:hover { background-color: #2563eb !important; }
+        .shortcut-btn-icon-amber:hover { background-color: #d97706 !important; }
+        .shortcut-btn-icon-purple:hover { background-color: #9333ea !important; }
+        .shortcut-btn-icon-indigo:hover { background-color: #4f46e5 !important; }
+        .shortcut-btn-icon-teal:hover { background-color: #0d9488 !important; }
+        .shortcut-btn-icon-sky:hover { background-color: #0284c7 !important; }
+        .shortcut-btn-icon-rose:hover { background-color: #e11d48 !important; }
+        .shortcut-btn-icon-orange:hover { background-color: #ea580c !important; }
     </style>
 @endsection
 

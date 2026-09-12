@@ -1,19 +1,19 @@
 <!-- Left side column. contains the logo and sidebar -->
 <aside class="side-bar tw-relative tw-hidden tw-h-screen tw-bg-white tw-w-64 xl:tw-w-64 lg:tw-flex lg:tw-flex-col tw-shrink-0 tw-border-r tw-border-gray-200">
 
-    <!-- sidebar: style can be found in sidebar.less -->
-
-    {{-- <a href="{{route('home')}}" class="logo">
-		<span class="logo-lg">{{ Session::get('business.name') }}</span>
-	</a> --}}
-
-    <a href="{{route('home')}}"
-        class="tw-sticky tw-top-0 tw-z-30 tw-relative tw-flex tw-items-center tw-justify-center tw-w-full tw-h-15 theme-logo-bg tw-shrink-0">
-        <p class="tw-text-lg tw-font-medium tw-text-white side-bar-heading tw-text-center">
-            {{ Session::get('business.name') }} <span class="tw-inline-block tw-w-3 tw-h-3 tw-bg-green-400 tw-rounded-full" title="Online"></span>
-        </p>
-        <div class="tw-absolute -tw-right-px tw-inset-y-0 tw-w-px theme-logo-bg"></div>
-    </a>
+    <div class="tw-sticky tw-top-0 tw-z-30 tw-relative tw-flex tw-items-center tw-justify-between tw-px-4 tw-w-full tw-h-15 theme-logo-bg tw-shrink-0">
+        <a href="{{route('home')}}" class="tw-flex tw-items-center tw-gap-2 tw-text-lg tw-font-medium tw-text-white side-bar-heading tw-truncate">
+            <span>{{ Session::get('business.name') }}</span>
+            <span class="tw-inline-block tw-w-2.5 tw-h-2.5 tw-bg-green-400 tw-rounded-full tw-shrink-0" title="Online"></span>
+        </a>
+        <button type="button" class="close-sidebar-btn lg:tw-hidden tw-text-white/80 hover:tw-text-white tw-p-1.5 tw-rounded-lg tw-transition-colors tw-bg-transparent tw-border-0 tw-cursor-pointer" aria-label="Tutup Menu">
+            <svg class="tw-size-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M18 6l-12 12"/>
+                <path d="M6 6l12 12"/>
+            </svg>
+        </button>
+    </div>
 
     <!-- Sidebar Search -->
     <div class="tw-px-3 tw-pt-2 tw-pb-1 tw-shrink-0">
@@ -48,4 +48,3 @@
     <!-- /.sidebar-menu -->
     <!-- /.sidebar -->
 </aside>
-

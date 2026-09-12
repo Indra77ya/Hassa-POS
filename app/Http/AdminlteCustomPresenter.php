@@ -11,7 +11,7 @@ class AdminlteCustomPresenter extends Presenter
      */
     public function getOpenTagWrapper()
     {
-        return '<div class="tw-flex-1 tw-px-2 tw-pt-1.5 tw-pb-60 tw-space-y-1 tw-overflow-y-auto" style="padding-bottom: 250px;" id="side-bar">' . PHP_EOL;
+        return '<div class="tw-flex-1 tw-px-2 tw-pt-1.5 tw-pb-10 tw-space-y-1 tw-overflow-y-auto" id="side-bar">' . PHP_EOL;
     }
 
     /**
@@ -87,9 +87,6 @@ class AdminlteCustomPresenter extends Presenter
         // Compile child menu items
         $childItems = $this->getChildMenuItems($item);
 
-        // echo "here";
-        // print_r($dropdownToggle);exit;
-
         return '<div>' . $dropdownToggle . $childItemsContainerStart . $childItems . $childItemsContainerEnd . '</div>' . PHP_EOL;
     }
 
@@ -104,7 +101,6 @@ class AdminlteCustomPresenter extends Presenter
      */
     public function getMultiLevelDropdownWrapper($item)
     {
-        // Placeholder for multi-level dropdown functionality if needed
         return '';
     }
 
@@ -119,9 +115,6 @@ class AdminlteCustomPresenter extends Presenter
 
         $children = '';
         $displayStyle = $item->hasActiveOnChild() ? 'block' : 'none';
-
-        
-
 
         if (count($item->getChilds()) > 0) {
             
@@ -152,11 +145,9 @@ class AdminlteCustomPresenter extends Presenter
      */
     protected function formatIcon($icon)
     {
-        // Check if the icon string contains "<svg", indicating it's an SVG icon
         if (strpos($icon, '<svg') !== false) {
-            return $icon; // Return the SVG icon directly
+            return $icon;
         } else {
-            // Assume it's a FontAwesome icon and return it wrapped in an <i> tag
             return '<i class="' . $icon . ' tw-size-5 tw-shrink-0"></i>';
         }
     }
@@ -171,5 +162,3 @@ class AdminlteCustomPresenter extends Presenter
         }
     }
 }
-
-
