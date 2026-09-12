@@ -755,6 +755,66 @@
     .dataTables_scrollBody.dropdown-opened {
       overflow: visible !important;
     }
+
+    /* Global mobile responsiveness for DataTables and responsive table wrappers */
+    @media (max-width: 767px) {
+      .dataTables_wrapper {
+        width: 100% !important;
+        overflow: visible !important;
+      }
+
+      .table-responsive {
+        width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        display: block !important;
+        margin-bottom: 0;
+      }
+
+      .table-responsive > .table,
+      .dataTables_wrapper .table {
+        width: 100% !important;
+        max-width: none !important;
+      }
+
+      .table-responsive .table th,
+      .table-responsive .table td,
+      .dataTables_wrapper .table th,
+      .dataTables_wrapper .table td {
+        white-space: nowrap !important;
+        padding: 8px 10px !important;
+        font-size: 12px !important;
+      }
+
+      /* Keep DataTables controls (length, filter, info, pagination) fixed/sticky to left edge when scrolling table horizontally */
+      .dataTables_wrapper .dataTables_length,
+      .dataTables_wrapper .dataTables_filter,
+      .dataTables_wrapper .dataTables_info,
+      .dataTables_wrapper .dataTables_paginate {
+        position: sticky !important;
+        left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        z-index: 10 !important;
+      }
+
+      .dataTables_wrapper .dataTables_filter {
+        text-align: left !important;
+        margin-top: 5px !important;
+      }
+
+      .dataTables_wrapper .dataTables_filter input {
+        max-width: 100% !important;
+      }
+
+      .table-responsive .btn-group,
+      .table-responsive .dropdown,
+      .dataTables_wrapper .btn-group,
+      .dataTables_wrapper .dropdown {
+        position: relative;
+      }
+    }
   </style>
   <style>
     .action-link[data-v-397d14ca] {
