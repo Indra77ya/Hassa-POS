@@ -19,6 +19,8 @@
         if ($user_role_name && session('user.business_id')) {
             $user_role_name = str_replace('#' . session('user.business_id'), '', $user_role_name);
         }
+        $user_first_name = Session::get('user.first_name');
+        $show_role_badge = !empty($user_role_name) && strtolower(trim($user_role_name)) !== strtolower(trim($user_first_name));
     @endphp
 
     @if (auth()->user()->can('dashboard.data'))
@@ -27,7 +29,7 @@
                 <div class="sm:tw-flex sm:tw-items-center sm:tw-justify-between sm:tw-gap-12">
                     <div class="tw-mt-2 sm:tw-w-1/2 md:tw-w-1/2">
                         <h1 class="tw-text-2xl md:tw-text-3xl tw-tracking-tight tw-font-bold tw-text-white tw-mb-1 md:tw-mb-0">
-                            {{ __('home.welcome_message', ['name' => Session::get('user.first_name')]) }} 👋
+                            {{ __('home.welcome_message', ['name' => $user_first_name]) }} 👋
                         </h1>
                     </div>
                     @if ($is_admin)
@@ -540,7 +542,7 @@
                                     <span class="tw-w-2 tw-h-2 tw-rounded-full tw-bg-emerald-500"></span>
                                     {{ $time_greeting }}
                                 </span>
-                                @if (!empty($user_role_name))
+                                @if ($show_role_badge)
                                     <span class="tw-inline-flex tw-items-center tw-text-xs tw-font-bold tw-text-blue-800 tw-bg-blue-50 tw-px-3 tw-py-1 tw-rounded-full tw-border tw-border-blue-200">
                                         <i class="fa fa-user-tag tw-mr-1.5" style="font-size: 11px;"></i>
                                         {{ $user_role_name }}
@@ -548,7 +550,7 @@
                                 @endif
                             </div>
                             <h1 class="tw-text-2xl sm:tw-text-3xl tw-font-extrabold tw-text-gray-900 tw-tracking-tight">
-                                Halo, {{ Session::get('user.first_name') }}!
+                                Halo, {{ $user_first_name }}!
                             </h1>
                             <p class="tw-text-sm tw-text-gray-600 tw-mt-1">
                                 Pilih modul kerja di bawah untuk langsung mengakses tugas & transaksi harian Anda.
