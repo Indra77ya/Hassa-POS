@@ -101,14 +101,14 @@ class OrderSheetController extends Controller
                 ->addColumn('wa_status', function ($row) {
                     if (!empty($row->whatsapp_sent_at)) {
                         $formatted_time = Carbon::parse($row->whatsapp_sent_at)->format('d/m/Y H:i');
-                        return '<span class="label bg-green" title="Terkirim pada ' . e($formatted_time) . '"><i class="fab fa-whatsapp"></i> Terkirim</span><br><small class="text-muted">' . e($formatted_time) . '</small>';
+                        return '<div style="white-space: nowrap;"><span class="label bg-green" title="Terkirim pada ' . e($formatted_time) . '"><i class="fab fa-whatsapp"></i> Terkirim</span><br><small class="text-muted">' . e($formatted_time) . '</small></div>';
                     } else {
-                        return '<span class="label bg-gray"><i class="fab fa-whatsapp"></i> Belum Dikirim</span>';
+                        return '<div style="white-space: nowrap;"><span class="label bg-gray"><i class="fab fa-whatsapp"></i> Belum Dikirim</span></div>';
                     }
                 })
                 ->editColumn('status', function ($row) {
                     if (!$row->status) return '-';
-                    return '<span class="label" style="background-color: ' . e($row->status->color) . ';">' . e($row->status->name) . '</span>';
+                    return '<div style="white-space: nowrap;"><span class="label" style="background-color: ' . e($row->status->color) . ';">' . e($row->status->name) . '</span></div>';
                 })
                 ->addColumn('payment_status', function ($row) {
                     $status = $row->payment_status;
@@ -127,11 +127,13 @@ class OrderSheetController extends Controller
                         $text = __('lang_v1.partial');
                     }
 
-                    $html = '<span class="label ' . $bg_class . '">' . e($text) . '</span>';
+                    $html = '<div style="white-space: nowrap;">';
+                    $html .= '<span class="label ' . $bg_class . '">' . e($text) . '</span>';
                     $html .= '<br><small>' . __('sale.total') . ': ' . $this->commonUtil->num_f($total) . '</small>';
                     if ($status != 'paid') {
-                        $html .= '<br><small>' . __('purchase.payment_due') . ': ' . $this->commonUtil->num_f($due) . '</small>';
+                        $html .= '<br><small>Sisa: ' . $this->commonUtil->num_f($due) . '</small>';
                     }
+                    $html .= '</div>';
                     return $html;
                 })
                 ->editColumn('quantity', function ($row) {
