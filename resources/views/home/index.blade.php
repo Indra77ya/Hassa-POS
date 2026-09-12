@@ -3,14 +3,50 @@
 
 @section('content')
 
+    @php
+        $now = \Carbon\Carbon::now();
+        $hour = $now->hour;
+        if ($hour < 11) {
+            $time_greeting = 'Selamat Pagi';
+        } elseif ($hour < 15) {
+            $time_greeting = 'Selamat Siang';
+        } elseif ($hour < 18) {
+            $time_greeting = 'Selamat Sore';
+        } else {
+            $time_greeting = 'Selamat Malam';
+        }
+        $user_role_name = auth()->user()->roles->pluck('name')->first() ?? '';
+        if ($user_role_name && session('user.business_id')) {
+            $user_role_name = str_replace('#' . session('user.business_id'), '', $user_role_name);
+        }
+    @endphp
+
     <div class="tw-pb-6 theme-header-bg xl:tw-pb-0">
         <div class="tw-px-5 tw-pt-3">
                     <div class="sm:tw-flex sm:tw-items-center sm:tw-justify-between sm:tw-gap-12">
                         <div class="tw-mt-2 sm:tw-w-1/2 md:tw-w-1/2">
+                            @if (!auth()->user()->can('dashboard.data'))
+                                <div class="tw-flex tw-items-center tw-gap-2 tw-mb-1.5">
+                                    <span class="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-semibold tw-text-white/90 tw-bg-white/15 tw-px-2.5 tw-py-0.5 tw-rounded-full tw-backdrop-blur-sm tw-border tw-border-white/10">
+                                        <span class="tw-w-1.5 tw-h-1.5 tw-rounded-full tw-bg-emerald-400 tw-animate-pulse"></span>
+                                        {{ $time_greeting }}
+                                    </span>
+                                    @if (!empty($user_role_name))
+                                        <span class="tw-inline-flex tw-items-center tw-text-xs tw-font-semibold tw-text-white/90 tw-bg-white/20 tw-px-2.5 tw-py-0.5 tw-rounded-full tw-backdrop-blur-sm tw-border tw-border-white/10">
+                                            {{ $user_role_name }}
+                                        </span>
+                                    @endif
+                                </div>
+                            @endif
                             <h1
-                                class="tw-text-2xl md:tw-text-4xl tw-tracking-tight tw-font-bold tw-text-white tw-mb-2 md:tw-mb-0">
-                                {{ __('home.welcome_message', ['name' => Session::get('user.first_name')]) }}
+                                class="tw-text-2xl md:tw-text-3xl tw-tracking-tight tw-font-bold tw-text-white tw-mb-1 md:tw-mb-0">
+                                {{ __('home.welcome_message', ['name' => Session::get('user.first_name')]) }} 👋
                             </h1>
+                            @if (!auth()->user()->can('dashboard.data'))
+                                <p class="tw-text-xs md:tw-text-sm tw-text-white/80 tw-mt-1">
+                                    Pilih modul kerja di bawah untuk langsung mengakses tugas & transaksi harian Anda.
+                                </p>
+                            @endif
                         </div>
     
                         @if (auth()->user()->can('dashboard.data'))
@@ -60,11 +96,11 @@
                                 </div>
                             @endif
                         @else
-                            <div class="tw-mt-3 sm:tw-mt-0 tw-inline-flex tw-items-center tw-gap-2 tw-bg-white/10 tw-backdrop-blur-md tw-px-4 tw-py-2 tw-rounded-xl tw-text-white tw-text-sm tw-font-medium">
-                                <svg class="tw-w-5 tw-h-5 tw-text-white/80" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <div class="tw-mt-3 sm:tw-mt-0 tw-inline-flex tw-items-center tw-gap-2 tw-bg-white/10 tw-backdrop-blur-md tw-px-3.5 tw-py-2 tw-rounded-xl tw-text-white tw-text-sm tw-font-medium tw-border tw-border-white/10">
+                                <svg class="tw-w-4.5 tw-h-4.5 tw-text-white/80" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                                 </svg>
-                                <span>{{ \Carbon\Carbon::now()->format('d F Y') }}</span>
+                                <span>{{ $now->format('d F Y') }}</span>
                             </div>
                         @endif
                     </div>
@@ -1019,168 +1055,329 @@
             </div>
         </div>
     @else
-        <div class="tw-px-5 tw-pt-8 tw-pb-12">
+        <div class="tw-px-4 sm:tw-px-6 tw-pt-6 tw-pb-10">
             <div class="tw-max-w-6xl tw-mx-auto">
                 {{-- Operational Shortcuts Section --}}
-                <div class="tw-mb-6 tw-flex tw-items-center tw-justify-between">
+                <div class="tw-mb-5 tw-flex tw-items-center tw-justify-between">
                     <div>
-                        <h2 class="tw-text-xl sm:tw-text-2xl tw-font-bold tw-text-gray-900 dark:tw-text-white tw-flex tw-items-center tw-gap-2.5">
-                            <span class="tw-inline-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-rounded-xl tw-bg-primary-500 tw-text-white tw-shadow-sm">
-                                <svg class="tw-w-5 tw-h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <h2 class="tw-text-lg sm:tw-text-xl tw-font-bold tw-text-gray-900 dark:tw-text-white tw-flex tw-items-center tw-gap-2">
+                            <span class="tw-inline-flex tw-items-center tw-justify-center tw-w-8 tw-h-8 tw-rounded-lg tw-bg-primary-500 tw-text-white tw-shadow-sm">
+                                <svg class="tw-w-4.5 tw-h-4.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
                                 </svg>
                             </span>
                             Pintasan Operasional
                         </h2>
-                        <p class="tw-text-sm tw-text-gray-600 dark:tw-text-gray-300 tw-mt-1">
-                            Pilih modul kerja di bawah ini untuk langsung mengakses tugas harian Anda
-                        </p>
                     </div>
                 </div>
 
-                <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-6">
+                <div class="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-4 md:tw-gap-5">
                     @if (auth()->user()->can('laundry.view') || auth()->user()->can('laundry.create') || auth()->user()->can('laundry.update_status') || auth()->user()->can('laundry.log_process'))
-                        <a href="{{ action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'index']) }}"
-                           class="tw-group tw-relative tw-bg-white dark:tw-bg-slate-800 tw-rounded-2xl tw-p-6 tw-ring-1 tw-ring-gray-200 dark:tw-ring-slate-700 tw-shadow-sm hover:tw-shadow-xl hover:tw-ring-blue-400 hover:-tw-translate-y-1 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
+                        <div class="tw-group tw-bg-white dark:tw-bg-slate-800 tw-rounded-xl tw-p-4 md:tw-p-5 tw-ring-1 tw-ring-gray-200 dark:tw-ring-slate-700 tw-shadow-sm hover:tw-shadow-md hover:tw-ring-blue-400 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
                             <div>
-                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
-                                    <div class="tw-w-14 tw-h-14 tw-rounded-2xl tw-bg-blue-100 dark:tw-bg-blue-900/50 tw-text-blue-600 dark:tw-text-blue-300 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
-                                        <svg class="tw-w-7 tw-h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-3">
+                                    <div class="tw-w-11 tw-h-11 tw-rounded-xl tw-bg-blue-100 dark:tw-bg-blue-900/50 tw-text-blue-600 dark:tw-text-blue-300 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
+                                        <svg class="tw-w-5.5 tw-h-5.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                                         </svg>
                                     </div>
-                                    <span class="tw-text-xs tw-font-bold tw-text-blue-700 dark:tw-text-blue-300 tw-bg-blue-100/80 dark:tw-bg-blue-900/50 tw-px-3 tw-py-1 tw-rounded-full">Laundry</span>
+                                    <span class="tw-text-xs tw-font-bold tw-text-blue-700 dark:tw-text-blue-300 tw-bg-blue-50 dark:tw-bg-blue-900/40 tw-px-2.5 tw-py-0.5 tw-rounded-full">Laundry</span>
                                 </div>
-                                <h3 class="tw-text-lg tw-font-bold tw-text-gray-900 dark:tw-text-white group-hover:tw-text-blue-600 tw-transition-colors">Pesanan Laundry</h3>
-                                <p class="tw-text-sm tw-text-gray-600 dark:tw-text-gray-300 tw-mt-2 tw-leading-relaxed">Lihat, kelola, dan catat lembar pesanan laundry pelanggan dengan cepat.</p>
+                                <h3 class="tw-text-base tw-font-bold tw-text-gray-900 dark:tw-text-white group-hover:tw-text-blue-600 tw-transition-colors">Pesanan Laundry</h3>
+                                <p class="tw-text-xs tw-text-gray-500 dark:tw-text-gray-300 tw-mt-1 tw-leading-relaxed">Lihat, kelola, dan catat lembar pesanan laundry pelanggan dengan cepat.</p>
                             </div>
-                            <div class="tw-mt-6 tw-pt-4 tw-border-t tw-border-gray-100 dark:tw-border-slate-700 tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-bold tw-text-blue-600 dark:tw-text-blue-400">
-                                <span>Buka Pesanan</span>
-                                <svg class="tw-w-5 tw-h-5 group-hover:tw-translate-x-1.5 tw-transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                                </svg>
+                            <div class="tw-mt-4 tw-pt-3 tw-border-t tw-border-gray-100 dark:tw-border-slate-700/80 tw-flex tw-items-center tw-gap-2">
+                                <a href="{{ action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'index']) }}"
+                                   class="tw-flex-1 tw-inline-flex tw-items-center tw-justify-center tw-gap-1.5 tw-px-3 tw-py-2 tw-rounded-lg tw-bg-blue-50 dark:tw-bg-blue-900/30 tw-text-blue-600 dark:tw-text-blue-300 hover:tw-bg-blue-600 hover:tw-text-white dark:hover:tw-bg-blue-600 dark:hover:tw-text-white tw-text-xs tw-font-bold tw-transition-colors">
+                                    <span>Lihat Pesanan</span>
+                                    <svg class="tw-w-3.5 tw-h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                                    </svg>
+                                </a>
+                                @if (auth()->user()->can('laundry.create'))
+                                    <a href="{{ action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'create']) }}"
+                                       class="tw-inline-flex tw-items-center tw-justify-center tw-w-8 tw-h-8 tw-rounded-lg tw-bg-blue-600 tw-text-white hover:tw-bg-blue-700 tw-text-xs tw-font-bold tw-transition-colors"
+                                       title="Buat Pesanan Laundry Baru">
+                                        <svg class="tw-w-4 tw-h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                        </svg>
+                                    </a>
+                                @endif
                             </div>
-                        </a>
+                        </div>
                     @endif
 
                     @if (auth()->user()->can('sell.create') || auth()->user()->can('pos.create'))
-                        <a href="{{ action([\App\Http\Controllers\SellPosController::class, 'create']) }}"
-                           class="tw-group tw-relative tw-bg-white dark:tw-bg-slate-800 tw-rounded-2xl tw-p-6 tw-ring-1 tw-ring-gray-200 dark:tw-ring-slate-700 tw-shadow-sm hover:tw-shadow-xl hover:tw-ring-emerald-400 hover:-tw-translate-y-1 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
+                        <div class="tw-group tw-bg-white dark:tw-bg-slate-800 tw-rounded-xl tw-p-4 md:tw-p-5 tw-ring-1 tw-ring-gray-200 dark:tw-ring-slate-700 tw-shadow-sm hover:tw-shadow-md hover:tw-ring-emerald-400 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
                             <div>
-                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
-                                    <div class="tw-w-14 tw-h-14 tw-rounded-2xl tw-bg-emerald-100 dark:tw-bg-emerald-900/50 tw-text-emerald-600 dark:tw-text-emerald-300 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
-                                        <svg class="tw-w-7 tw-h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-3">
+                                    <div class="tw-w-11 tw-h-11 tw-rounded-xl tw-bg-emerald-100 dark:tw-bg-emerald-900/50 tw-text-emerald-600 dark:tw-text-emerald-300 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
+                                        <svg class="tw-w-5.5 tw-h-5.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
                                         </svg>
                                     </div>
-                                    <span class="tw-text-xs tw-font-bold tw-text-emerald-700 dark:tw-text-emerald-300 tw-bg-emerald-100/80 dark:tw-bg-emerald-900/50 tw-px-3 tw-py-1 tw-rounded-full">POS</span>
+                                    <span class="tw-text-xs tw-font-bold tw-text-emerald-700 dark:tw-text-emerald-300 tw-bg-emerald-50 dark:tw-bg-emerald-900/40 tw-px-2.5 tw-py-0.5 tw-rounded-full">POS</span>
                                 </div>
-                                <h3 class="tw-text-lg tw-font-bold tw-text-gray-900 dark:tw-text-white group-hover:tw-text-emerald-600 tw-transition-colors">Layar Kasir (POS)</h3>
-                                <p class="tw-text-sm tw-text-gray-600 dark:tw-text-gray-300 tw-mt-2 tw-leading-relaxed">Buka terminal kasir penjualan untuk melayani pembayaran transaksi secara langsung.</p>
+                                <h3 class="tw-text-base tw-font-bold tw-text-gray-900 dark:tw-text-white group-hover:tw-text-emerald-600 tw-transition-colors">Layar Kasir (POS)</h3>
+                                <p class="tw-text-xs tw-text-gray-500 dark:tw-text-gray-300 tw-mt-1 tw-leading-relaxed">Buka terminal kasir penjualan untuk melayani pembayaran transaksi secara langsung.</p>
                             </div>
-                            <div class="tw-mt-6 tw-pt-4 tw-border-t tw-border-gray-100 dark:tw-border-slate-700 tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-bold tw-text-emerald-600 dark:tw-text-emerald-400">
-                                <span>Buka Kasir</span>
-                                <svg class="tw-w-5 tw-h-5 group-hover:tw-translate-x-1.5 tw-transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                                </svg>
+                            <div class="tw-mt-4 tw-pt-3 tw-border-t tw-border-gray-100 dark:tw-border-slate-700/80 tw-flex tw-items-center tw-gap-2">
+                                <a href="{{ action([\App\Http\Controllers\SellPosController::class, 'create']) }}"
+                                   class="tw-flex-1 tw-inline-flex tw-items-center tw-justify-center tw-gap-1.5 tw-px-3 tw-py-2 tw-rounded-lg tw-bg-emerald-50 dark:tw-bg-emerald-900/30 tw-text-emerald-600 dark:tw-text-emerald-300 hover:tw-bg-emerald-600 hover:tw-text-white dark:hover:tw-bg-emerald-600 dark:hover:tw-text-white tw-text-xs tw-font-bold tw-transition-colors">
+                                    <span>Buka Terminal Kasir</span>
+                                    <svg class="tw-w-3.5 tw-h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                                    </svg>
+                                </a>
                             </div>
-                        </a>
+                        </div>
                     @endif
 
                     @if (auth()->user()->can('repair.view') || auth()->user()->can('job_sheet.create'))
-                        <a href="{{ action([\Modules\Repair\Http\Controllers\JobSheetController::class, 'index']) }}"
-                           class="tw-group tw-relative tw-bg-white dark:tw-bg-slate-800 tw-rounded-2xl tw-p-6 tw-ring-1 tw-ring-gray-200 dark:tw-ring-slate-700 tw-shadow-sm hover:tw-shadow-xl hover:tw-ring-amber-400 hover:-tw-translate-y-1 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
+                        <div class="tw-group tw-bg-white dark:tw-bg-slate-800 tw-rounded-xl tw-p-4 md:tw-p-5 tw-ring-1 tw-ring-gray-200 dark:tw-ring-slate-700 tw-shadow-sm hover:tw-shadow-md hover:tw-ring-amber-400 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
                             <div>
-                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
-                                    <div class="tw-w-14 tw-h-14 tw-rounded-2xl tw-bg-amber-100 dark:tw-bg-amber-900/50 tw-text-amber-600 dark:tw-text-amber-300 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
-                                        <svg class="tw-w-7 tw-h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-3">
+                                    <div class="tw-w-11 tw-h-11 tw-rounded-xl tw-bg-amber-100 dark:tw-bg-amber-900/50 tw-text-amber-600 dark:tw-text-amber-300 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
+                                        <svg class="tw-w-5.5 tw-h-5.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.83-5.83M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l5.654-4.654m0 0l3.03-2.496c.384-.317.626-.74.766-1.208" />
                                         </svg>
                                     </div>
-                                    <span class="tw-text-xs tw-font-bold tw-text-amber-700 dark:tw-text-amber-300 tw-bg-amber-100/80 dark:tw-bg-amber-900/50 tw-px-3 tw-py-1 tw-rounded-full">Servis</span>
+                                    <span class="tw-text-xs tw-font-bold tw-text-amber-700 dark:tw-text-amber-300 tw-bg-amber-50 dark:tw-bg-amber-900/40 tw-px-2.5 tw-py-0.5 tw-rounded-full">Servis</span>
                                 </div>
-                                <h3 class="tw-text-lg tw-font-bold tw-text-gray-900 dark:tw-text-white group-hover:tw-text-amber-600 tw-transition-colors">Servis & Repair</h3>
-                                <p class="tw-text-sm tw-text-gray-600 dark:tw-text-gray-300 tw-mt-2 tw-leading-relaxed">Kelola job sheet penerimaan dan status pengerjaan servis barang.</p>
+                                <h3 class="tw-text-base tw-font-bold tw-text-gray-900 dark:tw-text-white group-hover:tw-text-amber-600 tw-transition-colors">Servis & Repair</h3>
+                                <p class="tw-text-xs tw-text-gray-500 dark:tw-text-gray-300 tw-mt-1 tw-leading-relaxed">Kelola job sheet penerimaan dan status pengerjaan servis barang.</p>
                             </div>
-                            <div class="tw-mt-6 tw-pt-4 tw-border-t tw-border-gray-100 dark:tw-border-slate-700 tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-bold tw-text-amber-600 dark:tw-text-amber-400">
-                                <span>Buka Modul</span>
-                                <svg class="tw-w-5 tw-h-5 group-hover:tw-translate-x-1.5 tw-transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                                </svg>
+                            <div class="tw-mt-4 tw-pt-3 tw-border-t tw-border-gray-100 dark:tw-border-slate-700/80 tw-flex tw-items-center tw-gap-2">
+                                <a href="{{ action([\Modules\Repair\Http\Controllers\JobSheetController::class, 'index']) }}"
+                                   class="tw-flex-1 tw-inline-flex tw-items-center tw-justify-center tw-gap-1.5 tw-px-3 tw-py-2 tw-rounded-lg tw-bg-amber-50 dark:tw-bg-amber-900/30 tw-text-amber-600 dark:tw-text-amber-300 hover:tw-bg-amber-600 hover:tw-text-white dark:hover:tw-bg-amber-600 dark:hover:tw-text-white tw-text-xs tw-font-bold tw-transition-colors">
+                                    <span>Job Sheet Servis</span>
+                                    <svg class="tw-w-3.5 tw-h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                                    </svg>
+                                </a>
+                                @if (auth()->user()->can('job_sheet.create'))
+                                    <a href="{{ action([\Modules\Repair\Http\Controllers\JobSheetController::class, 'create']) }}"
+                                       class="tw-inline-flex tw-items-center tw-justify-center tw-w-8 tw-h-8 tw-rounded-lg tw-bg-amber-600 tw-text-white hover:tw-bg-amber-700 tw-text-xs tw-font-bold tw-transition-colors"
+                                       title="Buat Job Sheet Baru">
+                                        <svg class="tw-w-4 tw-h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                        </svg>
+                                    </a>
+                                @endif
                             </div>
-                        </a>
+                        </div>
                     @endif
 
                     @if (auth()->user()->can('product.view') || auth()->user()->can('product.create'))
-                        <a href="{{ action([\App\Http\Controllers\ProductController::class, 'index']) }}"
-                           class="tw-group tw-relative tw-bg-white dark:tw-bg-slate-800 tw-rounded-2xl tw-p-6 tw-ring-1 tw-ring-gray-200 dark:tw-ring-slate-700 tw-shadow-sm hover:tw-shadow-xl hover:tw-ring-purple-400 hover:-tw-translate-y-1 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
+                        <div class="tw-group tw-bg-white dark:tw-bg-slate-800 tw-rounded-xl tw-p-4 md:tw-p-5 tw-ring-1 tw-ring-gray-200 dark:tw-ring-slate-700 tw-shadow-sm hover:tw-shadow-md hover:tw-ring-purple-400 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
                             <div>
-                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
-                                    <div class="tw-w-14 tw-h-14 tw-rounded-2xl tw-bg-purple-100 dark:tw-bg-purple-900/50 tw-text-purple-600 dark:tw-text-purple-300 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
-                                        <svg class="tw-w-7 tw-h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-3">
+                                    <div class="tw-w-11 tw-h-11 tw-rounded-xl tw-bg-purple-100 dark:tw-bg-purple-900/50 tw-text-purple-600 dark:tw-text-purple-300 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
+                                        <svg class="tw-w-5.5 tw-h-5.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25" />
                                         </svg>
                                     </div>
-                                    <span class="tw-text-xs tw-font-bold tw-text-purple-700 dark:tw-text-purple-300 tw-bg-purple-100/80 dark:tw-bg-purple-900/50 tw-px-3 tw-py-1 tw-rounded-full">Produk</span>
+                                    <span class="tw-text-xs tw-font-bold tw-text-purple-700 dark:tw-text-purple-300 tw-bg-purple-50 dark:tw-bg-purple-900/40 tw-px-2.5 tw-py-0.5 tw-rounded-full">Produk</span>
                                 </div>
-                                <h3 class="tw-text-lg tw-font-bold tw-text-gray-900 dark:tw-text-white group-hover:tw-text-purple-600 tw-transition-colors">Daftar Produk</h3>
-                                <p class="tw-text-sm tw-text-gray-600 dark:tw-text-gray-300 tw-mt-2 tw-leading-relaxed">Lihat & periksa katalog barang, harga variasi, serta posisi stok terkini.</p>
+                                <h3 class="tw-text-base tw-font-bold tw-text-gray-900 dark:tw-text-white group-hover:tw-text-purple-600 tw-transition-colors">Daftar Produk</h3>
+                                <p class="tw-text-xs tw-text-gray-500 dark:tw-text-gray-300 tw-mt-1 tw-leading-relaxed">Lihat & periksa katalog barang, harga variasi, serta posisi stok terkini.</p>
                             </div>
-                            <div class="tw-mt-6 tw-pt-4 tw-border-t tw-border-gray-100 dark:tw-border-slate-700 tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-bold tw-text-purple-600 dark:tw-text-purple-400">
-                                <span>Buka Produk</span>
-                                <svg class="tw-w-5 tw-h-5 group-hover:tw-translate-x-1.5 tw-transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                                </svg>
+                            <div class="tw-mt-4 tw-pt-3 tw-border-t tw-border-gray-100 dark:tw-border-slate-700/80 tw-flex tw-items-center tw-gap-2">
+                                <a href="{{ action([\App\Http\Controllers\ProductController::class, 'index']) }}"
+                                   class="tw-flex-1 tw-inline-flex tw-items-center tw-justify-center tw-gap-1.5 tw-px-3 tw-py-2 tw-rounded-lg tw-bg-purple-50 dark:tw-bg-purple-900/30 tw-text-purple-600 dark:tw-text-purple-300 hover:tw-bg-purple-600 hover:tw-text-white dark:hover:tw-bg-purple-600 dark:hover:tw-text-white tw-text-xs tw-font-bold tw-transition-colors">
+                                    <span>Katalog Produk</span>
+                                    <svg class="tw-w-3.5 tw-h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                                    </svg>
+                                </a>
+                                @if (auth()->user()->can('product.create'))
+                                    <a href="{{ action([\App\Http\Controllers\ProductController::class, 'create']) }}"
+                                       class="tw-inline-flex tw-items-center tw-justify-center tw-w-8 tw-h-8 tw-rounded-lg tw-bg-purple-600 tw-text-white hover:tw-bg-purple-700 tw-text-xs tw-font-bold tw-transition-colors"
+                                       title="Tambah Produk Baru">
+                                        <svg class="tw-w-4 tw-h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                        </svg>
+                                    </a>
+                                @endif
                             </div>
-                        </a>
+                        </div>
                     @endif
 
                     @if (auth()->user()->can('customer.view') || auth()->user()->can('customer.create'))
-                        <a href="{{ action([\App\Http\Controllers\ContactController::class, 'index'], ['type' => 'customer']) }}"
-                           class="tw-group tw-relative tw-bg-white dark:tw-bg-slate-800 tw-rounded-2xl tw-p-6 tw-ring-1 tw-ring-gray-200 dark:tw-ring-slate-700 tw-shadow-sm hover:tw-shadow-xl hover:tw-ring-indigo-400 hover:-tw-translate-y-1 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
+                        <div class="tw-group tw-bg-white dark:tw-bg-slate-800 tw-rounded-xl tw-p-4 md:tw-p-5 tw-ring-1 tw-ring-gray-200 dark:tw-ring-slate-700 tw-shadow-sm hover:tw-shadow-md hover:tw-ring-indigo-400 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
                             <div>
-                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
-                                    <div class="tw-w-14 tw-h-14 tw-rounded-2xl tw-bg-indigo-100 dark:tw-bg-indigo-900/50 tw-text-indigo-600 dark:tw-text-indigo-300 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
-                                        <svg class="tw-w-7 tw-h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-3">
+                                    <div class="tw-w-11 tw-h-11 tw-rounded-xl tw-bg-indigo-100 dark:tw-bg-indigo-900/50 tw-text-indigo-600 dark:tw-text-indigo-300 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
+                                        <svg class="tw-w-5.5 tw-h-5.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
                                         </svg>
                                     </div>
-                                    <span class="tw-text-xs tw-font-bold tw-text-indigo-700 dark:tw-text-indigo-300 tw-bg-indigo-100/80 dark:tw-bg-indigo-900/50 tw-px-3 tw-py-1 tw-rounded-full">Kontak</span>
+                                    <span class="tw-text-xs tw-font-bold tw-text-indigo-700 dark:tw-text-indigo-300 tw-bg-indigo-50 dark:tw-bg-indigo-900/40 tw-px-2.5 tw-py-0.5 tw-rounded-full">Kontak</span>
                                 </div>
-                                <h3 class="tw-text-lg tw-font-bold tw-text-gray-900 dark:tw-text-white group-hover:tw-text-indigo-600 tw-transition-colors">Data Pelanggan</h3>
-                                <p class="tw-text-sm tw-text-gray-600 dark:tw-text-gray-300 tw-mt-2 tw-leading-relaxed">Kelola informasi data pelanggan, nomor kontak, dan riwayat transaksi.</p>
+                                <h3 class="tw-text-base tw-font-bold tw-text-gray-900 dark:tw-text-white group-hover:tw-text-indigo-600 tw-transition-colors">Data Pelanggan</h3>
+                                <p class="tw-text-xs tw-text-gray-500 dark:tw-text-gray-300 tw-mt-1 tw-leading-relaxed">Kelola informasi data pelanggan, nomor kontak, dan riwayat transaksi.</p>
                             </div>
-                            <div class="tw-mt-6 tw-pt-4 tw-border-t tw-border-gray-100 dark:tw-border-slate-700 tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-bold tw-text-indigo-600 dark:tw-text-indigo-400">
-                                <span>Buka Pelanggan</span>
-                                <svg class="tw-w-5 tw-h-5 group-hover:tw-translate-x-1.5 tw-transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                                </svg>
+                            <div class="tw-mt-4 tw-pt-3 tw-border-t tw-border-gray-100 dark:tw-border-slate-700/80 tw-flex tw-items-center tw-gap-2">
+                                <a href="{{ action([\App\Http\Controllers\ContactController::class, 'index'], ['type' => 'customer']) }}"
+                                   class="tw-flex-1 tw-inline-flex tw-items-center tw-justify-center tw-gap-1.5 tw-px-3 tw-py-2 tw-rounded-lg tw-bg-indigo-50 dark:tw-bg-indigo-900/30 tw-text-indigo-600 dark:tw-text-indigo-300 hover:tw-bg-indigo-600 hover:tw-text-white dark:hover:tw-bg-indigo-600 dark:hover:tw-text-white tw-text-xs tw-font-bold tw-transition-colors">
+                                    <span>Data Pelanggan</span>
+                                    <svg class="tw-w-3.5 tw-h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                                    </svg>
+                                </a>
+                                @if (auth()->user()->can('customer.create'))
+                                    <button type="button" data-href="{{ action([\App\Http\Controllers\ContactController::class, 'create'], ['type' => 'customer']) }}"
+                                            class="tw-inline-flex tw-items-center tw-justify-center tw-w-8 tw-h-8 tw-rounded-lg tw-bg-indigo-600 tw-text-white hover:tw-bg-indigo-700 tw-text-xs tw-font-bold tw-transition-colors btn-modal"
+                                            data-container=".contact_modal"
+                                            title="Tambah Pelanggan Baru">
+                                        <svg class="tw-w-4 tw-h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                        </svg>
+                                    </button>
+                                @endif
                             </div>
-                        </a>
+                        </div>
                     @endif
 
                     @if (auth()->user()->can('sell.view') || auth()->user()->can('direct_sell.view'))
-                        <a href="{{ action([\App\Http\Controllers\SellController::class, 'index']) }}"
-                           class="tw-group tw-relative tw-bg-white dark:tw-bg-slate-800 tw-rounded-2xl tw-p-6 tw-ring-1 tw-ring-gray-200 dark:tw-ring-slate-700 tw-shadow-sm hover:tw-shadow-xl hover:tw-ring-teal-400 hover:-tw-translate-y-1 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
+                        <div class="tw-group tw-bg-white dark:tw-bg-slate-800 tw-rounded-xl tw-p-4 md:tw-p-5 tw-ring-1 tw-ring-gray-200 dark:tw-ring-slate-700 tw-shadow-sm hover:tw-shadow-md hover:tw-ring-teal-400 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
                             <div>
-                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
-                                    <div class="tw-w-14 tw-h-14 tw-rounded-2xl tw-bg-teal-100 dark:tw-bg-teal-900/50 tw-text-teal-600 dark:tw-text-teal-300 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
-                                        <svg class="tw-w-7 tw-h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-3">
+                                    <div class="tw-w-11 tw-h-11 tw-rounded-xl tw-bg-teal-100 dark:tw-bg-teal-900/50 tw-text-teal-600 dark:tw-text-teal-300 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
+                                        <svg class="tw-w-5.5 tw-h-5.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                                         </svg>
                                     </div>
-                                    <span class="tw-text-xs tw-font-bold tw-text-teal-700 dark:tw-text-teal-300 tw-bg-teal-100/80 dark:tw-bg-teal-900/50 tw-px-3 tw-py-1 tw-rounded-full">Penjualan</span>
+                                    <span class="tw-text-xs tw-font-bold tw-text-teal-700 dark:tw-text-teal-300 tw-bg-teal-50 dark:tw-bg-teal-900/40 tw-px-2.5 tw-py-0.5 tw-rounded-full">Penjualan</span>
                                 </div>
-                                <h3 class="tw-text-lg tw-font-bold tw-text-gray-900 dark:tw-text-white group-hover:tw-text-teal-600 tw-transition-colors">Daftar Penjualan</h3>
-                                <p class="tw-text-sm tw-text-gray-600 dark:tw-text-gray-300 tw-mt-2 tw-leading-relaxed">Lihat, periksa, dan cetak riwayat faktur transaksi penjualan toko.</p>
+                                <h3 class="tw-text-base tw-font-bold tw-text-gray-900 dark:tw-text-white group-hover:tw-text-teal-600 tw-transition-colors">Daftar Penjualan</h3>
+                                <p class="tw-text-xs tw-text-gray-500 dark:tw-text-gray-300 tw-mt-1 tw-leading-relaxed">Lihat, periksa, dan cetak riwayat faktur transaksi penjualan toko.</p>
                             </div>
-                            <div class="tw-mt-6 tw-pt-4 tw-border-t tw-border-gray-100 dark:tw-border-slate-700 tw-flex tw-items-center tw-justify-between tw-text-sm tw-font-bold tw-text-teal-600 dark:tw-text-teal-400">
-                                <span>Buka Penjualan</span>
-                                <svg class="tw-w-5 tw-h-5 group-hover:tw-translate-x-1.5 tw-transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                                </svg>
+                            <div class="tw-mt-4 tw-pt-3 tw-border-t tw-border-gray-100 dark:tw-border-slate-700/80 tw-flex tw-items-center tw-gap-2">
+                                <a href="{{ action([\App\Http\Controllers\SellController::class, 'index']) }}"
+                                   class="tw-flex-1 tw-inline-flex tw-items-center tw-justify-center tw-gap-1.5 tw-px-3 tw-py-2 tw-rounded-lg tw-bg-teal-50 dark:tw-bg-teal-900/30 tw-text-teal-600 dark:tw-text-teal-300 hover:tw-bg-teal-600 hover:tw-text-white dark:hover:tw-bg-teal-600 dark:hover:tw-text-white tw-text-xs tw-font-bold tw-transition-colors">
+                                    <span>Riwayat Penjualan</span>
+                                    <svg class="tw-w-3.5 tw-h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                                    </svg>
+                                </a>
+                                @if (auth()->user()->can('sell.create'))
+                                    <a href="{{ action([\App\Http\Controllers\SellController::class, 'create']) }}"
+                                       class="tw-inline-flex tw-items-center tw-justify-center tw-w-8 tw-h-8 tw-rounded-lg tw-bg-teal-600 tw-text-white hover:tw-bg-teal-700 tw-text-xs tw-font-bold tw-transition-colors"
+                                       title="Tambah Penjualan Baru">
+                                        <svg class="tw-w-4 tw-h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                        </svg>
+                                    </a>
+                                @endif
                             </div>
-                        </a>
+                        </div>
+                    @endif
+
+                    @if (auth()->user()->can('purchase.view') || auth()->user()->can('purchase.create'))
+                        <div class="tw-group tw-bg-white dark:tw-bg-slate-800 tw-rounded-xl tw-p-4 md:tw-p-5 tw-ring-1 tw-ring-gray-200 dark:tw-ring-slate-700 tw-shadow-sm hover:tw-shadow-md hover:tw-ring-sky-400 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
+                            <div>
+                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-3">
+                                    <div class="tw-w-11 tw-h-11 tw-rounded-xl tw-bg-sky-100 dark:tw-bg-sky-900/50 tw-text-sky-600 dark:tw-text-sky-300 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
+                                        <svg class="tw-w-5.5 tw-h-5.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM18.75 18.75a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3h1.5l1.68 8.395a1.875 1.875 0 001.838 1.505h9.914a1.875 1.875 0 001.838-1.505l1.385-6.92A.75.75 0 0021.17 3.75H6.25" />
+                                        </svg>
+                                    </div>
+                                    <span class="tw-text-xs tw-font-bold tw-text-sky-700 dark:tw-text-sky-300 tw-bg-sky-50 dark:tw-bg-sky-900/40 tw-px-2.5 tw-py-0.5 tw-rounded-full">Pembelian</span>
+                                </div>
+                                <h3 class="tw-text-base tw-font-bold tw-text-gray-900 dark:tw-text-white group-hover:tw-text-sky-600 tw-transition-colors">Pembelian Stok</h3>
+                                <p class="tw-text-xs tw-text-gray-500 dark:tw-text-gray-300 tw-mt-1 tw-leading-relaxed">Catat transaksi pembelian stok barang dari pemasok / supplier.</p>
+                            </div>
+                            <div class="tw-mt-4 tw-pt-3 tw-border-t tw-border-gray-100 dark:tw-border-slate-700/80 tw-flex tw-items-center tw-gap-2">
+                                <a href="{{ action([\App\Http\Controllers\PurchaseController::class, 'index']) }}"
+                                   class="tw-flex-1 tw-inline-flex tw-items-center tw-justify-center tw-gap-1.5 tw-px-3 tw-py-2 tw-rounded-lg tw-bg-sky-50 dark:tw-bg-sky-900/30 tw-text-sky-600 dark:tw-text-sky-300 hover:tw-bg-sky-600 hover:tw-text-white dark:hover:tw-bg-sky-600 dark:hover:tw-text-white tw-text-xs tw-font-bold tw-transition-colors">
+                                    <span>Riwayat Pembelian</span>
+                                    <svg class="tw-w-3.5 tw-h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                                    </svg>
+                                </a>
+                                @if (auth()->user()->can('purchase.create'))
+                                    <a href="{{ action([\App\Http\Controllers\PurchaseController::class, 'create']) }}"
+                                       class="tw-inline-flex tw-items-center tw-justify-center tw-w-8 tw-h-8 tw-rounded-lg tw-bg-sky-600 tw-text-white hover:tw-bg-sky-700 tw-text-xs tw-font-bold tw-transition-colors"
+                                       title="Tambah Pembelian Baru">
+                                        <svg class="tw-w-4 tw-h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                        </svg>
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+
+                    @if (auth()->user()->can('expense.access') || auth()->user()->can('expense.add'))
+                        <div class="tw-group tw-bg-white dark:tw-bg-slate-800 tw-rounded-xl tw-p-4 md:tw-p-5 tw-ring-1 tw-ring-gray-200 dark:tw-ring-slate-700 tw-shadow-sm hover:tw-shadow-md hover:tw-ring-rose-400 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
+                            <div>
+                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-3">
+                                    <div class="tw-w-11 tw-h-11 tw-rounded-xl tw-bg-rose-100 dark:tw-bg-rose-900/50 tw-text-rose-600 dark:tw-text-rose-300 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
+                                        <svg class="tw-w-5.5 tw-h-5.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-6h6M2.25 12a9.75 9.375 0 1119.5 0 9.75 9.375 0 01-19.5 0z" />
+                                        </svg>
+                                    </div>
+                                    <span class="tw-text-xs tw-font-bold tw-text-rose-700 dark:tw-text-rose-300 tw-bg-rose-50 dark:tw-bg-rose-900/40 tw-px-2.5 tw-py-0.5 tw-rounded-full">Pengeluaran</span>
+                                </div>
+                                <h3 class="tw-text-base tw-font-bold tw-text-gray-900 dark:tw-text-white group-hover:tw-text-rose-600 tw-transition-colors">Biaya Operasional</h3>
+                                <p class="tw-text-xs tw-text-gray-500 dark:tw-text-gray-300 tw-mt-1 tw-leading-relaxed">Catat dan pantau pengeluaran biaya operasional harian usaha.</p>
+                            </div>
+                            <div class="tw-mt-4 tw-pt-3 tw-border-t tw-border-gray-100 dark:tw-border-slate-700/80 tw-flex tw-items-center tw-gap-2">
+                                <a href="{{ action([\App\Http\Controllers\ExpenseController::class, 'index']) }}"
+                                   class="tw-flex-1 tw-inline-flex tw-items-center tw-justify-center tw-gap-1.5 tw-px-3 tw-py-2 tw-rounded-lg tw-bg-rose-50 dark:tw-bg-rose-900/30 tw-text-rose-600 dark:tw-text-rose-300 hover:tw-bg-rose-600 hover:tw-text-white dark:hover:tw-bg-rose-600 dark:hover:tw-text-white tw-text-xs tw-font-bold tw-transition-colors">
+                                    <span>Riwayat Biaya</span>
+                                    <svg class="tw-w-3.5 tw-h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                                    </svg>
+                                </a>
+                                @if (auth()->user()->can('expense.add'))
+                                    <a href="{{ action([\App\Http\Controllers\ExpenseController::class, 'create']) }}"
+                                       class="tw-inline-flex tw-items-center tw-justify-center tw-w-8 tw-h-8 tw-rounded-lg tw-bg-rose-600 tw-text-white hover:tw-bg-rose-700 tw-text-xs tw-font-bold tw-transition-colors"
+                                       title="Catat Pengeluaran Baru">
+                                        <svg class="tw-w-4 tw-h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                        </svg>
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+
+                    @if (auth()->user()->can('stock_adjustment.view') || auth()->user()->can('stock_adjustment.create'))
+                        <div class="tw-group tw-bg-white dark:tw-bg-slate-800 tw-rounded-xl tw-p-4 md:tw-p-5 tw-ring-1 tw-ring-gray-200 dark:tw-ring-slate-700 tw-shadow-sm hover:tw-shadow-md hover:tw-ring-orange-400 tw-transition-all tw-duration-200 tw-flex tw-flex-col tw-justify-between">
+                            <div>
+                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-3">
+                                    <div class="tw-w-11 tw-h-11 tw-rounded-xl tw-bg-orange-100 dark:tw-bg-orange-900/50 tw-text-orange-600 dark:tw-text-orange-300 tw-flex tw-items-center tw-justify-center group-hover:tw-scale-105 tw-transition-transform">
+                                        <svg class="tw-w-5.5 tw-h-5.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 18H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 12h11.25" />
+                                        </svg>
+                                    </div>
+                                    <span class="tw-text-xs tw-font-bold tw-text-orange-700 dark:tw-text-orange-300 tw-bg-orange-50 dark:tw-bg-orange-900/40 tw-px-2.5 tw-py-0.5 tw-rounded-full">Stok</span>
+                                </div>
+                                <h3 class="tw-text-base tw-font-bold tw-text-gray-900 dark:tw-text-white group-hover:tw-text-orange-600 tw-transition-colors">Penyesuaian Stok</h3>
+                                <p class="tw-text-xs tw-text-gray-500 dark:tw-text-gray-300 tw-mt-1 tw-leading-relaxed">Sesuaikan fisik stok barang rusak, hilang, atau opname inventaris.</p>
+                            </div>
+                            <div class="tw-mt-4 tw-pt-3 tw-border-t tw-border-gray-100 dark:tw-border-slate-700/80 tw-flex tw-items-center tw-gap-2">
+                                <a href="{{ action([\App\Http\Controllers\StockAdjustmentController::class, 'index']) }}"
+                                   class="tw-flex-1 tw-inline-flex tw-items-center tw-justify-center tw-gap-1.5 tw-px-3 tw-py-2 tw-rounded-lg tw-bg-orange-50 dark:tw-bg-orange-900/30 tw-text-orange-600 dark:tw-text-orange-300 hover:tw-bg-orange-600 hover:tw-text-white dark:hover:tw-bg-orange-600 dark:hover:tw-text-white tw-text-xs tw-font-bold tw-transition-colors">
+                                    <span>Riwayat Penyesuaian</span>
+                                    <svg class="tw-w-3.5 tw-h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                                    </svg>
+                                </a>
+                                @if (auth()->user()->can('stock_adjustment.create'))
+                                    <a href="{{ action([\App\Http\Controllers\StockAdjustmentController::class, 'create']) }}"
+                                       class="tw-inline-flex tw-items-center tw-justify-center tw-w-8 tw-h-8 tw-rounded-lg tw-bg-orange-600 tw-text-white hover:tw-bg-orange-700 tw-text-xs tw-font-bold tw-transition-colors"
+                                       title="Buat Penyesuaian Stok">
+                                        <svg class="tw-w-4 tw-h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                        </svg>
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
                     @endif
                 </div>
             </div>
