@@ -758,8 +758,12 @@
 
     /* Global mobile responsiveness for DataTables and responsive table wrappers */
     @media (max-width: 767px) {
-      .table-responsive,
       .dataTables_wrapper {
+        width: 100% !important;
+        overflow: visible !important;
+      }
+
+      .table-responsive {
         width: 100% !important;
         overflow-x: auto !important;
         -webkit-overflow-scrolling: touch !important;
@@ -780,6 +784,28 @@
         white-space: nowrap !important;
         padding: 8px 10px !important;
         font-size: 12px !important;
+      }
+
+      /* Keep DataTables controls (length, filter, info, pagination) fixed/sticky to left edge when scrolling table horizontally */
+      .dataTables_wrapper .dataTables_length,
+      .dataTables_wrapper .dataTables_filter,
+      .dataTables_wrapper .dataTables_info,
+      .dataTables_wrapper .dataTables_paginate {
+        position: sticky !important;
+        left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        z-index: 10 !important;
+      }
+
+      .dataTables_wrapper .dataTables_filter {
+        text-align: left !important;
+        margin-top: 5px !important;
+      }
+
+      .dataTables_wrapper .dataTables_filter input {
+        max-width: 100% !important;
       }
 
       .table-responsive .btn-group,
