@@ -168,19 +168,29 @@
 </style>
 <style>
     .small-view-side-active {
-        display: grid !important;
-        z-index: 1000;
-        position: absolute;
+        display: flex !important;
+        flex-direction: column !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 280px !important;
+        max-width: 85vw !important;
+        height: 100vh !important;
+        z-index: 1050 !important;
+        background-color: #ffffff !important;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1) !important;
+        overflow: hidden !important;
     }
     .overlay {
         width: 100vw;
         height: 100vh;
-        background: rgba(0, 0, 0, 0.8);
+        background: rgba(0, 0, 0, 0.6);
         position: fixed;
         top: 0;
         left: 0;
         display: none;
-        z-index: 20;
+        z-index: 1040;
+        backdrop-filter: blur(2px);
     }
 
     .tw-dw-btn.tw-dw-btn-xs.tw-dw-btn-outline {
@@ -211,10 +221,6 @@
     #scrollable-container{
         position:relative;
     }
-    
-
-
-
 </style>
 
 </html>
