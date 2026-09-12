@@ -40,11 +40,6 @@
                 <a class="btn btn-primary" href="{{ action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'create']) }}">
                     <i class="fa fa-plus"></i> @lang('messages.add')
                 </a>
-                {!! Form::open(['url' => route('laundry.import_demo_data'), 'method' => 'post', 'style' => 'display:inline-block; margin-left: 5px;']) !!}
-                    <button type="submit" class="btn btn-warning" onclick="return confirm('Apakah Anda yakin ingin memasukkan data demo laundry?')">
-                        <i class="fa fa-database"></i> @lang('laundry::lang.import_demo_data')
-                    </button>
-                {!! Form::close() !!}
             </div>
         @endslot
 
