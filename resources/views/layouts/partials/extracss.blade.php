@@ -755,6 +755,40 @@
     .dataTables_scrollBody.dropdown-opened {
       overflow: visible !important;
     }
+
+    /* Global mobile responsiveness for DataTables and responsive table wrappers */
+    @media (max-width: 767px) {
+      .table-responsive,
+      .dataTables_wrapper {
+        width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        display: block !important;
+        margin-bottom: 0;
+      }
+
+      .table-responsive > .table,
+      .dataTables_wrapper .table {
+        width: 100% !important;
+        max-width: none !important;
+      }
+
+      .table-responsive .table th,
+      .table-responsive .table td,
+      .dataTables_wrapper .table th,
+      .dataTables_wrapper .table td {
+        white-space: nowrap !important;
+        padding: 8px 10px !important;
+        font-size: 12px !important;
+      }
+
+      .table-responsive .btn-group,
+      .table-responsive .dropdown,
+      .dataTables_wrapper .btn-group,
+      .dataTables_wrapper .dropdown {
+        position: relative;
+      }
+    }
   </style>
   <style>
     .action-link[data-v-397d14ca] {
