@@ -19,7 +19,7 @@
 
       <div class="form-group">
         {!! Form::label('default_price', __('laundry::lang.default_price') . ':') !!}
-        {!! Form::number('default_price', 0, ['class' => 'form-control', 'step' => '0.01']) !!}
+        {!! Form::text('default_price', @num_format(0), ['class' => 'form-control input_number']) !!}
       </div>
 
       <div class="form-group">

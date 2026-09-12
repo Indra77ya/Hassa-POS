@@ -66,6 +66,9 @@ class LaundryItemTypeController extends Controller
 
         try {
             $input = $request->only(['name', 'unit_name', 'default_price', 'description', 'process_ids']);
+            if (isset($input['default_price'])) {
+                $input['default_price'] = $this->commonUtil->num_uf($input['default_price']);
+            }
             $input['business_id'] = $business_id;
 
             $item_type = LaundryItemType::create($input);
@@ -102,6 +105,9 @@ class LaundryItemTypeController extends Controller
 
         try {
             $input = $request->only(['name', 'unit_name', 'default_price', 'description', 'process_ids']);
+            if (isset($input['default_price'])) {
+                $input['default_price'] = $this->commonUtil->num_uf($input['default_price']);
+            }
             $item_type = LaundryItemType::where('business_id', $business_id)->findOrFail($id);
             $item_type->update($input);
 
