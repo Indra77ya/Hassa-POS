@@ -597,13 +597,13 @@
                             </div>
                             <div class="tw-mt-5 tw-pt-3.5 tw-border-t tw-border-gray-100 tw-flex tw-items-center tw-gap-2">
                                 <a href="{{ action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'index']) }}"
-                                   class="tw-flex-1 tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-px-3.5 tw-py-2.5 tw-rounded-xl tw-bg-blue-50 tw-text-blue-700 hover:tw-bg-blue-600 hover:tw-text-white tw-text-xs tw-font-bold tw-transition-colors">
+                                   class="tw-flex-1 shortcut-btn shortcut-btn-blue">
                                     <span>Lihat Pesanan</span>
                                     <i class="fa fa-arrow-right" style="font-size: 11px;"></i>
                                 </a>
                                 @if (auth()->user()->can('laundry.create'))
                                     <a href="{{ action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'create']) }}"
-                                       class="tw-inline-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-rounded-xl tw-bg-blue-600 tw-text-white hover:tw-bg-blue-700 tw-text-xs tw-font-bold tw-transition-colors"
+                                       class="shortcut-btn-icon shortcut-btn-icon-blue"
                                        title="Buat Pesanan Laundry Baru">
                                         <i class="fa fa-plus" style="font-size: 13px;"></i>
                                     </a>
@@ -626,7 +626,7 @@
                             </div>
                             <div class="tw-mt-5 tw-pt-3.5 tw-border-t tw-border-gray-100 tw-flex tw-items-center tw-gap-2">
                                 <a href="{{ action([\App\Http\Controllers\SellPosController::class, 'create']) }}"
-                                   class="tw-flex-1 tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-px-3.5 tw-py-2.5 tw-rounded-xl tw-bg-emerald-50 tw-text-emerald-700 hover:tw-bg-emerald-600 hover:tw-text-white tw-text-xs tw-font-bold tw-transition-colors">
+                                   class="tw-flex-1 shortcut-btn shortcut-btn-emerald">
                                     <span>Buka Terminal Kasir</span>
                                     <i class="fa fa-arrow-right" style="font-size: 11px;"></i>
                                 </a>
@@ -648,13 +648,13 @@
                             </div>
                             <div class="tw-mt-5 tw-pt-3.5 tw-border-t tw-border-gray-100 tw-flex tw-items-center tw-gap-2">
                                 <a href="{{ action([\Modules\Repair\Http\Controllers\JobSheetController::class, 'index']) }}"
-                                   class="tw-flex-1 tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-px-3.5 tw-py-2.5 tw-rounded-xl tw-bg-amber-50 tw-text-amber-700 hover:tw-bg-amber-600 hover:tw-text-white tw-text-xs tw-font-bold tw-transition-colors">
+                                   class="tw-flex-1 shortcut-btn shortcut-btn-amber">
                                     <span>Job Sheet Servis</span>
                                     <i class="fa fa-arrow-right" style="font-size: 11px;"></i>
                                 </a>
                                 @if (auth()->user()->can('job_sheet.create'))
                                     <a href="{{ action([\Modules\Repair\Http\Controllers\JobSheetController::class, 'create']) }}"
-                                       class="tw-inline-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-rounded-xl tw-bg-amber-600 tw-text-white hover:tw-bg-amber-700 tw-text-xs tw-font-bold tw-transition-colors"
+                                       class="shortcut-btn-icon shortcut-btn-icon-amber"
                                        title="Buat Job Sheet Baru">
                                         <i class="fa fa-plus" style="font-size: 13px;"></i>
                                     </a>
@@ -677,13 +677,13 @@
                             </div>
                             <div class="tw-mt-5 tw-pt-3.5 tw-border-t tw-border-gray-100 tw-flex tw-items-center tw-gap-2">
                                 <a href="{{ action([\App\Http\Controllers\ProductController::class, 'index']) }}"
-                                   class="tw-flex-1 tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-px-3.5 tw-py-2.5 tw-rounded-xl tw-bg-purple-50 tw-text-purple-700 hover:tw-bg-purple-600 hover:tw-text-white tw-text-xs tw-font-bold tw-transition-colors">
+                                   class="tw-flex-1 shortcut-btn shortcut-btn-purple">
                                     <span>Katalog Produk</span>
                                     <i class="fa fa-arrow-right" style="font-size: 11px;"></i>
                                 </a>
                                 @if (auth()->user()->can('product.create'))
                                     <a href="{{ action([\App\Http\Controllers\ProductController::class, 'create']) }}"
-                                       class="tw-inline-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-rounded-xl tw-bg-purple-600 tw-text-white hover:tw-bg-purple-700 tw-text-xs tw-font-bold tw-transition-colors"
+                                       class="shortcut-btn-icon shortcut-btn-icon-purple"
                                        title="Tambah Produk Baru">
                                         <i class="fa fa-plus" style="font-size: 13px;"></i>
                                     </a>
@@ -706,13 +706,13 @@
                             </div>
                             <div class="tw-mt-5 tw-pt-3.5 tw-border-t tw-border-gray-100 tw-flex tw-items-center tw-gap-2">
                                 <a href="{{ action([\App\Http\Controllers\ContactController::class, 'index'], ['type' => 'customer']) }}"
-                                   class="tw-flex-1 tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-px-3.5 tw-py-2.5 tw-rounded-xl tw-bg-indigo-50 tw-text-indigo-700 hover:tw-bg-indigo-600 hover:tw-text-white tw-text-xs tw-font-bold tw-transition-colors">
+                                   class="tw-flex-1 shortcut-btn shortcut-btn-indigo">
                                     <span>Data Pelanggan</span>
                                     <i class="fa fa-arrow-right" style="font-size: 11px;"></i>
                                 </a>
                                 @if (auth()->user()->can('customer.create'))
                                     <button type="button" data-href="{{ action([\App\Http\Controllers\ContactController::class, 'create'], ['type' => 'customer']) }}"
-                                            class="tw-inline-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-rounded-xl tw-bg-indigo-600 tw-text-white hover:tw-bg-indigo-700 tw-text-xs tw-font-bold tw-transition-colors btn-modal"
+                                            class="shortcut-btn-icon shortcut-btn-icon-indigo btn-modal"
                                             data-container=".contact_modal"
                                             title="Tambah Pelanggan Baru">
                                         <i class="fa fa-plus" style="font-size: 13px;"></i>
@@ -736,13 +736,13 @@
                             </div>
                             <div class="tw-mt-5 tw-pt-3.5 tw-border-t tw-border-gray-100 tw-flex tw-items-center tw-gap-2">
                                 <a href="{{ action([\App\Http\Controllers\SellController::class, 'index']) }}"
-                                   class="tw-flex-1 tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-px-3.5 tw-py-2.5 tw-rounded-xl tw-bg-teal-50 tw-text-teal-700 hover:tw-bg-teal-600 hover:tw-text-white tw-text-xs tw-font-bold tw-transition-colors">
+                                   class="tw-flex-1 shortcut-btn shortcut-btn-teal">
                                     <span>Riwayat Penjualan</span>
                                     <i class="fa fa-arrow-right" style="font-size: 11px;"></i>
                                 </a>
                                 @if (auth()->user()->can('sell.create'))
                                     <a href="{{ action([\App\Http\Controllers\SellController::class, 'create']) }}"
-                                       class="tw-inline-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-rounded-xl tw-bg-teal-600 tw-text-white hover:tw-bg-teal-700 tw-text-xs tw-font-bold tw-transition-colors"
+                                       class="shortcut-btn-icon shortcut-btn-icon-teal"
                                        title="Tambah Penjualan Baru">
                                         <i class="fa fa-plus" style="font-size: 13px;"></i>
                                     </a>
@@ -765,13 +765,13 @@
                             </div>
                             <div class="tw-mt-5 tw-pt-3.5 tw-border-t tw-border-gray-100 tw-flex tw-items-center tw-gap-2">
                                 <a href="{{ action([\App\Http\Controllers\PurchaseController::class, 'index']) }}"
-                                   class="tw-flex-1 tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-px-3.5 tw-py-2.5 tw-rounded-xl tw-bg-sky-50 tw-text-sky-700 hover:tw-bg-sky-600 hover:tw-text-white tw-text-xs tw-font-bold tw-transition-colors">
+                                   class="tw-flex-1 shortcut-btn shortcut-btn-sky">
                                     <span>Riwayat Pembelian</span>
                                     <i class="fa fa-arrow-right" style="font-size: 11px;"></i>
                                 </a>
                                 @if (auth()->user()->can('purchase.create'))
                                     <a href="{{ action([\App\Http\Controllers\PurchaseController::class, 'create']) }}"
-                                       class="tw-inline-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-rounded-xl tw-bg-sky-600 tw-text-white hover:tw-bg-sky-700 tw-text-xs tw-font-bold tw-transition-colors"
+                                       class="shortcut-btn-icon shortcut-btn-icon-sky"
                                        title="Tambah Pembelian Baru">
                                         <i class="fa fa-plus" style="font-size: 13px;"></i>
                                     </a>
@@ -794,13 +794,13 @@
                             </div>
                             <div class="tw-mt-5 tw-pt-3.5 tw-border-t tw-border-gray-100 tw-flex tw-items-center tw-gap-2">
                                 <a href="{{ action([\App\Http\Controllers\ExpenseController::class, 'index']) }}"
-                                   class="tw-flex-1 tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-px-3.5 tw-py-2.5 tw-rounded-xl tw-bg-rose-50 tw-text-rose-700 hover:tw-bg-rose-600 hover:tw-text-white tw-text-xs tw-font-bold tw-transition-colors">
+                                   class="tw-flex-1 shortcut-btn shortcut-btn-rose">
                                     <span>Riwayat Biaya</span>
                                     <i class="fa fa-arrow-right" style="font-size: 11px;"></i>
                                 </a>
                                 @if (auth()->user()->can('expense.add'))
                                     <a href="{{ action([\App\Http\Controllers\ExpenseController::class, 'create']) }}"
-                                       class="tw-inline-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-rounded-xl tw-bg-rose-600 tw-text-white hover:tw-bg-rose-700 tw-text-xs tw-font-bold tw-transition-colors"
+                                       class="shortcut-btn-icon shortcut-btn-icon-rose"
                                        title="Catat Pengeluaran Baru">
                                         <i class="fa fa-plus" style="font-size: 13px;"></i>
                                     </a>
@@ -823,13 +823,13 @@
                             </div>
                             <div class="tw-mt-5 tw-pt-3.5 tw-border-t tw-border-gray-100 tw-flex tw-items-center tw-gap-2">
                                 <a href="{{ action([\App\Http\Controllers\StockAdjustmentController::class, 'index']) }}"
-                                   class="tw-flex-1 tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-px-3.5 tw-py-2.5 tw-rounded-xl tw-bg-orange-50 tw-text-orange-700 hover:tw-bg-orange-600 hover:tw-text-white tw-text-xs tw-font-bold tw-transition-colors">
+                                   class="tw-flex-1 shortcut-btn shortcut-btn-orange">
                                     <span>Riwayat Penyesuaian</span>
                                     <i class="fa fa-arrow-right" style="font-size: 11px;"></i>
                                 </a>
                                 @if (auth()->user()->can('stock_adjustment.create'))
                                     <a href="{{ action([\App\Http\Controllers\StockAdjustmentController::class, 'create']) }}"
-                                       class="tw-inline-flex tw-items-center tw-justify-center tw-w-9 tw-h-9 tw-rounded-xl tw-bg-orange-600 tw-text-white hover:tw-bg-orange-700 tw-text-xs tw-font-bold tw-transition-colors"
+                                       class="shortcut-btn-icon shortcut-btn-icon-orange"
                                        title="Buat Penyesuaian Stok">
                                         <i class="fa fa-plus" style="font-size: 13px;"></i>
                                     </a>
@@ -856,6 +856,75 @@
         .select2-container {
             width: 100% !important;
         }
+
+        .shortcut-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: none !important;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .shortcut-btn span, .shortcut-btn i {
+            color: #ffffff !important;
+        }
+
+        .shortcut-btn-blue { background-color: #2563eb !important; color: #ffffff !important; }
+        .shortcut-btn-blue:hover, .shortcut-btn-blue:focus, .shortcut-btn-blue:active { background-color: #1d4ed8 !important; color: #ffffff !important; }
+
+        .shortcut-btn-emerald { background-color: #059669 !important; color: #ffffff !important; }
+        .shortcut-btn-emerald:hover, .shortcut-btn-emerald:focus, .shortcut-btn-emerald:active { background-color: #047857 !important; color: #ffffff !important; }
+
+        .shortcut-btn-amber { background-color: #d97706 !important; color: #ffffff !important; }
+        .shortcut-btn-amber:hover, .shortcut-btn-amber:focus, .shortcut-btn-amber:active { background-color: #b45309 !important; color: #ffffff !important; }
+
+        .shortcut-btn-purple { background-color: #9333ea !important; color: #ffffff !important; }
+        .shortcut-btn-purple:hover, .shortcut-btn-purple:focus, .shortcut-btn-purple:active { background-color: #7e22ce !important; color: #ffffff !important; }
+
+        .shortcut-btn-indigo { background-color: #4f46e5 !important; color: #ffffff !important; }
+        .shortcut-btn-indigo:hover, .shortcut-btn-indigo:focus, .shortcut-btn-indigo:active { background-color: #4338ca !important; color: #ffffff !important; }
+
+        .shortcut-btn-teal { background-color: #0d9488 !important; color: #ffffff !important; }
+        .shortcut-btn-teal:hover, .shortcut-btn-teal:focus, .shortcut-btn-teal:active { background-color: #0f766e !important; color: #ffffff !important; }
+
+        .shortcut-btn-sky { background-color: #0284c7 !important; color: #ffffff !important; }
+        .shortcut-btn-sky:hover, .shortcut-btn-sky:focus, .shortcut-btn-sky:active { background-color: #0369a1 !important; color: #ffffff !important; }
+
+        .shortcut-btn-rose { background-color: #e11d48 !important; color: #ffffff !important; }
+        .shortcut-btn-rose:hover, .shortcut-btn-rose:focus, .shortcut-btn-rose:active { background-color: #be123c !important; color: #ffffff !important; }
+
+        .shortcut-btn-orange { background-color: #ea580c !important; color: #ffffff !important; }
+        .shortcut-btn-orange:hover, .shortcut-btn-orange:focus, .shortcut-btn-orange:active { background-color: #c2410c !important; color: #ffffff !important; }
+
+        .shortcut-btn-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            background-color: #f3f4f6 !important;
+            color: #374151 !important;
+            border: 1px solid #e5e7eb !important;
+            text-decoration: none !important;
+            transition: all 0.2s ease-in-out;
+        }
+        .shortcut-btn-icon i { color: #374151 !important; }
+        .shortcut-btn-icon:hover i { color: #ffffff !important; }
+        .shortcut-btn-icon-blue:hover { background-color: #2563eb !important; }
+        .shortcut-btn-icon-amber:hover { background-color: #d97706 !important; }
+        .shortcut-btn-icon-purple:hover { background-color: #9333ea !important; }
+        .shortcut-btn-icon-indigo:hover { background-color: #4f46e5 !important; }
+        .shortcut-btn-icon-teal:hover { background-color: #0d9488 !important; }
+        .shortcut-btn-icon-sky:hover { background-color: #0284c7 !important; }
+        .shortcut-btn-icon-rose:hover { background-color: #e11d48 !important; }
+        .shortcut-btn-icon-orange:hover { background-color: #ea580c !important; }
     </style>
 @endsection
 
