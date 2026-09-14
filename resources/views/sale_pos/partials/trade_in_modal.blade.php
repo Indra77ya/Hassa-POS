@@ -76,16 +76,15 @@
             previous_trade_in_val = __read_number($('#trade_in_pos_value')) || 0;
         });
 
-        $(document).on('click', '#save_pos_trade_in_btn', function() {
-            var val_str = $('#trade_in_pos_value').val() || '0';
+        function apply_trade_in_deduction() {
             var new_trade_in_val = __read_number($('#trade_in_pos_value')) || 0;
             var device_name = $('#trade_in_pos_device_name').val() || '';
 
-            if (device_name !== '') {
+            if (device_name !== '' && new_trade_in_val > 0) {
                 var first_payment_row = $('#payment_rows_div').find('.payment_row').first();
                 if (first_payment_row.length) {
-                    var current_cash_amount = __read_number(first_payment_row.find('.payment-amount')) || 0;
-                    var adjusted_cash_amount = current_cash_amount + previous_trade_in_val - new_trade_in_val;
+                    var total_payable = __read_number($('#final_total_input')) || 0;
+                    var adjusted_cash_amount = total_payable - new_trade_in_val;
                     if (adjusted_cash_amount < 0) {
                         adjusted_cash_amount = 0;
                     }
@@ -94,18 +93,27 @@
                         calculate_balance_due();
                     }
                 }
-                if (new_trade_in_val > 0) {
-                    $('#pos_trade_in_badge').removeClass('hide').text('Rp ' + val_str);
-                    $('#pos_trade_in_btn i').removeClass('tw-text-orange-500').addClass('tw-text-green-500');
-                    toastr.success('Potongan Tukar Tambah Rp ' + val_str + ' berhasil diterapkan!');
-                } else {
-                    $('#pos_trade_in_badge').addClass('hide').text('');
-                    $('#pos_trade_in_btn i').removeClass('tw-text-green-500').addClass('tw-text-orange-500');
-                }
+            }
+        }
+
+        $(document).on('click', '#save_pos_trade_in_btn', function() {
+            var val_str = $('#trade_in_pos_value').val() || '0';
+            var new_trade_in_val = __read_number($('#trade_in_pos_value')) || 0;
+            var device_name = $('#trade_in_pos_device_name').val() || '';
+
+            if (device_name !== '' && new_trade_in_val > 0) {
+                apply_trade_in_deduction();
+                $('#pos_trade_in_badge').removeClass('hide').text('Rp ' + val_str);
+                $('#pos_trade_in_btn i').removeClass('tw-text-orange-500').addClass('tw-text-green-500');
+                toastr.success('Potongan Tukar Tambah Rp ' + val_str + ' berhasil diterapkan!');
             } else {
                 $('#pos_trade_in_badge').addClass('hide').text('');
                 $('#pos_trade_in_btn i').removeClass('tw-text-green-500').addClass('tw-text-orange-500');
             }
+        });
+
+        $('#modal_payment').on('shown.bs.modal', function() {
+            apply_trade_in_deduction();
         });
     });
 </script>
