@@ -95,8 +95,16 @@
                     }
                 }
                 if (new_trade_in_val > 0) {
+                    $('#pos_trade_in_badge').removeClass('hide').text('Rp ' + val_str);
+                    $('#pos_trade_in_btn i').removeClass('tw-text-orange-500').addClass('tw-text-green-500');
                     toastr.success('Potongan Tukar Tambah Rp ' + val_str + ' berhasil diterapkan!');
+                } else {
+                    $('#pos_trade_in_badge').addClass('hide').text('');
+                    $('#pos_trade_in_btn i').removeClass('tw-text-green-500').addClass('tw-text-orange-500');
                 }
+            } else {
+                $('#pos_trade_in_badge').addClass('hide').text('');
+                $('#pos_trade_in_btn i').removeClass('tw-text-green-500').addClass('tw-text-orange-500');
             }
         });
     });
