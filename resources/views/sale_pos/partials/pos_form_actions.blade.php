@@ -64,6 +64,12 @@
                             class="fas fa-file-alt tw-text-amber-500 tw-text-base"></i> @lang('lang_v1.quotation')</button>
                 @endif
 
+                <button type="button"
+                    class="tw-font-bold tw-text-slate-600 hover:tw-text-orange-600 tw-cursor-pointer tw-text-xs md:tw-text-sm tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-1 tw-whitespace-nowrap tw-transition-colors"
+                    data-toggle="modal" data-target="#pos_trade_in_modal" title="Tukar Tambah Perangkat Bekas">
+                    <i class="fas fa-exchange-alt tw-text-orange-500 tw-text-base"></i> Tukar Tambah
+                </button>
+
                 @if (!Gate::check('disable_suspend_sale') || auth()->user()->can('superadmin') || auth()->user()->can('admin'))
                     @if (empty($pos_settings['disable_suspend']))
                         <button type="button"
@@ -162,3 +168,4 @@
 @endif
 
 @include('sale_pos.partials.edit_shipping_modal')
+@include('sale_pos.partials.trade_in_modal')

@@ -72,6 +72,13 @@ $jobsheet_settings['contact_custom_fields'] : [];
                             <i class="fas fa-barcode"></i>
                             @lang( 'repair::lang.print_label' )
                         </a>
+
+                        @if(!empty($trade_in))
+                        <a class="tw-dw-btn tw-dw-btn-warning tw-text-white tw-dw-btn-sm" href="{{action([\Modules\Repair\Http\Controllers\JobSheetController::class, 'printTradeInReceipt'], [$job_sheet->id])}}" target="_blank">
+                            <i class="fas fa-exchange-alt"></i>
+                            Cetak Kuitansi Tukar Tambah
+                        </a>
+                        @endif
                     </div>
                 </div>
                 <div class="box-body" id="job_sheet">
@@ -347,6 +354,22 @@ $jobsheet_settings['contact_custom_fields'] : [];
                                 @endif
                             </td>
                         </tr>
+                        @if(!empty($trade_in))
+                        <tr>
+                            <td colspan="3" style="background-color: #fcf8e3;">
+                                <b><i class="fas fa-exchange-alt"></i> Informasi Tukar Tambah (Trade-In):</b> <br>
+                                <strong>Perangkat Bekas:</strong> {{$trade_in->device_name}}
+                                @if($trade_in->brand) (Merek: {{$trade_in->brand}}) @endif
+                                @if($trade_in->model) (Model: {{$trade_in->model}}) @endif
+                                @if($trade_in->serial_no) (SN/IMEI: {{$trade_in->serial_no}}) @endif <br>
+                                <strong>Nilai Tukar Tambah:</strong> <span class="display_currency" data-currency_symbol="true">{{$trade_in->trade_in_value}}</span> |
+                                <strong>Estimasi Harga Jual Bekas:</strong> <span class="display_currency" data-currency_symbol="true">{{$trade_in->unit_price}}</span> <br>
+                                @if($trade_in->condition) <strong>Kondisi:</strong> {{$trade_in->condition}} <br> @endif
+                                @if($trade_in->notes) <strong>Catatan:</strong> {{$trade_in->notes}} @endif
+                            </td>
+                        </tr>
+                        @endif
+
                         @if($job_sheet->service_type == 'pick_up' || $job_sheet->service_type == 'on_site')
                         <tr>
                             <td colspan="3">

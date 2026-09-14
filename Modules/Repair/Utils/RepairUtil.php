@@ -4,14 +4,231 @@ namespace Modules\Repair\Utils;
 
 use App\Business;
 use App\Charts\CommonChart;
+use App\Product;
+use App\PurchaseLine;
+use App\Transaction;
+use App\TransactionPayment;
+use App\Unit;
+use App\Utils\ProductUtil;
+use App\Utils\TransactionUtil;
 use App\Utils\Util;
 use DB;
 use Modules\Repair\Entities\JobSheet;
+use Modules\Repair\Entities\RepairTradeIn;
 use Modules\Repair\Notifications\RepairStatusUpdated;
 use Notification;
 
 class RepairUtil extends Util
 {
+    protected $productUtil;
+    protected $transactionUtil;
+
+    public function __construct(ProductUtil $productUtil = null, TransactionUtil $transactionUtil = null)
+    {
+        $this->productUtil = $productUtil ?: new ProductUtil();
+        $this->transactionUtil = $transactionUtil ?: new TransactionUtil();
+    }
+
+    /**
+     * Save or update trade-in details for job sheet / sale transaction
+     */
+    public function saveOrUpdateTradeIn($business_id, $user_id, array $trade_in_data, $transaction_id = null, $job_sheet_id = null)
+    {
+        $trade_in_value = ! empty($trade_in_data['trade_in_value']) ? $this->num_uf($trade_in_data['trade_in_value']) : 0;
+        $device_name = ! empty($trade_in_data['device_name']) ? trim($trade_in_data['device_name']) : '';
+
+        // Existing trade-in check
+        $existing = null;
+        if ($job_sheet_id) {
+            $existing = RepairTradeIn::where('business_id', $business_id)->where('job_sheet_id', $job_sheet_id)->first();
+        } elseif ($transaction_id) {
+            $existing = RepairTradeIn::where('business_id', $business_id)->where('transaction_id', $transaction_id)->first();
+        }
+
+        if ($trade_in_value <= 0 || empty($device_name)) {
+            if ($existing) {
+                // If trade-in value was reset to 0, remove trade-in payment line if needed
+                if ($existing->transaction_id) {
+                    TransactionPayment::where('transaction_id', $existing->transaction_id)
+                        ->where('note', 'like', '%Tukar Tambah%')
+                        ->delete();
+                    $this->transactionUtil->updatePaymentStatus($existing->transaction_id);
+                }
+                $existing->delete();
+            }
+            return null;
+        }
+
+        $contact_id = ! empty($trade_in_data['contact_id']) ? $trade_in_data['contact_id'] : null;
+        if (! $contact_id && $job_sheet_id) {
+            $js = JobSheet::find($job_sheet_id);
+            $contact_id = $js ? $js->contact_id : null;
+        } elseif (! $contact_id && $transaction_id) {
+            $tr = Transaction::find($transaction_id);
+            $contact_id = $tr ? $tr->contact_id : null;
+        }
+
+        $location_id = ! empty($trade_in_data['location_id']) ? $trade_in_data['location_id'] : null;
+        if (! $location_id && $job_sheet_id) {
+            $js = JobSheet::find($job_sheet_id);
+            $location_id = $js ? $js->location_id : null;
+        } elseif (! $location_id && $transaction_id) {
+            $tr = Transaction::find($transaction_id);
+            $location_id = $tr ? $tr->location_id : null;
+        }
+
+        $unit_price = ! empty($trade_in_data['unit_price']) ? $this->num_uf($trade_in_data['unit_price']) : $trade_in_value;
+        $brand = ! empty($trade_in_data['brand']) ? trim($trade_in_data['brand']) : null;
+        $model = ! empty($trade_in_data['model']) ? trim($trade_in_data['model']) : null;
+        $serial_no = ! empty($trade_in_data['serial_no']) ? trim($trade_in_data['serial_no']) : null;
+        $condition = ! empty($trade_in_data['condition']) ? trim($trade_in_data['condition']) : null;
+        $notes = ! empty($trade_in_data['notes']) ? trim($trade_in_data['notes']) : null;
+
+        $product_id = $existing ? $existing->product_id : null;
+        $purchase_transaction_id = $existing ? $existing->purchase_transaction_id : null;
+
+        // 1. Create or Update Product for Second-Hand Device
+        if (! $product_id) {
+            $unit = Unit::where('business_id', $business_id)->first();
+            $unit_id = $unit ? $unit->id : 1;
+            $sku = 'TT-' . time() . rand(100, 999);
+            $prod_name = '[Bekas] ' . $device_name . ($serial_no ? ' (SN: ' . $serial_no . ')' : '');
+
+            $product = Product::create([
+                'name' => $prod_name,
+                'business_id' => $business_id,
+                'type' => 'single',
+                'unit_id' => $unit_id,
+                'sku' => $sku,
+                'barcode_type' => 'C128',
+                'enable_stock' => 1,
+                'created_by' => $user_id,
+            ]);
+            $product_id = $product->id;
+
+            $this->productUtil->createSingleProductVariation(
+                $product->id,
+                $product->sku,
+                $trade_in_value,
+                $trade_in_value,
+                0,
+                $unit_price,
+                $unit_price
+            );
+
+            if ($location_id) {
+                $product->product_locations()->sync([$location_id]);
+            }
+        } else {
+            $product = Product::find($product_id);
+            if ($product) {
+                $prod_name = '[Bekas] ' . $device_name . ($serial_no ? ' (SN: ' . $serial_no . ')' : '');
+                $product->update(['name' => $prod_name]);
+            }
+        }
+
+        // 2. Create or Update Purchase Transaction for Stock Entry
+        if (! $purchase_transaction_id && $location_id && $contact_id) {
+            $ref_no = 'PO-TT-' . time() . rand(10, 99);
+            $purchase = Transaction::create([
+                'business_id' => $business_id,
+                'location_id' => $location_id,
+                'type' => 'purchase',
+                'status' => 'received',
+                'payment_status' => 'paid',
+                'contact_id' => $contact_id,
+                'transaction_date' => now(),
+                'total_before_tax' => $trade_in_value,
+                'final_total' => $trade_in_value,
+                'ref_no' => $ref_no,
+                'created_by' => $user_id,
+            ]);
+            $purchase_transaction_id = $purchase->id;
+
+            $variation = $product ? $product->variations()->first() : null;
+            if ($variation) {
+                PurchaseLine::create([
+                    'transaction_id' => $purchase->id,
+                    'product_id' => $product->id,
+                    'variation_id' => $variation->id,
+                    'product_variation_id' => $variation->product_variation_id,
+                    'quantity' => 1,
+                    'purchase_price' => $trade_in_value,
+                    'purchase_price_inc_tax' => $trade_in_value,
+                    'item_tax' => 0,
+                ]);
+
+                // Update product quantity stock in location
+                $this->productUtil->updateProductQuantity($location_id, $product->id, $variation->id, 1);
+            }
+
+            // Create purchase payment line
+            TransactionPayment::create([
+                'transaction_id' => $purchase->id,
+                'business_id' => $business_id,
+                'amount' => $trade_in_value,
+                'method' => 'other',
+                'paid_on' => now(),
+                'created_by' => $user_id,
+                'payment_ref_no' => 'PAY-TT-' . time() . rand(10, 99),
+                'note' => 'Pembelian Barang Tukar Tambah: ' . $device_name,
+            ]);
+        }
+
+        // 3. Create or Update Payment Line on Sale/POS Transaction
+        if ($transaction_id) {
+            $payment = TransactionPayment::where('transaction_id', $transaction_id)
+                ->where('note', 'like', '%Tukar Tambah%')
+                ->first();
+
+            if (! $payment) {
+                TransactionPayment::create([
+                    'transaction_id' => $transaction_id,
+                    'business_id' => $business_id,
+                    'amount' => $trade_in_value,
+                    'method' => 'other',
+                    'paid_on' => now(),
+                    'created_by' => $user_id,
+                    'payment_ref_no' => 'PAY-TT-SALE-' . time() . rand(10, 99),
+                    'note' => 'Potongan Tukar Tambah: ' . $device_name,
+                ]);
+            } else {
+                $payment->update([
+                    'amount' => $trade_in_value,
+                    'note' => 'Potongan Tukar Tambah: ' . $device_name,
+                ]);
+            }
+
+            $this->transactionUtil->updatePaymentStatus($transaction_id);
+        }
+
+        // 4. Save/Update RepairTradeIn Record
+        $data_to_save = [
+            'business_id' => $business_id,
+            'location_id' => $location_id,
+            'contact_id' => $contact_id,
+            'job_sheet_id' => $job_sheet_id,
+            'transaction_id' => $transaction_id,
+            'purchase_transaction_id' => $purchase_transaction_id,
+            'product_id' => $product_id,
+            'device_name' => $device_name,
+            'brand' => $brand,
+            'model' => $model,
+            'serial_no' => $serial_no,
+            'condition' => $condition,
+            'notes' => $notes,
+            'unit_price' => $unit_price,
+            'trade_in_value' => $trade_in_value,
+            'created_by' => $user_id,
+        ];
+
+        if ($existing) {
+            $existing->update($data_to_save);
+            return $existing;
+        }
+
+        return RepairTradeIn::create($data_to_save);
+    }
     public function replaceModuleTags($business_id, $data, $job_sheet)
     {
         $id = empty($job_sheet->repair_job_sheet_id) ? $job_sheet->id : $job_sheet->repair_job_sheet_id;

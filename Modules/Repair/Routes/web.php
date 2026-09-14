@@ -35,4 +35,5 @@ Route::middleware('web', 'authh', 'auth', 'SetSessionData', 'language', 'timezon
     Route::resource('job-sheet', 'Modules\Repair\Http\Controllers\JobSheetController');
     Route::post('update-repair-jobsheet-settings', [Modules\Repair\Http\Controllers\RepairSettingsController::class, 'updateJobsheetSettings']);
     Route::get('job-sheet/print-label/{id}', [Modules\Repair\Http\Controllers\JobSheetController::class, 'printLabel']);
+    Route::get('job-sheet/print-trade-in/{id}', [Modules\Repair\Http\Controllers\JobSheetController::class, 'printTradeInReceipt']);
 });

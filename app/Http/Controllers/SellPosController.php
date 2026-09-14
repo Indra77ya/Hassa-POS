@@ -635,6 +635,18 @@ class SellPosController extends Controller
                     $this->transactionUtil->updateSalesOrderStatus($transaction->sales_order_ids);
                 }
 
+                // Process Trade-In if present and valid in POS request
+                if ($request->has('trade_in')) {
+                    $trade_in_data = $request->input('trade_in');
+                    if (! empty($trade_in_data['device_name']) && ! empty($trade_in_data['trade_in_value']) && floatval($trade_in_data['trade_in_value']) > 0) {
+                        $trade_in_data['contact_id'] = $transaction->contact_id;
+                        $trade_in_data['location_id'] = $transaction->location_id;
+                        $job_sheet_id = $request->input('job_sheet_id');
+                        $repairUtil = new \Modules\Repair\Utils\RepairUtil();
+                        $repairUtil->saveOrUpdateTradeIn($business_id, $user_id, $trade_in_data, $transaction->id, $job_sheet_id);
+                    }
+                }
+
                 $this->moduleUtil->getModuleData('after_sale_saved', ['transaction' => $transaction, 'input' => $input]);
 
                 Media::uploadMedia($business_id, $transaction, $request, 'documents');

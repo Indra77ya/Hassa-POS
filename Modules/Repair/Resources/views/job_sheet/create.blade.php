@@ -89,6 +89,8 @@
             </div>
         </div>
         @endcomponent
+
+        @include('repair::job_sheet.partials.trade_in_inputs')
         @component('components.widget')
         <div class="row">
             <div class="col-sm-4">

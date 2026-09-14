@@ -86,6 +86,7 @@
                 </div>
             </div>
         </div>
+        @include('repair::job_sheet.partials.trade_in_inputs')
         <div class="box box-solid">
             <div class="box-body">
                 <div class="row">

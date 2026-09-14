@@ -400,6 +400,14 @@ class JobSheetController extends Controller
 
             $job_sheet = JobSheet::create($input);
 
+            // Process Trade-In if present
+            if ($request->has('trade_in')) {
+                $trade_in_data = $request->input('trade_in');
+                $trade_in_data['contact_id'] = $job_sheet->contact_id;
+                $trade_in_data['location_id'] = $job_sheet->location_id;
+                $this->repairUtil->saveOrUpdateTradeIn($business_id, $request->user()->id, $trade_in_data, null, $job_sheet->id);
+            }
+
             //upload media
             Media::uploadMedia($business_id, $job_sheet, $request, 'images');
 
@@ -497,8 +505,10 @@ class JobSheetController extends Controller
            ->latest()
            ->get();
 
+        $trade_in = \Modules\Repair\Entities\RepairTradeIn::where('business_id', $business_id)->where('job_sheet_id', $id)->first();
+
         return view('repair::job_sheet.show')
-            ->with(compact('job_sheet', 'repair_settings', 'parts', 'activities', 'jobsheet_settings'));
+            ->with(compact('job_sheet', 'repair_settings', 'parts', 'activities', 'jobsheet_settings', 'trade_in'));
     }
 
     /**
@@ -536,8 +546,10 @@ class JobSheetController extends Controller
             $technecians = $this->commonUtil->serviceStaffDropdown($business_id);
         }
 
+        $trade_in = \Modules\Repair\Entities\RepairTradeIn::where('business_id', $business_id)->where('job_sheet_id', $id)->first();
+
         return view('repair::job_sheet.edit')
-            ->with(compact('job_sheet', 'repair_statuses', 'device_models', 'brands', 'devices', 'default_status', 'technecians', 'types', 'customer_groups', 'repair_settings'));
+            ->with(compact('job_sheet', 'repair_statuses', 'device_models', 'brands', 'devices', 'default_status', 'technecians', 'types', 'customer_groups', 'repair_settings', 'trade_in'));
     }
 
     /**
@@ -578,6 +590,14 @@ class JobSheetController extends Controller
                             ->findOrFail($id);
 
             $job_sheet->update($input);
+
+            // Process Trade-In if present
+            if ($request->has('trade_in')) {
+                $trade_in_data = $request->input('trade_in');
+                $trade_in_data['contact_id'] = $job_sheet->contact_id;
+                $trade_in_data['location_id'] = $job_sheet->location_id;
+                $this->repairUtil->saveOrUpdateTradeIn($business_id, $request->user()->id, $trade_in_data, null, $job_sheet->id);
+            }
 
             //upload media
             Media::uploadMedia($business_id, $job_sheet, $request, 'images');
@@ -1015,6 +1035,44 @@ class JobSheetController extends Controller
         $mpdf->SetTitle(__('repair::lang.job_sheet_label').' | '.$job_sheet->job_sheet_no);
         $mpdf->WriteHTML($html);
         $mpdf->Output('job_sheet_label.pdf', 'I');
+    }
+
+    /**
+     * Print Trade-In Receipt & Agreement
+     *
+     * @param int $id
+     * @return Response
+     */
+    public function printTradeInReceipt($id)
+    {
+        $business_id = request()->session()->get('user.business_id');
+
+        if (! (auth()->user()->can('superadmin') || ($this->moduleUtil->hasThePermissionInSubscription($business_id, 'repair_module') && (auth()->user()->can('job_sheet.view_assigned') || auth()->user()->can('job_sheet.view_all') || auth()->user()->can('job_sheet.create'))))) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $trade_in = \Modules\Repair\Entities\RepairTradeIn::with(['business', 'location', 'customer'])
+            ->where('business_id', $business_id)
+            ->where('job_sheet_id', $id)
+            ->firstOrFail();
+
+        $job_sheet = JobSheet::find($id);
+
+        $html = view('repair::trade_in.receipt', compact('trade_in', 'job_sheet'))->render();
+
+        $mpdf = new \Mpdf\Mpdf([
+            'tempDir' => public_path('uploads/temp'),
+            'mode' => 'utf-8',
+            'margin_top' => 10,
+            'margin_bottom' => 10,
+            'margin_left' => 10,
+            'margin_right' => 10,
+            'format' => 'A4',
+        ]);
+        $mpdf->useSubstitutions = true;
+        $mpdf->SetTitle('Kuitansi Tukar Tambah | TT-' . str_pad($trade_in->id, 5, '0', STR_PAD_LEFT));
+        $mpdf->WriteHTML($html);
+        $mpdf->Output('kuitansi_tukar_tambah.pdf', 'I');
     }
 
     public function getUploadDocs($id)
