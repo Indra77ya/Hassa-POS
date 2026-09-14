@@ -90,7 +90,16 @@ class RepairUtil extends Util
         // 1. Create or Update Product for Second-Hand Device
         if (! $product_id) {
             $unit = Unit::where('business_id', $business_id)->first();
-            $unit_id = $unit ? $unit->id : 1;
+            if (! $unit) {
+                $unit = Unit::create([
+                    'business_id' => $business_id,
+                    'actual_name' => 'Pc(s)',
+                    'short_name' => 'Pc(s)',
+                    'allow_decimal' => 0,
+                    'created_by' => $user_id,
+                ]);
+            }
+            $unit_id = $unit->id;
             $sku = 'TT-' . time() . rand(100, 999);
             $prod_name = '[Bekas] ' . $device_name . ($serial_no ? ' (SN: ' . $serial_no . ')' : '');
 

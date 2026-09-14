@@ -62,8 +62,42 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white" data-dismiss="modal">Simpan & Gunakan</button>
+                <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white" id="save_pos_trade_in_btn" data-dismiss="modal">Simpan & Gunakan</button>
             </div>
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        var previous_trade_in_val = 0;
+
+        $('#pos_trade_in_modal').on('show.bs.modal', function() {
+            previous_trade_in_val = __read_number($('#trade_in_pos_value')) || 0;
+        });
+
+        $(document).on('click', '#save_pos_trade_in_btn', function() {
+            var val_str = $('#trade_in_pos_value').val() || '0';
+            var new_trade_in_val = __read_number($('#trade_in_pos_value')) || 0;
+            var device_name = $('#trade_in_pos_device_name').val() || '';
+
+            if (device_name !== '') {
+                var first_payment_row = $('#payment_rows_div').find('.payment_row').first();
+                if (first_payment_row.length) {
+                    var current_cash_amount = __read_number(first_payment_row.find('.payment-amount')) || 0;
+                    var adjusted_cash_amount = current_cash_amount + previous_trade_in_val - new_trade_in_val;
+                    if (adjusted_cash_amount < 0) {
+                        adjusted_cash_amount = 0;
+                    }
+                    __write_number(first_payment_row.find('.payment-amount'), adjusted_cash_amount);
+                    if (typeof calculate_balance_due === 'function') {
+                        calculate_balance_due();
+                    }
+                }
+                if (new_trade_in_val > 0) {
+                    toastr.success('Potongan Tukar Tambah Rp ' + val_str + ' berhasil diterapkan!');
+                }
+            }
+        });
+    });
+</script>
