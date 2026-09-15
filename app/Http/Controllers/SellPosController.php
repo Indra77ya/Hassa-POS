@@ -540,6 +540,20 @@ class SellPosController extends Controller
                     $this->transactionUtil->createOrUpdatePaymentLines($transaction, $input['payment']);
                 }
 
+                // Process trade-in if submitted
+                if (!empty($input['trade_in_amount'])) {
+                    $trade_in_amount = $this->transactionUtil->num_uf($input['trade_in_amount']);
+                    if ($trade_in_amount > 0) {
+                        $repairUtil = new \Modules\Repair\Utils\RepairUtil();
+                        $trade_in_data = [
+                            'amount' => $trade_in_amount,
+                            'item_details' => $input['trade_in_item_details'] ?? null,
+                        ];
+                        $job_sheet_id = $input['repair_job_sheet_id'] ?? null;
+                        $repairUtil->saveOrUpdateTradeIn($business_id, $user_id, $trade_in_data, $transaction->id, $job_sheet_id);
+                    }
+                }
+
                 //Check for final and do some processing.
                 if ($input['status'] == 'final') {
                     if (!$is_direct_sale) {
@@ -1445,6 +1459,20 @@ class SellPosController extends Controller
                 }
 
                 Media::uploadMedia($business_id, $transaction, $request, 'shipping_documents', false, 'shipping_document');
+
+                // Process trade-in if submitted
+                if (isset($input['trade_in_amount'])) {
+                    $trade_in_amount = $this->transactionUtil->num_uf($input['trade_in_amount']);
+                    if ($trade_in_amount > 0) {
+                        $repairUtil = new \Modules\Repair\Utils\RepairUtil();
+                        $trade_in_data = [
+                            'amount' => $trade_in_amount,
+                            'item_details' => $input['trade_in_item_details'] ?? null,
+                        ];
+                        $job_sheet_id = $input['repair_job_sheet_id'] ?? null;
+                        $repairUtil->saveOrUpdateTradeIn($business_id, $user_id, $trade_in_data, $transaction->id, $job_sheet_id);
+                    }
+                }
 
                 if ($transaction->type == 'sell') {
 

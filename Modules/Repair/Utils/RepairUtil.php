@@ -10,8 +10,166 @@ use Modules\Repair\Entities\JobSheet;
 use Modules\Repair\Notifications\RepairStatusUpdated;
 use Notification;
 
+use App\Category;
+use App\Product;
+use App\PurchaseLine;
+use App\Transaction;
+use App\Unit;
+use App\Utils\ProductUtil;
+use App\Utils\TransactionUtil;
+use Modules\Repair\Entities\RepairTradeIn;
+
 class RepairUtil extends Util
 {
+    /**
+     * Process and save or update Trade-In device as inventory purchase and payment offset.
+     *
+     * @param int $business_id
+     * @param int $user_id
+     * @param array $trade_in_data
+     * @param int $transaction_id
+     * @param int|null $job_sheet_id
+     * @return RepairTradeIn|null
+     */
+    public function saveOrUpdateTradeIn($business_id, $user_id, array $trade_in_data, $transaction_id, $job_sheet_id = null)
+    {
+        $amount = isset($trade_in_data['amount']) ? (float) $trade_in_data['amount'] : 0;
+        if ($amount <= 0) {
+            return null;
+        }
+
+        $sale_transaction = Transaction::where('business_id', $business_id)->find($transaction_id);
+        if (!$sale_transaction) {
+            return null;
+        }
+
+        $item_details = [];
+        if (!empty($trade_in_data['item_details'])) {
+            if (is_array($trade_in_data['item_details'])) {
+                $item_details = $trade_in_data['item_details'];
+            } elseif (is_string($trade_in_data['item_details'])) {
+                $decoded = json_decode($trade_in_data['item_details'], true);
+                $item_details = is_array($decoded) ? $decoded : ['details' => $trade_in_data['item_details']];
+            }
+        }
+
+        $device_name = !empty($item_details['device_name']) ? $item_details['device_name'] : (!empty($item_details['name']) ? $item_details['name'] : 'Perangkat Bekas');
+        $serial_no = !empty($item_details['serial_no']) ? $item_details['serial_no'] : (!empty($item_details['imei']) ? $item_details['imei'] : null);
+        $condition = !empty($item_details['condition']) ? $item_details['condition'] : null;
+
+        $category = Category::firstOrCreate(
+            ['business_id' => $business_id, 'name' => 'Barang Bekas', 'category_type' => 'product'],
+            ['parent_id' => 0, 'short_code' => 'BB']
+        );
+
+        $default_unit = Unit::where('business_id', $business_id)->first();
+        $unit_id = $default_unit ? $default_unit->id : 1;
+
+        $productUtil = new ProductUtil();
+        $transactionUtil = new TransactionUtil();
+
+        $trade_in = RepairTradeIn::where('transaction_id', $transaction_id)->first();
+        $product = null;
+
+        if ($trade_in && $trade_in->product_id) {
+            $product = Product::where('business_id', $business_id)->find($trade_in->product_id);
+        }
+
+        if (!$product) {
+            $sku = 'TRD-' . time() . '-' . rand(100, 999);
+            $product = Product::create([
+                'name' => '[Trade-In] ' . $device_name,
+                'business_id' => $business_id,
+                'type' => 'single',
+                'unit_id' => $unit_id,
+                'category_id' => $category->id,
+                'sku' => $sku,
+                'enable_stock' => 1,
+                'created_by' => $user_id,
+            ]);
+
+            $variation = $productUtil->createSingleProductVariation(
+                $product->id,
+                $product->sku,
+                $amount,
+                $amount,
+                0,
+                $amount,
+                $amount
+            );
+        } else {
+            $variation = $product->variations()->first();
+        }
+
+        $purchase_transaction = null;
+        if ($trade_in && $trade_in->purchase_transaction_id) {
+            $purchase_transaction = Transaction::where('business_id', $business_id)->find($trade_in->purchase_transaction_id);
+        }
+
+        if (!$purchase_transaction) {
+            $purchase_ref = 'TRD-PO-' . time() . '-' . rand(10, 99);
+            $purchase_transaction = Transaction::create([
+                'business_id' => $business_id,
+                'location_id' => $sale_transaction->location_id,
+                'type' => 'purchase',
+                'status' => 'received',
+                'payment_status' => 'paid',
+                'contact_id' => $sale_transaction->contact_id,
+                'final_total' => $amount,
+                'grand_total' => $amount,
+                'created_by' => $user_id,
+                'transaction_date' => \Carbon\Carbon::now()->toDateTimeString(),
+                'ref_no' => $purchase_ref,
+            ]);
+        } else {
+            $purchase_transaction->update([
+                'final_total' => $amount,
+                'grand_total' => $amount,
+            ]);
+        }
+
+        PurchaseLine::updateOrCreate(
+            [
+                'transaction_id' => $purchase_transaction->id,
+                'product_id' => $product->id,
+            ],
+            [
+                'variation_id' => $variation->id,
+                'quantity' => 1,
+                'purchase_price' => $amount,
+                'purchase_price_inc_tax' => $amount,
+                'item_tax' => 0,
+            ]
+        );
+
+        $productUtil->updateProductQuantity($purchase_transaction->location_id, $product->id, $variation->id, 1, 0, null, false);
+
+        $payment_data = [
+            'amount' => $amount,
+            'method' => 'other',
+            'paid_on' => \Carbon\Carbon::now()->toDateTimeString(),
+            'note' => 'Tukar Tambah / Trade-In offset',
+        ];
+        $transactionUtil->createOrUpdatePaymentLines($purchase_transaction, [$payment_data], $business_id, $user_id, false);
+
+        $trade_in_record = RepairTradeIn::updateOrCreate(
+            ['transaction_id' => $transaction_id],
+            [
+                'business_id' => $business_id,
+                'user_id' => $user_id,
+                'job_sheet_id' => $job_sheet_id,
+                'product_id' => $product->id,
+                'purchase_transaction_id' => $purchase_transaction->id,
+                'amount' => $amount,
+                'serial_no' => $serial_no,
+                'condition' => $condition,
+                'details' => $item_details,
+            ]
+        );
+
+        return $trade_in_record;
+    }
+
     public function replaceModuleTags($business_id, $data, $job_sheet)
     {
         $id = empty($job_sheet->repair_job_sheet_id) ? $job_sheet->id : $job_sheet->repair_job_sheet_id;
