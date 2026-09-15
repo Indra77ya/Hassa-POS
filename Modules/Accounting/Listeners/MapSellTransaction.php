@@ -91,7 +91,7 @@ class MapSellTransaction
 
             // 2. Delete existing mappings for this transaction first to prevent duplicates or stale records
             AccountingAccountsTransaction::where('transaction_id', $id)
-                ->whereIn('map_type', ['payment_account', 'deposit_to', 'cogs_debit', 'cogs_credit', 'recovered_deposit_to', 'loss_deposit_to'])
+                ->whereIn('map_type', ['payment_account', 'deposit_to', 'cogs_debit', 'cogs_credit', 'recovered_deposit_to', 'loss_deposit_to', 'trade_in_debit'])
                 ->delete();
 
             // 3. Calculate net paid amount (payments - change returns)
@@ -255,12 +255,50 @@ class MapSellTransaction
                 AccountingAccountsTransaction::updateOrCreateMapTransaction($receivable_data);
             }
 
-            // Credit Revenue Leg (Pendapatan Penjualan)
+            // Check for Trade-In record
+            $trade_in_amount = 0;
+            $trade_in_record = \DB::table('repair_trade_ins')->where('transaction_id', $id)->first();
+            if ($trade_in_record && (float)$trade_in_record->amount > 0) {
+                $trade_in_amount = (float)$trade_in_record->amount;
+
+                // Resolve Trade-In Used Goods Inventory Asset Account (Persediaan Barang Bekas)
+                $trade_in_account_id = isset($accounting_default_map['trade_in']['deposit_to']) ? $accounting_default_map['trade_in']['deposit_to'] : null;
+                if (is_null($trade_in_account_id)) {
+                    $trade_in_account_id = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                        ->where('status', 'active')
+                        ->where('account_primary_type', 'asset')
+                        ->where(function($q) {
+                            $q->where('name', 'like', '%Persediaan Barang Bekas%')
+                              ->orWhere('name', 'like', '%Barang Bekas%')
+                              ->orWhere('name', 'like', '%Persediaan%');
+                        })
+                        ->value('id');
+                }
+
+                if (!is_null($trade_in_account_id)) {
+                    $trade_in_journal_data = [
+                        'accounting_account_id' => $trade_in_account_id,
+                        'transaction_id' => $id,
+                        'transaction_payment_id' => null,
+                        'amount' => $trade_in_amount,
+                        'type' => 'debit',
+                        'sub_type' => 'sell',
+                        'note' => 'Persediaan Barang Bekas (Tukar Tambah) - ' . $transaction->invoice_no,
+                        'map_type' => 'trade_in_debit',
+                        'created_by' => $user_id,
+                        'operation_date' => $transaction->transaction_date ?? \Carbon::now(),
+                    ];
+                    AccountingAccountsTransaction::updateOrCreateMapTransaction($trade_in_journal_data);
+                }
+            }
+
+            // Credit Revenue Leg (Pendapatan Penjualan / Repair utuh = final_total + trade_in_amount)
+            $total_revenue_amount = $final_total + $trade_in_amount;
             $revenue_data = [
                 'accounting_account_id' => $revenue_account_id,
                 'transaction_id' => $id,
                 'transaction_payment_id' => null,
-                'amount' => $final_total,
+                'amount' => $total_revenue_amount,
                 'type' => 'credit',
                 'sub_type' => 'sell',
                 'note' => 'Pendapatan Penjualan - ' . $transaction->invoice_no,
