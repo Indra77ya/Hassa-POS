@@ -531,6 +531,22 @@
 					</div>
 				@endif
 
+				<!-- Trade-In -->
+				@if( !empty($receipt_details->trade_in_amount) )
+					<div class="flex-box">
+						<p class="width-50 text-right">
+							{!! $receipt_details->trade_in_label !!}
+							@if(!empty($receipt_details->trade_in_details['device_name']))
+								<br><small>({{$receipt_details->trade_in_details['device_name']}}@if(!empty($receipt_details->trade_in_serial_no)) - {{$receipt_details->trade_in_serial_no}}@endif)</small>
+							@endif
+						</p>
+
+						<p class="width-50 text-right">
+							(-) {{$receipt_details->trade_in_amount}}
+						</p>
+					</div>
+				@endif
+
 				@if(!empty($receipt_details->packing_charge))
 					<div class="flex-box">
 						<p class="left text-right">

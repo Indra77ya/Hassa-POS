@@ -475,6 +475,21 @@
 						</tr>
 					@endif
 
+					@if( !empty($receipt_details->trade_in_amount) )
+						<tr>
+							<th>
+								{!! $receipt_details->trade_in_label !!}
+								@if(!empty($receipt_details->trade_in_details['device_name']))
+									<br><small>({{$receipt_details->trade_in_details['device_name']}}@if(!empty($receipt_details->trade_in_serial_no)) - {{$receipt_details->trade_in_serial_no}}@endif)</small>
+								@endif
+							</th>
+
+							<td class="text-right">
+								(-) {{$receipt_details->trade_in_amount}}
+							</td>
+						</tr>
+					@endif
+
 					@if(!empty($receipt_details->total_items_label))
 						<tr>
 							<th style="width:70%">

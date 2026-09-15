@@ -1426,6 +1426,17 @@ class TransactionUtil extends Util
 
         $output['discount_amount_unformatted'] = $discount;
 
+        //Trade-In details
+        $trade_in_record = \DB::table('repair_trade_ins')->where('transaction_id', $transaction->id)->first();
+        if ($trade_in_record && (float)$trade_in_record->amount > 0) {
+            $output['trade_in_label'] = __('repair::lang.trade_in');
+            $output['trade_in_amount'] = $this->num_f($trade_in_record->amount, $show_currency, $business_details);
+            $output['trade_in_amount_unformatted'] = (float)$trade_in_record->amount;
+            $output['trade_in_serial_no'] = $trade_in_record->serial_no;
+            $output['trade_in_condition'] = $trade_in_record->condition;
+            $output['trade_in_details'] = is_string($trade_in_record->details) ? json_decode($trade_in_record->details, true) : $trade_in_record->details;
+        }
+
         //reward points
         if ($business_details->enable_rp == 1 && ! empty($transaction->rp_redeemed)) {
             $output['reward_point_label'] = $business_details->rp_name;
