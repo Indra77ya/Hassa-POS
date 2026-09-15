@@ -38,6 +38,7 @@
 			<span class="pos_totals_label">
 				<span class="mobile-only">TRADE(-)</span>
 				<span class="desktop-only">@lang('repair::lang.trade_in')(-)</span>
+				<i class="fas fa-edit pos_totals_edit tw-text-indigo-500 hover:tw-text-indigo-700 tw-ml-1 tw-cursor-pointer" id="pos-edit-trade-in" title="@lang('repair::lang.trade_in')" aria-hidden="true" data-toggle="modal" data-target="#trade_in_modal"></i>
 			</span>
 			<span class="pos_totals_value pos_totals_value--danger" id="total_trade_in">0</span>
 			<input type="hidden" name="trade_in_amount" id="trade_in_amount" value="@if(empty($edit)){{'0.00'}}@else{{@num_format($transaction->trade_in_amount ?? 0)}}@endif" data-default="0.00">

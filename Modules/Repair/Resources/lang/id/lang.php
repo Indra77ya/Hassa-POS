@@ -215,6 +215,7 @@ return [
     'view_own_invoice' => 'Lihat faktur sendiri',
     'trade_in' => 'Tukar Tambah',
     'trade_in_amount' => 'Nilai Tukar Tambah',
+    'resale_price' => 'Harga Jual Kembali',
     'trade_in_details' => 'Detail Perangkat Bekas',
     'save_and_use' => 'Simpan & Gunakan',
 ];

@@ -21,16 +21,22 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="trade_in_condition">@lang('repair::lang.condition_of_product'):</label>
                             <input type="text" class="form-control" id="trade_in_condition" name="condition" placeholder="Contoh: Mulus 90%, Baterai 85%">
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="trade_in_value">@lang('repair::lang.trade_in_amount') (Rp):*</label>
                             <input type="text" class="form-control input_number trade_in_value_input" id="trade_in_value" name="modal_trade_in_amount" placeholder="0.00" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="trade_in_resale_price">@lang('repair::lang.resale_price') (Rp):</label>
+                            <input type="text" class="form-control input_number" id="trade_in_resale_price" name="resale_price" placeholder="Harga Jual Kembali">
                         </div>
                     </div>
                 </div>

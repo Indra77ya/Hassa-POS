@@ -216,6 +216,7 @@ return [
     'use_for_repair_help_text' => 'If checked, brand will be displayed in dropdown used on repair module!',
     'trade_in' => 'Trade-In',
     'trade_in_amount' => 'Trade-In Value',
+    'resale_price' => 'Resale Price',
     'trade_in_details' => 'Used Device Details',
     'save_and_use' => 'Save & Use',
 ];

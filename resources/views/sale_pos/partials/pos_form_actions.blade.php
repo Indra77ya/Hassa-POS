@@ -162,3 +162,4 @@
 @endif
 
 @include('sale_pos.partials.edit_shipping_modal')
+@includeIf('repair::repair.partials.trade_in_modal')

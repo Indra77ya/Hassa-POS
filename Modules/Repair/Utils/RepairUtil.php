@@ -56,6 +56,7 @@ class RepairUtil extends Util
         $device_name = !empty($item_details['device_name']) ? $item_details['device_name'] : (!empty($item_details['name']) ? $item_details['name'] : 'Perangkat Bekas');
         $serial_no = !empty($item_details['serial_no']) ? $item_details['serial_no'] : (!empty($item_details['imei']) ? $item_details['imei'] : null);
         $condition = !empty($item_details['condition']) ? $item_details['condition'] : null;
+        $resale_price = !empty($item_details['resale_price']) ? (float) $item_details['resale_price'] : $amount;
 
         $category = Category::firstOrCreate(
             ['business_id' => $business_id, 'name' => 'Barang Bekas', 'category_type' => 'product'],
@@ -94,11 +95,19 @@ class RepairUtil extends Util
                 $amount,
                 $amount,
                 0,
-                $amount,
-                $amount
+                $resale_price,
+                $resale_price
             );
         } else {
             $variation = $product->variations()->first();
+            if ($variation) {
+                $variation->update([
+                    'default_purchase_price' => $amount,
+                    'dpp_inc_tax' => $amount,
+                    'default_sell_price' => $resale_price,
+                    'sell_price_inc_tax' => $resale_price,
+                ]);
+            }
         }
 
         $purchase_transaction = null;
