@@ -129,6 +129,7 @@
 		<div class="btn-group mt-5" role="group">
 			<button type="button" class="btn btn-primary btn-flat" data-toggle="modal" data-target="#checklist_modal"><i class="fa fa-plus"></i> @lang('repair::lang.pre_repair_checklist')</button>
 			<button type="button" class="btn btn-primary btn-flat" data-toggle="modal" data-target="#security_modal"><i class="fa fa-lock"></i> @lang('repair::lang.security')</button>
+			<button type="button" class="btn btn-success btn-flat" data-toggle="modal" data-target="#trade_in_modal"><i class="fas fa-sync-alt"></i> @lang('repair::lang.trade_in')</button>
 		</div>
 	</div>
 </div>
@@ -142,6 +143,7 @@
 </div>
 @include('repair::repair.partials.security_modal')
 @include('repair::repair.partials.checklist_modal')
+@include('repair::repair.partials.trade_in_modal')
 
 <style type="text/css">
 	#product_category_div, #feature_product_div, #product_brand_div{
