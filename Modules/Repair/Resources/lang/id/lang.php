@@ -213,4 +213,8 @@ return [
     'use_for_repair_help_text' => 'Jika dicentang, merek akan ditampilkan di dropdown yang digunakan di modul perbaikan!',
     'view_all_invoice' => 'Lihat semua faktur',
     'view_own_invoice' => 'Lihat faktur sendiri',
+    'trade_in' => 'Tukar Tambah',
+    'trade_in_amount' => 'Nilai Tukar Tambah',
+    'trade_in_details' => 'Detail Perangkat Bekas',
+    'save_and_use' => 'Simpan & Gunakan',
 ];

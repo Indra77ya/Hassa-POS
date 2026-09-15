@@ -214,4 +214,8 @@ return [
     'save_and_upload_docs' => 'Save and upload docs',
     'upload_job_sheet_docs' => 'Upload job sheet docs',
     'use_for_repair_help_text' => 'If checked, brand will be displayed in dropdown used on repair module!',
+    'trade_in' => 'Trade-In',
+    'trade_in_amount' => 'Trade-In Value',
+    'trade_in_details' => 'Used Device Details',
+    'save_and_use' => 'Save & Use',
 ];

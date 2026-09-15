@@ -1170,7 +1170,35 @@ $(document).ready(function() {
 
     //Updates for add sell
     $('select#discount_type, input#discount_amount, input#shipping_charges, \
-        input#rp_redeemed_amount').change(function() {
+        input#rp_redeemed_amount, input#trade_in_amount').change(function() {
+        pos_total_row();
+    });
+
+    $(document).on('click', '#save_trade_in_btn, .save_trade_in_btn', function(e) {
+        var modal = $(this).closest('.modal');
+        var amount_elem = modal.find('input#trade_in_value, input.trade_in_value_input, input[name="modal_trade_in_amount"]');
+        if (amount_elem.length) {
+            var amount = __read_number(amount_elem);
+            var details = {};
+            modal.find('input, select, textarea').serializeArray().forEach(function(item) {
+                details[item.name] = item.value;
+            });
+            __write_number($('input#trade_in_amount'), amount);
+            $('input#trade_in_item_details').val(JSON.stringify(details));
+            $('input#trade_in_amount').trigger('change');
+        }
+    });
+
+    $(document).on('trade_in_updated', function(e, data) {
+        if (data) {
+            if (data.amount !== undefined) {
+                __write_number($('input#trade_in_amount'), data.amount);
+            }
+            if (data.details !== undefined) {
+                var details_str = typeof data.details === 'object' ? JSON.stringify(data.details) : data.details;
+                $('input#trade_in_item_details').val(details_str);
+            }
+        }
         pos_total_row();
     });
     $('select#tax_rate_id').change(function() {
@@ -2289,7 +2317,14 @@ function calculate_billing_details(price_total) {
         $('#packing_charge_text').text(__currency_trans_from_en(packing_charge, false));
     }
 
-    var total_payable = price_total + order_tax - discount + shipping_charges + packing_charge + additional_expense;
+    // Trade-in deduction
+    var trade_in_amount = 0;
+    if ($('input#trade_in_amount').length > 0) {
+        trade_in_amount = __read_number($('input#trade_in_amount'));
+    }
+    $('span#total_trade_in').text(__currency_trans_from_en(trade_in_amount, false));
+
+    var total_payable = price_total + order_tax - discount - trade_in_amount + shipping_charges + packing_charge + additional_expense;
 
     var rounding_multiple = $('#amount_rounding_method').val() ? parseFloat($('#amount_rounding_method').val()) : 0;
     var round_off_data = __round(total_payable, rounding_multiple);
@@ -2439,7 +2474,7 @@ function reset_pos_form(){
 	set_location();
 
 	$('tr.product_row').remove();
-	$('span.total_quantity, span.price_total, span#total_discount, span#order_tax, span#total_payable, span#shipping_charges_amount, span#loyalty_amount_display').text(0);
+	$('span.total_quantity, span.price_total, span#total_discount, span#total_trade_in, span#order_tax, span#total_payable, span#shipping_charges_amount, span#loyalty_amount_display').text(0);
 	$('span.total_payable_span', 'span.total_paying', 'span.balance_due').text(0);
 
 	$('#modal_payment').find('.remove_payment_row').each( function(){
@@ -2450,9 +2485,16 @@ function reset_pos_form(){
         $('#is_credit_sale').val(0);
     }
 
-	//Reset discount
+	//Reset discount & trade-in
 	__write_number($('input#discount_amount'), $('input#discount_amount').data('default'));
 	$('input#discount_type').val($('input#discount_type').data('default'));
+
+	if ($('input#trade_in_amount').length) {
+		__write_number($('input#trade_in_amount'), $('input#trade_in_amount').data('default') || 0);
+	}
+	if ($('input#trade_in_item_details').length) {
+		$('input#trade_in_item_details').val('');
+	}
 
 	//Reset tax rate
 	$('input#tax_rate_id').val($('input#tax_rate_id').data('default'));

@@ -33,6 +33,17 @@
 			<input type="hidden" name="discount_amount" id="discount_amount" value="@if(empty($edit)) {{@num_format($business_details->default_sales_discount)}} @else {{@num_format($transaction->discount_amount)}} @endif" data-default="{{$business_details->default_sales_discount}}">
 		</div>
 
+		{{-- Trade-In --}}
+		<div class="pos_totals_cell @if(!empty($enabled_modules) && !in_array('repair', $enabled_modules)) hide @endif" id="pos_trade_in_cell">
+			<span class="pos_totals_label">
+				<span class="mobile-only">TRADE(-)</span>
+				<span class="desktop-only">@lang('repair::lang.trade_in')(-)</span>
+			</span>
+			<span class="pos_totals_value pos_totals_value--danger" id="total_trade_in">0</span>
+			<input type="hidden" name="trade_in_amount" id="trade_in_amount" value="@if(empty($edit)){{'0.00'}}@else{{@num_format($transaction->trade_in_amount ?? 0)}}@endif" data-default="0.00">
+			<input type="hidden" name="trade_in_item_details" id="trade_in_item_details" value="@if(empty($edit)){{''}}@else{{$transaction->trade_in_item_details ?? ''}}@endif">
+		</div>
+
 		{{-- Loyalty --}}
 		<div class="pos_totals_cell @if(!$is_rp_enabled) hide @endif">
 			<span class="pos_totals_label">
