@@ -2325,6 +2325,9 @@ function calculate_billing_details(price_total) {
     $('span#total_trade_in').text(__currency_trans_from_en(trade_in_amount, false));
 
     var total_payable = price_total + order_tax - discount - trade_in_amount + shipping_charges + packing_charge + additional_expense;
+    if (total_payable < 0) {
+        total_payable = 0;
+    }
 
     var rounding_multiple = $('#amount_rounding_method').val() ? parseFloat($('#amount_rounding_method').val()) : 0;
     var round_off_data = __round(total_payable, rounding_multiple);
