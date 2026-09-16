@@ -1068,15 +1068,23 @@ class JobSheetController extends Controller
 
     public function printTradeInReceipt($id)
     {
-        $business_id = request()->session()->get('user.business_id');
+        $session_business_id = request()->session()->get('user.business_id');
 
-        $trade_in = \Modules\Repair\Entities\RepairTradeIn::where('business_id', $business_id)
-            ->where(function($q) use ($id) {
+        $trade_in = \Modules\Repair\Entities\RepairTradeIn::where(function($q) use ($id) {
                 $q->where('id', $id)
                   ->orWhere('transaction_id', $id)
                   ->orWhere('job_sheet_id', $id);
-            })
-            ->firstOrFail();
+            });
+
+        if (!empty($session_business_id)) {
+            $trade_in->where('business_id', $session_business_id);
+        }
+
+        $trade_in = $trade_in->first();
+
+        if (empty($trade_in)) {
+            abort(404, 'Data tukar tambah tidak ditemukan.');
+        }
 
         $transaction = null;
         if (!empty($trade_in->transaction_id)) {
@@ -1088,6 +1096,7 @@ class JobSheetController extends Controller
             $job_sheet = \Modules\Repair\Entities\JobSheet::with(['customer', 'businessLocation'])->find($trade_in->job_sheet_id);
         }
 
+        $business_id = $trade_in->business_id ?? $session_business_id;
         $business = \App\Business::find($business_id);
 
         return view('repair::trade_in.receipt', compact('trade_in', 'transaction', 'job_sheet', 'business'));
