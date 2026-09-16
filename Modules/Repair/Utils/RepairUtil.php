@@ -585,10 +585,11 @@ class RepairUtil extends Util
                     'paid_on' => \Carbon::now()->toDateTimeString(),
                     'created_by' => $user_id,
                     'payment_ref_no' => 'TRD-DED-' . strtoupper(\Str::random(6)),
-                    'note' => 'Potongan Tukar Tambah',
+                    'note' => 'Tukar Tambah (Trade-In)',
                 ]);
             } else {
                 $trade_in_payment->amount = $trade_in_amount;
+                $trade_in_payment->note = 'Tukar Tambah (Trade-In)';
                 $trade_in_payment->save();
             }
 
