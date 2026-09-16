@@ -467,11 +467,14 @@ class RepairUtil extends Util
             }
 
             // Create Variation
+            $profit_percent = $trade_in_amount > 0 ? (($resale_price - $trade_in_amount) / $trade_in_amount) * 100 : 0;
             $productUtil = new \App\Utils\ProductUtil();
             $productUtil->createSingleProductVariation(
                 $product->id,
                 $product->sku,
                 $trade_in_amount,
+                $trade_in_amount,
+                $profit_percent,
                 $resale_price,
                 $resale_price
             );
