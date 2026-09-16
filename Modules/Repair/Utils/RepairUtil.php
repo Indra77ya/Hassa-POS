@@ -546,6 +546,9 @@ class RepairUtil extends Util
                 'payment_ref_no' => 'TRD-PAY-' . strtoupper(\Str::random(6)),
                 'note' => 'Pembayaran Otomatis Tukar Tambah',
             ]);
+
+            // Dispatch PurchaseCreatedOrModified event to sync accounting double-entry journal (inventory debit)
+            event(new \App\Events\PurchaseCreatedOrModified($purchase));
         }
 
         // 3. Save or update RepairTradeIn model record

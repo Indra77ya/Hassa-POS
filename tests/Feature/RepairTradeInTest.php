@@ -116,7 +116,7 @@ class RepairTradeInTest extends TestCase
         $this->assertDatabaseHas('transaction_payments', [
             'transaction_id' => $sale_trans->id,
             'amount' => 2000000,
-            'note' => 'Potongan Tukar Tambah',
+            'note' => 'Tukar Tambah (Trade-In)',
         ]);
     }
 
