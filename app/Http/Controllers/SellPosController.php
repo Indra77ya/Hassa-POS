@@ -639,14 +639,17 @@ class SellPosController extends Controller
 
                 Media::uploadMedia($business_id, $transaction, $request, 'documents');
 
-                if (!empty($input['trade_in_amount']) && floatval($input['trade_in_amount']) > 0) {
+                $trade_in_amount_uf = !empty($input['trade_in_amount']) ? $this->transactionUtil->num_uf($input['trade_in_amount']) : 0;
+                if ($trade_in_amount_uf > 0) {
+                    $resale_price_input = $input['trade_in_item_details']['resale_price'] ?? $input['trade_in_amount'];
+                    $resale_price_uf = $this->transactionUtil->num_uf($resale_price_input);
                     $repairUtil = new \Modules\Repair\Utils\RepairUtil();
                     $trade_in_data = [
                         'model_name' => $input['trade_in_item_details']['model_name'] ?? '',
                         'serial_no' => $input['trade_in_item_details']['serial_no'] ?? '',
                         'condition' => $input['trade_in_item_details']['condition'] ?? '',
-                        'trade_in_value' => $input['trade_in_amount'],
-                        'resale_price' => $input['trade_in_item_details']['resale_price'] ?? $input['trade_in_amount'],
+                        'trade_in_value' => $trade_in_amount_uf,
+                        'resale_price' => $resale_price_uf > 0 ? $resale_price_uf : $trade_in_amount_uf,
                     ];
                     $repairUtil->saveOrUpdateTradeIn($business_id, $user_id, $trade_in_data, $transaction->id);
                 }
@@ -1517,14 +1520,17 @@ class SellPosController extends Controller
 
                 Media::uploadMedia($business_id, $transaction, $request, 'documents');
 
-                if (!empty($input['trade_in_amount']) && floatval($input['trade_in_amount']) > 0) {
+                $trade_in_amount_uf = !empty($input['trade_in_amount']) ? $this->transactionUtil->num_uf($input['trade_in_amount']) : 0;
+                if ($trade_in_amount_uf > 0) {
+                    $resale_price_input = $input['trade_in_item_details']['resale_price'] ?? $input['trade_in_amount'];
+                    $resale_price_uf = $this->transactionUtil->num_uf($resale_price_input);
                     $repairUtil = new \Modules\Repair\Utils\RepairUtil();
                     $trade_in_data = [
                         'model_name' => $input['trade_in_item_details']['model_name'] ?? '',
                         'serial_no' => $input['trade_in_item_details']['serial_no'] ?? '',
                         'condition' => $input['trade_in_item_details']['condition'] ?? '',
-                        'trade_in_value' => $input['trade_in_amount'],
-                        'resale_price' => $input['trade_in_item_details']['resale_price'] ?? $input['trade_in_amount'],
+                        'trade_in_value' => $trade_in_amount_uf,
+                        'resale_price' => $resale_price_uf > 0 ? $resale_price_uf : $trade_in_amount_uf,
                     ];
                     $repairUtil->saveOrUpdateTradeIn($business_id, $user_id, $trade_in_data, $transaction->id);
                 }
