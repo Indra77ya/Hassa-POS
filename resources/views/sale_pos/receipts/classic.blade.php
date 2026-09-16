@@ -475,6 +475,22 @@
 						</tr>
 					@endif
 
+					<!-- Trade In -->
+					@if( !empty($receipt_details->trade_in_amount) )
+						<tr>
+							<th>
+								{!! $receipt_details->trade_in_label !!}
+								@if(!empty($receipt_details->trade_in_details))
+									<br><small>({{$receipt_details->trade_in_details}})</small>
+								@endif
+							</th>
+
+							<td class="text-right">
+								(-) {{$receipt_details->trade_in_amount}}
+							</td>
+						</tr>
+					@endif
+
 					@if(!empty($receipt_details->total_items_label))
 						<tr>
 							<th style="width:70%">

@@ -1411,6 +1411,15 @@ class TransactionUtil extends Util
         $taxed_subtotal = $output['subtotal_unformatted'] - $total_exempt;
         $output['taxed_subtotal'] = $this->num_f($taxed_subtotal, $show_currency, $business_details);
 
+        //Trade-In (Tukar Tambah)
+        $trade_in = \Modules\Repair\Entities\RepairTradeIn::where('transaction_id', $transaction->id)->first();
+        if (!empty($trade_in)) {
+            $output['trade_in_label'] = 'Potongan Tukar Tambah';
+            $output['trade_in_amount'] = $this->num_f($trade_in->trade_in_value, $show_currency, $business_details);
+            $output['trade_in_details'] = $trade_in->model_name . (!empty($trade_in->serial_no) ? ' (S/N: ' . $trade_in->serial_no . ')' : '');
+            $output['trade_in_serial_no'] = $trade_in->serial_no;
+        }
+
         //Discount
         $discount_amount = $this->num_f($transaction->discount_amount, $show_currency, $business_details);
         $output['line_discount_label'] = $invoice_layout->discount_label;

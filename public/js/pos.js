@@ -648,6 +648,11 @@ $(document).ready(function() {
                     toastr.error(result.msg);
                 }
             },
+            error: function(xhr) {
+                enable_pos_form_actions();
+                var msg = (xhr.responseJSON && xhr.responseJSON.msg) ? xhr.responseJSON.msg : LANG.something_went_wrong;
+                toastr.error(msg);
+            },
         });
     });
 
@@ -680,6 +685,9 @@ $(document).ready(function() {
                     reset_pos_form();
                     toastr.success(result.msg);
 
+                    if (result.trade_in_url) {
+                        window.open(result.trade_in_url, '_blank');
+                    }
                     //Check if enabled or not
                     if (result.receipt.is_enabled) {
                         pos_print(result.receipt);
@@ -687,6 +695,11 @@ $(document).ready(function() {
                 } else {
                     toastr.error(result.msg);
                 }
+            },
+            error: function(xhr) {
+                enable_pos_form_actions();
+                var msg = (xhr.responseJSON && xhr.responseJSON.msg) ? xhr.responseJSON.msg : LANG.something_went_wrong;
+                toastr.error(msg);
             },
         });
     });
@@ -931,6 +944,9 @@ $(document).ready(function() {
                     dataType: 'json',
                     success: function(result) {
                         if (result.success == 1) {
+                            if (result.trade_in_url) {
+                                window.open(result.trade_in_url, '_blank');
+                            }
                             if (result.whatsapp_link) {
                                 window.open(result.whatsapp_link);
                             }
@@ -949,6 +965,11 @@ $(document).ready(function() {
 
                         enable_pos_form_actions();
                     },
+                    error: function(xhr) {
+                        enable_pos_form_actions();
+                        var msg = (xhr.responseJSON && xhr.responseJSON.msg) ? xhr.responseJSON.msg : LANG.something_went_wrong;
+                        toastr.error(msg);
+                    },
                 });
             }
             return false;
@@ -957,6 +978,29 @@ $(document).ready(function() {
 
     $(document).on('change', '.payment-amount', function() {
         calculate_balance_due();
+    });
+
+    //Save trade-in
+    $(document).on('click', '#save_trade_in_btn', function() {
+        var model_name = $('#trade_in_model').val();
+        var serial_no = $('#trade_in_serial').val();
+        var condition = $('#trade_in_condition').val();
+        var trade_in_val = __read_number($('#trade_in_val_input'));
+        var resale_price = __read_number($('#trade_in_resale_price_input'));
+
+        if (trade_in_val > 0 && !model_name) {
+            toastr.error('Silakan isi nama model/tipe perangkat tukar tambah.');
+            return false;
+        }
+
+        __write_number($('#trade_in_amount'), trade_in_val);
+        $('#trade_in_model_hidden').val(model_name);
+        $('#trade_in_serial_hidden').val(serial_no);
+        $('#trade_in_condition_hidden').val(condition);
+        __write_number($('#trade_in_resale_price_hidden'), resale_price);
+
+        $('#trade_in_modal').modal('hide');
+        pos_total_row();
     });
 
     //Update discount
@@ -2289,7 +2333,16 @@ function calculate_billing_details(price_total) {
         $('#packing_charge_text').text(__currency_trans_from_en(packing_charge, false));
     }
 
-    var total_payable = price_total + order_tax - discount + shipping_charges + packing_charge + additional_expense;
+    var trade_in_amount = 0;
+    if ($('#trade_in_amount').length > 0) {
+        trade_in_amount = __read_number($('#trade_in_amount'));
+        $('span#total_trade_in').text(__currency_trans_from_en(trade_in_amount, false));
+    }
+
+    var total_payable = price_total + order_tax - discount - trade_in_amount + shipping_charges + packing_charge + additional_expense;
+    if (total_payable < 0) {
+        total_payable = 0;
+    }
 
     var rounding_multiple = $('#amount_rounding_method').val() ? parseFloat($('#amount_rounding_method').val()) : 0;
     var round_off_data = __round(total_payable, rounding_multiple);
@@ -2439,7 +2492,12 @@ function reset_pos_form(){
 	set_location();
 
 	$('tr.product_row').remove();
-	$('span.total_quantity, span.price_total, span#total_discount, span#order_tax, span#total_payable, span#shipping_charges_amount, span#loyalty_amount_display').text(0);
+	$('span.total_quantity, span.price_total, span#total_discount, span#total_trade_in, span#order_tax, span#total_payable, span#shipping_charges_amount, span#loyalty_amount_display').text(0);
+	if ($('#trade_in_amount').length) {
+		$('#trade_in_amount').val(0);
+		$('#trade_in_model_hidden, #trade_in_serial_hidden, #trade_in_condition_hidden, #trade_in_resale_price_hidden').val('');
+		$('#trade_in_model, #trade_in_serial, #trade_in_condition, #trade_in_val_input, #trade_in_resale_price_input').val('');
+	}
 	$('span.total_payable_span', 'span.total_paying', 'span.balance_due').text(0);
 
 	$('#modal_payment').find('.remove_payment_row').each( function(){

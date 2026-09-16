@@ -1065,4 +1065,31 @@ class JobSheetController extends Controller
             ->with('status', ['success' => true,
                 'msg' => __('lang_v1.success'), ]);
     }
+
+    public function printTradeInReceipt($id)
+    {
+        $business_id = request()->session()->get('user.business_id');
+
+        $trade_in = \Modules\Repair\Entities\RepairTradeIn::where('business_id', $business_id)
+            ->where(function($q) use ($id) {
+                $q->where('id', $id)
+                  ->orWhere('transaction_id', $id)
+                  ->orWhere('job_sheet_id', $id);
+            })
+            ->firstOrFail();
+
+        $transaction = null;
+        if (!empty($trade_in->transaction_id)) {
+            $transaction = \App\Transaction::with(['contact', 'business', 'location', 'payment_lines', 'sell_lines.product', 'sell_lines.variations'])->find($trade_in->transaction_id);
+        }
+
+        $job_sheet = null;
+        if (!empty($trade_in->job_sheet_id)) {
+            $job_sheet = \Modules\Repair\Entities\JobSheet::with(['customer', 'businessLocation'])->find($trade_in->job_sheet_id);
+        }
+
+        $business = \App\Business::find($business_id);
+
+        return view('repair::trade_in.receipt', compact('trade_in', 'transaction', 'job_sheet', 'business'));
+    }
 }
