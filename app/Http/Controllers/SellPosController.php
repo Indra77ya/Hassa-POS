@@ -639,9 +639,19 @@ class SellPosController extends Controller
 
                 Media::uploadMedia($business_id, $transaction, $request, 'documents');
 
-                $this->transactionUtil->activityLog($transaction, 'added');
+                if (!empty($input['trade_in_amount']) && floatval($input['trade_in_amount']) > 0) {
+                    $repairUtil = new \Modules\Repair\Utils\RepairUtil();
+                    $trade_in_data = [
+                        'model_name' => $input['trade_in_item_details']['model_name'] ?? '',
+                        'serial_no' => $input['trade_in_item_details']['serial_no'] ?? '',
+                        'condition' => $input['trade_in_item_details']['condition'] ?? '',
+                        'trade_in_value' => $input['trade_in_amount'],
+                        'resale_price' => $input['trade_in_item_details']['resale_price'] ?? $input['trade_in_amount'],
+                    ];
+                    $repairUtil->saveOrUpdateTradeIn($business_id, $user_id, $trade_in_data, $transaction->id);
+                }
 
-                
+                $this->transactionUtil->activityLog($transaction, 'added');
 
                 DB::commit();
 
@@ -682,7 +692,11 @@ class SellPosController extends Controller
                     $receipt = $this->receiptContent($business_id, $input['location_id'], $transaction->id, null, false, true, $invoice_layout_id);
                 }
 
+                $trade_in = \Modules\Repair\Entities\RepairTradeIn::where('transaction_id', $transaction->id)->first();
                 $output = ['success' => 1, 'msg' => $msg, 'receipt' => $receipt, 'transaction_id' => $transaction->id];
+                if (!empty($trade_in)) {
+                    $output['trade_in_url'] = action([\Modules\Repair\Http\Controllers\JobSheetController::class, 'printTradeInReceipt'], [$transaction->id]);
+                }
 
                 if (!empty($whatsapp_link)) {
                     $output['whatsapp_link'] = $whatsapp_link;
@@ -872,6 +886,18 @@ class SellPosController extends Controller
         if ($this->transactionUtil->isReturnExist($id)) {
             return back()->with('status', ['success' => 0,
                 'msg' => __('lang_v1.return_exist')]);
+        }
+
+        $trade_in = \Modules\Repair\Entities\RepairTradeIn::where('transaction_id', $transaction->id)->first();
+        $trade_in_details = [];
+        if (!empty($trade_in)) {
+            $trade_in_details = [
+                'model_name' => $trade_in->model_name,
+                'serial_no' => $trade_in->serial_no,
+                'condition' => $trade_in->condition,
+                'trade_in_value' => $trade_in->trade_in_value,
+                'resale_price' => $trade_in->resale_price,
+            ];
         }
 
         $walk_in_customer = $this->contactUtil->getWalkInCustomer($business_id);
@@ -1154,7 +1180,7 @@ class SellPosController extends Controller
                 'brands', 'accounts', 'waiters', 'redeem_details', 'edit_price', 'edit_discount',
                 'shipping_statuses', 'warranties', 'sub_type', 'pos_module_data', 'invoice_schemes',
                 'default_invoice_schemes', 'invoice_layouts', 'featured_products', 'customer_due',
-                'users', 'only_payment', 'price_groups', 'default_price_group_id'));
+                'users', 'only_payment', 'price_groups', 'default_price_group_id', 'trade_in_details'));
     }
 
     /**
@@ -1490,6 +1516,18 @@ class SellPosController extends Controller
                 $this->moduleUtil->getModuleData('after_sale_saved', ['transaction' => $transaction, 'input' => $input]);
 
                 Media::uploadMedia($business_id, $transaction, $request, 'documents');
+
+                if (!empty($input['trade_in_amount']) && floatval($input['trade_in_amount']) > 0) {
+                    $repairUtil = new \Modules\Repair\Utils\RepairUtil();
+                    $trade_in_data = [
+                        'model_name' => $input['trade_in_item_details']['model_name'] ?? '',
+                        'serial_no' => $input['trade_in_item_details']['serial_no'] ?? '',
+                        'condition' => $input['trade_in_item_details']['condition'] ?? '',
+                        'trade_in_value' => $input['trade_in_amount'],
+                        'resale_price' => $input['trade_in_item_details']['resale_price'] ?? $input['trade_in_amount'],
+                    ];
+                    $repairUtil->saveOrUpdateTradeIn($business_id, $user_id, $trade_in_data, $transaction->id);
+                }
 
                 $this->transactionUtil->activityLog($transaction, 'edited', $transaction_before);
 

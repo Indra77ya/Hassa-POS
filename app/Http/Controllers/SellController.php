@@ -354,6 +354,11 @@ class SellController extends Controller
                             $html .= '<li><a href="#" data-href="'.action([\App\Http\Controllers\SellController::class, 'viewMedia'], ['model_id' => $row->id, 'model_type' => \App\Transaction::class, 'model_media_type' => 'shipping_document']).'" class="btn-modal" data-container=".view_modal"><i class="fas fa-paperclip" aria-hidden="true"></i>'.__('lang_v1.shipping_documents').'</a></li>';
                         }
 
+                        $trade_in = \Modules\Repair\Entities\RepairTradeIn::where('transaction_id', $row->id)->first();
+                        if (!empty($trade_in)) {
+                            $html .= '<li><a href="' . action([\Modules\Repair\Http\Controllers\JobSheetController::class, 'printTradeInReceipt'], [$row->id]) . '" target="_blank"><i class="fas fa-sync-alt text-success"></i> Cetak Kuitansi Tukar Tambah</a></li>';
+                        }
+
                         $html .= '</ul></div>';
 
                         return $html;

@@ -390,4 +390,206 @@ class RepairUtil extends Util
 
         return $chart;
     }
+
+    /**
+     * Saves or updates trade-in details for a transaction.
+     * Registers product, creates purchase transaction and payment, and links trade-in record.
+     */
+    public function saveOrUpdateTradeIn($business_id, $user_id, array $trade_in_data, $transaction_id = null, $job_sheet_id = null)
+    {
+        if (empty($trade_in_data['model_name']) || empty($trade_in_data['trade_in_value']) || floatval($trade_in_data['trade_in_value']) <= 0) {
+            return null;
+        }
+
+        $trade_in_amount = floatval($trade_in_data['trade_in_value']);
+        $resale_price = !empty($trade_in_data['resale_price']) && floatval($trade_in_data['resale_price']) > 0
+            ? floatval($trade_in_data['resale_price'])
+            : $trade_in_amount;
+
+        $existing = null;
+        if (!empty($transaction_id)) {
+            $existing = \Modules\Repair\Entities\RepairTradeIn::where('transaction_id', $transaction_id)->first();
+        } elseif (!empty($job_sheet_id)) {
+            $existing = \Modules\Repair\Entities\RepairTradeIn::where('job_sheet_id', $job_sheet_id)->first();
+        }
+
+        $product_id = $existing ? $existing->product_id : null;
+        $purchase_transaction_id = $existing ? $existing->purchase_transaction_id : null;
+
+        $location_id = null;
+        $contact_id = null;
+
+        if (!empty($transaction_id)) {
+            $sale_trans = \App\Transaction::find($transaction_id);
+            if ($sale_trans) {
+                $location_id = $sale_trans->location_id;
+                $contact_id = $sale_trans->contact_id;
+            }
+        }
+
+        if (empty($location_id)) {
+            $loc = \App\BusinessLocation::where('business_id', $business_id)->first();
+            $location_id = $loc ? $loc->id : null;
+        }
+
+        if (empty($contact_id)) {
+            $contact = \App\Contact::where('business_id', $business_id)->where('type', 'supplier')->first();
+            if (!$contact) {
+                $contact = \App\Contact::where('business_id', $business_id)->first();
+            }
+            $contact_id = $contact ? $contact->id : null;
+        }
+
+        // 1. Create or update Product for the trade-in item
+        if (empty($product_id)) {
+            $product_name = '[BEKAS/SECOND] ' . $trade_in_data['model_name'];
+            if (!empty($trade_in_data['serial_no'])) {
+                $product_name .= ' (' . $trade_in_data['serial_no'] . ')';
+            }
+
+            $unit = \App\Unit::where('business_id', $business_id)->first();
+            $unit_id = $unit ? $unit->id : 1;
+
+            $product = \App\Product::create([
+                'name' => $product_name,
+                'business_id' => $business_id,
+                'type' => 'single',
+                'unit_id' => $unit_id,
+                'sku' => 'TRD-' . strtoupper(\Str::random(6)),
+                'enable_stock' => 1,
+                'created_by' => $user_id,
+            ]);
+            $product_id = $product->id;
+
+            // Link product location
+            if (!empty($location_id)) {
+                $product->product_locations()->sync([$location_id]);
+            }
+
+            // Create Variation
+            $productUtil = new \App\Utils\ProductUtil();
+            $productUtil->createSingleProductVariation(
+                $product->id,
+                $product->sku,
+                $trade_in_amount,
+                $resale_price,
+                $resale_price
+            );
+        } else {
+            // Update variation prices if exists
+            $variation = \App\Variation::where('product_id', $product_id)->first();
+            if ($variation) {
+                $variation->default_purchase_price = $trade_in_amount;
+                $variation->dpp_inc_tax = $trade_in_amount;
+                $variation->profit_percent = $trade_in_amount > 0 ? (($resale_price - $trade_in_amount) / $trade_in_amount) * 100 : 0;
+                $variation->default_sell_price = $resale_price;
+                $variation->sell_price_inc_tax = $resale_price;
+                $variation->save();
+            }
+        }
+
+        $variation = \App\Variation::where('product_id', $product_id)->first();
+        $variation_id = $variation ? $variation->id : null;
+
+        // 2. Create Purchase Transaction for stock in
+        if (empty($purchase_transaction_id) && !empty($variation_id)) {
+            $ref_count = $this->setAndGetReferenceCount('purchase', $business_id);
+            $ref_no = $this->generateReferenceNumber('purchase', $ref_count, $business_id);
+
+            $purchase = \App\Transaction::create([
+                'business_id' => $business_id,
+                'location_id' => $location_id,
+                'type' => 'purchase',
+                'status' => 'received',
+                'payment_status' => 'paid',
+                'contact_id' => $contact_id,
+                'transaction_date' => \Carbon::now()->toDateTimeString(),
+                'total_before_tax' => $trade_in_amount,
+                'final_total' => $trade_in_amount,
+                'created_by' => $user_id,
+                'ref_no' => $ref_no,
+            ]);
+
+            $purchase_transaction_id = $purchase->id;
+
+            // Create Purchase Line
+            \App\PurchaseLine::create([
+                'transaction_id' => $purchase->id,
+                'product_id' => $product_id,
+                'variation_id' => $variation_id,
+                'quantity' => 1,
+                'purchase_price' => $trade_in_amount,
+                'purchase_price_inc_tax' => $trade_in_amount,
+                'item_tax' => 0,
+                'quantity_sold' => 0,
+            ]);
+
+            // Adjust stock
+            $productUtil = new \App\Utils\ProductUtil();
+            $productUtil->updateProductQuantity($location_id, $product_id, $variation_id, 1, 0);
+
+            // Create Purchase Payment Line
+            \App\TransactionPayment::create([
+                'transaction_id' => $purchase->id,
+                'business_id' => $business_id,
+                'amount' => $trade_in_amount,
+                'method' => 'other',
+                'paid_on' => \Carbon::now()->toDateTimeString(),
+                'created_by' => $user_id,
+                'payment_ref_no' => 'TRD-PAY-' . strtoupper(\Str::random(6)),
+                'note' => 'Pembayaran Otomatis Tukar Tambah',
+            ]);
+        }
+
+        // 3. Save or update RepairTradeIn model record
+        $trade_in = \Modules\Repair\Entities\RepairTradeIn::updateOrCreate(
+            [
+                'transaction_id' => $transaction_id,
+                'job_sheet_id' => $job_sheet_id,
+            ],
+            [
+                'business_id' => $business_id,
+                'transaction_id' => $transaction_id,
+                'job_sheet_id' => $job_sheet_id,
+                'model_name' => $trade_in_data['model_name'],
+                'serial_no' => isset($trade_in_data['serial_no']) ? $trade_in_data['serial_no'] : null,
+                'condition' => isset($trade_in_data['condition']) ? $trade_in_data['condition'] : null,
+                'trade_in_value' => $trade_in_amount,
+                'resale_price' => $resale_price,
+                'product_id' => $product_id,
+                'purchase_transaction_id' => $purchase_transaction_id,
+                'created_by' => $user_id,
+            ]
+        );
+
+        // 4. Create a payment line on the sale transaction for trade_in deduction if transaction_id exists
+        if (!empty($transaction_id)) {
+            // Check if trade-in payment line exists
+            $trade_in_payment = \App\TransactionPayment::where('transaction_id', $transaction_id)
+                ->where('note', 'like', '%Tukar Tambah%')
+                ->first();
+
+            if (!$trade_in_payment) {
+                \App\TransactionPayment::create([
+                    'transaction_id' => $transaction_id,
+                    'business_id' => $business_id,
+                    'amount' => $trade_in_amount,
+                    'method' => 'other',
+                    'paid_on' => \Carbon::now()->toDateTimeString(),
+                    'created_by' => $user_id,
+                    'payment_ref_no' => 'TRD-DED-' . strtoupper(\Str::random(6)),
+                    'note' => 'Potongan Tukar Tambah',
+                ]);
+            } else {
+                $trade_in_payment->amount = $trade_in_amount;
+                $trade_in_payment->save();
+            }
+
+            // Recalculate transaction payment status
+            $transactionUtil = new \App\Utils\TransactionUtil();
+            $transactionUtil->updatePaymentStatus($transaction_id);
+        }
+
+        return $trade_in;
+    }
 }

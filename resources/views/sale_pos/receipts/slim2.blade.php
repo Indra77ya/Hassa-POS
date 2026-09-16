@@ -203,6 +203,22 @@
 					</p>
 				</div>
 			@endif
+
+			<!-- Trade In -->
+			@if( !empty($receipt_details->trade_in_amount) )
+				<div class="flex-box">
+					<p class="width-50 text-left">
+						{!! $receipt_details->trade_in_label !!}
+						@if(!empty($receipt_details->trade_in_details))
+							<br><small>({{$receipt_details->trade_in_details}})</small>
+						@endif
+					</p>
+
+					<p class="width-50 text-right">
+						(-) {{$receipt_details->trade_in_amount}}
+					</p>
+				</div>
+			@endif
 			@if (!empty($receipt_details->sell_custom_field_2_value))
 				<div class="textbox-info">
 					<p class="f-left"><strong>{!! $receipt_details->sell_custom_field_2_label !!}</strong></p>

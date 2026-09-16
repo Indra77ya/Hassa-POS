@@ -33,6 +33,21 @@
 			<input type="hidden" name="discount_amount" id="discount_amount" value="@if(empty($edit)) {{@num_format($business_details->default_sales_discount)}} @else {{@num_format($transaction->discount_amount)}} @endif" data-default="{{$business_details->default_sales_discount}}">
 		</div>
 
+		{{-- Trade In (Tukar Tambah) --}}
+		<div class="pos_totals_cell">
+			<span class="pos_totals_label">
+				<span class="mobile-only">TRD(-)</span>
+				<span class="desktop-only">Tukar Tambah(-)</span>
+				<i class="fas fa-edit pos_totals_edit tw-text-indigo-500 hover:tw-text-indigo-700 tw-ml-1 tw-cursor-pointer" id="pos-edit-trade-in" title="Input Tukar Tambah" aria-hidden="true" data-toggle="modal" data-target="#trade_in_modal"></i>
+			</span>
+			<span class="pos_totals_value pos_totals_value--danger" id="total_trade_in">0</span>
+			<input type="hidden" name="trade_in_amount" id="trade_in_amount" value="@if(!empty($trade_in_details['trade_in_value'])){{$trade_in_details['trade_in_value']}}@else 0 @endif" data-default="0">
+			<input type="hidden" name="trade_in_item_details[model_name]" id="trade_in_model_hidden" value="@if(!empty($trade_in_details['model_name'])){{$trade_in_details['model_name']}}@endif">
+			<input type="hidden" name="trade_in_item_details[serial_no]" id="trade_in_serial_hidden" value="@if(!empty($trade_in_details['serial_no'])){{$trade_in_details['serial_no']}}@endif">
+			<input type="hidden" name="trade_in_item_details[condition]" id="trade_in_condition_hidden" value="@if(!empty($trade_in_details['condition'])){{$trade_in_details['condition']}}@endif">
+			<input type="hidden" name="trade_in_item_details[resale_price]" id="trade_in_resale_price_hidden" value="@if(!empty($trade_in_details['resale_price'])){{$trade_in_details['resale_price']}}@endif">
+		</div>
+
 		{{-- Loyalty --}}
 		<div class="pos_totals_cell @if(!$is_rp_enabled) hide @endif">
 			<span class="pos_totals_label">
