@@ -177,7 +177,7 @@
             <table class="table table-condensed" style="font-size: 13px;">
                 <tr>
                     <td><strong>Total Pembelian:</strong></td>
-                    <td class="text-right">@format_currency($transaction->final_total + $trade_in->trade_in_value)</td>
+                    <td class="text-right">@format_currency($transaction->final_total)</td>
                 </tr>
                 <tr class="text-danger">
                     <td><strong>Potongan Tukar Tambah:</strong></td>
@@ -185,7 +185,7 @@
                 </tr>
                 <tr style="font-size: 15px; background: #f8fafc; font-weight: bold;">
                     <td>Net Total Bayar:</td>
-                    <td class="text-right" style="color: #059669;">@format_currency($transaction->final_total)</td>
+                    <td class="text-right" style="color: #059669;">@format_currency($transaction->final_total - $trade_in->trade_in_value)</td>
                 </tr>
             </table>
         </div>

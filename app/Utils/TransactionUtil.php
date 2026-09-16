@@ -1567,8 +1567,9 @@ class TransactionUtil extends Util
                                     'date' => $this->format_date($value['paid_on'], false, $business_details),
                                 ];
                         } elseif ($value['method'] == 'other') {
+                            $display_method = !empty($value['note']) ? $value['note'] : $method;
                             $output['payments'][] =
-                                ['method' => $method,
+                                ['method' => $display_method,
                                     'amount' => $this->num_f($value['amount'], $show_currency, $business_details),
                                     'date' => $this->format_date($value['paid_on'], false, $business_details),
                                 ];
