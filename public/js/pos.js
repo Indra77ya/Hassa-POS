@@ -648,6 +648,11 @@ $(document).ready(function() {
                     toastr.error(result.msg);
                 }
             },
+            error: function(xhr) {
+                enable_pos_form_actions();
+                var msg = (xhr.responseJSON && xhr.responseJSON.msg) ? xhr.responseJSON.msg : LANG.something_went_wrong;
+                toastr.error(msg);
+            },
         });
     });
 
@@ -690,6 +695,11 @@ $(document).ready(function() {
                 } else {
                     toastr.error(result.msg);
                 }
+            },
+            error: function(xhr) {
+                enable_pos_form_actions();
+                var msg = (xhr.responseJSON && xhr.responseJSON.msg) ? xhr.responseJSON.msg : LANG.something_went_wrong;
+                toastr.error(msg);
             },
         });
     });
@@ -954,6 +964,11 @@ $(document).ready(function() {
                         }
 
                         enable_pos_form_actions();
+                    },
+                    error: function(xhr) {
+                        enable_pos_form_actions();
+                        var msg = (xhr.responseJSON && xhr.responseJSON.msg) ? xhr.responseJSON.msg : LANG.something_went_wrong;
+                        toastr.error(msg);
                     },
                 });
             }

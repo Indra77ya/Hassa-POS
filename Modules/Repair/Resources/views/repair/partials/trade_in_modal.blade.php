@@ -10,13 +10,13 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="trade_in_model">Nama Tipe / Model Perangkat: <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="trade_in_model" name="trade_in_model_modal" placeholder="Contoh: iPhone 11 128GB / Laptop Asus X441" value="@if(!empty($trade_in_details['model_name'])){{$trade_in_details['model_name']}}@endif">
+                            <input type="text" class="form-control" id="trade_in_model" name="trade_in_model_modal" autocomplete="off" placeholder="Contoh: iPhone 11 128GB / Laptop Asus X441" value="@if(!empty($trade_in_details['model_name'])){{$trade_in_details['model_name']}}@endif">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="trade_in_serial">Nomor Seri / IMEI:</label>
-                            <input type="text" class="form-control" id="trade_in_serial" name="trade_in_serial_modal" placeholder="Contoh: 358912093810123" value="@if(!empty($trade_in_details['serial_no'])){{$trade_in_details['serial_no']}}@endif">
+                            <input type="text" class="form-control" id="trade_in_serial" name="trade_in_serial_modal" autocomplete="off" placeholder="Contoh: 358912093810123" value="@if(!empty($trade_in_details['serial_no'])){{$trade_in_details['serial_no']}}@endif">
                         </div>
                     </div>
                 </div>
