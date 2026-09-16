@@ -765,10 +765,12 @@ $(document).ready(function() {
         }
 
         //Check for remaining balance & add it in 1st payment row
-        var total_payable = __read_number($('input#final_total_input'));
+        var gross_total = __read_number($('input#final_total_input'));
+        var trade_in_amount = $('#trade_in_amount').length > 0 ? __read_number($('#trade_in_amount')) : 0;
+        var net_payable = Math.max(0, gross_total - trade_in_amount);
         var total_paying = __read_number($('input#total_paying_input'));
-        if (total_payable > total_paying) {
-            var bal_due = total_payable - total_paying;
+        if (net_payable > total_paying) {
+            var bal_due = net_payable - total_paying;
 
             var first_row = $('#payment_rows_div')
                 .find('.payment-amount')
@@ -847,9 +849,11 @@ $(document).ready(function() {
                 if (result) {
                     var appended = $('#payment_rows_div').append(result);
 
-                    var total_payable = __read_number($('input#final_total_input'));
+                    var gross_total = __read_number($('input#final_total_input'));
+                    var trade_in_amount = $('#trade_in_amount').length > 0 ? __read_number($('#trade_in_amount')) : 0;
+                    var net_payable = Math.max(0, gross_total - trade_in_amount);
                     var total_paying = __read_number($('input#total_paying_input'));
-                    var b_due = total_payable - total_paying;
+                    var b_due = net_payable - total_paying;
                     $(appended)
                         .find('input.payment-amount')
                         .focus();
@@ -1639,8 +1643,10 @@ $(document).ready(function() {
         if ($(this).val()) {
             curr_exchange_rate = __read_number($(this));
         }
-        var total_payable = __read_number($('input#final_total_input'));
-        var shown_total = total_payable * curr_exchange_rate;
+        var gross_total = __read_number($('input#final_total_input'));
+        var trade_in_amount = $('#trade_in_amount').length > 0 ? __read_number($('#trade_in_amount')) : 0;
+        var net_payable = Math.max(0, gross_total - trade_in_amount);
+        var shown_total = net_payable * curr_exchange_rate;
         $('span#total_payable').text(__currency_trans_from_en(shown_total, false));
     });
 
@@ -2339,14 +2345,14 @@ function calculate_billing_details(price_total) {
         $('span#total_trade_in').text(__currency_trans_from_en(trade_in_amount, false));
     }
 
-    var total_payable = price_total + order_tax - discount - trade_in_amount + shipping_charges + packing_charge + additional_expense;
-    if (total_payable < 0) {
-        total_payable = 0;
+    var gross_total = price_total + order_tax - discount + shipping_charges + packing_charge + additional_expense;
+    if (gross_total < 0) {
+        gross_total = 0;
     }
 
     var rounding_multiple = $('#amount_rounding_method').val() ? parseFloat($('#amount_rounding_method').val()) : 0;
-    var round_off_data = __round(total_payable, rounding_multiple);
-    var total_payable_rounded = round_off_data.number;
+    var round_off_data = __round(gross_total, rounding_multiple);
+    var gross_total_rounded = round_off_data.number;
 
     var round_off_amount = round_off_data.diff;
     if (round_off_amount != 0) {
@@ -2356,19 +2362,21 @@ function calculate_billing_details(price_total) {
     }
     $('input#round_off_amount').val(round_off_amount);
 
-    __write_number($('input#final_total_input'), total_payable_rounded);
+    var net_payable_rounded = Math.max(0, gross_total_rounded - trade_in_amount);
+
+    __write_number($('input#final_total_input'), gross_total_rounded);
     var curr_exchange_rate = 1;
     if ($('#exchange_rate').length > 0 && $('#exchange_rate').val()) {
         curr_exchange_rate = __read_number($('#exchange_rate'));
     }
-    var shown_total = total_payable_rounded * curr_exchange_rate;
+    var shown_total = net_payable_rounded * curr_exchange_rate;
     $('span#total_payable').text(__currency_trans_from_en(shown_total, false));
 
-    $('span.total_payable_span').text(__currency_trans_from_en(total_payable_rounded, true));
+    $('span.total_payable_span').text(__currency_trans_from_en(net_payable_rounded, true));
 
     //Check if edit form then don't update price.
     if ($('form#edit_pos_sell_form').length == 0 && $('form#edit_sell_form').length == 0) {
-        __write_number($('.payment-amount').first(), total_payable_rounded);
+        __write_number($('.payment-amount').first(), net_payable_rounded);
     }
 
     $(document).trigger('invoice_total_calculated');
@@ -2405,7 +2413,9 @@ function pos_order_tax(price_total, discount) {
 }
 
 function calculate_balance_due() {
-    var total_payable = __read_number($('#final_total_input'));
+    var gross_total = __read_number($('#final_total_input'));
+    var trade_in_amount = $('#trade_in_amount').length > 0 ? __read_number($('#trade_in_amount')) : 0;
+    var net_payable = Math.max(0, gross_total - trade_in_amount);
     var total_paying = 0;
     $('#payment_rows_div')
         .find('.payment-amount')
@@ -2414,7 +2424,7 @@ function calculate_balance_due() {
                 total_paying += __read_number($(this));
             }
         });
-    var bal_due = total_payable - total_paying;
+    var bal_due = net_payable - total_paying;
     var change_return = 0;
 
     //change_return
