@@ -397,14 +397,18 @@ class RepairUtil extends Util
      */
     public function saveOrUpdateTradeIn($business_id, $user_id, array $trade_in_data, $transaction_id = null, $job_sheet_id = null)
     {
-        if (empty($trade_in_data['model_name']) || empty($trade_in_data['trade_in_value']) || floatval($trade_in_data['trade_in_value']) <= 0) {
+        if (empty($trade_in_data['model_name']) || empty($trade_in_data['trade_in_value'])) {
             return null;
         }
 
-        $trade_in_amount = floatval($trade_in_data['trade_in_value']);
-        $resale_price = !empty($trade_in_data['resale_price']) && floatval($trade_in_data['resale_price']) > 0
-            ? floatval($trade_in_data['resale_price'])
-            : $trade_in_amount;
+        $trade_in_amount = is_numeric($trade_in_data['trade_in_value']) ? floatval($trade_in_data['trade_in_value']) : $this->num_uf($trade_in_data['trade_in_value']);
+        if ($trade_in_amount <= 0) {
+            return null;
+        }
+
+        $resale_price_raw = !empty($trade_in_data['resale_price']) ? $trade_in_data['resale_price'] : $trade_in_amount;
+        $resale_price_val = is_numeric($resale_price_raw) ? floatval($resale_price_raw) : $this->num_uf($resale_price_raw);
+        $resale_price = $resale_price_val > 0 ? $resale_price_val : $trade_in_amount;
 
         $existing = null;
         if (!empty($transaction_id)) {
