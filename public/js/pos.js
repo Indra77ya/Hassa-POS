@@ -989,18 +989,32 @@ $(document).ready(function() {
         var model_name = $('#trade_in_model').val();
         var serial_no = $('#trade_in_serial').val();
         var condition = $('#trade_in_condition').val();
+        var unit_id = $('#trade_in_unit_id').val();
+        var category_id = $('#trade_in_category_id').val();
         var trade_in_val = __read_number($('#trade_in_val_input'));
         var resale_price = __read_number($('#trade_in_resale_price_input'));
 
-        if (trade_in_val > 0 && !model_name) {
-            toastr.error('Silakan isi nama model/tipe perangkat tukar tambah.');
-            return false;
+        if (trade_in_val > 0) {
+            if (!model_name) {
+                toastr.error('Silakan isi nama model/tipe perangkat tukar tambah.');
+                return false;
+            }
+            if (!category_id) {
+                toastr.error('Silakan pilih kategori perangkat tukar tambah.');
+                return false;
+            }
+            if (!unit_id) {
+                toastr.error('Silakan pilih unit/satuan perangkat tukar tambah.');
+                return false;
+            }
         }
 
         __write_number($('#trade_in_amount'), trade_in_val);
         $('#trade_in_model_hidden').val(model_name);
         $('#trade_in_serial_hidden').val(serial_no);
         $('#trade_in_condition_hidden').val(condition);
+        $('#trade_in_unit_hidden').val(unit_id);
+        $('#trade_in_category_hidden').val(category_id);
         __write_number($('#trade_in_resale_price_hidden'), resale_price);
 
         $('#trade_in_modal').modal('hide');
@@ -2505,8 +2519,9 @@ function reset_pos_form(){
 	$('span.total_quantity, span.price_total, span#total_discount, span#total_trade_in, span#order_tax, span#total_payable, span#shipping_charges_amount, span#loyalty_amount_display').text(0);
 	if ($('#trade_in_amount').length) {
 		$('#trade_in_amount').val(0);
-		$('#trade_in_model_hidden, #trade_in_serial_hidden, #trade_in_condition_hidden, #trade_in_resale_price_hidden').val('');
+		$('#trade_in_model_hidden, #trade_in_serial_hidden, #trade_in_condition_hidden, #trade_in_unit_hidden, #trade_in_category_hidden, #trade_in_resale_price_hidden').val('');
 		$('#trade_in_model, #trade_in_serial, #trade_in_condition, #trade_in_val_input, #trade_in_resale_price_input').val('');
+		$('#trade_in_unit_id, #trade_in_category_id').val('').trigger('change');
 	}
 	$('span.total_payable_span', 'span.total_paying', 'span.balance_due').text(0);
 

@@ -4,9 +4,11 @@ namespace Tests\Feature;
 
 use App\Business;
 use App\BusinessLocation;
+use App\Category;
 use App\Contact;
 use App\Product;
 use App\Transaction;
+use App\Unit;
 use App\User;
 use App\Variation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -22,6 +24,8 @@ class RepairTradeInTest extends TestCase
     protected $business;
     protected $location;
     protected $contact;
+    protected $unit;
+    protected $category;
 
     protected function setUp(): void
     {
@@ -62,6 +66,23 @@ class RepairTradeInTest extends TestCase
             'mobile' => '08987654321',
         ]);
 
+        $this->unit = Unit::create([
+            'business_id' => $this->business->id,
+            'actual_name' => 'Pieces',
+            'short_name' => 'Pcs',
+            'allow_decimal' => 0,
+            'created_by' => $this->user->id,
+        ]);
+
+        $this->category = Category::create([
+            'name' => 'Handphone Bekas',
+            'business_id' => $this->business->id,
+            'short_code' => 'HPB',
+            'parent_id' => 0,
+            'created_by' => $this->user->id,
+            'category_type' => 'product',
+        ]);
+
         $this->actingAs($this->user);
         session(['user.business_id' => $this->business->id, 'user.id' => $this->user->id]);
     }
@@ -89,6 +110,8 @@ class RepairTradeInTest extends TestCase
             'model_name' => 'iPhone 11 128GB',
             'serial_no' => '358912093810123',
             'condition' => 'Mulus 95%, Battery Health 85%',
+            'unit_id' => $this->unit->id,
+            'category_id' => $this->category->id,
             'trade_in_value' => 2000000,
             'resale_price' => 2500000,
         ];
@@ -99,11 +122,15 @@ class RepairTradeInTest extends TestCase
         $this->assertEquals('iPhone 11 128GB', $trade_in->model_name);
         $this->assertEquals(2000000, $trade_in->trade_in_value);
         $this->assertEquals(2500000, $trade_in->resale_price);
+        $this->assertEquals($this->unit->id, $trade_in->unit_id);
+        $this->assertEquals($this->category->id, $trade_in->category_id);
 
         // Check second hand product created
         $product = Product::find($trade_in->product_id);
         $this->assertNotNull($product);
         $this->assertStringContainsString('iPhone 11 128GB', $product->name);
+        $this->assertEquals($this->unit->id, $product->unit_id);
+        $this->assertEquals($this->category->id, $product->category_id);
 
         // Check purchase transaction created for stock-in
         $purchase = Transaction::find($trade_in->purchase_transaction_id);

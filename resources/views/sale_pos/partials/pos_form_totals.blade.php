@@ -45,6 +45,8 @@
 			<input type="hidden" name="trade_in_item_details[model_name]" id="trade_in_model_hidden" value="@if(!empty($trade_in_details['model_name'])){{$trade_in_details['model_name']}}@endif">
 			<input type="hidden" name="trade_in_item_details[serial_no]" id="trade_in_serial_hidden" value="@if(!empty($trade_in_details['serial_no'])){{$trade_in_details['serial_no']}}@endif">
 			<input type="hidden" name="trade_in_item_details[condition]" id="trade_in_condition_hidden" value="@if(!empty($trade_in_details['condition'])){{$trade_in_details['condition']}}@endif">
+			<input type="hidden" name="trade_in_item_details[unit_id]" id="trade_in_unit_hidden" value="@if(!empty($trade_in_details['unit_id'])){{$trade_in_details['unit_id']}}@endif">
+			<input type="hidden" name="trade_in_item_details[category_id]" id="trade_in_category_hidden" value="@if(!empty($trade_in_details['category_id'])){{$trade_in_details['category_id']}}@endif">
 			<input type="hidden" name="trade_in_item_details[resale_price]" id="trade_in_resale_price_hidden" value="@if(!empty($trade_in_details['resale_price'])){{$trade_in_details['resale_price']}}@endif">
 		</div>
 
