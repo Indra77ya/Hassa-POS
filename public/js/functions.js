@@ -382,7 +382,15 @@ function __sum_stock(table, class_name, label_direction = 'right') {
     return stock_html;
 }
 
-function __print_receipt(section_id = null) {
+var receipt_print_callback = null;
+
+function __print_receipt(section_id = null, callback = null) {
+    if (typeof callback === 'function') {
+        receipt_print_callback = callback;
+    } else {
+        receipt_print_callback = null;
+    }
+
     if (section_id) {
         var imgs = document.getElementById(section_id).getElementsByTagName("img");
     } else {
@@ -400,10 +408,11 @@ function __print_receipt(section_id = null) {
         setTimeout(function() {
             window.print();
 
-            // setTimeout(function() {
-            //     $('#receipt_section').html('');
-            // }, 5000);
-            
+            if (typeof receipt_print_callback === 'function') {
+                var cb = receipt_print_callback;
+                receipt_print_callback = null;
+                cb();
+            }
         }, 1000);
     }
 }
@@ -413,9 +422,11 @@ function incrementImageCounter() {
     if ( img_counter === img_len ) {
         window.print();
         
-        // setTimeout(function() {
-        //     $('#receipt_section').html('');
-        // }, 5000);
+        if (typeof receipt_print_callback === 'function') {
+            var cb = receipt_print_callback;
+            receipt_print_callback = null;
+            cb();
+        }
     }
 }
 

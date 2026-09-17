@@ -685,12 +685,17 @@ $(document).ready(function() {
                     reset_pos_form();
                     toastr.success(result.msg);
 
-                    if (result.trade_in_url) {
-                        window.open(result.trade_in_url, '_blank');
-                    }
+                    var openTradeIn = function() {
+                        if (result.trade_in_url) {
+                            window.open(result.trade_in_url, '_blank');
+                        }
+                    };
+
                     //Check if enabled or not
-                    if (result.receipt.is_enabled) {
-                        pos_print(result.receipt);
+                    if (result.receipt && result.receipt.is_enabled) {
+                        pos_print(result.receipt, openTradeIn);
+                    } else {
+                        openTradeIn();
                     }
                 } else {
                     toastr.error(result.msg);
@@ -948,9 +953,6 @@ $(document).ready(function() {
                     dataType: 'json',
                     success: function(result) {
                         if (result.success == 1) {
-                            if (result.trade_in_url) {
-                                window.open(result.trade_in_url, '_blank');
-                            }
                             if (result.whatsapp_link) {
                                 window.open(result.whatsapp_link);
                             }
@@ -959,9 +961,17 @@ $(document).ready(function() {
 
                             reset_pos_form();
 
+                            var openTradeIn = function() {
+                                if (result.trade_in_url) {
+                                    window.open(result.trade_in_url, '_blank');
+                                }
+                            };
+
                             //Check if enabled or not
-                            if (result.receipt.is_enabled) {
-                                pos_print(result.receipt);
+                            if (result.receipt && result.receipt.is_enabled) {
+                                pos_print(result.receipt, openTradeIn);
+                            } else {
+                                openTradeIn();
                             }
                         } else {
                             toastr.error(result.msg);
@@ -2756,7 +2766,7 @@ function round_row_to_iraqi_dinnar(row) {
     }
 }
 
-function pos_print(receipt) {
+function pos_print(receipt, callback = null) {
     //If printer type then connect with websocket
     if (receipt.print_type == 'printer') {
         var content = receipt;
@@ -2772,6 +2782,10 @@ function pos_print(receipt) {
             }, 700);
         }
 
+        if (typeof callback === 'function') {
+            callback();
+        }
+
     } else if (receipt.html_content != '') {
         var title = document.title;
         if (typeof receipt.print_title != 'undefined') {
@@ -2781,11 +2795,15 @@ function pos_print(receipt) {
         //If printer type browser then print content
         $('#receipt_section').html(receipt.html_content);
         __currency_convert_recursively($('#receipt_section'));
-        __print_receipt('receipt_section');
+        __print_receipt('receipt_section', callback);
 
         setTimeout(function() {
             document.title = title;
         }, 1200);
+    } else {
+        if (typeof callback === 'function') {
+            callback();
+        }
     }
 }
 
