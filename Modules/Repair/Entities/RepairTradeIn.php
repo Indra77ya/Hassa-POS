@@ -29,4 +29,14 @@ class RepairTradeIn extends Model
     {
         return $this->belongsTo(\App\User::class, 'created_by');
     }
+
+    public function unit()
+    {
+        return $this->belongsTo(\App\Unit::class, 'unit_id');
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(\App\Category::class, 'category_id');
+    }
 }

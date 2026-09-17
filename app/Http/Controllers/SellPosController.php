@@ -261,6 +261,9 @@ class SellPosController extends Controller
         //Added check because $users is of no use if enable_contact_assign if false
         $users = config('constants.enable_contact_assign') ? User::forDropdown($business_id, false, false, false, true) : [];
 
+        $units_dropdown = Unit::forDropdown($business_id);
+        $categories_dropdown = Category::forDropdown($business_id, 'product');
+
         return view('sale_pos.create')
             ->with(compact(
                 'edit_discount',
@@ -294,6 +297,8 @@ class SellPosController extends Controller
                 'default_invoice_schemes',
                 'invoice_layouts',
                 'users',
+                'units_dropdown',
+                'categories_dropdown'
             ));
     }
 
@@ -648,6 +653,8 @@ class SellPosController extends Controller
                         'model_name' => $input['trade_in_item_details']['model_name'] ?? '',
                         'serial_no' => $input['trade_in_item_details']['serial_no'] ?? '',
                         'condition' => $input['trade_in_item_details']['condition'] ?? '',
+                        'unit_id' => $input['trade_in_item_details']['unit_id'] ?? null,
+                        'category_id' => $input['trade_in_item_details']['category_id'] ?? null,
                         'trade_in_value' => $trade_in_amount_uf,
                         'resale_price' => $resale_price_uf > 0 ? $resale_price_uf : $trade_in_amount_uf,
                     ];
@@ -898,6 +905,8 @@ class SellPosController extends Controller
                 'model_name' => $trade_in->model_name,
                 'serial_no' => $trade_in->serial_no,
                 'condition' => $trade_in->condition,
+                'unit_id' => $trade_in->unit_id,
+                'category_id' => $trade_in->category_id,
                 'trade_in_value' => $trade_in->trade_in_value,
                 'resale_price' => $trade_in->resale_price,
             ];
@@ -1176,6 +1185,9 @@ class SellPosController extends Controller
         $users = config('constants.enable_contact_assign') ? User::forDropdown($business_id, false, false, false, true) : [];
         $only_payment = request()->segment(2) == 'payment';
 
+        $units_dropdown = Unit::forDropdown($business_id);
+        $categories_dropdown = Category::forDropdown($business_id, 'product');
+
         return view('sale_pos.edit')
             ->with(compact('business_details', 'taxes', 'payment_types', 'walk_in_customer',
                 'sell_details', 'transaction', 'payment_lines', 'location_printer_type', 'shortcuts',
@@ -1183,7 +1195,8 @@ class SellPosController extends Controller
                 'brands', 'accounts', 'waiters', 'redeem_details', 'edit_price', 'edit_discount',
                 'shipping_statuses', 'warranties', 'sub_type', 'pos_module_data', 'invoice_schemes',
                 'default_invoice_schemes', 'invoice_layouts', 'featured_products', 'customer_due',
-                'users', 'only_payment', 'price_groups', 'default_price_group_id', 'trade_in_details'));
+                'users', 'only_payment', 'price_groups', 'default_price_group_id', 'trade_in_details',
+                'units_dropdown', 'categories_dropdown'));
     }
 
     /**
@@ -1529,6 +1542,8 @@ class SellPosController extends Controller
                         'model_name' => $input['trade_in_item_details']['model_name'] ?? '',
                         'serial_no' => $input['trade_in_item_details']['serial_no'] ?? '',
                         'condition' => $input['trade_in_item_details']['condition'] ?? '',
+                        'unit_id' => $input['trade_in_item_details']['unit_id'] ?? null,
+                        'category_id' => $input['trade_in_item_details']['category_id'] ?? null,
                         'trade_in_value' => $trade_in_amount_uf,
                         'resale_price' => $resale_price_uf > 0 ? $resale_price_uf : $trade_in_amount_uf,
                     ];

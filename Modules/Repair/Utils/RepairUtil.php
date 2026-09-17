@@ -444,6 +444,15 @@ class RepairUtil extends Util
             $contact_id = $contact ? $contact->id : null;
         }
 
+        // Determine unit_id and category_id
+        $unit_id = !empty($trade_in_data['unit_id']) ? $trade_in_data['unit_id'] : null;
+        if (empty($unit_id)) {
+            $unit = \App\Unit::where('business_id', $business_id)->first();
+            $unit_id = $unit ? $unit->id : 1;
+        }
+
+        $category_id = !empty($trade_in_data['category_id']) ? $trade_in_data['category_id'] : null;
+
         // 1. Create or update Product for the trade-in item
         if (empty($product_id)) {
             $product_name = '[BEKAS/SECOND] ' . $trade_in_data['model_name'];
@@ -451,14 +460,12 @@ class RepairUtil extends Util
                 $product_name .= ' (' . $trade_in_data['serial_no'] . ')';
             }
 
-            $unit = \App\Unit::where('business_id', $business_id)->first();
-            $unit_id = $unit ? $unit->id : 1;
-
             $product = \App\Product::create([
                 'name' => $product_name,
                 'business_id' => $business_id,
                 'type' => 'single',
                 'unit_id' => $unit_id,
+                'category_id' => $category_id,
                 'sku' => 'TRD-' . strtoupper(\Str::random(6)),
                 'enable_stock' => 1,
                 'created_by' => $user_id,
@@ -483,6 +490,18 @@ class RepairUtil extends Util
                 $resale_price
             );
         } else {
+            // Update product unit and category if provided
+            $product_obj = \App\Product::find($product_id);
+            if ($product_obj) {
+                if (!empty($unit_id)) {
+                    $product_obj->unit_id = $unit_id;
+                }
+                if (!empty($category_id)) {
+                    $product_obj->category_id = $category_id;
+                }
+                $product_obj->save();
+            }
+
             // Update variation prices if exists
             $variation = \App\Variation::where('product_id', $product_id)->first();
             if ($variation) {
@@ -564,6 +583,8 @@ class RepairUtil extends Util
                 'model_name' => $trade_in_data['model_name'],
                 'serial_no' => isset($trade_in_data['serial_no']) ? $trade_in_data['serial_no'] : null,
                 'condition' => isset($trade_in_data['condition']) ? $trade_in_data['condition'] : null,
+                'unit_id' => $unit_id,
+                'category_id' => $category_id,
                 'trade_in_value' => $trade_in_amount,
                 'resale_price' => $resale_price,
                 'product_id' => $product_id,
