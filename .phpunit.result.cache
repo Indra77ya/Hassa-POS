@@ -1,1 +1,0 @@
-{"version":1,"defects":{"Tests\\Feature\\RepairTradeInTest::test_save_or_update_trade_in_creates_product_and_purchase":4,"Tests\\Feature\\RepairTradeInTest::test_print_trade_in_receipt":4},"times":{"Tests\\Feature\\RepairTradeInTest::test_save_or_update_trade_in_creates_product_and_purchase":0.505,"Tests\\Feature\\RepairTradeInTest::test_print_trade_in_receipt":0.053}}

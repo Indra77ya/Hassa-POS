@@ -44,6 +44,7 @@ use App\Transaction;
 use App\TransactionPayment;
 use App\TransactionSellLine;
 use App\TypesOfService;
+use App\Unit;
 use App\User;
 use App\Utils\BusinessUtil;
 use App\Utils\CashRegisterUtil;
@@ -261,8 +262,8 @@ class SellPosController extends Controller
         //Added check because $users is of no use if enable_contact_assign if false
         $users = config('constants.enable_contact_assign') ? User::forDropdown($business_id, false, false, false, true) : [];
 
-        $units_dropdown = Unit::forDropdown($business_id);
-        $categories_dropdown = Category::forDropdown($business_id, 'product');
+        $units_dropdown = \App\Unit::forDropdown($business_id);
+        $categories_dropdown = \App\Category::forDropdown($business_id, 'product');
 
         return view('sale_pos.create')
             ->with(compact(
@@ -1185,8 +1186,8 @@ class SellPosController extends Controller
         $users = config('constants.enable_contact_assign') ? User::forDropdown($business_id, false, false, false, true) : [];
         $only_payment = request()->segment(2) == 'payment';
 
-        $units_dropdown = Unit::forDropdown($business_id);
-        $categories_dropdown = Category::forDropdown($business_id, 'product');
+        $units_dropdown = \App\Unit::forDropdown($business_id);
+        $categories_dropdown = \App\Category::forDropdown($business_id, 'product');
 
         return view('sale_pos.edit')
             ->with(compact('business_details', 'taxes', 'payment_types', 'walk_in_customer',
