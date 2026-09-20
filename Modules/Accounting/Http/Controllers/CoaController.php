@@ -1718,7 +1718,7 @@ class CoaController extends Controller
                         }
 
                         if ($row->sub_type == 'expense') {
-                            $description = '<b>'.__('accounting::lang.expense').'</b>';
+                            $description = '<b>'.__('lang_v1.expense').'</b>';
                             $description .= '<br>'.__('purchase.ref_no').': '.$row->ref_no;
                             $description .= '<br>'.__('lang_v1.description').': '.$row->aat_note;
                         }
