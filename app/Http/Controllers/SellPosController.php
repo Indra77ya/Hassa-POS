@@ -899,6 +899,17 @@ class SellPosController extends Controller
                 'msg' => __('lang_v1.return_exist')]);
         }
 
+        $walk_in_customer = $this->contactUtil->getWalkInCustomer($business_id);
+
+        $business_details = $this->businessUtil->getDetails($business_id);
+
+        $taxes = TaxRate::forBusinessDropdown($business_id, true, true);
+
+        $transaction = Transaction::where('business_id', $business_id)
+            ->where('type', 'sell')
+            ->with(['price_group', 'types_of_service'])
+            ->findorfail($id);
+
         $trade_in = \Modules\Repair\Entities\RepairTradeIn::where('transaction_id', $transaction->id)->first();
         $trade_in_details = [];
         if (!empty($trade_in)) {
@@ -912,17 +923,6 @@ class SellPosController extends Controller
                 'resale_price' => $trade_in->resale_price,
             ];
         }
-
-        $walk_in_customer = $this->contactUtil->getWalkInCustomer($business_id);
-
-        $business_details = $this->businessUtil->getDetails($business_id);
-
-        $taxes = TaxRate::forBusinessDropdown($business_id, true, true);
-
-        $transaction = Transaction::where('business_id', $business_id)
-            ->where('type', 'sell')
-            ->with(['price_group', 'types_of_service'])
-            ->findorfail($id);
 
         // If ZATCA module is installed and this transaction is successfully synced, prevent edit
         $moduleUtil = new ModuleUtil();
