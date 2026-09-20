@@ -453,6 +453,19 @@ class RepairUtil extends Util
 
         $category_id = !empty($trade_in_data['category_id']) ? $trade_in_data['category_id'] : null;
 
+        // Determine payment account for method 'other' from location default_payment_accounts
+        $account_id = null;
+        if (!empty($location_id)) {
+            $location = \App\BusinessLocation::find($location_id);
+            if ($location && !empty($location->default_payment_accounts)) {
+                $defaultPaymentAccounts = json_decode($location->default_payment_accounts, true);
+                $account_id = $defaultPaymentAccounts['other']['account']
+                    ?? $defaultPaymentAccounts['custom_pay_1']['account']
+                    ?? $defaultPaymentAccounts['cash']['account']
+                    ?? null;
+            }
+        }
+
         // 1. Create or update Product for the trade-in item
         if (empty($product_id)) {
             $product_name = '[BEKAS/SECOND] ' . $trade_in_data['model_name'];
@@ -562,6 +575,7 @@ class RepairUtil extends Util
                 'method' => 'other',
                 'paid_on' => \Carbon::now()->toDateTimeString(),
                 'created_by' => $user_id,
+                'account_id' => $account_id,
                 'payment_ref_no' => 'TRD-PAY-' . strtoupper(\Str::random(6)),
                 'note' => 'Pembayaran Otomatis Tukar Tambah',
             ]);
@@ -608,11 +622,15 @@ class RepairUtil extends Util
                     'method' => 'other',
                     'paid_on' => \Carbon::now()->toDateTimeString(),
                     'created_by' => $user_id,
+                    'account_id' => $account_id,
                     'payment_ref_no' => 'TRD-DED-' . strtoupper(\Str::random(6)),
                     'note' => 'Tukar Tambah (Trade-In)',
                 ]);
             } else {
                 $trade_in_payment->amount = $trade_in_amount;
+                if (!empty($account_id) && empty($trade_in_payment->account_id)) {
+                    $trade_in_payment->account_id = $account_id;
+                }
                 $trade_in_payment->note = 'Tukar Tambah (Trade-In)';
                 $trade_in_payment->save();
             }

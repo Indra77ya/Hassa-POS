@@ -201,6 +201,42 @@ class AccountController extends Controller
                             ->make(true);
         }
 
+        // Auto-link existing unlinked trade-in payments to location's default payment account
+        $unlinked_trade_in_payments = TransactionPayment::with(['transaction'])
+            ->where('business_id', $business_id)
+            ->whereNull('account_id')
+            ->where(function ($q) {
+                $q->where('payment_ref_no', 'like', 'TRD-PAY-%')
+                  ->orWhere('payment_ref_no', 'like', 'TRD-DED-%')
+                  ->orWhere('note', 'like', '%Tukar Tambah%');
+            })
+            ->get();
+
+        if ($unlinked_trade_in_payments->isNotEmpty()) {
+            foreach ($unlinked_trade_in_payments as $tp) {
+                $loc_id = $tp->transaction ? $tp->transaction->location_id : null;
+                if (empty($loc_id)) {
+                    $loc = BusinessLocation::where('business_id', $business_id)->first();
+                    $loc_id = $loc ? $loc->id : null;
+                }
+                if (!empty($loc_id)) {
+                    $location = BusinessLocation::find($loc_id);
+                    if ($location && !empty($location->default_payment_accounts)) {
+                        $defAccs = json_decode($location->default_payment_accounts, true);
+                        $acc_id = $defAccs['other']['account']
+                            ?? $defAccs['custom_pay_1']['account']
+                            ?? $defAccs['cash']['account']
+                            ?? null;
+
+                        if (!empty($acc_id)) {
+                            $tp->account_id = $acc_id;
+                            $tp->save();
+                        }
+                    }
+                }
+            }
+        }
+
         $not_linked_payments = TransactionPayment::leftjoin(
             'transactions as T',
             'transaction_payments.transaction_id',
