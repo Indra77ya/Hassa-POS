@@ -920,6 +920,15 @@ class AccountController extends Controller
             $from = $request->input('from_account');
             $to = $request->input('to_account');
             $note = $request->input('note');
+
+            if (!empty($from) && $from == $to) {
+                $output = [
+                    'success' => false,
+                    'msg' => __('account.cannot_transfer_to_same_account'),
+                ];
+                return redirect()->action([\App\Http\Controllers\AccountController::class, 'index'])->with('status', $output);
+            }
+
             if (! empty($amount)) {
                 $from_account = Account::findOrFail($from);
                 $to_account = Account::findOrFail($to);
@@ -1018,7 +1027,15 @@ class AccountController extends Controller
 
             $amount = $this->commonUtil->num_uf($request->input('amount'));
             $account_id = $request->input('account_id');
+            $from_account = $request->input('from_account');
             $note = $request->input('note');
+
+            if (!empty($from_account) && $from_account == $account_id) {
+                return [
+                    'success' => false,
+                    'msg' => __('account.cannot_transfer_to_same_account'),
+                ];
+            }
 
             $account = Account::where('business_id', $business_id)
                             ->findOrFail($account_id);

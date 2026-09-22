@@ -120,4 +120,5 @@ return [
     'purchase_account' => 'Purchase Account',
     'sales_account' => 'Sales Account',
     'rounding_account' => 'Rounding Account',
+    'cannot_transfer_to_same_account' => 'Cannot transfer or deposit to the same account',
 ];

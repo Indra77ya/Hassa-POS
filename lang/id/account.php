@@ -109,6 +109,7 @@ return [
     'shipping_income_account' => 'Pendapatan Pengiriman',
     'rounding_account' => 'Beban Pembulatan',
     'packing_charge_account' => 'Pendapatan Packing',
+    'cannot_transfer_to_same_account' => 'Tidak dapat melakukan transfer atau setoran ke akun yang sama',
 
     // Transaction sub-types
     'sell' => 'Penjualan',
