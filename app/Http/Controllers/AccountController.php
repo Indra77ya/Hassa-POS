@@ -921,7 +921,7 @@ class AccountController extends Controller
             $to = $request->input('to_account');
             $note = $request->input('note');
 
-            if ($from == $to) {
+            if (!empty($from) && $from == $to) {
                 $output = [
                     'success' => false,
                     'msg' => __('account.cannot_transfer_to_same_account'),
@@ -1364,59 +1364,8 @@ class AccountController extends Controller
                     ->editColumn('sub_type', function ($row) {
                         return $this->__getPaymentDetails($row);
                     })
-                    ->addColumn('action', function ($row) {
-                        $html = '';
-                        $has_action = false;
-
-                        $html .= '<div class="btn-group">
-                                    <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info tw-w-max dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                        '.__("messages.actions").' <span class="caret"></span><span class="sr-only">Toggle Dropdown</span>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-right" role="menu">';
-
-                        if (auth()->user()->can('edit_account_transaction')) {
-                            if ($row->sub_type == 'fund_transfer' || $row->sub_type == 'deposit' || $row->sub_type == 'opening_balance') {
-                                $html .= '<li>
-                                            <button type="button" class="tw-block tw-w-full tw-text-left tw-px-4 tw-py-2 tw-text-sm tw-text-gray-700 hover:tw-bg-gray-100 hover:tw-text-gray-900 tw-bg-transparent tw-border-none tw-outline-none btn-modal" data-container="#edit_account_transaction" data-href="'.action([\App\Http\Controllers\AccountController::class, 'editAccountTransaction'], [$row->id]).'">
-                                                <i class="fa fa-edit"></i> '.__('messages.edit').'
-                                            </button>
-                                         </li>';
-                                $has_action = true;
-                            }
-                        }
-
-                        if (auth()->user()->can('delete_account_transaction')) {
-                            if ($row->sub_type == 'fund_transfer' || $row->sub_type == 'deposit') {
-                                $html .= '<li>
-                                            <button type="button" class="tw-block tw-w-full tw-text-left tw-px-4 tw-py-2 tw-text-sm tw-text-gray-700 hover:tw-bg-gray-100 hover:tw-text-gray-900 tw-bg-transparent tw-border-none tw-outline-none delete_account_transaction" data-href="'.action([\App\Http\Controllers\AccountController::class, 'destroyAccountTransaction'], [$row->id]).'">
-                                                <i class="fa fa-trash"></i> '.__('messages.delete').'
-                                            </button>
-                                         </li>';
-                                $has_action = true;
-                            }
-                        }
-
-                        $has_media = ! empty($row->media) && ! empty($row->media->first());
-                        $has_transfer_media = ! empty($row->transfer_transaction) && ! empty($row->transfer_transaction->media) && ! empty($row->transfer_transaction->media->first());
-
-                        if ($has_media || $has_transfer_media) {
-                            $display_url = $has_media ? $row->media->first()->display_url : $row->transfer_transaction->media->first()->display_url;
-                            $display_name = $has_media ? $row->media->first()->display_name : $row->transfer_transaction->media->first()->display_name;
-
-                            $html .= '<li>
-                                        <a class="tw-block tw-w-full tw-text-left tw-px-4 tw-py-2 tw-text-sm tw-text-gray-700 hover:tw-bg-gray-100 hover:tw-text-gray-900 tw-bg-transparent tw-border-none tw-outline-none" href="'.$display_url.'" download="'.$display_name.'">
-                                            <i class="fa fa-download"></i> '.__('purchase.download_document').'
-                                        </a>
-                                     </li>';
-                            $has_action = true;
-                        }
-
-                        $html .= '</ul></div>';
-
-                        return $has_action ? $html : '';
-                    })
                     ->removeColumn('id')
-                    ->rawColumns(['credit', 'debit', 'balance', 'sub_type', 'activity', 'action'])
+                    ->rawColumns(['credit', 'debit', 'balance', 'sub_type', 'activity'])
                     ->make(true);
             } catch (\Exception $e) {
                 dd($e->getMessage(), $e->getTraceAsString());
