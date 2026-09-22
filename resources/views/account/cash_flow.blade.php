@@ -62,6 +62,7 @@
                         <th>@lang('account.debit')</th>
                         <th>@lang('account.credit')</th>
                         <th>@lang( 'lang_v1.account_balance' ) @show_tooltip(__('lang_v1.account_balance_tooltip'))</th>
+                        <th class="not-export">@lang( 'messages.action' )</th>
                     </tr>
                 </thead>
                 <tfoot>
@@ -69,6 +70,7 @@
                         <td colspan="4"><strong>@lang('sale.total'):</strong></td>
                         <td class="footer_total_debit"></td>
                         <td class="footer_total_credit"></td>
+                        <td></td>
                         <td></td>
                     </tr>
                 </tfoot>
@@ -82,6 +84,9 @@
 
     <div class="modal fade account_model" tabindex="-1" role="dialog" 
     	aria-labelledby="gridSystemModalLabel">
+    </div>
+    <div class="modal fade account_model" tabindex="-1" role="dialog"
+        aria-labelledby="gridSystemModalLabel" id="edit_account_transaction">
     </div>
 
 </section>
@@ -134,6 +139,7 @@
                 {data: 'debit', name: 'amount', searchable: false},
                 {data: 'credit', name: 'amount', searchable: false},
                 {data: 'balance', name: 'balance', searchable: false},
+                {data: 'action', name: 'action', searchable: false}
             ],
             "fnDrawCallback": function (oSettings) {
                 __currency_convert_recursively($('#cash_flow_table'));
@@ -159,6 +165,64 @@
             cash_flow_table.ajax.reload();
         });
 
+        $('#edit_account_transaction').on('shown.bs.modal', function(e) {
+            $('#edit_account_transaction_form').validate({
+                submitHandler: function(form) {
+                    e.preventDefault();
+                    var data = $(form).serialize();
+                    $.ajax({
+                        method: 'POST',
+                        url: $(form).attr('action'),
+                        dataType: 'json',
+                        data: data,
+                        beforeSend: function(xhr) {
+                            __disable_submit_button($(form).find('button[type="submit"]'));
+                        },
+                        success: function(result) {
+                            if (result.success == true) {
+                                $('#edit_account_transaction').modal('hide');
+                                toastr.success(result.msg);
+
+                                if (typeof(cash_flow_table) != 'undefined') {
+                                    cash_flow_table.ajax.reload();
+                                }
+                            } else {
+                                toastr.error(result.msg);
+                            }
+                        },
+                    });
+                },
+            });
+        });
+
+    });
+
+    $(document).on('click', '.delete_account_transaction', function(e){
+        e.preventDefault();
+        swal({
+          title: LANG.sure,
+          icon: "warning",
+          buttons: true,
+          dangerMode: true,
+        }).then((willDelete) => {
+            if (willDelete) {
+                var href = $(this).data('href');
+                $.ajax({
+                    url: href,
+                    dataType: "json",
+                    success: function(result){
+                        if(result.success === true){
+                            toastr.success(result.msg);
+                            if (typeof(cash_flow_table) != 'undefined') {
+                                cash_flow_table.ajax.reload();
+                            }
+                        } else {
+                            toastr.error(result.msg);
+                        }
+                    }
+                });
+            }
+        });
     });
 </script>
 @endsection
