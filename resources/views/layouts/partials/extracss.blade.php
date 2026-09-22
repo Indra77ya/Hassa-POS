@@ -825,4 +825,28 @@
     .action-link[data-v-49962cc0] {
       cursor: pointer;
     }
+
+    /* Table footer summary cells spacing and alignment improvements */
+    tr.footer-total > td,
+    tfoot tr > td,
+    tfoot tr > th {
+      vertical-align: middle !important;
+      padding: 8px 10px !important;
+      white-space: nowrap !important;
+    }
+
+    td.footer_payment_status_count,
+    td.payment_method_count,
+    td.service_type_count,
+    td.footer_status_count,
+    .footer_payment_status_count,
+    .payment_method_count {
+      min-width: 120px !important;
+      text-align: left !important;
+    }
+
+    tr.footer-total td p,
+    tfoot td p {
+      margin-bottom: 0 !important;
+    }
   </style>
