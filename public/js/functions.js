@@ -294,10 +294,10 @@ function __count_status(data, key) {
     }
 
     //generate html
-    var html = '<p class="text-left"><small>';
+    var html = '<p class="text-left" style="margin-bottom: 0; line-height: 1.5;"><small>';
     for (var key in statuses) {
         html +=
-            statuses[key]['display_name'] + ' - ' + statuses[key]['count'] + '</br>';
+            '<span style="white-space: nowrap; display: block;">' + statuses[key]['display_name'] + ' - ' + statuses[key]['count'] + '</span>';
     }
 
     html += '</small></p>';
@@ -330,10 +330,10 @@ function __sum_status(table, class_name) {
 
 function __sum_status_html(table, class_name) {
     var statuses_sum = __sum_status(table, class_name);
-    var status_html = '<p class="text-left"><small>';
+    var status_html = '<p class="text-left" style="margin-bottom: 0; line-height: 1.5;"><small>';
     for (var key in statuses_sum) {
         status_html +=
-            statuses_sum[key]['display_name'] + ' - ' + statuses_sum[key]['count'] + '</br>';
+            '<span style="white-space: nowrap; display: block;">' + statuses_sum[key]['display_name'] + ' - ' + statuses_sum[key]['count'] + '</span>';
     }
 
     status_html += '</small></p>';
@@ -357,23 +357,25 @@ function __sum_stock(table, class_name, label_direction = 'right') {
                 }
             }
         });
-    var stock_html = '<p class="text-left"><small>';
+    var stock_html = '<p class="text-left" style="margin-bottom: 0; line-height: 1.5;"><small>';
 
     for (var key in stocks) {
         if (label_direction == 'left') {
             stock_html +=
+                '<span style="white-space: nowrap; display: block;">' +
                 key +
                 ' : <span class="display_currency" data-is_quantity="true">' +
                 stocks[key] +
-                '</span> ' +
-                '</br>';
+                '</span>' +
+                '</span>';
         } else {
             stock_html +=
+                '<span style="white-space: nowrap; display: block;">' +
                 '<span class="display_currency" data-is_quantity="true">' +
                 stocks[key] +
                 '</span> ' +
                 key +
-                '</br>';
+                '</span>';
         }
     }
 

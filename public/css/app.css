@@ -398,8 +398,12 @@ table.table-border-center-col > tfoot > tr > td:nth-child(2)
 table.dataTable tbody>tr.selected{
     background-color: #B0BED9;
 }
-tr.footer-total > td {
+tr.footer-total > td,
+tfoot tr > td,
+tfoot tr > th {
     vertical-align: middle !important;
+    padding: 8px 10px !important;
+    white-space: nowrap !important;
 }
 .error{
 	color: red !important;
