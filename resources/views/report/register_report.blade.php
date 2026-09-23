@@ -52,13 +52,13 @@
                                 <th style="white-space: nowrap !important;">@lang('cash_register.total_cash')</th>
                                 <th style="white-space: nowrap !important;">@lang('lang_v1.total_bank_transfer')</th>
                                 <th style="white-space: nowrap !important;">@lang('lang_v1.total_advance_payment')</th>
-                                <th style="white-space: nowrap !important;">{{$payment_types['custom_pay_1']}}</th>
-                                <th style="white-space: nowrap !important;">{{$payment_types['custom_pay_2']}}</th>
-                                <th style="white-space: nowrap !important;">{{$payment_types['custom_pay_3']}}</th>
-                                <th style="white-space: nowrap !important;">{{$payment_types['custom_pay_4']}}</th>
-                                <th style="white-space: nowrap !important;">{{$payment_types['custom_pay_5']}}</th>
-                                <th style="white-space: nowrap !important;">{{$payment_types['custom_pay_6']}}</th>
-                                <th style="white-space: nowrap !important;">{{$payment_types['custom_pay_7']}}</th>
+                                <th style="white-space: nowrap !important;">{{$payment_types['custom_pay_1'] ?? __('lang_v1.custom_payment_1')}}</th>
+                                <th style="white-space: nowrap !important;">{{$payment_types['custom_pay_2'] ?? __('lang_v1.custom_payment_2')}}</th>
+                                <th style="white-space: nowrap !important;">{{$payment_types['custom_pay_3'] ?? __('lang_v1.custom_payment_3')}}</th>
+                                <th style="white-space: nowrap !important;">{{$payment_types['custom_pay_4'] ?? __('lang_v1.custom_payment_4')}}</th>
+                                <th style="white-space: nowrap !important;">{{$payment_types['custom_pay_5'] ?? __('lang_v1.custom_payment_5')}}</th>
+                                <th style="white-space: nowrap !important;">{{$payment_types['custom_pay_6'] ?? __('lang_v1.custom_payment_6')}}</th>
+                                <th style="white-space: nowrap !important;">{{$payment_types['custom_pay_7'] ?? __('lang_v1.custom_payment_7')}}</th>
                                 <th style="white-space: nowrap !important;">@lang('cash_register.other_payments')</th>
                                 <th style="white-space: nowrap !important;">@lang('sale.total')</th>
                                 <th class="not-export" style="white-space: nowrap !important;">@lang('messages.action')</th>
