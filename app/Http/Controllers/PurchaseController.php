@@ -151,7 +151,10 @@ class PurchaseController extends Controller
                         '"><i class="fas fa-undo" aria-hidden="true" ></i>'.__('lang_v1.purchase_return').'</a></li>';
                     }
 
-                    if (auth()->user()->can('purchase.update') || auth()->user()->can('purchase.update_status')) {
+                    if ($row->status == 'ordered' && !empty($row->intercompany_linked_transaction_id)) {
+                        $html .= '<li><a href="#" data-purchase_id="'.$row->id.
+                        '" data-status="received" class="update_status"><i class="fas fa-check-circle" aria-hidden="true" ></i> Konfirmasi Terima (Inter-Company)</a></li>';
+                    } elseif (auth()->user()->can('purchase.update') || auth()->user()->can('purchase.update_status')) {
                         $html .= '<li><a href="#" data-purchase_id="'.$row->id.
                         '" data-status="'.$row->status.'" class="update_status"><i class="fas fa-edit" aria-hidden="true" ></i>'.__('lang_v1.update_status').'</a></li>';
                     }
@@ -417,6 +420,9 @@ class PurchaseController extends Controller
             $this->productUtil->adjustStockOverSelling($transaction);
 
             $this->transactionUtil->activityLog($transaction, 'added');
+
+            // Sync Inter-Company Purchase to Sell
+            \App\Utils\IntercompanyUtil::syncPurchaseToSell($transaction);
 
             PurchaseCreatedOrModified::dispatch($transaction);
 
@@ -750,6 +756,9 @@ class PurchaseController extends Controller
             }
 
             $this->transactionUtil->activityLog($transaction, 'edited', $transaction_before);
+
+            // Sync Inter-Company Purchase to Sell
+            \App\Utils\IntercompanyUtil::syncPurchaseToSell($transaction);
 
             PurchaseCreatedOrModified::dispatch($transaction);
 

@@ -664,6 +664,9 @@ class SellPosController extends Controller
 
                 $this->transactionUtil->activityLog($transaction, 'added');
 
+                // Sync Inter-Company Sales to Purchase
+                \App\Utils\IntercompanyUtil::syncSellToPurchase($transaction);
+
                 DB::commit();
 
                 SellCreatedOrModified::dispatch($transaction);
@@ -1553,9 +1556,12 @@ class SellPosController extends Controller
 
                 $this->transactionUtil->activityLog($transaction, 'edited', $transaction_before);
 
-                SellCreatedOrModified::dispatch($transaction);
+                // Sync Inter-Company Sales to Purchase
+                \App\Utils\IntercompanyUtil::syncSellToPurchase($transaction);
 
                 DB::commit();
+
+                SellCreatedOrModified::dispatch($transaction);
 
                 if ($request->input('is_save_and_print') == 1) {
                     $url = $this->transactionUtil->getInvoiceUrl($id, $business_id);

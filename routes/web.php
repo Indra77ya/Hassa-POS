@@ -132,6 +132,13 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::post('/test-sms', [BusinessController::class, 'testSmsConfiguration']);
     Route::get('/business/settings', [BusinessController::class, 'getBusinessSettings'])->name('business.getBusinessSettings');
     Route::post('/business/update', [BusinessController::class, 'postBusinessSettings'])->name('business.postBusinessSettings');
+    // Intercompany Link routes
+    Route::get('/intercompany-links', [\App\Http\Controllers\IntercompanyController::class, 'index']);
+    Route::get('/intercompany-links/contacts/{business_id}', [\App\Http\Controllers\IntercompanyController::class, 'getContacts']);
+    Route::post('/intercompany-links', [\App\Http\Controllers\IntercompanyController::class, 'store']);
+    Route::delete('/intercompany-links/{id}', [\App\Http\Controllers\IntercompanyController::class, 'destroy']);
+
+    Route::get('/switch-business/{id}', [UserController::class, 'switchBusiness'])->name('user.switchBusiness');
     Route::get('/user/profile', [UserController::class, 'getProfile'])->name('user.getProfile');
     Route::post('/user/update', [UserController::class, 'updateProfile'])->name('user.updateProfile');
     Route::post('/user/update-password', [UserController::class, 'updatePassword'])->name('user.updatePassword');

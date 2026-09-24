@@ -209,6 +209,50 @@
                     </svg>
                 </button>
 
+                {{-- Multi-Company Business Switcher --}}
+                @php
+                    $user = auth()->user();
+                    $administrator_list = config('constants.administrator_usernames');
+                    $administrator_usernames = array_map('trim', explode(',', $administrator_list));
+                    $is_admin = in_array($user->username, $administrator_usernames);
+
+                    if ($is_admin) {
+                        $switchable_businesses = \App\Business::where('is_active', 1)->pluck('name', 'id');
+                    } else {
+                        $linked_ids = \App\BusinessIntercompanyLink::where('business_id', session('business.id'))
+                            ->pluck('linked_business_id')
+                            ->toArray();
+                        $same_username_ids = \App\User::where('username', $user->username)
+                            ->pluck('business_id')
+                            ->toArray();
+                        $all_allowed_ids = array_unique(array_merge([$user->business_id, session('business.id')], $linked_ids, $same_username_ids));
+                        $switchable_businesses = \App\Business::whereIn('id', $all_allowed_ids)->where('is_active', 1)->pluck('name', 'id');
+                    }
+                @endphp
+
+                @if(count($switchable_businesses) > 1)
+                    <details class="tw-dw-dropdown tw-relative tw-inline-block tw-text-left">
+                        <summary class="tw-inline-flex tw-transition-all tw-ring-1 tw-ring-white/10 hover:tw-text-white tw-cursor-pointer tw-duration-200 tw-bg-@if(!empty(session('business.theme_color'))){{session('business.theme_color')}}@else{{'primary'}}@endif-800 hover:tw-bg-@if(!empty(session('business.theme_color'))){{session('business.theme_color')}}@else{{'primary'}}@endif-700 tw-py-1.5 tw-px-3 tw-rounded-lg tw-items-center tw-justify-center tw-text-sm tw-font-medium tw-text-white tw-gap-1">
+                            <i class="fas fa-building"></i>
+                            <span class="tw-hidden md:tw-inline">{{ session('business.name') }}</span>
+                            <i class="fas fa-chevron-down tw-text-xs"></i>
+                        </summary>
+                        <ul class="tw-dw-menu tw-dw-dropdown-content tw-dw-z-[1] tw-dw-bg-base-100 tw-dw-rounded-box tw-w-56 tw-absolute tw-right-0 tw-z-10 tw-mt-2 tw-origin-top-right tw-bg-white tw-rounded-lg tw-shadow-lg tw-ring-1 tw-ring-gray-200 focus:tw-outline-none" role="menu">
+                            <div class="tw-p-2" role="none">
+                                <div class="tw-px-3 tw-py-1 tw-text-xs tw-font-semibold tw-text-gray-500 tw-uppercase">Pilih Bisnis</div>
+                                @foreach($switchable_businesses as $b_id => $b_name)
+                                    <a href="{{ action([\App\Http\Controllers\UserController::class, 'switchBusiness'], [$b_id]) }}"
+                                       class="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-text-sm tw-font-medium @if($b_id == session('business.id')) tw-text-primary-600 tw-bg-primary-50 @else tw-text-gray-600 hover:tw-text-gray-900 hover:tw-bg-gray-100 @endif tw-rounded-lg"
+                                       role="menuitem">
+                                        <i class="fas fa-check tw-text-xs @if($b_id != session('business.id')) tw-opacity-0 @endif"></i>
+                                        <span class="tw-truncate">{{ $b_name }}</span>
+                                    </a>
+                                @endforeach
+                            </div>
+                        </ul>
+                    </details>
+                @endif
+
                 @include('layouts.partials.header-notifications')
 
 

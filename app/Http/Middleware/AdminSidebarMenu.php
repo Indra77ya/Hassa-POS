@@ -835,6 +835,16 @@ class AdminSidebarMenu
                                 ['icon' => '', 'active' => request()->segment(1) == 'business-location']
                             );
                         }
+
+                        $administrator_list = config('constants.administrator_usernames');
+                        $administrator_usernames = array_map('trim', explode(',', $administrator_list));
+                        if (in_array(auth()->user()->username, $administrator_usernames)) {
+                            $sub->url(
+                                action([\App\Http\Controllers\IntercompanyController::class, 'index']),
+                                'Inter-Company Links',
+                                ['icon' => '', 'active' => request()->segment(1) == 'intercompany-links']
+                            );
+                        }
                         if (auth()->user()->can('invoice_settings.access')) {
                             $sub->url(
                                 action([\App\Http\Controllers\InvoiceSchemeController::class, 'index']),
