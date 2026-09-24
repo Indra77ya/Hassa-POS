@@ -40,7 +40,7 @@
             <table class="table table-bordered table-striped" id="intercompany_links_table">
                 <thead>
                     <tr>
-                        <th>@lang('Contact')</th>
+                        <th>@lang('contact.contact')</th>
                         <th>@lang('Target Business')</th>
                         <th>@lang('messages.action')</th>
                     </tr>
