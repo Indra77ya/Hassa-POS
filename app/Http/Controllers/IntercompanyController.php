@@ -12,15 +12,7 @@ class IntercompanyController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('admin');
-        $this->middleware(function ($request, $next) {
-            $administrator_list = config('constants.administrator_usernames');
-            $administrator_usernames = array_map('trim', explode(',', $administrator_list));
-            if (!in_array(auth()->user()->username, $administrator_usernames)) {
-                abort(403, 'Akses Ditolak: Hanya Administrator Utama yang dapat mengelola Inter-Company Link.');
-            }
-            return $next($request);
-        });
+        $this->middleware('superadmin');
     }
 
     /**
