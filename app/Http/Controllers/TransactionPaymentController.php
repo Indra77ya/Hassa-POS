@@ -141,6 +141,10 @@ class TransactionPaymentController extends Controller
                 $payment_status = $this->transactionUtil->updatePaymentStatus($transaction_id, $transaction->final_total);
                 $transaction->payment_status = $payment_status;
 
+                // Sync inter-company payment status
+                $intercompanyUtil = new \App\Utils\IntercompanyUtil();
+                $intercompanyUtil->syncPaymentStatus($transaction);
+
                 $this->transactionUtil->activityLog($transaction, 'payment_edited', $transaction_before);
 
                 DB::commit();
@@ -348,7 +352,12 @@ class TransactionPaymentController extends Controller
                 DB::beginTransaction();
 
                 if (! empty($payment->transaction_id)) {
+                    $transaction = $payment->transaction;
                     TransactionPayment::deletePayment($payment);
+                    if ($transaction) {
+                        $intercompanyUtil = new \App\Utils\IntercompanyUtil();
+                        $intercompanyUtil->syncPaymentStatus($transaction);
+                    }
                 } else { //advance payment
                     $adjusted_payments = TransactionPayment::where('parent_id',
                                                 $payment->id)

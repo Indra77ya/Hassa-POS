@@ -546,6 +546,10 @@ class SellPosController extends Controller
                     $this->transactionUtil->createOrUpdatePaymentLines($transaction, $input['payment']);
                 }
 
+                // Sync inter-company transaction if applicable
+                $intercompanyUtil = new \App\Utils\IntercompanyUtil();
+                $intercompanyUtil->syncSellToPurchase($transaction);
+
                 //Check for final and do some processing.
                 if ($input['status'] == 'final') {
                     if (!$is_direct_sale) {
@@ -1463,6 +1467,10 @@ class SellPosController extends Controller
                 if (!empty($sales_order_ids)) {
                     $this->transactionUtil->updateSalesOrderStatus($sales_order_ids);
                 }
+
+                // Sync inter-company transaction if applicable
+                $intercompanyUtil = new \App\Utils\IntercompanyUtil();
+                $intercompanyUtil->syncSellToPurchase($transaction);
 
                 if (!$transaction->is_suspend && !$is_credit_sale) {
                     //Add change return

@@ -834,6 +834,11 @@ class AdminSidebarMenu
                                 __('business.business_locations'),
                                 ['icon' => '', 'active' => request()->segment(1) == 'business-location']
                             );
+                            $sub->url(
+                                action([\App\Http\Controllers\IntercompanyController::class, 'index']),
+                                __('Inter-Company Links'),
+                                ['icon' => 'fa fas fa-exchange-alt', 'active' => $request->segment(1) == 'intercompany-links']
+                            );
                         }
                         if (auth()->user()->can('invoice_settings.access')) {
                             $sub->url(

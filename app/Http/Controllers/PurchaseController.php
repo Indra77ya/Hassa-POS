@@ -154,6 +154,11 @@ class PurchaseController extends Controller
                     if (auth()->user()->can('purchase.update') || auth()->user()->can('purchase.update_status')) {
                         $html .= '<li><a href="#" data-purchase_id="'.$row->id.
                         '" data-status="'.$row->status.'" class="update_status"><i class="fas fa-edit" aria-hidden="true" ></i>'.__('lang_v1.update_status').'</a></li>';
+
+                        if (! empty($row->is_intercompany) && $row->status != 'received') {
+                            $html .= '<li><a href="#" data-purchase_id="'.$row->id.
+                            '" data-status="received" class="update_status text-success"><i class="fas fa-check-circle" aria-hidden="true"></i> Konfirmasi Terima (Inter-Company)</a></li>';
+                        }
                     }
 
                     if ($row->status == 'ordered') {
