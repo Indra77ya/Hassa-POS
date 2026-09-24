@@ -39,7 +39,7 @@ class IntercompanyController extends Controller
                 ->make(true);
         }
 
-        $contacts = Contact::forDropdown($business_id, false, 'both');
+        $contacts = Contact::contactDropdown($business_id, false, false);
         $businesses = Business::where('id', '!=', $business_id)->pluck('name', 'id');
 
         return view('intercompany.index', compact('contacts', 'businesses'));
