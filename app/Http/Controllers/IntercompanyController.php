@@ -55,12 +55,19 @@ class IntercompanyController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validator = \Validator::make($request->all(), [
             'business_id' => 'required|integer|exists:business,id',
             'linked_business_id' => 'required|integer|exists:business,id|different:business_id',
             'contact_id' => 'required|integer|exists:contacts,id',
             'linked_contact_id' => 'nullable|integer|exists:contacts,id',
         ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'msg' => $validator->errors()->first(),
+            ]);
+        }
 
         try {
             // Create link from business_id -> linked_business_id
