@@ -143,6 +143,9 @@ class TransactionPaymentController extends Controller
 
                 $this->transactionUtil->activityLog($transaction, 'payment_edited', $transaction_before);
 
+                // Sync payment status bidirectionally for intercompany linked transactions
+                \App\Utils\IntercompanyUtil::syncPaymentStatus($transaction);
+
                 DB::commit();
             }
 
@@ -309,6 +312,9 @@ class TransactionPaymentController extends Controller
 
             $this->transactionUtil->activityLog($transaction, 'payment_edited', $transaction_before);
 
+            // Sync payment status bidirectionally for intercompany linked transactions
+            \App\Utils\IntercompanyUtil::syncPaymentStatus($transaction);
+
             DB::commit();
 
             //event
@@ -348,7 +354,11 @@ class TransactionPaymentController extends Controller
                 DB::beginTransaction();
 
                 if (! empty($payment->transaction_id)) {
+                    $trans = Transaction::find($payment->transaction_id);
                     TransactionPayment::deletePayment($payment);
+                    if ($trans) {
+                        \App\Utils\IntercompanyUtil::syncPaymentStatus($trans);
+                    }
                 } else { //advance payment
                     $adjusted_payments = TransactionPayment::where('parent_id',
                                                 $payment->id)

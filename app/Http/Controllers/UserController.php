@@ -111,6 +111,72 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    /**
+     * Switch current business in session
+     */
+    public function switchBusiness($business_id)
+    {
+        try {
+            $user = auth()->user();
+            $target_business = \App\Business::findOrFail($business_id);
+
+            // Check authorization
+            $administrator_list = config('constants.administrator_usernames');
+            $administrator_usernames = array_map('trim', explode(',', $administrator_list));
+            $is_admin = in_array($user->username, $administrator_usernames);
+
+            $can_switch = false;
+            if ($is_admin) {
+                $can_switch = true;
+            } else {
+                // Check if target business is linked to user's primary business or if user has account in target business
+                $linked_business_ids = \App\BusinessIntercompanyLink::where('business_id', $user->business_id)
+                    ->pluck('linked_business_id')
+                    ->toArray();
+
+                $same_username_businesses = User::where('username', $user->username)
+                    ->pluck('business_id')
+                    ->toArray();
+
+                if (in_array($business_id, $linked_business_ids) || in_array($business_id, $same_username_businesses) || $user->business_id == $business_id) {
+                    $can_switch = true;
+                }
+            }
+
+            if (!$can_switch) {
+                abort(403, 'Unauthorized business switch');
+            }
+
+            // Update session data
+            $business_util = new \App\Utils\BusinessUtil();
+            $currency = $target_business->currency;
+            $currency_data = [
+                'id' => $currency->id,
+                'code' => $currency->code,
+                'symbol' => $currency->symbol,
+                'thousand_separator' => $currency->thousand_separator,
+                'decimal_separator' => $currency->decimal_separator,
+            ];
+
+            session()->put('business', $target_business);
+            session()->put('currency', $currency_data);
+
+            $session_user = session('user');
+            $session_user['business_id'] = $target_business->id;
+            session()->put('user', $session_user);
+
+            $financial_year = $business_util->getCurrentFinancialYear($target_business->id);
+            session()->put('financial_year', $financial_year);
+
+            $output = ['success' => 1, 'msg' => 'Berhasil berpindah bisnis ke ' . $target_business->name];
+        } catch (\Exception $e) {
+            \Log::emergency('File:' . $e->getFile() . 'Line:' . $e->getLine() . 'Message:' . $e->getMessage());
+            $output = ['success' => 0, 'msg' => __('messages.something_went_wrong')];
+        }
+
+        return redirect('/home')->with('status', $output);
+    }
+
     public function updatePassword(Request $request)
     {
         //Disable in demo
