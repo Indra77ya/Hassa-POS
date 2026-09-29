@@ -461,10 +461,12 @@ class DataController extends Controller
     public function afterModelSaved($data)
     {
         if ($data['event'] = 'user_saved') {
+            $moduleUtil = new ModuleUtil();
             $user = $data['model_instance'];
             $user->essentials_department_id = request()->input('essentials_department_id');
             $user->essentials_designation_id = request()->input('essentials_designation_id');
-            $user->essentials_salary = request()->input('essentials_salary');
+            $salary = request()->input('essentials_salary');
+            $user->essentials_salary = ! empty($salary) || $salary === '0' || $salary === 0 ? $moduleUtil->num_uf($salary) : null;
             $user->essentials_pay_period = request()->input('essentials_pay_period');
             $user->essentials_pay_cycle = request()->input('essentials_pay_cycle');
             $user->location_id = request()->input('location_id');

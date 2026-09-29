@@ -29,7 +29,7 @@
             <div class="multi-input">
                 {!! Form::label('essentials_salary', __('essentials::lang.salary') . ':') !!}
                 <br/>
-                {!! Form::number('essentials_salary', !empty($user->essentials_salary) ? $user->essentials_salary : null, ['class' => 'form-control width-40 pull-left', 'placeholder' => __('essentials::lang.salary')]); !!}
+                {!! Form::text('essentials_salary', !empty($user->essentials_salary) ? @num_format($user->essentials_salary) : null, ['class' => 'form-control width-40 pull-left input_number', 'placeholder' => __('essentials::lang.salary')]); !!}
 
                 {!! Form::select('essentials_pay_period', ['month' => __('essentials::lang.per'). ' '.__('lang_v1.month'), 'week' => __('essentials::lang.per'). ' '.__('essentials::lang.week'), 'day' => __('essentials::lang.per'). ' '.__('lang_v1.day')], !empty($user->essentials_pay_period) ? $user->essentials_pay_period : null, ['class' => 'form-control width-60 pull-left']); !!}
             </div>
