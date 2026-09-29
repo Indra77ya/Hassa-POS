@@ -32,6 +32,8 @@
                                 <th>@lang('laundry::lang.staff_name')</th>
                                 <th>@lang('laundry::lang.total_tasks_completed')</th>
                                 <th>@lang('laundry::lang.total_points_earned')</th>
+                                <th>@lang('laundry::lang.bonus_per_point')</th>
+                                <th>@lang('laundry::lang.total_bonus')</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -40,10 +42,12 @@
                                     <td>{{ $summary->staff_name }}</td>
                                     <td>{{ $summary->total_tasks }}</td>
                                     <td><strong>{{ @num_format($summary->total_points) }}</strong></td>
+                                    <td>@format_currency($summary->bonus_rate)</td>
+                                    <td><strong class="text-success">@format_currency($summary->total_bonus)</strong></td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="text-center">@lang('lang_v1.no_data')</td>
+                                    <td colspan="5" class="text-center">@lang('lang_v1.no_data')</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -64,6 +68,8 @@
                         <th>@lang('laundry::lang.quantity')</th>
                         <th>@lang('laundry::lang.process_points')</th>
                         <th>@lang('laundry::lang.points_earned')</th>
+                        <th>@lang('laundry::lang.bonus_per_point')</th>
+                        <th>@lang('laundry::lang.total_bonus')</th>
                         <th>@lang('laundry::lang.completed_at')</th>
                     </tr>
                 </thead>
@@ -116,6 +122,8 @@ $(document).ready(function() {
             { data: 'quantity', name: 'os.quantity' },
             { data: 'process_points', name: 'lp.points' },
             { data: 'points_earned', name: 'laundry_order_process_logs.points_earned' },
+            { data: 'bonus_rate', name: 'u.laundry_bonus_per_point' },
+            { data: 'total_bonus', name: 'total_bonus', searchable: false },
             { data: 'completed_at', name: 'laundry_order_process_logs.completed_at' }
         ]
     });

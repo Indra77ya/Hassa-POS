@@ -271,6 +271,26 @@ class PayrollController extends Controller
                     $payrolls[$employee->id]['allowances']['allowance_percents'][] = 0;
                 }
 
+                // Calculate laundry bonus if applicable
+                if (\Illuminate\Support\Facades\Schema::hasTable('laundry_order_process_logs')) {
+                    $laundry_bonus_rate = (float) ($employee->laundry_bonus_per_point ?? 0);
+                    if ($laundry_bonus_rate > 0) {
+                        $laundry_points = \Modules\Laundry\Entities\LaundryOrderProcessLog::join('laundry_order_sheets as os', 'laundry_order_process_logs.order_sheet_id', '=', 'os.id')
+                            ->where('os.business_id', $business_id)
+                            ->where('laundry_order_process_logs.staff_id', $employee->id)
+                            ->whereBetween('laundry_order_process_logs.completed_at', [\Carbon\Carbon::parse($start_date)->startOfDay(), \Carbon\Carbon::parse($end_date)->endOfDay()])
+                            ->sum('laundry_order_process_logs.points_earned');
+
+                        $total_laundry_bonus = $laundry_points * $laundry_bonus_rate;
+                        if ($total_laundry_bonus > 0) {
+                            $payrolls[$employee->id]['allowances']['allowance_names'][] = __('laundry::lang.laundry_bonus_per_point');
+                            $payrolls[$employee->id]['allowances']['allowance_amounts'][] = $total_laundry_bonus;
+                            $payrolls[$employee->id]['allowances']['allowance_types'][] = 'fixed';
+                            $payrolls[$employee->id]['allowances']['allowance_percents'][] = 0;
+                        }
+                    }
+                }
+
                 //get earnings & deductions of employee
                 $allowances_and_deductions = $this->essentialsUtil->getEmployeeAllowancesAndDeductions($business_id, $employee->id, $start_date, $end_date);
                 foreach ($allowances_and_deductions as $ad) {

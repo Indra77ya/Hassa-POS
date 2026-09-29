@@ -45,6 +45,8 @@ class LaundryReportController extends Controller
                     'os.unit_name',
                     'lp.points as process_points',
                     'laundry_order_process_logs.points_earned',
+                    'u.laundry_bonus_per_point as bonus_rate',
+                    DB::raw('(laundry_order_process_logs.points_earned * COALESCE(u.laundry_bonus_per_point, 0)) as total_bonus'),
                     'laundry_order_process_logs.completed_at',
                 ]);
 
@@ -71,7 +73,13 @@ class LaundryReportController extends Controller
                 ->editColumn('points_earned', function ($row) {
                     return '<strong>' . $this->commonUtil->num_f($row->points_earned) . '</strong>';
                 })
-                ->rawColumns(['points_earned'])
+                ->editColumn('bonus_rate', function ($row) {
+                    return $this->commonUtil->num_f($row->bonus_rate, true);
+                })
+                ->editColumn('total_bonus', function ($row) {
+                    return '<strong class="text-success">' . $this->commonUtil->num_f($row->total_bonus, true) . '</strong>';
+                })
+                ->rawColumns(['points_earned', 'total_bonus'])
                 ->make(true);
         }
 
@@ -84,10 +92,12 @@ class LaundryReportController extends Controller
             ->whereNotNull('laundry_order_process_logs.staff_id')
             ->select([
                 DB::raw("CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) as staff_name"),
+                'u.laundry_bonus_per_point as bonus_rate',
                 DB::raw('SUM(laundry_order_process_logs.points_earned) as total_points'),
+                DB::raw('SUM(laundry_order_process_logs.points_earned * COALESCE(u.laundry_bonus_per_point, 0)) as total_bonus'),
                 DB::raw('COUNT(laundry_order_process_logs.id) as total_tasks'),
             ])
-            ->groupBy('u.id', 'u.first_name', 'u.last_name')
+            ->groupBy('u.id', 'u.first_name', 'u.last_name', 'u.laundry_bonus_per_point')
             ->get();
 
         return view('laundry::reports.staff_points', compact('staffs', 'staff_summary'));
