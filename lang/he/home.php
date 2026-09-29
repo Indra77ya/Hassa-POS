@@ -2,7 +2,7 @@
 
 return [
     'home' => 'בית',
-    'welcome_message' => 'ברוך הבא :name, 👋',
+    'welcome_message' => 'ברוך הבא :name,',
     'total_sell' => 'סה״כ מכירות',
     'total_purchase' => 'סה״כ רכישות',
     'invoice_due' => 'חשבונית לתשלום',

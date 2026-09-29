@@ -11,7 +11,7 @@ return [
     |
     */
     'home' => 'الصفحة الرئيسية',
-    'welcome_message' => 'مرحبا :name 👋',
+    'welcome_message' => 'مرحبا :name,',
     'total_sell' => 'إجمالي المبيعات',
     'total_purchase' => 'إجمالي المشتريات',
     'invoice_due' => 'فواتير مستحقة السداد',
