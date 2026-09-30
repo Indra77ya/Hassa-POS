@@ -291,6 +291,82 @@ class PayrollController extends Controller
                     }
                 }
 
+                // Calculate completed Repair Job Sheet bonus for technicians
+                if (\Illuminate\Support\Facades\Schema::hasTable('repair_job_sheets')) {
+                    $completed_job_sheets_count = \DB::table('repair_job_sheets')
+                        ->join('repair_statuses', 'repair_job_sheets.status_id', '=', 'repair_statuses.id')
+                        ->where('repair_job_sheets.business_id', $business_id)
+                        ->where('repair_job_sheets.service_staff', $employee->id)
+                        ->where('repair_statuses.is_completed_status', 1)
+                        ->whereBetween('repair_job_sheets.updated_at', [\Carbon\Carbon::parse($start_date)->startOfDay(), \Carbon\Carbon::parse($end_date)->endOfDay()])
+                        ->count();
+
+                    if ($completed_job_sheets_count > 0) {
+                        // Bonus calculation based on technician commission percent or default per-job sheet incentive
+                        $tech_cmmsn = !empty($employee->cmmsn_percent) ? (float)$employee->cmmsn_percent : 0;
+                        if ($tech_cmmsn > 0) {
+                            $total_repair_cost = \DB::table('repair_job_sheets')
+                                ->join('repair_statuses', 'repair_job_sheets.status_id', '=', 'repair_statuses.id')
+                                ->where('repair_job_sheets.business_id', $business_id)
+                                ->where('repair_job_sheets.service_staff', $employee->id)
+                                ->where('repair_statuses.is_completed_status', 1)
+                                ->whereBetween('repair_job_sheets.updated_at', [\Carbon\Carbon::parse($start_date)->startOfDay(), \Carbon\Carbon::parse($end_date)->endOfDay()])
+                                ->sum('estimated_cost');
+                            $repair_bonus = ($total_repair_cost * $tech_cmmsn) / 100;
+                        } else {
+                            $repair_bonus = $completed_job_sheets_count * 10000; // Default nominal bonus per completed repair
+                        }
+
+                        if ($repair_bonus > 0) {
+                            $payrolls[$employee->id]['allowances']['allowance_names'][] = 'Bonus Teknisi Repair (' . $completed_job_sheets_count . ' Perbaikan)';
+                            $payrolls[$employee->id]['allowances']['allowance_amounts'][] = $repair_bonus;
+                            $payrolls[$employee->id]['allowances']['allowance_types'][] = 'fixed';
+                            $payrolls[$employee->id]['allowances']['allowance_percents'][] = 0;
+                        }
+                    }
+                }
+
+                // Calculate completed Project task bonus
+                if (\Illuminate\Support\Facades\Schema::hasTable('pjt_project_tasks')) {
+                    $completed_tasks_count = \DB::table('pjt_project_tasks')
+                        ->join('pjt_project_task_members', 'pjt_project_tasks.id', '=', 'pjt_project_task_members.project_task_id')
+                        ->join('pjt_projects', 'pjt_project_tasks.project_id', '=', 'pjt_projects.id')
+                        ->where('pjt_projects.business_id', $business_id)
+                        ->where('pjt_project_task_members.user_id', $employee->id)
+                        ->where('pjt_project_tasks.status', 'completed')
+                        ->whereBetween('pjt_project_tasks.updated_at', [\Carbon\Carbon::parse($start_date)->startOfDay(), \Carbon\Carbon::parse($end_date)->endOfDay()])
+                        ->count();
+
+                    if ($completed_tasks_count > 0) {
+                        $project_bonus = $completed_tasks_count * 15000; // Nominal incentive per completed task
+                        $payrolls[$employee->id]['allowances']['allowance_names'][] = 'Insentif Proyek (' . $completed_tasks_count . ' Tugas Selesai)';
+                        $payrolls[$employee->id]['allowances']['allowance_amounts'][] = $project_bonus;
+                        $payrolls[$employee->id]['allowances']['allowance_types'][] = 'fixed';
+                        $payrolls[$employee->id]['allowances']['allowance_percents'][] = 0;
+                    }
+                }
+
+                // Calculate Attendance Lateness / Absence Deductions if applicable
+                if (\Illuminate\Support\Facades\Schema::hasTable('essentials_attendances')) {
+                    $late_minutes = \DB::table('essentials_attendances')
+                        ->leftJoin('essentials_shifts as es', 'es.id', '=', 'essentials_attendances.essentials_shift_id')
+                        ->where('essentials_attendances.business_id', $business_id)
+                        ->where('essentials_attendances.user_id', $employee->id)
+                        ->whereBetween('essentials_attendances.clock_in_time', [\Carbon\Carbon::parse($start_date)->startOfDay(), \Carbon\Carbon::parse($end_date)->endOfDay()])
+                        ->whereNotNull('es.start_time')
+                        ->select(\DB::raw('SUM(GREATEST(0, TIMESTAMPDIFF(MINUTE, CONCAT(DATE(essentials_attendances.clock_in_time), " ", es.start_time), essentials_attendances.clock_in_time))) as total_late_minutes'))
+                        ->value('total_late_minutes');
+
+                    if ($late_minutes > 0) {
+                        $late_deduction_rate = 1000; // Rp 1,000 per minute late fallback or configurable
+                        $total_late_deduction = $late_minutes * $late_deduction_rate;
+                        $payrolls[$employee->id]['deductions']['deduction_names'][] = 'Potongan Keterlambatan Absensi (' . $late_minutes . ' Menit)';
+                        $payrolls[$employee->id]['deductions']['deduction_amounts'][] = $total_late_deduction;
+                        $payrolls[$employee->id]['deductions']['deduction_types'][] = 'fixed';
+                        $payrolls[$employee->id]['deductions']['deduction_percents'][] = 0;
+                    }
+                }
+
                 //get earnings & deductions of employee
                 $allowances_and_deductions = $this->essentialsUtil->getEmployeeAllowancesAndDeductions($business_id, $employee->id, $start_date, $end_date);
                 foreach ($allowances_and_deductions as $ad) {
@@ -380,6 +456,8 @@ class PayrollController extends Controller
 
                 $transaction = Transaction::create($payroll);
                 $transaction_ids[] = $transaction->id;
+
+                event(new \Modules\Essentials\Events\PayrollCreatedOrModified($transaction));
 
                 if ($notify_employee && $payroll_group->status == 'final') {
                     $transaction->action = 'created';
@@ -933,6 +1011,8 @@ class PayrollController extends Controller
 
                 if (! empty($payroll_trans)) {
                     $payroll_trans->update($payroll);
+
+                    event(new \Modules\Essentials\Events\PayrollCreatedOrModified($payroll_trans));
 
                     if ($notify_employee && $payroll_group->status == 'final') {
                         $payroll_trans->action = 'updated';

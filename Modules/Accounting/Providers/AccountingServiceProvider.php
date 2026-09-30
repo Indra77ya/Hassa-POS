@@ -40,6 +40,9 @@ class AccountingServiceProvider extends ServiceProvider
 
         $this->app['events']->listen(\App\Events\StockAdjustmentCreatedOrModified::class,
         \Modules\Accounting\Listeners\MapStockAdjustment::class);
+
+        $this->app['events']->listen('Modules\Essentials\Events\PayrollCreatedOrModified',
+        \Modules\Accounting\Listeners\MapPayrollTransaction::class);
     }
 
     /**

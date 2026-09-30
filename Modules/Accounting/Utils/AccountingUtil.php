@@ -252,7 +252,7 @@ class AccountingUtil extends Util
                 'created_by' => $user_id,
                 'operation_date' => \Carbon::now(),
             ];
-        }elseif ($type == 'expense') {
+        }elseif (in_array($type, ['expense', 'payroll'])) {
             $transaction = Transaction::where('business_id', $business_id)->where('id', $id)->firstorFail();            
             $payment_data = [
                 'accounting_account_id' => $payment_account,
@@ -287,7 +287,7 @@ class AccountingUtil extends Util
 
             $transaction_id = null;
             $transaction_payment_id = null;
-            if (in_array($type, ['sell', 'purchase', 'expense'])) {
+            if (in_array($type, ['sell', 'purchase', 'expense', 'payroll'])) {
                 $transaction_id = $id;
             } else {
                 $transaction_payment_id = $id;
