@@ -1630,7 +1630,7 @@ class Util
             'user_type', 'crm_contact_id', 'allow_login', 'username', 'password',
             'cmmsn_percent', 'max_sales_discount_percent', 'dob', 'gender', 'marital_status', 'blood_group', 'contact_number', 'alt_number', 'family_number', 'fb_link',
             'twitter_link', 'social_media_1', 'social_media_2', 'custom_field_1',
-            'custom_field_2', 'custom_field_3', 'custom_field_4', 'guardian_name', 'id_proof_name', 'id_proof_number', 'permanent_address', 'current_address', 'bank_details', 'selected_contacts', 'is_enable_service_staff_pin', 'service_staff_pin',
+            'custom_field_2', 'custom_field_3', 'custom_field_4', 'guardian_name', 'id_proof_name', 'id_proof_number', 'permanent_address', 'current_address', 'bank_details', 'selected_contacts', 'is_enable_service_staff_pin', 'service_staff_pin', 'laundry_bonus_per_point',
         ]);
 
         $user_details['status'] = ! empty($request->input('is_active')) ? $request->input('is_active') : 'inactive';

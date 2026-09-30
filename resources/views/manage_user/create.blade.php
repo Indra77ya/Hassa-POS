@@ -162,6 +162,12 @@
             {!! Form::text('max_sales_discount_percent', null, ['class' => 'form-control input_number', 'placeholder' => __( 'lang_v1.max_sales_discount_percent' ) ]); !!}
         </div>
       </div>
+      <div class="col-md-4">
+        <div class="form-group">
+          {!! Form::label('laundry_bonus_per_point', __('laundry::lang.laundry_bonus_per_point') . ' (Rp):') !!}
+            {!! Form::text('laundry_bonus_per_point', null, ['class' => 'form-control input_number', 'placeholder' => __('laundry::lang.laundry_bonus_per_point') ]); !!}
+        </div>
+      </div>
       <div class="clearfix"></div>
       
       <div class="col-md-4">
