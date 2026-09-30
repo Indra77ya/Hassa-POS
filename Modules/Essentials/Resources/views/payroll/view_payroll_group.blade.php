@@ -112,6 +112,18 @@
 	#payroll-group-table>tfoot>tr>th, #payroll-group-table>thead>tr>td,
 	#payroll-group-table>tbody>tr>td, #payroll-group-table>tfoot>tr>td {
 		border: 1px solid #1d1a1a;
+		padding: 12px 14px;
+		vertical-align: middle;
+	}
+	@media print {
+		#payroll-group-table {
+			border: 1px solid #000 !important;
+			width: 100% !important;
+		}
+		#payroll-group-table td, #payroll-group-table th {
+			border: 1px solid #000 !important;
+			padding: 10px 12px !important;
+		}
 	}
 </style>
 @section('javascript')

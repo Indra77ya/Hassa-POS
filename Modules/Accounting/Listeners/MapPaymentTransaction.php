@@ -71,6 +71,12 @@ class MapPaymentTransaction
             return;
         }
 
+        if ($transaction->type == 'payroll') {
+            $mapPayroll = new \Modules\Accounting\Listeners\MapPayrollTransaction();
+            $mapPayroll->handle($transaction);
+            return;
+        }
+
         // if payment is deleted then delete the mapping
         if (isset($event->isDeleted) && $event->isDeleted) {
             $accountingUtil = new \Modules\Accounting\Utils\AccountingUtil();
