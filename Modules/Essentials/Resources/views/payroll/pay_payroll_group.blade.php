@@ -45,62 +45,66 @@
 						</div>
 					</div>
 	                <div class="table-responsive mt-15">
-	                    <table class="table" id="payroll-group-table" style="width: 100% !important;">
-                            <tr>
-                                <th>@lang( 'essentials::lang.employee' )</th>
-                                <th>@lang( 'essentials::lang.gross_amount' )</th>
-                                <th>@lang('lang_v1.bank_details')</th>
-									<th>@lang('sale.payments')</th>
-                                <th>
-                                	@lang('purchase.add_payment')
-                                </th>
-                            </tr>
+	                    <table class="table table-bordered" id="payroll-group-table" style="width: 100% !important;">
+                            <thead>
+                                <tr>
+                                    <th style="padding: 12px; min-width: 150px;">@lang( 'essentials::lang.employee' )</th>
+                                    <th style="padding: 12px; min-width: 120px;">@lang( 'essentials::lang.gross_amount' )</th>
+                                    <th style="padding: 12px; min-width: 220px;">@lang('lang_v1.bank_details')</th>
+                                    <th style="padding: 12px; min-width: 200px;">@lang('sale.payments')</th>
+                                    <th style="padding: 12px; min-width: 260px;">@lang('purchase.add_payment')</th>
+                                </tr>
+                            </thead>
                         	@foreach($payrolls as $id => $payroll)
 	                        	<tr data-id="{{$id}}">
 	                        		<input type="hidden" name="payments[{{$id}}][transaction_id]" value="{{$payroll['transaction_id']}}">
                         			<input type="hidden" name="payments[{{$id}}][employee_id]" value="{{$payroll['employee_id']}}">
-	                        		<td>
-	                        			{{$payroll['employee']}}
+						<td style="padding: 12px;">
+							<strong>{{$payroll['employee']}}</strong>
 	                        		</td>
-	                        		<td>
+						<td style="padding: 12px; font-weight: bold;">
 	                        			@format_currency($payroll['final_total'])
 	                        		</td>
-	                        		<td>
+						<td style="padding: 12px; line-height: 1.7;">
 	                        			<strong>@lang('lang_v1.bank_name'):</strong>
-				      					{{$payroll['bank_details']['bank_name'] ?? ''}}
+									{{$payroll['bank_details']['bank_name'] ?? '-'}}
 				      					<br>
 
 				      					<strong>@lang('lang_v1.branch'):</strong>
-				      					{{$payroll['bank_details']['branch'] ?? ''}}
+									{{$payroll['bank_details']['branch'] ?? '-'}}
 				      					<br>
 
 				      					<strong>@lang('lang_v1.bank_code'):</strong>
-				      					{{$payroll['bank_details']['bank_code'] ?? ''}}
+									{{$payroll['bank_details']['bank_code'] ?? '-'}}
 				      					<br>
 				      					
 				      					<strong>@lang('lang_v1.account_holder_name'):</strong>
-				      					{{$payroll['bank_details']['account_holder_name'] ?? ''}}
+									{{$payroll['bank_details']['account_holder_name'] ?? '-'}}
 				      					<br>
 
 				      					<strong>@lang('lang_v1.bank_account_no'):</strong>
-				      					{{$payroll['bank_details']['account_number'] ?? ''}}
+									{{$payroll['bank_details']['account_number'] ?? '-'}}
 				      					<br>
 				      					<strong>@lang('lang_v1.tax_payer_id'):</strong>
-				      					{{$payroll['bank_details']['tax_payer_id'] ?? ''}}
+									{{$payroll['bank_details']['tax_payer_id'] ?? '-'}}
 				      					<br>
 	                        		</td>
-									<td>
-										@foreach($payroll['payments'] as $payment)
+									<td style="padding: 12px; line-height: 1.7;">
+										@forelse($payroll['payments'] as $payment)
 											<strong>@lang('messages.date'): </strong> {{ @format_datetime($payment->paid_on) }} <br>
 											<strong>@lang('purchase.amount'): </strong> <span class="display_currency" data-currency_symbol="true">{{ $payment->amount }}</span> <br>
 											<strong>@lang('purchase.payment_method'): </strong>  {{ $payment->method ?? '' }} <br>
-											<strong>@lang('lang_v1.payment_note'): </strong>  {{ $payment->note ?? '' }}
-											<hr>
-										@endforeach
+											<strong>@lang('lang_v1.payment_note'): </strong>  {{ $payment->note ?? '-' }}
+											@if(!$loop->last)
+												<hr style="margin: 8px 0; border-top: 1px dashed #ddd;">
+											@endif
+										@empty
+											<span class="text-muted">@lang('purchase.no_records_found')</span>
+										@endforelse
 									</td>
-	                        		<td>
+						<td style="padding: 12px;">
 	                        			@if($payroll['payment_status'] == 'paid')
-	                        				<span class="label bg-light-green">
+								<span class="label bg-light-green" style="font-size: 13px; padding: 6px 12px;">
 	                        					<i class="fas fa-check-circle"></i>
 	                        					@lang('lang_v1.paid')
 	                        				</span>
