@@ -93,6 +93,10 @@ class ProductSerialNumberUtil extends Util
      */
     public function linkSellSerialNumbers($transaction, $products_input)
     {
+        if ($transaction->status !== 'final') {
+            return;
+        }
+
         $transaction->load('sell_lines');
 
         foreach ($transaction->sell_lines as $index => $sell_line) {

@@ -87,6 +87,14 @@
                 class="form-control input-sm input_number"
                 required>
             @endif
+
+            @if(!empty($product->enable_sr_no))
+                <br>
+                <div class="form-group" style="margin-top: 5px; margin-bottom: 0;">
+                    <label style="font-size: 11px; margin-bottom: 2px;">Serial Number / IMEI (1 per baris/koma):</label>
+                    <textarea name="purchases[{{$row_count}}][serial_numbers]" class="form-control input-sm" rows="2" placeholder="Masukkan Serial Number dipisah baris baru atau koma..."></textarea>
+                </div>
+            @endif
         </td>
         <td>
             @php

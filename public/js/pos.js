@@ -3938,3 +3938,11 @@ function saveFormDataToLocalStorage() {
 
     // console.log("Form data successfully saved to LocalStorage.");
 }
+
+$(document).on('change', '.product_serial_number_id', function() {
+    var $tr = $(this).closest('tr');
+    var selected_price = $(this).find('option:selected').data('price');
+    if (selected_price) {
+        $tr.find('.pos_unit_price_inc_tax').val(selected_price).trigger('change');
+    }
+});

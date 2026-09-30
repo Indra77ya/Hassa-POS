@@ -401,6 +401,9 @@ class PurchaseController extends Controller
 
             $this->productUtil->createOrUpdatePurchaseLines($transaction, $purchases, $currency_details, $enable_product_editing);
 
+            $serialUtil = new \App\Utils\ProductSerialNumberUtil();
+            $serialUtil->saveOrUpdatePurchaseSerialNumbers($transaction, $purchases);
+
             //Add Purchase payments
             $this->transactionUtil->createOrUpdatePaymentLines($transaction, $request->input('payment'));
 
@@ -736,6 +739,9 @@ class PurchaseController extends Controller
             $purchases = $request->input('purchases');
 
             $delete_purchase_lines = $this->productUtil->createOrUpdatePurchaseLines($transaction, $purchases, $currency_details, $enable_product_editing, $before_status);
+
+            $serialUtil = new \App\Utils\ProductSerialNumberUtil();
+            $serialUtil->saveOrUpdatePurchaseSerialNumbers($transaction, $purchases);
 
             //Update mapping of purchase & Sell.
             $this->transactionUtil->adjustMappingPurchaseSellAfterEditingPurchase($before_status, $transaction, $delete_purchase_lines);

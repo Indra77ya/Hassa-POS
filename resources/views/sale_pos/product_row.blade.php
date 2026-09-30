@@ -47,6 +47,32 @@
 
 
 		<input type="hidden" class="enable_sr_no" value="{{$product->enable_sr_no}}">
+		@if(!empty($product->enable_sr_no))
+			@php
+				$bus_id = session('user.business_id');
+				$loc_id = !empty($transaction_location_id) ? $transaction_location_id : null;
+
+				$serial_numbers_query = \App\ProductSerialNumber::where('product_id', $product->product_id)
+					->where('business_id', $bus_id)
+					->where('status', 'in_stock');
+
+				if (!empty($loc_id)) {
+					$serial_numbers_query->where('location_id', $loc_id);
+				}
+
+				$serial_numbers = $serial_numbers_query->get();
+			@endphp
+			<div class="tw-mt-1">
+				<select name="products[{{$row_count}}][product_serial_number_id]" class="form-control input-sm product_serial_number_id tw-text-xs">
+					<option value="">-- @lang('lang_v1.select_location') Serial/IMEI --</option>
+					@foreach($serial_numbers as $sn)
+						<option value="{{ $sn->id }}" data-price="{{ $sn->selling_price }}">
+							{{ $sn->serial_number }} @if(!empty($sn->selling_price)) (Rp {{ number_format($sn->selling_price) }}) @endif
+						</option>
+					@endforeach
+				</select>
+			</div>
+		@endif
 		<input type="hidden" 
 			class="product_type" 
 			name="products[{{$row_count}}][product_type]" 

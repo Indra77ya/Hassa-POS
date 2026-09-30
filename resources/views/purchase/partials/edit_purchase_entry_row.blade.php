@@ -121,6 +121,20 @@
                     class="form-control input-sm input_number"
                     required>
                 @endif
+
+                @if(!empty($purchase_line->product->enable_sr_no))
+                    <br>
+                    @php
+                        $existing_serials = \App\ProductSerialNumber::where('product_id', $purchase_line->product_id)
+                            ->where('purchase_line_id', $purchase_line->id)
+                            ->pluck('serial_number')
+                            ->implode("\n");
+                    @endphp
+                    <div class="form-group" style="margin-top: 5px; margin-bottom: 0;">
+                        <label style="font-size: 11px; margin-bottom: 2px;">Serial Number / IMEI (1 per baris/koma):</label>
+                        <textarea name="purchases[{{$loop->index}}][serial_numbers]" class="form-control input-sm" rows="2" placeholder="Masukkan Serial Number dipisah baris baru atau koma...">{{ $existing_serials }}</textarea>
+                    </div>
+                @endif
             </td>
             <td>
                 {!! Form::text('purchases[' . $loop->index . '][pp_without_discount]', number_format($purchase_line->pp_without_discount/$purchase->exchange_rate, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control input-sm purchase_unit_cost_without_discount input_number', 'required']); !!}

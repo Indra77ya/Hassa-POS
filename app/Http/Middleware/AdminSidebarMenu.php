@@ -170,6 +170,13 @@ class AdminSidebarMenu
                         }
                         if (auth()->user()->can('product.view')) {
                             $sub->url(
+                                action([\App\Http\Controllers\ProductSerialNumberController::class, 'index']),
+                                'Serial Number / IMEI',
+                                ['icon' => 'fa fas fa-barcode', 'active' => request()->segment(1) == 'product-serial-numbers']
+                            );
+                        }
+                        if (auth()->user()->can('product.view')) {
+                            $sub->url(
                                 action([\App\Http\Controllers\LabelsController::class, 'show']),
                                 __('barcode.print_labels'),
                                 ['icon' => '', 'active' => request()->segment(1) == 'labels' && request()->segment(2) == 'show']

@@ -533,6 +533,9 @@ class SellPosController extends Controller
 
                 if (empty($existing_transaction) || $transaction->sell_lines()->count() == 0) {
                     $this->transactionUtil->createOrUpdateSellLines($transaction, $input['products'], $input['location_id']);
+
+                    $serialUtil = new \App\Utils\ProductSerialNumberUtil();
+                    $serialUtil->linkSellSerialNumbers($transaction, $input['products']);
                 }
 
                 $change_return['amount'] = $input['change_return'] ?? 0;
@@ -1453,6 +1456,9 @@ class SellPosController extends Controller
 
                 //Update Sell lines
                 $deleted_lines = $this->transactionUtil->createOrUpdateSellLines($transaction, $input['products'], $input['location_id'], true, $status_before);
+
+                $serialUtil = new \App\Utils\ProductSerialNumberUtil();
+                $serialUtil->linkSellSerialNumbers($transaction, $input['products']);
 
                 //Update update lines
                 $is_credit_sale = isset($input['is_credit_sale']) && $input['is_credit_sale'] == 1 ? true : false;
