@@ -136,6 +136,10 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::post('/user/update', [UserController::class, 'updateProfile'])->name('user.updateProfile');
     Route::post('/user/update-password', [UserController::class, 'updatePassword'])->name('user.updatePassword');
 
+    Route::resource('product-serial-numbers', \App\Http\Controllers\ProductSerialNumberController::class)->only(['index', 'edit', 'update']);
+    Route::get('/get-product-serial-numbers', [\App\Http\Controllers\ProductSerialNumberController::class, 'getSerialNumbers']);
+    Route::get('/get-registered-serials', [\App\Http\Controllers\ProductSerialNumberController::class, 'getRegisteredSerials']);
+
     Route::resource('brands', BrandController::class);
 
     Route::resource('payment-account', 'PaymentAccountController');
