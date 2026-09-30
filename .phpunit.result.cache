@@ -1,0 +1,1 @@
+{"version":1,"defects":[],"times":{"Tests\\Feature\\LaundryUserBonusTest::test_user_laundry_bonus_rate_saving_and_report_calculation":0.553,"Tests\\Feature\\LaundryUserBonusTest::test_laundry_bonus_integration_with_hrm_payroll":0.117}}
