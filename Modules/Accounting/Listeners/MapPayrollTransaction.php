@@ -62,13 +62,24 @@ class MapPayrollTransaction
             }
         }
 
-        // 2. Resolve Payment Account dynamically from actual transaction payments or location default
-        $payment_account = null;
+        // 2. Check if payment has actually been made
         $payments = \DB::table('transaction_payments')
             ->where('transaction_id', $transaction->id)
             ->where('is_return', 0)
             ->get();
 
+        $paid_amount = $payments->sum('amount');
+
+        // If no payment has been made yet (payment_status is 'due' and paid_amount is 0),
+        // delete any existing mapping so Cash/Bank balance is NOT deducted prematurely!
+        if ($paid_amount <= 0 && $transaction->payment_status == 'due') {
+            $accountingUtil = new AccountingUtil();
+            $accountingUtil->deleteMap($transaction->id, null);
+            return;
+        }
+
+        // Resolve Payment Account dynamically from actual transaction payments
+        $payment_account = null;
         foreach ($payments as $payment) {
             if (!empty($payment->account_id)) {
                 $payment_account = \DB::table('accounts')
@@ -80,7 +91,7 @@ class MapPayrollTransaction
             }
         }
 
-        // Fallback payment account from location map or Cash/Bank account
+        // Fallback payment account from location map or Cash/Bank account if payment made without specific account
         if (is_null($payment_account) && !empty($location_id)) {
             $business_location = BusinessLocation::find($location_id);
             if ($business_location && !empty($business_location->accounting_default_map)) {
@@ -106,8 +117,8 @@ class MapPayrollTransaction
             }
         }
 
-        // Save accounting mapping if both accounts are resolved
-        if (!is_null($deposit_to) && !is_null($payment_account) && $transaction->final_total > 0) {
+        // Save accounting mapping only when actual payment exists
+        if (!is_null($deposit_to) && !is_null($payment_account) && $paid_amount > 0) {
             $user_id = auth()->id() ?? (request()->hasSession() ? request()->session()->get('user.id') : null) ?? $transaction->created_by ?? 1;
             $accountingUtil = new AccountingUtil();
             $accountingUtil->saveMap('payroll', $transaction->id, $user_id, $business_id, $deposit_to, $payment_account, $transaction->staff_note ?? 'HRM Payroll');
