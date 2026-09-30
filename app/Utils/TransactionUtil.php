@@ -484,6 +484,28 @@ class TransactionUtil extends Util
             $transaction->sell_lines()->saveMany($modifiers_formatted);
         }
 
+        // Sync serial numbers for sell lines
+        $snUtil = new \App\Utils\ProductSerialNumberUtil();
+        foreach ($products as $p_input) {
+            if (isset($p_input['serial_numbers'])) {
+                $serials = is_array($p_input['serial_numbers']) ? $p_input['serial_numbers'] : preg_split('/[\r\n,]+/', $p_input['serial_numbers']);
+                $sell_line = null;
+                if (!empty($p_input['transaction_sell_lines_id'])) {
+                    $sell_line = TransactionSellLine::find($p_input['transaction_sell_lines_id']);
+                } else {
+                    $sell_line = $transaction->sell_lines()
+                        ->where('product_id', $p_input['product_id'])
+                        ->where('variation_id', $p_input['variation_id'])
+                        ->latest()
+                        ->first();
+                }
+
+                if ($sell_line) {
+                    $snUtil->syncSellSerialNumbers($transaction->business_id, $sell_line->id, $serials);
+                }
+            }
+        }
+
         if ($return_deleted) {
             return $deleted_lines;
         }
@@ -662,6 +684,9 @@ class TransactionUtil extends Util
             //unset so_line_id if set
             TransactionSellLine::whereIn('so_line_id', $transaction_line_ids)
                     ->update(['so_line_id' => null]);
+
+            \App\ProductSerialNumber::whereIn('transaction_sell_line_id', $transaction_line_ids)
+                ->update(['transaction_sell_line_id' => null, 'status' => 'in_stock']);
 
             TransactionSellLine::whereIn('id', $transaction_line_ids)
                 ->delete();
@@ -2163,6 +2188,20 @@ class TransactionUtil extends Util
             }
             if ($il->show_sale_description == 1) {
                 $line_array['sell_line_note'] = ! empty($line->sell_line_note) ? nl2br($line->sell_line_note) : '';
+            }
+
+            $sns = \App\ProductSerialNumber::where('transaction_sell_line_id', $line->id)->pluck('serial_number')->toArray();
+            if (!empty($sns)) {
+                $sn_str = implode(', ', $sns);
+                $line_array['serial_numbers'] = $sn_str;
+                $line_array['serial_numbers_label'] = 'SN/IMEI';
+
+                $sn_html = '<small><strong>SN/IMEI:</strong> ' . e($sn_str) . '</small>';
+                if (!empty($line_array['sell_line_note'])) {
+                    $line_array['sell_line_note'] .= '<br>' . $sn_html;
+                } else {
+                    $line_array['sell_line_note'] = $sn_html;
+                }
             }
             if ($is_lot_number_enabled == 1 && $il->show_lot == 1) {
                 $line_array['lot_number'] = ! empty($line->lot_details->lot_number) ? $line->lot_details->lot_number : null;

@@ -201,6 +201,9 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::post('/products/toggle-woocommerce-sync', [ProductController::class, 'toggleWooCommerceSync']);
 
     Route::resource('products', ProductController::class);
+
+    Route::get('/product-serial-numbers', [\App\Http\Controllers\ProductSerialNumberController::class, 'index']);
+    Route::get('/get-registered-serials', [\App\Http\Controllers\ProductSerialNumberController::class, 'getRegisteredSerials']);
     Route::get('/toggle-subscription/{id}', 'SellPosController@toggleRecurringInvoices');
     Route::post('/sells/pos/get-types-of-service-details', 'SellPosController@getTypesOfServiceDetails');
     Route::get('/sells/subscriptions', 'SellPosController@listSubscriptions');

@@ -92,6 +92,7 @@ return [
     'customer_groups_report' => 'Laporan Grup Pelanggan',
     'none' => 'Tidak ada',
     'enable_imei_or_sr_no' => 'Aktifkan deskripsi Produk, IMEI atau Nomor Seri',
+    'serial_numbers' => 'Serial Number / IMEI',
     'tooltip_sr_no' => 'Mengaktifkan atau menonaktifkan menambahkan deskripsi produk, IMEI atau nomor seri saat menjual produk di layar POS',
     'description' => 'Deskripsi',
     'sell_line_description_help' => 'Tambahkan IMEI produk, nomor seri atau informasi lainnya di sini.',

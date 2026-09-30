@@ -92,6 +92,7 @@ return [
     'customer_groups_report' => 'Customer Groups Report',
     'none' => 'None',
     'enable_imei_or_sr_no' => 'Enable Product description, IMEI or Serial Number',
+    'serial_numbers' => 'Serial Numbers / IMEI',
     'tooltip_sr_no' => 'Enable or disable adding product description, IMEI or Serial number while selling products in POS screen',
     'description' => 'Description',
     'sell_line_description_help' => 'Add product IMEI, Serial number or other informations here.',

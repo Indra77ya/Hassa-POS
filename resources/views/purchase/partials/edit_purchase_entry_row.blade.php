@@ -50,6 +50,15 @@
                 @if( $purchase_line->product->type == 'variable') 
                     <br/>(<b>{{ $purchase_line->variations->product_variation->name}}</b> : {{ $purchase_line->variations->name}})
                 @endif
+                @if(!empty($purchase_line->product->enable_sr_no) && $purchase_line->product->enable_sr_no == 1)
+                    @php
+                        $existing_serials = \App\ProductSerialNumber::where('purchase_line_id', $purchase_line->id)->pluck('serial_number')->toArray();
+                        $serials_str = implode(', ', $existing_serials);
+                    @endphp
+                    <br>
+                    <small class="text-primary"><strong>Serial Number / IMEI (pisahkan dengan koma atau baris baru):</strong></small>
+                    {!! Form::textarea('purchases[' . $loop->index . '][serial_numbers]', $serials_str, ['class' => 'form-control input-sm', 'rows' => 2, 'placeholder' => 'Contoh: SN123, SN124, SN125']); !!}
+                @endif
             </td>
 
             <td>

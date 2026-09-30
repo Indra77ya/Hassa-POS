@@ -397,6 +397,20 @@ $(document).ready(function() {
         };
     }
 
+    $('table#pos_table tbody').on('change', '.pos_serial_number_select', function() {
+        var tr = $(this).closest('tr');
+        var selected_vals = $(this).val();
+        var count = selected_vals ? selected_vals.length : 0;
+        var qty_elem = tr.find('input.pos_quantity');
+        if (count > 0) {
+            __write_number(qty_elem, count);
+            qty_elem.trigger('change');
+        } else if (count === 0) {
+            __write_number(qty_elem, 0);
+            qty_elem.trigger('change');
+        }
+    });
+
     //Update line total and check for quantity not greater than max quantity
     $('table#pos_table tbody').on('change', 'input.pos_quantity', function() {
         pos_play_success_sound();
@@ -1995,6 +2009,13 @@ function pos_insert_product_row(result) {
     //Check if multipler is present then multiply it when a new row is added.
     if(__getUnitMultiplier(this_row) > 1){
         this_row.find('select.sub_unit').trigger('change');
+    }
+
+    if (this_row.find('.pos_serial_number_select').length) {
+        this_row.find('.pos_serial_number_select').select2({
+            placeholder: "Pilih / Scan Serial Number",
+            tags: true
+        }).trigger('change');
     }
 
     if (result.enable_sr_no == '1') {
