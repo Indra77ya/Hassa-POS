@@ -48,6 +48,17 @@ class HrmIntegrationTest extends TestCase
             'ref_no' => 'PAY-TEST-001',
         ]);
 
+        // Create transaction payment record
+        \App\TransactionPayment::create([
+            'transaction_id' => $payroll->id,
+            'business_id' => $business->id,
+            'amount' => 5000000,
+            'method' => 'cash',
+            'paid_on' => now()->toDateTimeString(),
+            'created_by' => $user->id,
+            'payment_ref_no' => 'PAY-REF-001',
+        ]);
+
         // Dispatch PayrollCreatedOrModified event
         event(new PayrollCreatedOrModified($payroll));
 

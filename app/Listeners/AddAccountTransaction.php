@@ -45,7 +45,7 @@ class AddAccountTransaction
         $transaction_id = $event->transactionPayment->transaction_id;
         if (!empty($transaction_id)) {
             $transaction = \App\Transaction::find($transaction_id);
-            if ($transaction && in_array($transaction->type, ['sell', 'purchase', 'expense'])) {
+            if ($transaction && in_array($transaction->type, ['sell', 'purchase', 'expense', 'payroll'])) {
                 return true;
             }
         }

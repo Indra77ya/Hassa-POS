@@ -17,7 +17,7 @@ class AccountTransaction extends Model
     {
         if (!empty($at->transaction_id)) {
             $transaction = \App\Transaction::find($at->transaction_id);
-            if ($transaction && in_array($transaction->type, ['sell', 'purchase', 'expense'])) {
+            if ($transaction && in_array($transaction->type, ['sell', 'purchase', 'expense', 'payroll'])) {
                 return true;
             }
         }
@@ -25,7 +25,7 @@ class AccountTransaction extends Model
             $payment = \App\TransactionPayment::find($at->transaction_payment_id);
             if ($payment && !empty($payment->transaction_id)) {
                 $transaction = \App\Transaction::find($payment->transaction_id);
-                if ($transaction && in_array($transaction->type, ['sell', 'purchase', 'expense'])) {
+                if ($transaction && in_array($transaction->type, ['sell', 'purchase', 'expense', 'payroll'])) {
                     return true;
                 }
             }

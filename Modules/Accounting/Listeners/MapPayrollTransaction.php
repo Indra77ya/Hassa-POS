@@ -69,10 +69,11 @@ class MapPayrollTransaction
             ->get();
 
         $paid_amount = $payments->sum('amount');
+        $is_paid = $transaction->payment_status == 'paid' || $paid_amount > 0;
 
         // If no payment has been made yet (payment_status is 'due' and paid_amount is 0),
         // delete any existing mapping so Cash/Bank balance is NOT deducted prematurely!
-        if ($paid_amount <= 0 && $transaction->payment_status == 'due') {
+        if (!$is_paid) {
             $accountingUtil = new AccountingUtil();
             $accountingUtil->deleteMap($transaction->id, null);
             return;
@@ -117,8 +118,8 @@ class MapPayrollTransaction
             }
         }
 
-        // Save accounting mapping only when actual payment exists
-        if (!is_null($deposit_to) && !is_null($payment_account) && $paid_amount > 0) {
+        // Save accounting mapping only when actual payment exists or status is paid
+        if (!is_null($deposit_to) && !is_null($payment_account) && $is_paid) {
             $user_id = auth()->id() ?? (request()->hasSession() ? request()->session()->get('user.id') : null) ?? $transaction->created_by ?? 1;
             $accountingUtil = new AccountingUtil();
             $accountingUtil->saveMap('payroll', $transaction->id, $user_id, $business_id, $deposit_to, $payment_account, $transaction->staff_note ?? 'HRM Payroll');
