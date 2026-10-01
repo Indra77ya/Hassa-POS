@@ -893,6 +893,9 @@ function init_purchase_sn_select(element) {
             placeholder: "Scan / ketik SN per-unit",
             width: '100%'
         });
+        if ($el.val() && $el.val().length > 0) {
+            $el.trigger('change');
+        }
     });
 }
 
