@@ -486,23 +486,19 @@ class TransactionUtil extends Util
 
         // Sync serial numbers for sell lines
         $snUtil = new \App\Utils\ProductSerialNumberUtil();
+        $products_values = array_values($products);
+        foreach ($lines_formatted as $idx => $sell_line) {
+            if (isset($products_values[$idx]['serial_numbers'])) {
+                $raw_sns = $products_values[$idx]['serial_numbers'];
+                $serials = is_array($raw_sns) ? $raw_sns : preg_split('/[\r\n,]+/', $raw_sns);
+                $snUtil->syncSellSerialNumbers($transaction->business_id, $sell_line->id, $serials);
+            }
+        }
         foreach ($products as $p_input) {
-            if (isset($p_input['serial_numbers'])) {
-                $serials = is_array($p_input['serial_numbers']) ? $p_input['serial_numbers'] : preg_split('/[\r\n,]+/', $p_input['serial_numbers']);
-                $sell_line = null;
-                if (!empty($p_input['transaction_sell_lines_id'])) {
-                    $sell_line = TransactionSellLine::find($p_input['transaction_sell_lines_id']);
-                } else {
-                    $sell_line = $transaction->sell_lines()
-                        ->where('product_id', $p_input['product_id'])
-                        ->where('variation_id', $p_input['variation_id'])
-                        ->latest()
-                        ->first();
-                }
-
-                if ($sell_line) {
-                    $snUtil->syncSellSerialNumbers($transaction->business_id, $sell_line->id, $serials);
-                }
+            if (!empty($p_input['transaction_sell_lines_id']) && isset($p_input['serial_numbers'])) {
+                $raw_sns = $p_input['serial_numbers'];
+                $serials = is_array($raw_sns) ? $raw_sns : preg_split('/[\r\n,]+/', $raw_sns);
+                $snUtil->syncSellSerialNumbers($transaction->business_id, $p_input['transaction_sell_lines_id'], $serials);
             }
         }
 

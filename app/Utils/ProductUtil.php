@@ -1345,25 +1345,19 @@ class ProductUtil extends Util
 
         // update serial numbers
         $snUtil = new \App\Utils\ProductSerialNumberUtil();
-        foreach ($input_data as $data) {
-            if (isset($data['serial_numbers'])) {
-                $pl = $transaction->purchase_lines()
-                    ->where('product_id', $data['product_id'])
-                    ->where('variation_id', $data['variation_id'])
-                    ->latest()
-                    ->first();
-
-                if ($pl) {
-                    $serials = is_array($data['serial_numbers']) ? $data['serial_numbers'] : preg_split('/[\r\n,]+/', $data['serial_numbers']);
-                    $snUtil->syncPurchaseSerialNumbers(
-                        $transaction->business_id,
-                        $data['product_id'],
-                        $data['variation_id'],
-                        $pl->id,
-                        $serials,
-                        $pl->purchase_price
-                    );
-                }
+        $input_data_values = array_values($input_data);
+        foreach ($updated_purchase_lines as $idx => $pl) {
+            if (isset($input_data_values[$idx]['serial_numbers'])) {
+                $raw_sns = $input_data_values[$idx]['serial_numbers'];
+                $serials = is_array($raw_sns) ? $raw_sns : preg_split('/[\r\n,]+/', $raw_sns);
+                $snUtil->syncPurchaseSerialNumbers(
+                    $transaction->business_id,
+                    $pl->product_id,
+                    $pl->variation_id,
+                    $pl->id,
+                    $serials,
+                    $pl->purchase_price
+                );
             }
         }
 

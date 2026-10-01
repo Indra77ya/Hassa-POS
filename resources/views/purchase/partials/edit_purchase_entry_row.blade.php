@@ -53,11 +53,14 @@
                 @if(!empty($purchase_line->product->enable_sr_no) && $purchase_line->product->enable_sr_no == 1)
                     @php
                         $existing_serials = \App\ProductSerialNumber::where('purchase_line_id', $purchase_line->id)->pluck('serial_number')->toArray();
-                        $serials_str = implode(', ', $existing_serials);
                     @endphp
                     <br>
-                    <small class="text-primary"><strong>Serial Number / IMEI (pisahkan dengan koma atau baris baru):</strong></small>
-                    {!! Form::textarea('purchases[' . $loop->index . '][serial_numbers]', $serials_str, ['class' => 'form-control input-sm', 'rows' => 2, 'placeholder' => 'Contoh: SN123, SN124, SN125']); !!}
+                    <small class="text-primary"><strong>Serial Number / IMEI (Scan / ketik per-unit lalu Enter):</strong></small>
+                    <select name="purchases[{{$loop->index}}][serial_numbers][]" class="form-control input-sm purchase_sn_select select2" multiple="multiple" style="width: 100%;">
+                        @foreach($existing_serials as $sn)
+                            <option value="{{$sn}}" selected>{{$sn}}</option>
+                        @endforeach
+                    </select>
                 @endif
             </td>
 

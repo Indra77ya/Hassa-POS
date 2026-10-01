@@ -13,8 +13,9 @@
             @endif
             @if(!empty($product->enable_sr_no) && $product->enable_sr_no == 1)
                 <br>
-                <small class="text-primary"><strong>Serial Number / IMEI (pisahkan dengan koma atau baris baru):</strong></small>
-                {!! Form::textarea('purchases[' . $row_count . '][serial_numbers]', null, ['class' => 'form-control input-sm', 'rows' => 2, 'placeholder' => 'Contoh: SN123, SN124, SN125']); !!}
+                <small class="text-primary"><strong>Serial Number / IMEI (Scan / ketik per-unit lalu Enter):</strong></small>
+                <select name="purchases[{{$row_count}}][serial_numbers][]" class="form-control input-sm purchase_sn_select select2" multiple="multiple" style="width: 100%;">
+                </select>
             @endif
             
         </td>

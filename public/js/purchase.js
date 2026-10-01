@@ -1,4 +1,22 @@
 $(document).ready(function() {
+    $(document).on('change', '.purchase_sn_select', function() {
+        var tr = $(this).closest('tr');
+        var selected = $(this).val();
+        var count = selected ? selected.length : 0;
+        if (count > 0) {
+            var qty_input = tr.find('input.purchase_quantity');
+            __write_number(qty_input, count);
+            qty_input.trigger('change');
+        }
+    });
+
+    if ($('.purchase_sn_select').length) {
+        $('.purchase_sn_select').select2({
+            tags: true,
+            tokenSeparators: [',', ' ', '\n', '\t'],
+            placeholder: "Scan / ketik SN per-unit"
+        });
+    }
     if ($('input#iraqi_selling_price_adjustment').length > 0) {
         iraqi_selling_price_adjustment = true;
     } else {
@@ -822,6 +840,14 @@ function append_purchase_lines(data, row_count, trigger_change = false) {
             //Check if multipler is present then multiply it when a new row is added.
             if(__getUnitMultiplier(row) > 1){
                 row.find('select.sub_unit').trigger('change');
+            }
+
+            if (row.find('.purchase_sn_select').length) {
+                row.find('.purchase_sn_select').select2({
+                    tags: true,
+                    tokenSeparators: [',', ' ', '\n', '\t'],
+                    placeholder: "Scan / ketik SN per-unit"
+                });
             }
 
             if (trigger_change && row.find('.purchase_unit_cost_without_discount').length) {
