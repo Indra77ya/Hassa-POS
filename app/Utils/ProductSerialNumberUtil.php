@@ -92,12 +92,14 @@ class ProductSerialNumberUtil extends Util
         }
 
         foreach ($serial_ids_or_numbers as $sn_val) {
-            $record = ProductSerialNumber::where('business_id', $business_id)
-                ->where(function($q) use ($sn_val) {
-                    $q->where('id', $sn_val)
-                      ->orWhere('serial_number', $sn_val);
-                })
-                ->first();
+            $query = ProductSerialNumber::where('business_id', $business_id);
+            if ($sell_line) {
+                $query->where('product_id', $sell_line->product_id);
+            }
+            $record = $query->where(function($q) use ($sn_val) {
+                $q->where('serial_number', $sn_val)
+                  ->orWhere('id', $sn_val);
+            })->first();
 
             if ($record) {
                 $record->update([

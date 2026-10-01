@@ -56,9 +56,21 @@
                     @endphp
                     <br>
                     <small class="text-primary"><strong>@lang('lang_v1.sn_input_help')</strong></small>
+                    @php
+                        $p_id = !empty($purchase_line->product_id) ? $purchase_line->product_id : $purchase_line->product->id;
+                        $all_existing_sn_records = \App\ProductSerialNumber::where('business_id', session('user.business_id'))
+                            ->where('product_id', $p_id)
+                            ->get();
+                        $current_line_sn_list = $existing_serial_records->pluck('serial_number')->toArray();
+                    @endphp
                     <select name="purchases[{{$loop->index}}][serial_numbers][]" class="form-control input-sm purchase_sn_select select2" multiple="multiple" style="width: 100%;" data-row_index="{{$loop->index}}">
-                        @foreach($existing_serial_records as $sn_rec)
-                            <option value="{{$sn_rec->serial_number}}" selected>{{$sn_rec->serial_number}}</option>
+                        @foreach($all_existing_sn_records as $sn_rec)
+                            @php
+                                $is_selected = in_array($sn_rec->serial_number, $current_line_sn_list);
+                            @endphp
+                            <option value="{{$sn_rec->serial_number}}" data-status="{{$sn_rec->status}}" @if($sn_rec->status == 'in_stock' && !$is_selected) data-is_existing_instock="1" @endif @if($is_selected) selected @endif>
+                                {{$sn_rec->serial_number}} (@lang('lang_v1.' . $sn_rec->status))
+                            </option>
                         @endforeach
                     </select>
                     <button type="button" class="btn btn-xs btn-default tw-mt-1.5 btn_sn_price_details" data-toggle="modal" data-target="#sn_price_modal_{{$loop->index}}">

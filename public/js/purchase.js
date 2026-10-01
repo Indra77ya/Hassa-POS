@@ -1,8 +1,39 @@
 $(document).ready(function() {
     $(document).on('change', '.purchase_sn_select', function() {
-        var tr = $(this).closest('tr');
-        var row_idx = $(this).data('row_index');
-        var selected = $(this).val();
+        var $select = $(this);
+        var tr = $select.closest('tr');
+        var row_idx = $select.data('row_index');
+        var selected = $select.val() || [];
+
+        // Prevent selecting existing in_stock serial numbers or duplicate across rows
+        var filtered_selected = [];
+        var has_duplicate = false;
+
+        $.each(selected, function(i, sn) {
+            sn = $.trim(sn);
+            if (!sn) return;
+
+            // Check if option in this select is marked as existing in_stock
+            var opt = $select.find('option[value="' + sn + '"]');
+            var is_existing_instock = opt.length && opt.data('is_existing_instock') == '1';
+
+            if (is_existing_instock) {
+                has_duplicate = true;
+                if (typeof toastr !== 'undefined') {
+                    toastr.error('Serial Number / IMEI "' + sn + '" is already in stock!');
+                } else {
+                    alert('Serial Number / IMEI "' + sn + '" is already in stock!');
+                }
+            } else {
+                filtered_selected.push(sn);
+            }
+        });
+
+        if (has_duplicate) {
+            $select.val(filtered_selected).trigger('change.select2');
+            selected = filtered_selected;
+        }
+
         var count = selected ? selected.length : 0;
 
         if (count > 0) {
