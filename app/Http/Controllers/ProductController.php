@@ -493,7 +493,7 @@ class ProductController extends Controller
                 if (empty($filtered_serials)) {
                     return redirect()->back()->withInput()->with('status', [
                         'success' => 0,
-                        'msg' => 'Minimal 1 serial number harus diisi saat Enable Serial Number dicentang.'
+                        'msg' => 'At least 1 serial number is required when Enable Serial Number is checked.'
                     ]);
                 }
             }
@@ -1649,7 +1649,7 @@ class ProductController extends Controller
 
                 if (empty($filtered_serials)) {
                     return ['success' => 0,
-                        'msg' => 'Minimal 1 serial number harus diisi saat Enable Serial Number dicentang.',
+                        'msg' => 'At least 1 serial number is required when Enable Serial Number is checked.',
                     ];
                 }
             }

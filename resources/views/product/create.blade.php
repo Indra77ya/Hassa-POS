@@ -230,16 +230,16 @@
         <div class="col-sm-12 product_sr_no_container @if(empty($duplicate_product) || empty($duplicate_product->enable_sr_no)) hide @endif">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <strong><i class="fa fa-barcode"></i> Detail Serial Number / IMEI</strong>
-                    <small class="text-muted">(Masukkan minimal 1 serial number beserta harga beli & harga jual)</small>
+                    <strong><i class="fa fa-barcode"></i> Serial Number / IMEI Details</strong>
+                    <small class="text-muted">(Enter at least 1 serial number with purchase price & selling price)</small>
                 </div>
                 <div class="panel-body">
                     <table class="table table-bordered table-striped" id="product_sr_no_table">
                         <thead>
                             <tr>
                                 <th>Serial Number / IMEI <span class="text-danger">*</span></th>
-                                <th>Harga Beli (HPP) <span class="text-danger">*</span></th>
-                                <th>Harga Jual <span class="text-danger">*</span></th>
+                                <th>Purchase Price (Cost) <span class="text-danger">*</span></th>
+                                <th>Selling Price <span class="text-danger">*</span></th>
                                 <th class="text-center" style="width: 50px;">
                                     <button type="button" class="btn btn-xs btn-primary add_product_sr_no_row"><i class="fa fa-plus"></i></button>
                                 </th>
@@ -248,13 +248,13 @@
                         <tbody>
                             <tr class="product_sr_no_row">
                                 <td>
-                                    <input type="text" name="product_serials[0][serial_number]" class="form-control input-sm product_sn_input" placeholder="Masukkan Serial / IMEI">
+                                    <input type="text" name="product_serials[0][serial_number]" class="form-control input-sm product_sn_input" placeholder="Enter Serial / IMEI">
                                 </td>
                                 <td>
-                                    <input type="text" name="product_serials[0][purchase_price]" class="form-control input-sm input_number product_sn_purchase_price" placeholder="Harga Beli (HPP)">
+                                    <input type="text" name="product_serials[0][purchase_price]" class="form-control input-sm input_number product_sn_purchase_price" placeholder="Purchase Price (Cost)">
                                 </td>
                                 <td>
-                                    <input type="text" name="product_serials[0][selling_price]" class="form-control input-sm input_number product_sn_selling_price" placeholder="Harga Jual">
+                                    <input type="text" name="product_serials[0][selling_price]" class="form-control input-sm input_number product_sn_selling_price" placeholder="Selling Price">
                                 </td>
                                 <td class="text-center">
                                     <button type="button" class="btn btn-xs btn-danger remove_product_sr_no_row"><i class="fa fa-trash"></i></button>

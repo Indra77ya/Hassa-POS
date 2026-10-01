@@ -20,9 +20,9 @@ $(document).ready(function() {
         var table = $(this).closest('table');
         var index = table.find('tbody tr').length;
         var new_row = '<tr class="product_sr_no_row">' +
-            '<td><input type="text" name="product_serials[' + index + '][serial_number]" class="form-control input-sm product_sn_input" placeholder="Masukkan Serial / IMEI"></td>' +
-            '<td><input type="text" name="product_serials[' + index + '][purchase_price]" class="form-control input-sm input_number product_sn_purchase_price" placeholder="Harga Beli (HPP)"></td>' +
-            '<td><input type="text" name="product_serials[' + index + '][selling_price]" class="form-control input-sm input_number product_sn_selling_price" placeholder="Harga Jual"></td>' +
+            '<td><input type="text" name="product_serials[' + index + '][serial_number]" class="form-control input-sm product_sn_input" placeholder="Enter Serial / IMEI"></td>' +
+            '<td><input type="text" name="product_serials[' + index + '][purchase_price]" class="form-control input-sm input_number product_sn_purchase_price" placeholder="Purchase Price (Cost)"></td>' +
+            '<td><input type="text" name="product_serials[' + index + '][selling_price]" class="form-control input-sm input_number product_sn_selling_price" placeholder="Selling Price"></td>' +
             '<td class="text-center"><button type="button" class="btn btn-xs btn-danger remove_product_sr_no_row"><i class="fa fa-trash"></i></button></td>' +
             '</tr>';
         table.find('tbody').append(new_row);
@@ -36,7 +36,7 @@ $(document).ready(function() {
             $(this).closest('tr').remove();
             calculate_product_sn_average_prices(form);
         } else {
-            toastr.error('Minimal 1 serial number harus diisi.');
+            toastr.error('At least 1 serial number must be filled.');
         }
     });
 
@@ -372,11 +372,11 @@ $(document).ready(function() {
             });
 
             if (sn_count === 0) {
-                toastr.error('Minimal 1 serial number harus diisi saat Enable Serial Number dicentang.');
+                toastr.error('At least 1 serial number is required when Enable Serial Number is checked.');
                 return false;
             }
             if (!sn_valid) {
-                toastr.error('Mohon lengkapi Serial Number, Harga Beli, dan Harga Jual untuk setiap baris.');
+                toastr.error('Please fill in Serial Number, Purchase Price, and Selling Price for every row.');
                 return false;
             }
         }
