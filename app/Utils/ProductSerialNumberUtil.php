@@ -8,19 +8,15 @@ use App\TransactionSellLine;
 class ProductSerialNumberUtil extends Util
 {
     /**
-     * Sync serial numbers on purchase line creation or update.
+     * Sync serial numbers on purchase line creation or update with custom HPP and Selling Price.
      */
-    public function syncPurchaseSerialNumbers($business_id, $product_id, $variation_id, $purchase_line_id, array $serials, $purchase_price = 0)
+    public function syncPurchaseSerialNumbers($business_id, $product_id, $variation_id, $purchase_line_id, array $serials, $default_purchase_price = 0, array $sn_details = [])
     {
-        // Clean serial numbers list
         $serials = array_values(array_filter(array_map('trim', $serials)));
 
-        // Existing serials for this purchase line
         $existing = ProductSerialNumber::where('business_id', $business_id)
             ->where('purchase_line_id', $purchase_line_id)
             ->get();
-
-        $existing_sn_list = $existing->pluck('serial_number')->toArray();
 
         // Remove deleted serials that are still in_stock
         foreach ($existing as $item) {
@@ -29,16 +25,29 @@ class ProductSerialNumberUtil extends Util
             }
         }
 
-        // Add new serials
         foreach ($serials as $sn) {
-            if (!empty($sn) && !in_array($sn, $existing_sn_list)) {
+            $pp = isset($sn_details[$sn]['purchase_price']) ? $this->num_uf($sn_details[$sn]['purchase_price']) : $default_purchase_price;
+            $sp = isset($sn_details[$sn]['selling_price']) ? $this->num_uf($sn_details[$sn]['selling_price']) : 0;
+
+            $record = ProductSerialNumber::where('business_id', $business_id)
+                ->where('purchase_line_id', $purchase_line_id)
+                ->where('serial_number', $sn)
+                ->first();
+
+            if ($record) {
+                $record->update([
+                    'purchase_price' => $pp,
+                    'selling_price' => $sp
+                ]);
+            } else {
                 ProductSerialNumber::create([
                     'business_id' => $business_id,
                     'product_id' => $product_id,
                     'variation_id' => $variation_id,
                     'purchase_line_id' => $purchase_line_id,
                     'serial_number' => $sn,
-                    'purchase_price' => $purchase_price,
+                    'purchase_price' => $pp,
+                    'selling_price' => $sp,
                     'status' => 'in_stock'
                 ]);
             }

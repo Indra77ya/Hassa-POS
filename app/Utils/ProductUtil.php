@@ -1350,13 +1350,15 @@ class ProductUtil extends Util
             if (isset($input_data_values[$idx]['serial_numbers'])) {
                 $raw_sns = $input_data_values[$idx]['serial_numbers'];
                 $serials = is_array($raw_sns) ? $raw_sns : preg_split('/[\r\n,]+/', $raw_sns);
+                $sn_details = isset($input_data_values[$idx]['sn_details']) ? $input_data_values[$idx]['sn_details'] : [];
                 $snUtil->syncPurchaseSerialNumbers(
                     $transaction->business_id,
                     $pl->product_id,
                     $pl->variation_id,
                     $pl->id,
                     $serials,
-                    $pl->purchase_price
+                    $pl->purchase_price,
+                    $sn_details
                 );
             }
         }

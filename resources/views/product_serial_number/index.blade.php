@@ -27,6 +27,8 @@
                     <tr>
                         <th>Serial Number / IMEI</th>
                         <th>@lang('product.product_name')</th>
+                        <th>HPP (Harga Beli)</th>
+                        <th>Harga Jual</th>
                         <th>@lang('sale.status')</th>
                         <th>No. Pembelian</th>
                         <th>No. Faktur Jual</th>
@@ -55,11 +57,16 @@ $(document).ready(function(){
         columns: [
             { data: 'serial_number', name: 'product_serial_numbers.serial_number' },
             { data: 'product', name: 'products.name' },
+            { data: 'purchase_price', name: 'product_serial_numbers.purchase_price' },
+            { data: 'selling_price', name: 'product_serial_numbers.selling_price' },
             { data: 'status', name: 'product_serial_numbers.status' },
             { data: 'purchase_ref', name: 'purch_tx.ref_no' },
             { data: 'sell_invoice', name: 'sell_tx.invoice_no' },
             { data: 'created_at', name: 'product_serial_numbers.created_at' }
-        ]
+        ],
+        fnDrawCallback: function(oSettings) {
+            __currency_convert_recursively($('#product_serial_numbers_table'));
+        }
     });
 
     $('#filter_status').change(function(){

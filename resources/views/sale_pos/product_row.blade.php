@@ -71,8 +71,8 @@
 						<label class="tw-text-[11px] tw-font-bold tw-text-indigo-600 tw-block tw-mb-1"><i class="fa fa-barcode"></i> Serial Number / IMEI:</label>
 						<select name="products[{{$row_count}}][serial_numbers][]" class="form-control input-sm pos_serial_number_select select2" multiple="multiple" style="width: 100%;">
 							@foreach($available_sns as $sn_item)
-								<option value="{{$sn_item->serial_number}}" @if(in_array($sn_item->serial_number, $selected_sns)) selected @endif>
-									{{$sn_item->serial_number}}
+								<option value="{{$sn_item->serial_number}}" data-selling_price="{{$sn_item->selling_price}}" @if(in_array($sn_item->serial_number, $selected_sns)) selected @endif>
+									{{$sn_item->serial_number}} @if(!empty($sn_item->selling_price) && $sn_item->selling_price > 0) ({{@num_format($sn_item->selling_price)}}) @endif
 								</option>
 							@endforeach
 						</select>

@@ -1,12 +1,47 @@
 $(document).ready(function() {
     $(document).on('change', '.purchase_sn_select', function() {
         var tr = $(this).closest('tr');
+        var row_idx = $(this).data('row_index');
         var selected = $(this).val();
         var count = selected ? selected.length : 0;
+
         if (count > 0) {
             var qty_input = tr.find('input.purchase_quantity');
             __write_number(qty_input, count);
             qty_input.trigger('change');
+        }
+
+        // Sync modal price table rows
+        var modal = $('#sn_price_modal_' + row_idx);
+        if (modal.length) {
+            var tbody = modal.find('tbody');
+            var default_pp = tr.find('input.purchase_unit_cost_without_discount').val() || tr.find('input.purchase_unit_cost').val() || '';
+            var default_sp = tr.find('input.default_sell_price').val() || '';
+
+            var existing_rows = {};
+            tbody.find('tr').each(function() {
+                var sn = $(this).data('sn');
+                var pp = $(this).find('input[name*="[purchase_price]"]').val();
+                var sp = $(this).find('input[name*="[selling_price]"]').val();
+                existing_rows[sn] = { purchase_price: pp, selling_price: sp };
+            });
+
+            tbody.empty();
+            if (selected && selected.length) {
+                $.each(selected, function(i, sn) {
+                    sn = $.trim(sn);
+                    if (sn) {
+                        var pp = existing_rows[sn] ? existing_rows[sn].purchase_price : default_pp;
+                        var sp = existing_rows[sn] ? existing_rows[sn].selling_price : default_sp;
+                        var row_html = '<tr data-sn="' + sn + '">' +
+                            '<td><strong>' + sn + '</strong></td>' +
+                            '<td><input type="text" name="purchases[' + row_idx + '][sn_details][' + sn + '][purchase_price]" class="form-control input-sm input_number" value="' + pp + '"></td>' +
+                            '<td><input type="text" name="purchases[' + row_idx + '][sn_details][' + sn + '][selling_price]" class="form-control input-sm input_number" value="' + sp + '"></td>' +
+                            '</tr>';
+                        tbody.append(row_html);
+                    }
+                });
+            }
         }
     });
 

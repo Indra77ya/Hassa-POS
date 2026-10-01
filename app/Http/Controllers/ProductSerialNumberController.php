@@ -35,6 +35,8 @@ class ProductSerialNumberController extends Controller
                 ->select([
                     'product_serial_numbers.id',
                     'product_serial_numbers.serial_number',
+                    'product_serial_numbers.purchase_price',
+                    'product_serial_numbers.selling_price',
                     'product_serial_numbers.status',
                     'products.name as product_name',
                     'variations.name as variation_name',
@@ -55,6 +57,12 @@ class ProductSerialNumberController extends Controller
                     }
                     return $name;
                 })
+                ->editColumn('purchase_price', function ($row) {
+                    return '<span class="display_currency" data-currency_symbol="true">' . $row->purchase_price . '</span>';
+                })
+                ->editColumn('selling_price', function ($row) {
+                    return '<span class="display_currency" data-currency_symbol="true">' . $row->selling_price . '</span>';
+                })
                 ->editColumn('status', function ($row) {
                     $badge = 'bg-green';
                     $text = __('lang_v1.in_stock');
@@ -73,7 +81,7 @@ class ProductSerialNumberController extends Controller
                 ->editColumn('created_at', function ($row) {
                     return @format_datetime($row->created_at);
                 })
-                ->rawColumns(['status'])
+                ->rawColumns(['status', 'purchase_price', 'selling_price'])
                 ->make(true);
         }
 

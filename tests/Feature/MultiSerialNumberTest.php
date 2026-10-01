@@ -103,7 +103,7 @@ class MultiSerialNumberTest extends TestCase
         ]);
     }
 
-    public function test_purchase_registers_in_stock_serial_numbers()
+    public function test_purchase_registers_in_stock_serial_numbers_with_custom_prices()
     {
         $snUtil = new ProductSerialNumberUtil();
 
@@ -135,13 +135,19 @@ class MultiSerialNumberTest extends TestCase
             $this->variation->id,
             $p_line->id,
             ['SN-IPH15-001', 'SN-IPH15-002'],
-            1000
+            1000,
+            [
+                'SN-IPH15-001' => ['purchase_price' => 1050, 'selling_price' => 1300],
+                'SN-IPH15-002' => ['purchase_price' => 1100, 'selling_price' => 1350]
+            ]
         );
 
         $this->assertDatabaseHas('product_serial_numbers', [
             'business_id' => $this->business->id,
             'product_id' => $this->product->id,
             'serial_number' => 'SN-IPH15-001',
+            'purchase_price' => 1050,
+            'selling_price' => 1300,
             'status' => 'in_stock'
         ]);
 
@@ -149,6 +155,8 @@ class MultiSerialNumberTest extends TestCase
             'business_id' => $this->business->id,
             'product_id' => $this->product->id,
             'serial_number' => 'SN-IPH15-002',
+            'purchase_price' => 1100,
+            'selling_price' => 1350,
             'status' => 'in_stock'
         ]);
     }
@@ -163,6 +171,8 @@ class MultiSerialNumberTest extends TestCase
             'product_id' => $this->product->id,
             'variation_id' => $this->variation->id,
             'serial_number' => 'SN-SOLD-TEST-001',
+            'purchase_price' => 1000,
+            'selling_price' => 1250,
             'status' => 'in_stock'
         ]);
 
@@ -175,8 +185,8 @@ class MultiSerialNumberTest extends TestCase
             'contact_id' => $this->contact->id,
             'invoice_no' => 'INV-SN-TEST-01',
             'transaction_date' => now(),
-            'total_before_tax' => 1200,
-            'final_total' => 1200,
+            'total_before_tax' => 1250,
+            'final_total' => 1250,
             'created_by' => $this->user->id
         ]);
 
@@ -185,8 +195,8 @@ class MultiSerialNumberTest extends TestCase
             'product_id' => $this->product->id,
             'variation_id' => $this->variation->id,
             'quantity' => 1,
-            'unit_price' => 1200,
-            'unit_price_inc_tax' => 1200
+            'unit_price' => 1250,
+            'unit_price_inc_tax' => 1250
         ]);
 
         $snUtil->syncSellSerialNumbers($this->business->id, $s_line->id, ['SN-SOLD-TEST-001']);

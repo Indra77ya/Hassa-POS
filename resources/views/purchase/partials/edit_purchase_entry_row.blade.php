@@ -52,15 +52,54 @@
                 @endif
                 @if(!empty($purchase_line->product->enable_sr_no) && $purchase_line->product->enable_sr_no == 1)
                     @php
-                        $existing_serials = \App\ProductSerialNumber::where('purchase_line_id', $purchase_line->id)->pluck('serial_number')->toArray();
+                        $existing_serial_records = \App\ProductSerialNumber::where('purchase_line_id', $purchase_line->id)->get();
                     @endphp
                     <br>
                     <small class="text-primary"><strong>Serial Number / IMEI (Scan / ketik per-unit lalu Enter):</strong></small>
-                    <select name="purchases[{{$loop->index}}][serial_numbers][]" class="form-control input-sm purchase_sn_select select2" multiple="multiple" style="width: 100%;">
-                        @foreach($existing_serials as $sn)
-                            <option value="{{$sn}}" selected>{{$sn}}</option>
+                    <select name="purchases[{{$loop->index}}][serial_numbers][]" class="form-control input-sm purchase_sn_select select2" multiple="multiple" style="width: 100%;" data-row_index="{{$loop->index}}">
+                        @foreach($existing_serial_records as $sn_rec)
+                            <option value="{{$sn_rec->serial_number}}" selected>{{$sn_rec->serial_number}}</option>
                         @endforeach
                     </select>
+                    <button type="button" class="btn btn-xs btn-default tw-mt-1.5 btn_sn_price_details" data-toggle="modal" data-target="#sn_price_modal_{{$loop->index}}">
+                        <i class="fa fa-cog text-info"></i> Detail Harga per SN
+                    </button>
+
+                    <!-- Modal for SN Price Details -->
+                    <div class="modal fade sn_price_modal" id="sn_price_modal_{{$loop->index}}" tabindex="-1" role="dialog">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <h4 class="modal-title">Atur HPP & Harga Jual per Serial Number</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <p class="help-block"><small>Bila dikosongkan, HPP dan Harga Jual akan otomatis menggunakan harga standar produk ini.</small></p>
+                                    <table class="table table-bordered table-condensed sn_price_table">
+                                        <thead>
+                                            <tr>
+                                                <th>Serial Number / IMEI</th>
+                                                <th>HPP (Harga Beli)</th>
+                                                <th>Harga Jual</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($existing_serial_records as $sn_rec)
+                                                <tr data-sn="{{$sn_rec->serial_number}}">
+                                                    <td><strong>{{$sn_rec->serial_number}}</strong></td>
+                                                    <td><input type="text" name="purchases[{{$loop->parent->index}}][sn_details][{{$sn_rec->serial_number}}][purchase_price]" class="form-control input-sm input_number" value="{{@num_format($sn_rec->purchase_price)}}"></td>
+                                                    <td><input type="text" name="purchases[{{$loop->parent->index}}][sn_details][{{$sn_rec->serial_number}}][selling_price]" class="form-control input-sm input_number" value="{{@num_format($sn_rec->selling_price)}}"></td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">Simpan & Tutup</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 @endif
             </td>
 

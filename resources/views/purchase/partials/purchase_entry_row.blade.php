@@ -14,8 +14,40 @@
             @if(!empty($product->enable_sr_no) && $product->enable_sr_no == 1)
                 <br>
                 <small class="text-primary"><strong>Serial Number / IMEI (Scan / ketik per-unit lalu Enter):</strong></small>
-                <select name="purchases[{{$row_count}}][serial_numbers][]" class="form-control input-sm purchase_sn_select select2" multiple="multiple" style="width: 100%;">
+                <select name="purchases[{{$row_count}}][serial_numbers][]" class="form-control input-sm purchase_sn_select select2" multiple="multiple" style="width: 100%;" data-row_index="{{$row_count}}">
                 </select>
+                <button type="button" class="btn btn-xs btn-default tw-mt-1.5 btn_sn_price_details" data-toggle="modal" data-target="#sn_price_modal_{{$row_count}}">
+                    <i class="fa fa-cog text-info"></i> Detail Harga per SN
+                </button>
+
+                <!-- Modal for SN Price Details -->
+                <div class="modal fade sn_price_modal" id="sn_price_modal_{{$row_count}}" tabindex="-1" role="dialog">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                <h4 class="modal-title">Atur HPP & Harga Jual per Serial Number</h4>
+                            </div>
+                            <div class="modal-body">
+                                <p class="help-block"><small>Bila dikosongkan, HPP dan Harga Jual akan otomatis menggunakan harga standar produk ini.</small></p>
+                                <table class="table table-bordered table-condensed sn_price_table">
+                                    <thead>
+                                        <tr>
+                                            <th>Serial Number / IMEI</th>
+                                            <th>HPP (Harga Beli)</th>
+                                            <th>Harga Jual</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">Simpan & Tutup</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             @endif
             
         </td>
