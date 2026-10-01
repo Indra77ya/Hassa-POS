@@ -463,6 +463,7 @@ class PurchaseController extends Controller
                                     'purchase_lines.variations',
                                     'purchase_lines.variations.product_variation',
                                     'purchase_lines.sub_unit',
+                                    'purchase_lines.serial_numbers',
                                     'location',
                                     'payment_lines',
                                     'tax'
@@ -1322,6 +1323,7 @@ class PurchaseController extends Controller
                                         'purchase_lines.product',
                                         'purchase_lines.variations',
                                         'purchase_lines.variations.product_variation',
+                                        'purchase_lines.serial_numbers',
                                         'location',
                                         'payment_lines'
                                     )

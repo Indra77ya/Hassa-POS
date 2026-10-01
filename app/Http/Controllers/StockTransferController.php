@@ -401,6 +401,7 @@ class StockTransferController extends Controller
                                 'sell_lines.variations.product_variation',
                                 'sell_lines.lot_details',
                                 'sell_lines.sub_unit',
+                                'sell_lines.serial_numbers',
                                 'location',
                                 'sell_lines.product.unit'
                             )

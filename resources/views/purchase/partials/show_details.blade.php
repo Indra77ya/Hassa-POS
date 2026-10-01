@@ -174,14 +174,34 @@
             $total_before_tax = 0.00;
           @endphp
           @foreach($purchase->purchase_lines as $purchase_line)
+            @php
+              $sn_records = $purchase_line->relationLoaded('serial_numbers')
+                  ? $purchase_line->serial_numbers
+                  : \App\ProductSerialNumber::where('purchase_line_id', $purchase_line->id)->get();
+              $has_sn = !empty($sn_records) && $sn_records->count() > 0;
+              $sn_collapse_id = 'purchase_line_sn_' . $purchase_line->id;
+            @endphp
             <tr>
               <td>{{ $loop->iteration }}</td>
               <td>
-                {{ $purchase_line->product->name }}
-                 @if( $purchase_line->product->type == 'variable')
-                  - {{ $purchase_line->variations->product_variation->name}}
-                  - {{ $purchase_line->variations->name}}
-                 @endif
+                @if($has_sn)
+                  <a href="#{{ $sn_collapse_id }}" data-toggle="collapse" class="tw-font-bold text-primary" style="cursor: pointer; text-decoration: underline;" title="Klik untuk melihat daftar Serial Number">
+                    {{ $purchase_line->product->name }}
+                    @if( $purchase_line->product->type == 'variable')
+                      - {{ $purchase_line->variations->product_variation->name}}
+                      - {{ $purchase_line->variations->name}}
+                    @endif
+                    <span class="label bg-blue" style="margin-left: 5px; font-size: 10px;">
+                      <i class="fa fa-barcode"></i> {{ $sn_records->count() }} SN
+                    </span>
+                  </a>
+                @else
+                  {{ $purchase_line->product->name }}
+                  @if( $purchase_line->product->type == 'variable')
+                    - {{ $purchase_line->variations->product_variation->name}}
+                    - {{ $purchase_line->variations->name}}
+                  @endif
+                @endif
               </td>
               <td>
                  @if( $purchase_line->product->type == 'variable')
@@ -237,6 +257,45 @@
               @endif
               <td class="text-right"><span class="display_currency" data-currency_symbol="true">{{ $purchase_line->purchase_price_inc_tax * $purchase_line->quantity }}</span></td>
             </tr>
+            @if($has_sn)
+              <tr id="{{ $sn_collapse_id }}" class="collapse bg-info no-print">
+                <td colspan="100%">
+                  <div style="padding: 10px 15px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px;">
+                    <strong style="color: #1e293b;"><i class="fa fa-barcode text-primary"></i> @lang('lang_v1.serial_numbers') Details ({{ $sn_records->count() }}):</strong>
+                    <table class="table table-bordered table-condensed bg-white" style="margin-top: 8px; margin-bottom: 0;">
+                      <thead>
+                        <tr style="background-color: #e2e8f0; color: #334155; font-size: 12px;">
+                          <th>#</th>
+                          <th>Serial Number / IMEI</th>
+                          <th class="text-right">Harga Beli (HPP)</th>
+                          <th class="text-right">Harga Jual</th>
+                          <th class="text-center">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @foreach($sn_records as $sn)
+                          <tr style="font-size: 12px;">
+                            <td>{{ $loop->iteration }}</td>
+                            <td><strong class="text-info">{{ $sn->serial_number }}</strong></td>
+                            <td class="text-right"><span class="display_currency" data-currency_symbol="true">{{ $sn->purchase_price }}</span></td>
+                            <td class="text-right"><span class="display_currency" data-currency_symbol="true">{{ $sn->selling_price }}</span></td>
+                            <td class="text-center">
+                              @if($sn->status == 'in_stock')
+                                <span class="label bg-green">Tersedia (In Stock)</span>
+                              @elseif($sn->status == 'sold')
+                                <span class="label bg-red">Terjual (Sold)</span>
+                              @else
+                                <span class="label bg-gray">{{ ucfirst($sn->status) }}</span>
+                              @endif
+                            </td>
+                          </tr>
+                        @endforeach
+                      </tbody>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+            @endif
             @php 
               $total_before_tax += ($purchase_line->quantity * $purchase_line->purchase_price);
             @endphp
