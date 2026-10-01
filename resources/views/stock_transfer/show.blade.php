@@ -105,8 +105,8 @@
 				                    - {{ $sell_lines->variations->product_variation->name}}
 				                    - {{ $sell_lines->variations->name}}
 				                  @endif
-				                  <span class="label label-info" style="margin-left: 5px; font-weight: normal; font-size: 10px;">
-				                    <i class="fa fa-barcode"></i> {{ $sn_records->count() }} SN
+				                  <span class="label" style="margin-left: 5px; background-color: #1e40af; color: #ffffff !important; font-weight: 700; font-size: 11px; padding: 2px 7px; border-radius: 4px; display: inline-block; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+				                    <i class="fa fa-barcode" style="color: #ffffff !important;"></i> {{ $sn_records->count() }} SN
 				                  </span>
 				                </a>
 				              @else
