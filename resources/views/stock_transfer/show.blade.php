@@ -157,11 +157,11 @@
 				                          <td class="text-right"><span class="display_currency" data-currency_symbol="true">{{ $sn->selling_price }}</span></td>
 				                          <td class="text-center">
 				                            @if($sn->status == 'in_stock')
-				                              <span class="label label-success">@lang('lang_v1.in_stock')</span>
+				                              <span class="label" style="background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; font-weight: 700; font-size: 11px; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; display: inline-block;">@lang('lang_v1.in_stock')</span>
 				                            @elseif($sn->status == 'sold')
-				                              <span class="label label-danger">@lang('lang_v1.sold')</span>
+				                              <span class="label" style="background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; font-weight: 700; font-size: 11px; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; display: inline-block;">@lang('lang_v1.sold')</span>
 				                            @else
-				                              <span class="label label-default">{{ ucfirst($sn->status) }}</span>
+				                              <span class="label" style="background-color: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; font-weight: 700; font-size: 11px; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; display: inline-block;">{{ ucfirst($sn->status) }}</span>
 				                            @endif
 				                          </td>
 				                        </tr>
