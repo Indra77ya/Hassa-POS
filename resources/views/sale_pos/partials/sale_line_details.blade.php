@@ -32,14 +32,14 @@
             <td>{{ $loop->iteration }}</td>
             <td>
                 @if($has_sn)
-                    <a href="#{{ $sn_collapse_id }}" data-toggle="collapse" class="tw-font-bold text-primary" style="cursor: pointer; text-decoration: underline;" title="Klik untuk melihat daftar Serial Number">
+                    <a href="#{{ $sn_collapse_id }}" data-toggle="collapse" style="cursor: pointer; text-decoration: none; font-weight: 600;" title="Klik untuk melihat daftar Serial Number">
                         {{ $sell_line->product->name }}
                         @if( $sell_line->product->type == 'variable')
                         - {{ $sell_line->variations->product_variation->name ?? ''}}
                         - {{ $sell_line->variations->name ?? ''}},
                         @endif
                         {{ $sell_line->variations->sub_sku ?? ''}}
-                        <span class="label bg-blue" style="margin-left: 5px; font-size: 10px;">
+                        <span class="label label-info" style="margin-left: 5px; font-weight: normal; font-size: 10px;">
                             <i class="fa fa-barcode"></i> {{ $sn_records->count() }} SN
                         </span>
                     </a>
@@ -146,34 +146,34 @@
             </td>
         </tr>
         @if($has_sn)
-            <tr id="{{ $sn_collapse_id }}" class="collapse bg-info no-print">
-                <td colspan="100%">
-                    <div style="padding: 10px 15px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px;">
-                        <strong style="color: #1e293b;"><i class="fa fa-barcode text-primary"></i> @lang('lang_v1.serial_numbers') Details ({{ $sn_records->count() }}):</strong>
-                        <table class="table table-bordered table-condensed bg-white" style="margin-top: 8px; margin-bottom: 0;">
+            <tr id="{{ $sn_collapse_id }}" class="collapse no-print">
+                <td colspan="100%" style="padding: 0; border-top: none;">
+                    <div style="padding: 8px 12px; background-color: #fafafa; border-bottom: 1px solid #e2e8f0;">
+                        <small class="text-muted" style="font-weight: 600;"><i class="fa fa-barcode"></i> @lang('lang_v1.serial_numbers') ({{ $sn_records->count() }}):</small>
+                        <table class="table table-bordered table-condensed bg-white" style="margin-top: 6px; margin-bottom: 0;">
                             <thead>
-                                <tr style="background-color: #e2e8f0; color: #334155; font-size: 12px;">
-                                    <th>#</th>
+                                <tr style="background-color: #f1f5f9; color: #475569; font-size: 11px;">
+                                    <th style="width: 40px;">#</th>
                                     <th>Serial Number / IMEI</th>
                                     <th class="text-right">Harga Beli (HPP)</th>
                                     <th class="text-right">Harga Jual</th>
-                                    <th class="text-center">Status</th>
+                                    <th class="text-center" style="width: 130px;">Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($sn_records as $sn)
-                                    <tr style="font-size: 12px;">
+                                    <tr style="font-size: 11px;">
                                         <td>{{ $loop->iteration }}</td>
-                                        <td><strong class="text-info">{{ $sn->serial_number }}</strong></td>
+                                        <td><strong style="color: #2563eb;">{{ $sn->serial_number }}</strong></td>
                                         <td class="text-right"><span class="display_currency" data-currency_symbol="true">{{ $sn->purchase_price }}</span></td>
                                         <td class="text-right"><span class="display_currency" data-currency_symbol="true">{{ $sn->selling_price }}</span></td>
                                         <td class="text-center">
                                             @if($sn->status == 'in_stock')
-                                                <span class="label bg-green">Tersedia (In Stock)</span>
+                                                <span class="label label-success">Tersedia</span>
                                             @elseif($sn->status == 'sold')
-                                                <span class="label bg-red">Terjual (Sold)</span>
+                                                <span class="label label-danger">Terjual</span>
                                             @else
-                                                <span class="label bg-gray">{{ ucfirst($sn->status) }}</span>
+                                                <span class="label label-default">{{ ucfirst($sn->status) }}</span>
                                             @endif
                                         </td>
                                     </tr>
