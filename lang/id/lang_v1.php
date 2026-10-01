@@ -99,6 +99,8 @@ return [
     'sn_price_modal_help' => 'Bila dikosongkan, HPP dan Harga Jual akan otomatis menggunakan harga standar produk ini.',
     'sn_purchase_price' => 'HPP (Harga Beli)',
     'sn_selling_price' => 'Harga Jual',
+    'sold' => 'Terjual',
+    'in_stock' => 'In Stock',
     'tooltip_sr_no' => 'Mengaktifkan atau menonaktifkan menambahkan deskripsi produk, IMEI atau nomor seri saat menjual produk di layar POS',
     'description' => 'Deskripsi',
     'sell_line_description_help' => 'Tambahkan IMEI produk, nomor seri atau informasi lainnya di sini.',

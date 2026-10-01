@@ -22,8 +22,14 @@
                 <small class="text-primary"><strong>@lang('lang_v1.sn_input_help')</strong></small>
                 <select name="purchases[{{$row_count}}][serial_numbers][]" class="form-control input-sm purchase_sn_select select2" multiple="multiple" style="width: 100%;" data-row_index="{{$row_count}}">
                     @foreach($existing_sn_records as $sn_rec)
+                        @php
+                            $status_label = __('lang_v1.' . $sn_rec->status);
+                            if ($status_label == 'lang_v1.' . $sn_rec->status) {
+                                $status_label = ucfirst(str_replace('_', ' ', $sn_rec->status));
+                            }
+                        @endphp
                         <option value="{{$sn_rec->serial_number}}" data-status="{{$sn_rec->status}}" @if($sn_rec->status == 'in_stock') data-is_existing_instock="1" @endif>
-                            {{$sn_rec->serial_number}} (@lang('lang_v1.' . $sn_rec->status))
+                            {{$sn_rec->serial_number}} ({{ $status_label }})
                         </option>
                     @endforeach
                 </select>

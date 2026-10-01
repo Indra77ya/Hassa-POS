@@ -99,6 +99,8 @@ return [
     'sn_price_modal_help' => 'If left blank, Purchase Price and Selling Price will default to standard product prices.',
     'sn_purchase_price' => 'Purchase Price (Cost)',
     'sn_selling_price' => 'Selling Price',
+    'sold' => 'Sold',
+    'in_stock' => 'In Stock',
     'tooltip_sr_no' => 'Enable or disable adding product description, IMEI or Serial number while selling products in POS screen',
     'description' => 'Description',
     'sell_line_description_help' => 'Add product IMEI, Serial number or other informations here.',

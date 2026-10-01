@@ -202,7 +202,7 @@
 											@elseif($sn->status == 'used_in_repair')
 												<span class="label label-warning">In Repair</span>
 											@else
-												<span class="label label-info">{{$sn->status}}</span>
+												<span class="label label-info">{{ucfirst(str_replace('_', ' ', $sn->status))}}</span>
 											@endif
 										</td>
 										<td><span class="display_currency" data-currency_symbol="true">{{$sn->purchase_price}}</span></td>
