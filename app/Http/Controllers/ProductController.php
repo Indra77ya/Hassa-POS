@@ -484,6 +484,18 @@ class ProductController extends Controller
 
             if (! empty($request->input('enable_sr_no')) && $request->input('enable_sr_no') == 1) {
                 $product_details['enable_sr_no'] = 1;
+
+                $product_serials = $request->input('product_serials', []);
+                $filtered_serials = array_filter($product_serials, function ($item) {
+                    return !empty(trim($item['serial_number'] ?? ''));
+                });
+
+                if (empty($filtered_serials)) {
+                    return redirect()->back()->withInput()->with('status', [
+                        'success' => 0,
+                        'msg' => 'Minimal 1 serial number harus diisi saat Enable Serial Number dicentang.'
+                    ]);
+                }
             }
 
             //upload document
@@ -537,6 +549,30 @@ class ProductController extends Controller
                 }
 
                 $this->productUtil->createSingleProductVariation($product->id, $product->sku, $request->input('item_level_purchase_price_total'), $request->input('purchase_price_inc_tax'), $request->input('profit_percent'), $request->input('selling_price'), $request->input('selling_price_inc_tax'), $combo_variations, $request->input('profit_margin_type'));
+            }
+
+            //Save Serial Numbers if enable_sr_no is enabled
+            if (! empty($product->enable_sr_no) && $product->enable_sr_no == 1 && ! empty($request->input('product_serials'))) {
+                $first_variation = $product->variations()->first();
+                $variation_id = $first_variation ? $first_variation->id : null;
+                $sn_details = [];
+                $serials_list = [];
+
+                foreach ($request->input('product_serials') as $sn_row) {
+                    $sn = trim($sn_row['serial_number'] ?? '');
+                    if (! empty($sn)) {
+                        $serials_list[] = $sn;
+                        $sn_details[$sn] = [
+                            'purchase_price' => $sn_row['purchase_price'] ?? 0,
+                            'selling_price' => $sn_row['selling_price'] ?? 0,
+                        ];
+                    }
+                }
+
+                if (! empty($serials_list)) {
+                    $snUtil = new \App\Utils\ProductSerialNumberUtil();
+                    $snUtil->syncPurchaseSerialNumbers($business_id, $product->id, $variation_id, null, $serials_list, 0, $sn_details);
+                }
             }
 
             //Add product racks details.
@@ -1605,6 +1641,17 @@ class ProductController extends Controller
 
             if (! empty($request->input('enable_sr_no')) && $request->input('enable_sr_no') == 1) {
                 $product_details['enable_sr_no'] = 1;
+
+                $product_serials = $request->input('product_serials', []);
+                $filtered_serials = array_filter($product_serials, function ($item) {
+                    return !empty(trim($item['serial_number'] ?? ''));
+                });
+
+                if (empty($filtered_serials)) {
+                    return ['success' => 0,
+                        'msg' => 'Minimal 1 serial number harus diisi saat Enable Serial Number dicentang.',
+                    ];
+                }
             }
 
             $product_details['warranty_id'] = ! empty($request->input('warranty_id')) ? $request->input('warranty_id') : null;
@@ -1639,6 +1686,30 @@ class ProductController extends Controller
                 $transaction_date = \Carbon::createFromFormat('Y-m-d', $transaction_date)->toDateTimeString();
 
                 $this->productUtil->addSingleProductOpeningStock($business_id, $product, $request->input('opening_stock'), $transaction_date, $user_id);
+            }
+
+            //Save Serial Numbers if enable_sr_no is enabled
+            if (! empty($product->enable_sr_no) && $product->enable_sr_no == 1 && ! empty($request->input('product_serials'))) {
+                $first_variation = $product->variations()->first();
+                $variation_id = $first_variation ? $first_variation->id : null;
+                $sn_details = [];
+                $serials_list = [];
+
+                foreach ($request->input('product_serials') as $sn_row) {
+                    $sn = trim($sn_row['serial_number'] ?? '');
+                    if (! empty($sn)) {
+                        $serials_list[] = $sn;
+                        $sn_details[$sn] = [
+                            'purchase_price' => $sn_row['purchase_price'] ?? 0,
+                            'selling_price' => $sn_row['selling_price'] ?? 0,
+                        ];
+                    }
+                }
+
+                if (! empty($serials_list)) {
+                    $snUtil = new \App\Utils\ProductSerialNumberUtil();
+                    $snUtil->syncPurchaseSerialNumbers($business_id, $product->id, $variation_id, null, $serials_list, 0, $sn_details);
+                }
             }
 
             //Add product locations
