@@ -220,7 +220,7 @@
         @endif
       </div>
       <div class="row">
-        <div class="form-group col-sm-11 col-sm-offset-1">
+        <div class="form-group col-sm-12">
           @include('product.partials.single_product_form_part', ['profit_percent' => $default_profit_percent, 'profit_margin_type' => $default_profit_margin_type, 'quick_add' => true ])
         </div>
       </div>
