@@ -78,6 +78,13 @@ $(document).ready(function() {
         }
     });
 
+    $(document).on('show.bs.modal', '.sn_price_modal', function() {
+        var form = $(this).closest('form');
+        if (form.length && $(this).parent().get(0) !== form.get(0)) {
+            $(this).appendTo(form);
+        }
+    });
+
     $(document).on('change', '.sn_price_modal input', function() {
         var modal = $(this).closest('.sn_price_modal');
         var row_idx = modal.data('row_index');
@@ -355,6 +362,10 @@ $(document).ready(function() {
     }
 
     $(document).on('click', '.remove_purchase_entry_row', function() {
+        var tr = $(this).closest('tr');
+        var select = tr.find('.purchase_sn_select');
+        var row_idx = select.length ? select.data('row_index') : null;
+
         swal({
             title: LANG.sure,
             icon: 'warning',
@@ -362,9 +373,10 @@ $(document).ready(function() {
             dangerMode: true,
         }).then(value => {
             if (value) {
-                $(this)
-                    .closest('tr')
-                    .remove();
+                if (row_idx !== null && typeof row_idx !== 'undefined') {
+                    $('#sn_price_modal_' + row_idx).remove();
+                }
+                tr.remove();
                 update_table_total();
                 update_grand_total();
                 update_table_sr_number();
