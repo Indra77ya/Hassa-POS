@@ -93,12 +93,14 @@ $(document).ready(function() {
     });
 
     if ($('.purchase_sn_select').length) {
-        $('.purchase_sn_select').select2({
-            tags: true,
-            tokenSeparators: [',', ' ', '\n', '\t'],
-            placeholder: "Scan / ketik SN per-unit"
-        });
+        init_purchase_sn_select($('.purchase_sn_select'));
     }
+
+    $(document).ajaxComplete(function() {
+        if ($('.purchase_sn_select').length) {
+            init_purchase_sn_select($('.purchase_sn_select'));
+        }
+    });
     if ($('input#iraqi_selling_price_adjustment').length > 0) {
         iraqi_selling_price_adjustment = true;
     } else {
@@ -874,6 +876,22 @@ $(document).ready(function() {
     toggle_search();
 });
 
+function init_purchase_sn_select(element) {
+    if (!element || !element.length) return;
+    element.each(function() {
+        var $el = $(this);
+        if ($el.hasClass('select2-hidden-accessible')) {
+            $el.select2('destroy');
+        }
+        $el.select2({
+            tags: true,
+            tokenSeparators: [',', ' ', '\n', '\t'],
+            placeholder: "Scan / ketik SN per-unit",
+            width: '100%'
+        });
+    });
+}
+
 function get_purchase_entry_row(product_id, variation_id) {
     if (product_id) {
         var row_count = $('#row_count').val();
@@ -906,7 +924,7 @@ function append_purchase_lines(data, row_count, trigger_change = false) {
     $(data)
         .find('.purchase_quantity')
         .each(function() {
-            row = $(this).closest('tr');
+            var row = $(this).closest('tr');
 
             $('#purchase_entry_table tbody').append(
                 update_purchase_entry_row_values(row)
@@ -924,12 +942,8 @@ function append_purchase_lines(data, row_count, trigger_change = false) {
                 row.find('select.sub_unit').trigger('change');
             }
 
-            if (row.find('.purchase_sn_select').length) {
-                row.find('.purchase_sn_select').select2({
-                    tags: true,
-                    tokenSeparators: [',', ' ', '\n', '\t'],
-                    placeholder: "Scan / ketik SN per-unit"
-                });
+            if ($('.purchase_sn_select').length) {
+                init_purchase_sn_select($('.purchase_sn_select'));
             }
 
             if (trigger_change && row.find('.purchase_unit_cost_without_discount').length) {

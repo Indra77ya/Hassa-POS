@@ -258,34 +258,34 @@
 					<table class="table table-condensed table-bordered table-th-green text-center table-striped" id="purchase_entry_table">
 						<thead>
 							<tr>
-								<th>#</th>
-								<th>@lang( 'product.product_name' )</th>
-								<th>@lang( 'purchase.purchase_quantity' )</th>
-								<th>@lang( 'lang_v1.unit_cost_before_discount' )</th>
-								<th>@lang( 'lang_v1.discount_percent' )</th>
-								<th>@lang( 'purchase.unit_cost_before_tax' )</th>
-								<th class="{{$hide_tax}}">@lang( 'purchase.subtotal_before_tax' )</th>
-								<th class="{{$hide_tax}}">@lang( 'purchase.product_tax' )</th>
-								<th class="{{$hide_tax}}">@lang( 'purchase.net_cost' )</th>
-								<th>@lang( 'purchase.line_total' )</th>
-								<th class="@if(!session('business.enable_editing_product_from_purchase')) hide @endif">
+								<th style="width: 3%; min-width: 30px;">#</th>
+								<th style="width: 28%; min-width: 240px;">@lang( 'product.product_name' )</th>
+								<th style="width: 10%; min-width: 90px;">@lang( 'purchase.purchase_quantity' )</th>
+								<th style="min-width: 110px;">@lang( 'lang_v1.unit_cost_before_discount' )</th>
+								<th style="min-width: 80px;">@lang( 'lang_v1.discount_percent' )</th>
+								<th style="min-width: 110px;">@lang( 'purchase.unit_cost_before_tax' )</th>
+								<th class="{{$hide_tax}}" style="min-width: 110px;">@lang( 'purchase.subtotal_before_tax' )</th>
+								<th class="{{$hide_tax}}" style="min-width: 110px;">@lang( 'purchase.product_tax' )</th>
+								<th class="{{$hide_tax}}" style="min-width: 110px;">@lang( 'purchase.net_cost' )</th>
+								<th style="min-width: 110px;">@lang( 'purchase.line_total' )</th>
+								<th class="@if(!session('business.enable_editing_product_from_purchase')) hide @endif" style="min-width: 85px;">
 									@lang( 'lang_v1.profit_margin' )
 								</th>
-								<th>
+								<th style="min-width: 110px;">
 									@lang( 'purchase.unit_selling_price' )
 									<small>(@lang('product.inc_of_tax'))</small>
 								</th>
 								@if(session('business.enable_lot_number'))
-									<th>
+									<th style="min-width: 90px;">
 										@lang('lang_v1.lot_number')
 									</th>
 								@endif
 								@if(session('business.enable_product_expiry'))
-									<th>
+									<th style="min-width: 120px;">
 										@lang('product.mfg_date') / @lang('product.exp_date')
 									</th>
 								@endif
-								<th><i class="fa fa-trash" aria-hidden="true"></i></th>
+								<th style="width: 3%;"><i class="fa fa-trash" aria-hidden="true"></i></th>
 							</tr>
 						</thead>
 						<tbody></tbody>

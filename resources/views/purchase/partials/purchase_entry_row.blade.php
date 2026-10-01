@@ -21,7 +21,7 @@
                 @endphp
                 <br>
                 <small class="text-primary"><strong>@lang('lang_v1.sn_input_help')</strong></small>
-                <select name="purchases[{{$row_count}}][serial_numbers][]" class="form-control input-sm purchase_sn_select select2" multiple="multiple" style="width: 100%;" data-row_index="{{$row_count}}">
+                <select name="purchases[{{$row_count}}][serial_numbers][]" class="form-control input-sm purchase_sn_select" multiple="multiple" style="width: 100%;" data-row_index="{{$row_count}}">
                     @foreach($existing_sn_records as $sn_rec)
                         <option value="{{$sn_rec->serial_number}}" data-status="{{$sn_rec->status}}" data-is_existing_instock="1">
                             {{$sn_rec->serial_number}} (@lang('lang_v1.in_stock'))
