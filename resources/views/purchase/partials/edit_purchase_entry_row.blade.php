@@ -67,7 +67,7 @@
                             ->get();
                         $current_line_sn_list = $existing_serial_records->pluck('serial_number')->toArray();
                     @endphp
-                    <select name="purchases[{{$loop->index}}][serial_numbers][]" class="form-control input-sm purchase_sn_select select2" multiple="multiple" style="width: 100%;" data-row_index="{{$loop->index}}">
+                    <select name="purchases[{{$loop->index}}][serial_numbers][]" class="form-control input-sm purchase_sn_select" multiple="multiple" style="width: 100%;" data-row_index="{{$loop->index}}">
                         @foreach($all_existing_sn_records as $sn_rec)
                             @php
                                 $is_selected = in_array($sn_rec->serial_number, $current_line_sn_list);
