@@ -175,6 +175,7 @@
 			@php
 				$product_sns = \App\ProductSerialNumber::where('business_id', session('user.business_id'))
 					->where('product_id', $product->id)
+					->where('status', 'in_stock')
 					->get();
 			@endphp
 			@if($product_sns->count() > 0)

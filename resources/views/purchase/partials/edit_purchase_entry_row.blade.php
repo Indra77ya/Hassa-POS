@@ -60,6 +60,10 @@
                         $p_id = !empty($purchase_line->product_id) ? $purchase_line->product_id : $purchase_line->product->id;
                         $all_existing_sn_records = \App\ProductSerialNumber::where('business_id', session('user.business_id'))
                             ->where('product_id', $p_id)
+                            ->where(function($q) use ($purchase_line) {
+                                $q->where('status', 'in_stock')
+                                  ->orWhere('purchase_line_id', $purchase_line->id);
+                            })
                             ->get();
                         $current_line_sn_list = $existing_serial_records->pluck('serial_number')->toArray();
                     @endphp
@@ -67,13 +71,9 @@
                         @foreach($all_existing_sn_records as $sn_rec)
                             @php
                                 $is_selected = in_array($sn_rec->serial_number, $current_line_sn_list);
-                                $status_label = __('lang_v1.' . $sn_rec->status);
-                                if ($status_label == 'lang_v1.' . $sn_rec->status) {
-                                    $status_label = ucfirst(str_replace('_', ' ', $sn_rec->status));
-                                }
                             @endphp
                             <option value="{{$sn_rec->serial_number}}" data-status="{{$sn_rec->status}}" @if($sn_rec->status == 'in_stock' && !$is_selected) data-is_existing_instock="1" @endif @if($is_selected) selected @endif>
-                                {{$sn_rec->serial_number}} ({{ $status_label }})
+                                {{$sn_rec->serial_number}} (@lang('lang_v1.' . $sn_rec->status))
                             </option>
                         @endforeach
                     </select>

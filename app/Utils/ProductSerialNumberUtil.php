@@ -29,6 +29,17 @@ class ProductSerialNumberUtil extends Util
             $pp = isset($sn_details[$sn]['purchase_price']) ? $this->num_uf($sn_details[$sn]['purchase_price']) : $default_purchase_price;
             $sp = isset($sn_details[$sn]['selling_price']) ? $this->num_uf($sn_details[$sn]['selling_price']) : 0;
 
+            // Prevent registering duplicate in_stock serial numbers in same business
+            $existing_instock = ProductSerialNumber::where('business_id', $business_id)
+                ->where('serial_number', $sn)
+                ->where('status', 'in_stock')
+                ->where('purchase_line_id', '!=', $purchase_line_id)
+                ->first();
+
+            if ($existing_instock) {
+                continue;
+            }
+
             $record = ProductSerialNumber::where('business_id', $business_id)
                 ->where('purchase_line_id', $purchase_line_id)
                 ->where('serial_number', $sn)
