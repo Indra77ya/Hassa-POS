@@ -95,6 +95,12 @@ $(document).ready(function() {
     if ($('.purchase_sn_select').length) {
         init_purchase_sn_select($('.purchase_sn_select'));
     }
+
+    $(document).ajaxComplete(function() {
+        if ($('.purchase_sn_select').length) {
+            init_purchase_sn_select($('.purchase_sn_select'));
+        }
+    });
     if ($('input#iraqi_selling_price_adjustment').length > 0) {
         iraqi_selling_price_adjustment = true;
     } else {
@@ -935,8 +941,8 @@ function append_purchase_lines(data, row_count, trigger_change = false) {
                 row.find('select.sub_unit').trigger('change');
             }
 
-            if (row.find('.purchase_sn_select').length) {
-                init_purchase_sn_select(row.find('.purchase_sn_select'));
+            if ($('.purchase_sn_select').length) {
+                init_purchase_sn_select($('.purchase_sn_select'));
             }
 
             if (trigger_change && row.find('.purchase_unit_cost_without_discount').length) {
