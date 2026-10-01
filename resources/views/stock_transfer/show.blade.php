@@ -1,3 +1,10 @@
+<style>
+  @media print {
+    .sn-details-row {
+      display: table-row !important;
+    }
+  }
+</style>
 <div class="modal-dialog modal-xl" role="document">
 	<div class="modal-content">
 		<div class="modal-header">
@@ -127,7 +134,7 @@
 				            </td>
 				          </tr>
 				          @if($has_sn)
-				            <tr id="{{ $sn_collapse_id }}" class="collapse no-print">
+				            <tr id="{{ $sn_collapse_id }}" class="collapse sn-details-row">
 				              <td colspan="100%" style="padding: 0; border-top: none;">
 				                <div style="padding: 8px 12px; background-color: #fafafa; border-bottom: 1px solid #e2e8f0;">
 				                  <small class="text-muted" style="font-weight: 600;"><i class="fa fa-barcode"></i> @lang('lang_v1.serial_numbers') ({{ $sn_records->count() }}):</small>
