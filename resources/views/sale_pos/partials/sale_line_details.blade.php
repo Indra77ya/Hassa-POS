@@ -162,9 +162,9 @@
                                 <tr style="background-color: #f1f5f9; color: #475569; font-size: 11px;">
                                     <th style="width: 40px;">#</th>
                                     <th>Serial Number / IMEI</th>
-                                    <th class="text-right">Harga Beli (HPP)</th>
-                                    <th class="text-right">Harga Jual</th>
-                                    <th class="text-center" style="width: 130px;">Status</th>
+                                    <th class="text-right">@lang('lang_v1.purchase_price')</th>
+                                    <th class="text-right">@lang('lang_v1.selling_price')</th>
+                                    <th class="text-center" style="width: 130px;">@lang('sale.status')</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -176,9 +176,9 @@
                                         <td class="text-right"><span class="display_currency" data-currency_symbol="true">{{ $sn->selling_price }}</span></td>
                                         <td class="text-center">
                                             @if($sn->status == 'in_stock')
-                                                <span class="label label-success">Tersedia</span>
+                                                <span class="label label-success">@lang('lang_v1.in_stock')</span>
                                             @elseif($sn->status == 'sold')
-                                                <span class="label label-danger">Terjual</span>
+                                                <span class="label label-danger">@lang('lang_v1.sold')</span>
                                             @else
                                                 <span class="label label-default">{{ ucfirst($sn->status) }}</span>
                                             @endif
