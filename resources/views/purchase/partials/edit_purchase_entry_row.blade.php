@@ -82,7 +82,7 @@
                     </button>
 
                     <!-- Modal for SN Price Details -->
-                    <div class="modal fade sn_price_modal" id="sn_price_modal_{{$loop->index}}" tabindex="-1" role="dialog">
+                    <div class="modal fade sn_price_modal" id="sn_price_modal_{{$loop->index}}" data-row_index="{{$loop->index}}" tabindex="-1" role="dialog">
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -156,6 +156,7 @@
                     data-rule-max-value="{{$max_quantity}}"
                     data-msg-max-value="{{__('lang_v1.max_quantity_quantity_allowed', ['quantity' => $max_quantity])}}" 
                 @endif
+                @if(!empty($purchase_line->product->enable_sr_no) && $purchase_line->product->enable_sr_no == 1) readonly @endif
                 >
 
                 <input type="hidden" class="base_unit_cost" value="{{$purchase_line->variations->default_purchase_price}}">
@@ -190,14 +191,14 @@
                 @endif
             </td>
             <td>
-                {!! Form::text('purchases[' . $loop->index . '][pp_without_discount]', number_format($purchase_line->pp_without_discount/$purchase->exchange_rate, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control input-sm purchase_unit_cost_without_discount input_number', 'required']); !!}
+                {!! Form::text('purchases[' . $loop->index . '][pp_without_discount]', number_format($purchase_line->pp_without_discount/$purchase->exchange_rate, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), array_merge(['class' => 'form-control input-sm purchase_unit_cost_without_discount input_number', 'required'], (!empty($purchase_line->product->enable_sr_no) && $purchase_line->product->enable_sr_no == 1) ? ['readonly' => 'readonly'] : [])); !!}
             </td>
             <td>
                 {!! Form::text('purchases[' . $loop->index . '][discount_percent]', number_format($purchase_line->discount_percent, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control input-sm inline_discounts input_number', 'required']); !!} <b>%</b>
             </td>
             <td>
                 {!! Form::text('purchases[' . $loop->index . '][purchase_price]', 
-                number_format($purchase_line->purchase_price/$purchase->exchange_rate, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control input-sm purchase_unit_cost input_number', 'required']); !!}
+                number_format($purchase_line->purchase_price/$purchase->exchange_rate, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), array_merge(['class' => 'form-control input-sm purchase_unit_cost input_number', 'required'], (!empty($purchase_line->product->enable_sr_no) && $purchase_line->product->enable_sr_no == 1) ? ['readonly' => 'readonly'] : [])); !!}
             </td>
             <td class="{{$hide_tax}}">
                 <span class="row_subtotal_before_tax">
@@ -222,7 +223,7 @@
                 </div>
             </td>
             <td class="{{$hide_tax}}">
-                {!! Form::text('purchases[' . $loop->index . '][purchase_price_inc_tax]', number_format($purchase_line->purchase_price_inc_tax/$purchase->exchange_rate, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control input-sm purchase_unit_cost_after_tax input_number', 'required']); !!}
+                {!! Form::text('purchases[' . $loop->index . '][purchase_price_inc_tax]', number_format($purchase_line->purchase_price_inc_tax/$purchase->exchange_rate, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), array_merge(['class' => 'form-control input-sm purchase_unit_cost_after_tax input_number', 'required'], (!empty($purchase_line->product->enable_sr_no) && $purchase_line->product->enable_sr_no == 1) ? ['readonly' => 'readonly'] : [])); !!}
             </td>
             <td>
                 <span class="row_subtotal_after_tax">
@@ -247,12 +248,12 @@
                 
                 {!! Form::text('purchases[' . $loop->index . '][profit_percent]', 
                 number_format($profit_percent, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), 
-                ['class' => 'form-control input-sm input_number profit_percent', 'required']); !!}
+                array_merge(['class' => 'form-control input-sm input_number profit_percent', 'required'], (!empty($purchase_line->product->enable_sr_no) && $purchase_line->product->enable_sr_no == 1) ? ['readonly' => 'readonly'] : [])); !!}
             </td>
             @if(empty($is_purchase_order))
             <td>
                 @if(session('business.enable_editing_product_from_purchase'))
-                    {!! Form::text('purchases[' . $loop->index . '][default_sell_price]', number_format($sp, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), ['class' => 'form-control input-sm input_number default_sell_price', 'required']); !!}
+                    {!! Form::text('purchases[' . $loop->index . '][default_sell_price]', number_format($sp, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), array_merge(['class' => 'form-control input-sm input_number default_sell_price', 'required'], (!empty($purchase_line->product->enable_sr_no) && $purchase_line->product->enable_sr_no == 1) ? ['readonly' => 'readonly'] : [])); !!}
                 @else
                     {{number_format($sp, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator)}}
                 @endif
