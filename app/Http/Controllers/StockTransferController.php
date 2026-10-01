@@ -314,6 +314,48 @@ class StockTransferController extends Controller
                 $purchase_transfer->purchase_lines()->createMany($purchase_lines);
             }
 
+            // Handle Serial Numbers for Stock Transfer
+            if (! empty($products)) {
+                $created_sell_lines = $sell_transfer->sell_lines->keyBy('variation_id');
+                $created_purchase_lines = $purchase_transfer->purchase_lines->keyBy('variation_id');
+
+                foreach ($products as $p_item) {
+                    if (! empty($p_item['serial_numbers']) && is_array($p_item['serial_numbers'])) {
+                        $v_id = $p_item['variation_id'];
+                        $sn_list = array_filter(array_map('trim', $p_item['serial_numbers']));
+
+                        if (! empty($sn_list)) {
+                            $s_line = $created_sell_lines->get($v_id);
+                            $p_line = $created_purchase_lines->get($v_id);
+
+                            foreach ($sn_list as $sn_val) {
+                                $sn_record = \App\ProductSerialNumber::where('business_id', $business_id)
+                                    ->where('product_id', $p_item['product_id'])
+                                    ->where(function($q) use ($sn_val) {
+                                        $q->where('serial_number', $sn_val)
+                                          ->orWhere('id', $sn_val);
+                                    })
+                                    ->first();
+
+                                if ($sn_record) {
+                                    $update_data = [];
+                                    if ($s_line) {
+                                        $update_data['transaction_sell_line_id'] = $s_line->id;
+                                    }
+                                    if ($status == 'completed' && $p_line) {
+                                        $update_data['purchase_line_id'] = $p_line->id;
+                                        $update_data['status'] = 'in_stock';
+                                    }
+                                    if (! empty($update_data)) {
+                                        $sn_record->update($update_data);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             //Decrease product stock from sell location
             //And increase product stock at purchase location
             if ($status == 'completed') {
@@ -827,6 +869,52 @@ class StockTransferController extends Controller
                 $purchase_transfer->purchase_lines()->saveMany($purchase_lines);
             }
 
+            // Handle Serial Numbers for Stock Transfer Update
+            if (! empty($products)) {
+                $updated_sell_lines = $sell_transfer->sell_lines->keyBy('variation_id');
+                $updated_purchase_lines = $purchase_transfer->purchase_lines->keyBy('variation_id');
+
+                foreach ($products as $p_item) {
+                    if (isset($p_item['serial_numbers']) && is_array($p_item['serial_numbers'])) {
+                        $v_id = $p_item['variation_id'];
+                        $sn_list = array_filter(array_map('trim', $p_item['serial_numbers']));
+                        $s_line = $updated_sell_lines->get($v_id);
+                        $p_line = $updated_purchase_lines->get($v_id);
+
+                        if ($s_line) {
+                            // Reset serial numbers no longer selected for this sell line
+                            \App\ProductSerialNumber::where('business_id', $business_id)
+                                ->where('transaction_sell_line_id', $s_line->id)
+                                ->whereNotIn('serial_number', $sn_list)
+                                ->update([
+                                    'transaction_sell_line_id' => null
+                                ]);
+
+                            foreach ($sn_list as $sn_val) {
+                                $sn_record = \App\ProductSerialNumber::where('business_id', $business_id)
+                                    ->where('product_id', $p_item['product_id'])
+                                    ->where(function($q) use ($sn_val) {
+                                        $q->where('serial_number', $sn_val)
+                                          ->orWhere('id', $sn_val);
+                                    })
+                                    ->first();
+
+                                if ($sn_record) {
+                                    $update_data = [
+                                        'transaction_sell_line_id' => $s_line->id
+                                    ];
+                                    if ($status == 'completed' && $p_line) {
+                                        $update_data['purchase_line_id'] = $p_line->id;
+                                        $update_data['status'] = 'in_stock';
+                                    }
+                                    $sn_record->update($update_data);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             //Decrease product stock from sell location
             //And increase product stock at purchase location
             if ($status == 'completed') {
@@ -919,6 +1007,8 @@ class StockTransferController extends Controller
 
             DB::beginTransaction();
             if ($status == 'completed' && $sell_transfer->status != 'completed') {
+                $purchase_lines_by_var = $purchase_transfer->purchase_lines->keyBy('variation_id');
+
                 foreach ($sell_transfer->sell_lines as $sell_line) {
                     if ($sell_line->product->enable_stock) {
                         $this->productUtil->decreaseProductQuantity(
@@ -937,6 +1027,17 @@ class StockTransferController extends Controller
                             null,
                             false
                         );
+                    }
+
+                    // Update serial numbers to purchase line of location 2
+                    $p_line = $purchase_lines_by_var->get($sell_line->variation_id);
+                    if ($p_line) {
+                        \App\ProductSerialNumber::where('business_id', $business_id)
+                            ->where('transaction_sell_line_id', $sell_line->id)
+                            ->update([
+                                'purchase_line_id' => $p_line->id,
+                                'status' => 'in_stock'
+                            ]);
                     }
                 }
 
