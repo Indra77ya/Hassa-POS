@@ -40,6 +40,28 @@ $(document).ready(function() {
         }
     });
 
+    // Validate duplicate SN input in product form
+    $(document).on('change blur', '.product_sn_input', function() {
+        var current_input = $(this);
+        var current_val = $.trim(current_input.val());
+        if (current_val === '') return;
+
+        var form = current_input.closest('form');
+        var is_dup = false;
+
+        form.find('.product_sn_input').not(current_input).each(function() {
+            if ($.trim($(this).val()).toLowerCase() === current_val.toLowerCase()) {
+                is_dup = true;
+                return false;
+            }
+        });
+
+        if (is_dup) {
+            toastr.error('Serial Number / IMEI "' + current_val + '" duplikat di dalam form.');
+            current_input.val('').focus();
+        }
+    });
+
     // Calculate average prices when SN prices change
     $(document).on('change keyup', '.product_sn_purchase_price, .product_sn_selling_price', function() {
         var form = $(this).closest('form');

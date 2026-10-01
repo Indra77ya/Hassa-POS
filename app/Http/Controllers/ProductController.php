@@ -496,6 +496,20 @@ class ProductController extends Controller
                         'msg' => 'At least 1 serial number is required when Enable Serial Number is checked.'
                     ]);
                 }
+
+                $sn_list = array_map(function($item) {
+                    return trim($item['serial_number']);
+                }, $filtered_serials);
+
+                $snUtil = new \App\Utils\ProductSerialNumberUtil();
+                $duplicates = $snUtil->checkDuplicateInStockSerials($business_id, $sn_list);
+                if (!empty($duplicates)) {
+                    $dup_str = implode(', ', $duplicates);
+                    return redirect()->back()->withInput()->with('status', [
+                        'success' => 0,
+                        'msg' => __('lang_v1.serial_number_already_exists', ['serial' => $dup_str]) ?? "Serial number / IMEI '{$dup_str}' sudah ada (in stock) atau terduplikasi."
+                    ]);
+                }
             }
 
             //upload document
@@ -1651,6 +1665,20 @@ class ProductController extends Controller
                     return ['success' => 0,
                         'msg' => 'At least 1 serial number is required when Enable Serial Number is checked.',
                     ];
+                }
+
+                $sn_list = array_map(function($item) {
+                    return trim($item['serial_number']);
+                }, $filtered_serials);
+
+                $snUtil = new \App\Utils\ProductSerialNumberUtil();
+                $duplicates = $snUtil->checkDuplicateInStockSerials($business_id, $sn_list);
+                if (!empty($duplicates)) {
+                    $dup_str = implode(', ', $duplicates);
+                    return response()->json([
+                        'success' => false,
+                        'msg' => "Serial number / IMEI '{$dup_str}' sudah ada (in stock) atau terduplikasi."
+                    ]);
                 }
             }
 
