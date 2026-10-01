@@ -92,13 +92,7 @@ $(document).ready(function() {
         }
     });
 
-    if ($('.purchase_sn_select').length) {
-        $('.purchase_sn_select').select2({
-            tags: true,
-            tokenSeparators: [',', ' ', '\n', '\t'],
-            placeholder: "Scan / ketik SN per-unit"
-        });
-    }
+    init_purchase_sn_select($('.purchase_sn_select'));
     if ($('input#iraqi_selling_price_adjustment').length > 0) {
         iraqi_selling_price_adjustment = true;
     } else {
@@ -902,6 +896,22 @@ function get_purchase_entry_row(product_id, variation_id) {
     }
 }
 
+function init_purchase_sn_select(element) {
+    if (!element || !element.length) return;
+
+    element.each(function() {
+        var $el = $(this);
+        if ($el.hasClass('select2-hidden-accessible')) {
+            return;
+        }
+        $el.select2({
+            tags: true,
+            tokenSeparators: [',', ' ', '\n', '\t'],
+            placeholder: "Scan / ketik SN per-unit"
+        });
+    });
+}
+
 function append_purchase_lines(data, row_count, trigger_change = false) {
     $(data)
         .find('.purchase_quantity')
@@ -925,11 +935,7 @@ function append_purchase_lines(data, row_count, trigger_change = false) {
             }
 
             if (row.find('.purchase_sn_select').length) {
-                row.find('.purchase_sn_select').select2({
-                    tags: true,
-                    tokenSeparators: [',', ' ', '\n', '\t'],
-                    placeholder: "Scan / ketik SN per-unit"
-                });
+                init_purchase_sn_select(row.find('.purchase_sn_select'));
             }
 
             if (trigger_change && row.find('.purchase_unit_cost_without_discount').length) {
