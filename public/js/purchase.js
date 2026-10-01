@@ -1,4 +1,88 @@
 $(document).ready(function() {
+    $(document).on('change', '.purchase_sn_select', function() {
+        var $select = $(this);
+        var tr = $select.closest('tr');
+        var row_idx = $select.data('row_index');
+        var selected = $select.val() || [];
+
+        // Prevent selecting existing in_stock serial numbers or duplicate across rows
+        var filtered_selected = [];
+        var has_duplicate = false;
+
+        $.each(selected, function(i, sn) {
+            sn = $.trim(sn);
+            if (!sn) return;
+
+            // Check if option in this select is marked as existing in_stock
+            var opt = $select.find('option[value="' + sn + '"]');
+            var is_existing_instock = opt.length && opt.data('is_existing_instock') == '1';
+
+            if (is_existing_instock) {
+                has_duplicate = true;
+                if (typeof toastr !== 'undefined') {
+                    toastr.error('Serial Number / IMEI "' + sn + '" is already in stock!');
+                } else {
+                    alert('Serial Number / IMEI "' + sn + '" is already in stock!');
+                }
+            } else {
+                filtered_selected.push(sn);
+            }
+        });
+
+        if (has_duplicate) {
+            $select.val(filtered_selected).trigger('change.select2');
+            selected = filtered_selected;
+        }
+
+        var count = selected ? selected.length : 0;
+
+        if (count > 0) {
+            var qty_input = tr.find('input.purchase_quantity');
+            __write_number(qty_input, count);
+            qty_input.trigger('change');
+        }
+
+        // Sync modal price table rows
+        var modal = $('#sn_price_modal_' + row_idx);
+        if (modal.length) {
+            var tbody = modal.find('tbody');
+            var default_pp = tr.find('input.purchase_unit_cost_without_discount').val() || tr.find('input.purchase_unit_cost').val() || '';
+            var default_sp = tr.find('input.default_sell_price').val() || '';
+
+            var existing_rows = {};
+            tbody.find('tr').each(function() {
+                var sn = $(this).data('sn');
+                var pp = $(this).find('input[name*="[purchase_price]"]').val();
+                var sp = $(this).find('input[name*="[selling_price]"]').val();
+                existing_rows[sn] = { purchase_price: pp, selling_price: sp };
+            });
+
+            tbody.empty();
+            if (selected && selected.length) {
+                $.each(selected, function(i, sn) {
+                    sn = $.trim(sn);
+                    if (sn) {
+                        var pp = existing_rows[sn] ? existing_rows[sn].purchase_price : default_pp;
+                        var sp = existing_rows[sn] ? existing_rows[sn].selling_price : default_sp;
+                        var row_html = '<tr data-sn="' + sn + '">' +
+                            '<td><strong>' + sn + '</strong></td>' +
+                            '<td><input type="text" name="purchases[' + row_idx + '][sn_details][' + sn + '][purchase_price]" class="form-control input-sm input_number" value="' + pp + '"></td>' +
+                            '<td><input type="text" name="purchases[' + row_idx + '][sn_details][' + sn + '][selling_price]" class="form-control input-sm input_number" value="' + sp + '"></td>' +
+                            '</tr>';
+                        tbody.append(row_html);
+                    }
+                });
+            }
+        }
+    });
+
+    if ($('.purchase_sn_select').length) {
+        $('.purchase_sn_select').select2({
+            tags: true,
+            tokenSeparators: [',', ' ', '\n', '\t'],
+            placeholder: "Scan / ketik SN per-unit"
+        });
+    }
     if ($('input#iraqi_selling_price_adjustment').length > 0) {
         iraqi_selling_price_adjustment = true;
     } else {
@@ -822,6 +906,14 @@ function append_purchase_lines(data, row_count, trigger_change = false) {
             //Check if multipler is present then multiply it when a new row is added.
             if(__getUnitMultiplier(row) > 1){
                 row.find('select.sub_unit').trigger('change');
+            }
+
+            if (row.find('.purchase_sn_select').length) {
+                row.find('.purchase_sn_select').select2({
+                    tags: true,
+                    tokenSeparators: [',', ' ', '\n', '\t'],
+                    placeholder: "Scan / ketik SN per-unit"
+                });
             }
 
             if (trigger_change && row.find('.purchase_unit_cost_without_discount').length) {

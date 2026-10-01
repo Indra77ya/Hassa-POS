@@ -42,6 +42,42 @@
 					<span class="tw-font-bold tw-text-[13px] tw-text-slate-800 tw-leading-snug tw-block" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{!! $product_name !!}</span>
 				@endif
 				<div class="tw-text-[11px] tw-text-slate-400 tw-font-medium tw-leading-none tw-mt-1">{{ $product_sku_brand }}@if($product->enable_stock) &nbsp;·&nbsp; <span class="tw-text-indigo-500 tw-font-semibold">{{ @num_format($product->qty_available) }} {{$product->unit}}</span>@endif</div>
+				@if(!empty($product->enable_sr_no) && $product->enable_sr_no == 1)
+					@php
+						$p_id = !empty($product->product_id) ? $product->product_id : (isset($product->id) ? $product->id : null);
+						$v_id = !empty($product->variation_id) ? $product->variation_id : null;
+						$sell_line_id = !empty($product->transaction_sell_lines_id) ? $product->transaction_sell_lines_id : null;
+
+						$sn_query = \App\ProductSerialNumber::where('business_id', session('user.business_id'))
+							->where('product_id', $p_id);
+
+						if (!empty($v_id)) {
+							$sn_query->where('variation_id', $v_id);
+						}
+
+						$available_sns = $sn_query->where(function($q) use ($sell_line_id) {
+							$q->where('status', 'in_stock');
+							if (!empty($sell_line_id)) {
+								$q->orWhere('transaction_sell_line_id', $sell_line_id);
+							}
+						})->get();
+
+						$selected_sns = [];
+						if (!empty($sell_line_id)) {
+							$selected_sns = \App\ProductSerialNumber::where('transaction_sell_line_id', $sell_line_id)->pluck('serial_number')->toArray();
+						}
+					@endphp
+					<div class="tw-mt-2">
+						<label class="tw-text-[11px] tw-font-bold tw-text-indigo-600 tw-block tw-mb-1"><i class="fa fa-barcode"></i> Serial Number / IMEI:</label>
+						<select name="products[{{$row_count}}][serial_numbers][]" class="form-control input-sm pos_serial_number_select select2" multiple="multiple" style="width: 100%;">
+							@foreach($available_sns as $sn_item)
+								<option value="{{$sn_item->serial_number}}" data-selling_price="{{$sn_item->selling_price}}" @if(in_array($sn_item->serial_number, $selected_sns)) selected @endif>
+									{{$sn_item->serial_number}} @if(!empty($sn_item->selling_price) && $sn_item->selling_price > 0) ({{@num_format($sn_item->selling_price)}}) @endif
+								</option>
+							@endforeach
+						</select>
+					</div>
+				@endif
 			</div>
 		</div>
 

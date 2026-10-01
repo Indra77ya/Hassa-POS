@@ -397,6 +397,40 @@ $(document).ready(function() {
         };
     }
 
+    $('table#pos_table tbody').on('change', '.pos_serial_number_select', function() {
+        var tr = $(this).closest('tr');
+        var selected_vals = $(this).val();
+        var count = selected_vals ? selected_vals.length : 0;
+        var qty_elem = tr.find('input.pos_quantity');
+        if (count > 0) {
+            __write_number(qty_elem, count);
+
+            // Check if selected options have custom selling prices
+            var total_custom_price = 0;
+            var custom_price_count = 0;
+            $(this).find('option:selected').each(function() {
+                var sp = parseFloat($(this).data('selling_price'));
+                if (sp && sp > 0) {
+                    total_custom_price += sp;
+                    custom_price_count++;
+                }
+            });
+
+            if (custom_price_count > 0) {
+                var avg_price = total_custom_price / custom_price_count;
+                var unit_price_elem = tr.find('input.pos_unit_price');
+                var unit_price_inc_tax_elem = tr.find('input.pos_unit_price_inc_tax');
+                __write_number(unit_price_elem, avg_price);
+                __write_number(unit_price_inc_tax_elem, avg_price);
+            }
+
+            qty_elem.trigger('change');
+        } else if (count === 0) {
+            __write_number(qty_elem, 0);
+            qty_elem.trigger('change');
+        }
+    });
+
     //Update line total and check for quantity not greater than max quantity
     $('table#pos_table tbody').on('change', 'input.pos_quantity', function() {
         pos_play_success_sound();
@@ -1995,6 +2029,13 @@ function pos_insert_product_row(result) {
     //Check if multipler is present then multiply it when a new row is added.
     if(__getUnitMultiplier(this_row) > 1){
         this_row.find('select.sub_unit').trigger('change');
+    }
+
+    if (this_row.find('.pos_serial_number_select').length) {
+        this_row.find('.pos_serial_number_select').select2({
+            placeholder: "Pilih / Scan Serial Number",
+            tags: true
+        }).trigger('change');
     }
 
     if (result.enable_sr_no == '1') {

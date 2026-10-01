@@ -108,4 +108,9 @@ class TransactionSellLine extends Model
     {
         return $this->belongsTo(\App\TransactionSellLine::class, 'so_line_id');
     }
+
+    public function serial_numbers()
+    {
+        return $this->hasMany(\App\ProductSerialNumber::class, 'transaction_sell_line_id');
+    }
 }

@@ -40,6 +40,14 @@
                 @if(!empty($sell_line->sell_line_note))
                 <br> {{$sell_line->sell_line_note}}
                 @endif
+
+                @if(!empty($sell_line->serial_numbers) && $sell_line->serial_numbers->count() > 0)
+                    <br>
+                    <small class="text-muted">
+                        <strong>@lang('lang_v1.serial_numbers'):</strong>
+                        {{ implode(', ', $sell_line->serial_numbers->pluck('serial_number')->toArray()) }}
+                    </small>
+                @endif
                 @if($is_warranty_enabled && !empty($sell_line->warranties->first()) )
                     <br><small>{{$sell_line->warranties->first()->display_name ?? ''}} - {{ @format_date($sell_line->warranties->first()->getEndDate($sell->transaction_date))}}</small>
                     @if(!empty($sell_line->warranties->first()->description))

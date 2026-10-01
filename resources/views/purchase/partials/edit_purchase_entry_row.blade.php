@@ -50,6 +50,73 @@
                 @if( $purchase_line->product->type == 'variable') 
                     <br/>(<b>{{ $purchase_line->variations->product_variation->name}}</b> : {{ $purchase_line->variations->name}})
                 @endif
+                @if(!empty($purchase_line->product->enable_sr_no) && $purchase_line->product->enable_sr_no == 1)
+                    @php
+                        $existing_serial_records = \App\ProductSerialNumber::where('purchase_line_id', $purchase_line->id)->get();
+                    @endphp
+                    <br>
+                    <small class="text-primary"><strong>@lang('lang_v1.sn_input_help')</strong></small>
+                    @php
+                        $p_id = !empty($purchase_line->product_id) ? $purchase_line->product_id : $purchase_line->product->id;
+                        $all_existing_sn_records = \App\ProductSerialNumber::where('business_id', session('user.business_id'))
+                            ->where('product_id', $p_id)
+                            ->where(function($q) use ($purchase_line) {
+                                $q->where('status', 'in_stock')
+                                  ->orWhere('purchase_line_id', $purchase_line->id);
+                            })
+                            ->get();
+                        $current_line_sn_list = $existing_serial_records->pluck('serial_number')->toArray();
+                    @endphp
+                    <select name="purchases[{{$loop->index}}][serial_numbers][]" class="form-control input-sm purchase_sn_select select2" multiple="multiple" style="width: 100%;" data-row_index="{{$loop->index}}">
+                        @foreach($all_existing_sn_records as $sn_rec)
+                            @php
+                                $is_selected = in_array($sn_rec->serial_number, $current_line_sn_list);
+                            @endphp
+                            <option value="{{$sn_rec->serial_number}}" data-status="{{$sn_rec->status}}" @if($sn_rec->status == 'in_stock' && !$is_selected) data-is_existing_instock="1" @endif @if($is_selected) selected @endif>
+                                {{$sn_rec->serial_number}} (@lang('lang_v1.' . $sn_rec->status))
+                            </option>
+                        @endforeach
+                    </select>
+                    <button type="button" class="btn btn-xs btn-default tw-mt-1.5 btn_sn_price_details" data-toggle="modal" data-target="#sn_price_modal_{{$loop->index}}">
+                        <i class="fa fa-cog text-info"></i> @lang('lang_v1.sn_price_details')
+                    </button>
+
+                    <!-- Modal for SN Price Details -->
+                    <div class="modal fade sn_price_modal" id="sn_price_modal_{{$loop->index}}" tabindex="-1" role="dialog">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <h4 class="modal-title">@lang('lang_v1.sn_price_modal_title')</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <p class="help-block"><small>@lang('lang_v1.sn_price_modal_help')</small></p>
+                                    <table class="table table-bordered table-condensed sn_price_table">
+                                        <thead>
+                                            <tr>
+                                                <th>Serial Number / IMEI</th>
+                                                <th>@lang('lang_v1.sn_purchase_price')</th>
+                                                <th>@lang('lang_v1.sn_selling_price')</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($existing_serial_records as $sn_rec)
+                                                <tr data-sn="{{$sn_rec->serial_number}}">
+                                                    <td><strong>{{$sn_rec->serial_number}}</strong></td>
+                                                    <td><input type="text" name="purchases[{{$loop->parent->index}}][sn_details][{{$sn_rec->serial_number}}][purchase_price]" class="form-control input-sm input_number" value="{{@num_format($sn_rec->purchase_price)}}"></td>
+                                                    <td><input type="text" name="purchases[{{$loop->parent->index}}][sn_details][{{$sn_rec->serial_number}}][selling_price]" class="form-control input-sm input_number" value="{{@num_format($sn_rec->selling_price)}}"></td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">@lang('messages.save') & @lang('messages.close')</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
             </td>
 
             <td>

@@ -1326,6 +1326,11 @@ class ProductUtil extends Util
                         ->update(['purchase_order_line_id' => null]);
                 }
 
+                // Delete orphaned serial numbers for deleted purchase lines
+                \App\ProductSerialNumber::whereIn('purchase_line_id', $delete_purchase_line_ids)
+                    ->where('status', 'in_stock')
+                    ->delete();
+
                 //Delete deleted purchase lines
                 PurchaseLine::where('transaction_id', $transaction->id)
                         ->whereIn('id', $delete_purchase_line_ids)
@@ -1336,6 +1341,26 @@ class ProductUtil extends Util
         //update purchase lines
         if (! empty($updated_purchase_lines)) {
             $transaction->purchase_lines()->saveMany($updated_purchase_lines);
+        }
+
+        // update serial numbers
+        $snUtil = new \App\Utils\ProductSerialNumberUtil();
+        $input_data_values = array_values($input_data);
+        foreach ($updated_purchase_lines as $idx => $pl) {
+            if (isset($input_data_values[$idx]['serial_numbers'])) {
+                $raw_sns = $input_data_values[$idx]['serial_numbers'];
+                $serials = is_array($raw_sns) ? $raw_sns : preg_split('/[\r\n,]+/', $raw_sns);
+                $sn_details = isset($input_data_values[$idx]['sn_details']) ? $input_data_values[$idx]['sn_details'] : [];
+                $snUtil->syncPurchaseSerialNumbers(
+                    $transaction->business_id,
+                    $pl->product_id,
+                    $pl->variation_id,
+                    $pl->id,
+                    $serials,
+                    $pl->purchase_price,
+                    $sn_details
+                );
+            }
         }
 
         return $delete_purchase_lines;

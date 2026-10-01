@@ -11,6 +11,56 @@
                 <br>
                 <small class="text-muted" style="white-space: nowrap;">@lang('report.current_stock'): @if(!empty($variation->variation_location_details->first())) {{@num_format($variation->variation_location_details->first()->qty_available)}} @else 0 @endif {{ $product->unit->short_name }}</small>
             @endif
+            @if(!empty($product->enable_sr_no) && $product->enable_sr_no == 1)
+                @php
+                    $p_id = !empty($product->product_id) ? $product->product_id : (isset($product->id) ? $product->id : null);
+                    $existing_sn_records = \App\ProductSerialNumber::where('business_id', session('user.business_id'))
+                        ->where('product_id', $p_id)
+                        ->where('status', 'in_stock')
+                        ->get();
+                @endphp
+                <br>
+                <small class="text-primary"><strong>@lang('lang_v1.sn_input_help')</strong></small>
+                <select name="purchases[{{$row_count}}][serial_numbers][]" class="form-control input-sm purchase_sn_select select2" multiple="multiple" style="width: 100%;" data-row_index="{{$row_count}}">
+                    @foreach($existing_sn_records as $sn_rec)
+                        <option value="{{$sn_rec->serial_number}}" data-status="{{$sn_rec->status}}" data-is_existing_instock="1">
+                            {{$sn_rec->serial_number}} (@lang('lang_v1.in_stock'))
+                        </option>
+                    @endforeach
+                </select>
+                <button type="button" class="btn btn-xs btn-default tw-mt-1.5 btn_sn_price_details" data-toggle="modal" data-target="#sn_price_modal_{{$row_count}}">
+                    <i class="fa fa-cog text-info"></i> @lang('lang_v1.sn_price_details')
+                </button>
+
+                <!-- Modal for SN Price Details -->
+                <div class="modal fade sn_price_modal" id="sn_price_modal_{{$row_count}}" tabindex="-1" role="dialog">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                <h4 class="modal-title">@lang('lang_v1.sn_price_modal_title')</h4>
+                            </div>
+                            <div class="modal-body">
+                                <p class="help-block"><small>@lang('lang_v1.sn_price_modal_help')</small></p>
+                                <table class="table table-bordered table-condensed sn_price_table">
+                                    <thead>
+                                        <tr>
+                                            <th>Serial Number / IMEI</th>
+                                            <th>@lang('lang_v1.sn_purchase_price')</th>
+                                            <th>@lang('lang_v1.sn_selling_price')</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">@lang('messages.save') & @lang('messages.close')</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
             
         </td>
         <td>
