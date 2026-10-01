@@ -6,7 +6,7 @@
 <!-- Content Header (Page header) -->
 <section class="content-header">
     <h1>@lang('lang_v1.serial_numbers')
-        <small>Daftar & Pelacakan Serial Number / IMEI</small>
+        <small>Serial Number / IMEI Tracking List</small>
     </h1>
 </section>
 
@@ -17,7 +17,7 @@
             <div class="col-md-3">
                 <div class="form-group">
                     {!! Form::label('filter_status', __('sale.status') . ':') !!}
-                    {!! Form::select('filter_status', ['' => 'Semua Status', 'in_stock' => __('lang_v1.in_stock'), 'sold' => __('lang_v1.sold'), 'used_in_repair' => 'Dalam Perbaikan', 'returned' => 'Diretur'], null, ['class' => 'form-control select2', 'id' => 'filter_status', 'style' => 'width:100%']); !!}
+                    {!! Form::select('filter_status', ['' => 'All Status', 'in_stock' => __('lang_v1.in_stock'), 'sold' => __('lang_v1.sold'), 'used_in_repair' => 'In Repair', 'returned' => 'Returned'], null, ['class' => 'form-control select2', 'id' => 'filter_status', 'style' => 'width:100%']); !!}
                 </div>
             </div>
         </div>
@@ -27,11 +27,11 @@
                     <tr>
                         <th>Serial Number / IMEI</th>
                         <th>@lang('product.product_name')</th>
-                        <th>HPP (Harga Beli)</th>
-                        <th>Harga Jual</th>
+                        <th>@lang('lang_v1.sn_purchase_price')</th>
+                        <th>@lang('lang_v1.sn_selling_price')</th>
                         <th>@lang('sale.status')</th>
-                        <th>No. Pembelian</th>
-                        <th>No. Faktur Jual</th>
+                        <th>Purchase Ref No</th>
+                        <th>Sell Invoice No</th>
                         <th>@lang('messages.date')</th>
                     </tr>
                 </thead>
