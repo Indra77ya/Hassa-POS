@@ -2192,7 +2192,7 @@ class TransactionUtil extends Util
                 $line_array['serial_numbers'] = $sn_str;
                 $line_array['serial_numbers_label'] = 'SN/IMEI';
 
-                $sn_html = '<div style="font-weight: 600; color: #2d3748; margin-top: 2px;">SN/IMEI: ' . e($sn_str) . '</div>';
+                $sn_html = '<div style="text-align: justify; font-weight: 600; color: #2d3748; margin-top: 2px;">SN/IMEI: ' . e($sn_str) . '</div>';
                 if (!empty($line_array['sell_line_note'])) {
                     $line_array['sell_line_note'] .= '<br>' . $sn_html;
                 } else {
