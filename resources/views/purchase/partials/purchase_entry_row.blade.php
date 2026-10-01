@@ -285,5 +285,3 @@
         <td><i class="fa fa-times remove_purchase_entry_row text-danger" title="Remove" style="cursor:pointer;"></i></td>
     </tr>
 @endforeach
-
-<input type="hidden" id="row_count" value="{{ $row_count }}">

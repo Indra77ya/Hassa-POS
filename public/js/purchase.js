@@ -79,9 +79,24 @@ $(document).ready(function() {
     });
 
     $(document).on('show.bs.modal', '.sn_price_modal', function() {
-        var form = $(this).closest('form');
-        if (form.length && $(this).parent().get(0) !== form.get(0)) {
-            $(this).appendTo(form);
+        var modal = $(this);
+        var form = modal.closest('form');
+        if (form.length && modal.parent().get(0) !== form.get(0)) {
+            modal.appendTo(form);
+        }
+
+        var row_idx = modal.data('row_index');
+        if (typeof row_idx === 'undefined' || row_idx === null || row_idx === '') {
+            var id = modal.attr('id') || '';
+            row_idx = id.replace('sn_price_modal_', '');
+        }
+
+        var tr = $('.purchase_sn_select[data-row_index="' + row_idx + '"]').closest('tr');
+        if (tr.length) {
+            var select = tr.find('.purchase_sn_select');
+            if (select.length) {
+                select.trigger('change');
+            }
         }
     });
 
@@ -883,7 +898,26 @@ function init_purchase_sn_select(element) {
 
 function get_purchase_entry_row(product_id, variation_id) {
     if (product_id) {
-        var row_count = $('#row_count').val();
+        var row_count = 0;
+        $('#purchase_entry_table tbody tr').each(function() {
+            var select = $(this).find('.purchase_sn_select');
+            var idx = select.length ? parseInt(select.data('row_index')) : NaN;
+            if (isNaN(idx)) {
+                var input = $(this).find('input[name*="purchases["]');
+                if (input.length) {
+                    var match = input.attr('name').match(/purchases\[(\d+)\]/);
+                    if (match) idx = parseInt(match[1]);
+                }
+            }
+            if (!isNaN(idx) && idx >= row_count) {
+                row_count = idx + 1;
+            }
+        });
+        var hidden_count = parseInt($('#row_count').val()) || 0;
+        if (hidden_count > row_count) {
+            row_count = hidden_count;
+        }
+
         var location_id = $('#location_id').val();
         var supplier_id = $('#supplier_id').val();
         var data = { 
