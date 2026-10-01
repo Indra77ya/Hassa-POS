@@ -73,6 +73,22 @@ $(document).ready(function() {
                     }
                 });
             }
+
+            update_sn_row_average_prices(tr);
+        }
+    });
+
+    $(document).on('change', '.sn_price_modal input', function() {
+        var modal = $(this).closest('.sn_price_modal');
+        var row_idx = modal.data('row_index');
+        if (typeof row_idx === 'undefined' || row_idx === null || row_idx === '') {
+            var id = modal.attr('id') || '';
+            row_idx = id.replace('sn_price_modal_', '');
+        }
+
+        var tr = $('.purchase_sn_select[data-row_index="' + row_idx + '"]').closest('tr');
+        if (tr.length) {
+            update_sn_row_average_prices(tr);
         }
     });
 
@@ -1038,6 +1054,48 @@ function iraqi_dinnar_selling_price_adjustment(row) {
     __write_number(row.find('input.default_sell_price'), default_sell_price, true);
 
     update_inline_profit_percentage(row);
+}
+
+function update_sn_row_average_prices(tr) {
+    var select = tr.find('.purchase_sn_select');
+    if (!select.length) return;
+
+    var row_idx = select.data('row_index');
+    var modal = $('#sn_price_modal_' + row_idx);
+    if (!modal.length) return;
+
+    var total_pp = 0;
+    var total_sp = 0;
+    var count = 0;
+
+    modal.find('tbody tr').each(function() {
+        var pp_val = $(this).find('input[name*="[purchase_price]"]').val();
+        var sp_val = $(this).find('input[name*="[selling_price]"]').val();
+
+        var pp = __read_number($(this).find('input[name*="[purchase_price]"]'), true) || 0;
+        var sp = __read_number($(this).find('input[name*="[selling_price]"]'), true) || 0;
+
+        total_pp += pp;
+        total_sp += sp;
+        count++;
+    });
+
+    if (count > 0) {
+        var avg_pp = total_pp / count;
+        var avg_sp = total_sp / count;
+
+        var cost_input = tr.find('input.purchase_unit_cost_without_discount');
+        if (cost_input.length) {
+            __write_number(cost_input, avg_pp, true);
+            cost_input.trigger('change');
+        }
+
+        var sp_input = tr.find('input.default_sell_price');
+        if (sp_input.length) {
+            __write_number(sp_input, avg_sp, true);
+            sp_input.trigger('change');
+        }
+    }
 }
 
 function update_inline_profit_percentage(row) {

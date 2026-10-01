@@ -33,7 +33,7 @@
                 </button>
 
                 <!-- Modal for SN Price Details -->
-                <div class="modal fade sn_price_modal" id="sn_price_modal_{{$row_count}}" tabindex="-1" role="dialog">
+                <div class="modal fade sn_price_modal" id="sn_price_modal_{{$row_count}}" data-row_index="{{$row_count}}" tabindex="-1" role="dialog">
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
