@@ -850,3 +850,77 @@
       margin-bottom: 0 !important;
     }
   </style>
+  <style>
+    /* Purchase entry table fixed layout and consistent column widths */
+    #purchase_entry_table {
+      width: 100% !important;
+      min-width: 960px !important;
+      table-layout: fixed !important;
+    }
+
+    #purchase_entry_table th,
+    #purchase_entry_table td {
+      vertical-align: middle !important;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+    }
+
+    /* Column 1: # */
+    #purchase_entry_table th:first-child,
+    #purchase_entry_table td:first-child {
+      width: 35px !important;
+      text-align: center !important;
+    }
+
+    /* Column 2: Product Name */
+    #purchase_entry_table th:nth-child(2),
+    #purchase_entry_table td:nth-child(2) {
+      width: 26% !important;
+      min-width: 220px !important;
+      text-align: left !important;
+    }
+
+    /* Column 3: Quantity */
+    #purchase_entry_table th:nth-child(3),
+    #purchase_entry_table td:nth-child(3) {
+      width: 10% !important;
+      min-width: 95px !important;
+    }
+
+    /* Action / Delete column (last child) */
+    #purchase_entry_table th:last-child,
+    #purchase_entry_table td:last-child {
+      width: 35px !important;
+      text-align: center !important;
+    }
+
+    /* Select2 container in purchase entry table */
+    #purchase_entry_table .select2-container {
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+
+    #purchase_entry_table .select2-selection--multiple {
+      max-width: 100% !important;
+      min-height: 31px !important;
+    }
+
+    #purchase_entry_table .select2-selection__choice {
+      max-width: 100% !important;
+      white-space: normal !important;
+      word-break: break-all !important;
+    }
+
+    /* Form controls in purchase entry table */
+    #purchase_entry_table input.form-control,
+    #purchase_entry_table select.form-control {
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    #purchase_entry_table small.text-muted {
+      white-space: normal !important;
+      display: inline-block;
+    }
+  </style>
