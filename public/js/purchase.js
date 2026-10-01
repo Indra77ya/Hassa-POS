@@ -886,7 +886,8 @@ function init_purchase_sn_select(element) {
         $el.select2({
             tags: true,
             tokenSeparators: [',', ' ', '\n', '\t'],
-            placeholder: "Scan / ketik SN per-unit"
+            placeholder: "Scan / ketik SN per-unit",
+            width: '100%'
         });
     });
 }
