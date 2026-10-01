@@ -72,7 +72,12 @@
                             @php
                                 $is_selected = in_array($sn_rec->serial_number, $current_line_sn_list);
                             @endphp
-                            <option value="{{$sn_rec->serial_number}}" data-status="{{$sn_rec->status}}" @if($sn_rec->status == 'in_stock' && !$is_selected) data-is_existing_instock="1" @endif @if($is_selected) selected @endif>
+                            <option value="{{$sn_rec->serial_number}}"
+                                    data-status="{{$sn_rec->status}}"
+                                    data-purchase_price="{{@num_format($sn_rec->purchase_price)}}"
+                                    data-selling_price="{{@num_format($sn_rec->selling_price)}}"
+                                    @if($sn_rec->status == 'in_stock' && !$is_selected) data-is_existing_instock="1" @endif
+                                    @if($is_selected) selected @endif>
                                 {{$sn_rec->serial_number}} (@lang('lang_v1.' . $sn_rec->status))
                             </option>
                         @endforeach

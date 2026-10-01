@@ -29,8 +29,8 @@
                         <option value="{{$sn_rec->serial_number}}"
                                 data-status="{{$sn_rec->status}}"
                                 data-is_existing_instock="{{ $is_unlinked ? 0 : 1 }}"
-                                data-purchase_price="{{$sn_rec->purchase_price}}"
-                                data-selling_price="{{$sn_rec->selling_price}}"
+                                data-purchase_price="{{@num_format($sn_rec->purchase_price)}}"
+                                data-selling_price="{{@num_format($sn_rec->selling_price)}}"
                                 @if($is_unlinked) selected="selected" @endif>
                             {{$sn_rec->serial_number}}
                         </option>
