@@ -83,7 +83,8 @@
                 $currency_precision = session('business.currency_precision', 2);
                 $quantity_precision = session('business.quantity_precision', 2);
 
-                $quantity_value = !empty($purchase_order_line) ? $purchase_order_line->quantity : 1;
+                $default_qty = (!empty($product->enable_sr_no) && $product->enable_sr_no == 1) ? 0 : 1;
+                $quantity_value = !empty($purchase_order_line) ? $purchase_order_line->quantity : $default_qty;
 
                 $quantity_value = !empty($purchase_requisition_line) ? $purchase_requisition_line->quantity - $purchase_requisition_line->po_quantity_purchased : $quantity_value;
                 $max_quantity = !empty($purchase_order_line) ? $purchase_order_line->quantity - $purchase_order_line->po_quantity_purchased : 0;
