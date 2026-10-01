@@ -36,8 +36,8 @@ $(document).ready(function() {
 
         var count = selected ? selected.length : 0;
 
-        if (count > 0) {
-            var qty_input = tr.find('input.purchase_quantity');
+        var qty_input = tr.find('input.purchase_quantity');
+        if (qty_input.length) {
             __write_number(qty_input, count);
             qty_input.trigger('change');
         }
@@ -375,31 +375,8 @@ $(document).ready(function() {
     //On Change of quantity
     $(document).on('change', '.purchase_quantity', function() {
         var row = $(this).closest('tr');
-        var quantity = __read_number($(this), true);
-        var purchase_before_tax = __read_number(row.find('input.purchase_unit_cost'), true);
-        var purchase_after_tax = __read_number(
-            row.find('input.purchase_unit_cost_after_tax'),
-            true
-        );
-
-        //Calculate sub totals
-        var sub_total_before_tax = quantity * purchase_before_tax;
-        var sub_total_after_tax = quantity * purchase_after_tax;
-
-        row.find('.row_subtotal_before_tax').text(
-            __currency_trans_from_en(sub_total_before_tax, false, true)
-        );
-        __write_number(
-            row.find('input.row_subtotal_before_tax_hidden'),
-            sub_total_before_tax,
-            true
-        );
-
-        row.find('.row_subtotal_after_tax').text(
-            __currency_trans_from_en(sub_total_after_tax, false, true)
-        );
-        __write_number(row.find('input.row_subtotal_after_tax_hidden'), sub_total_after_tax, true);
-
+        update_purchase_entry_row_values(row);
+        update_inline_profit_percentage(row);
         update_table_total();
         update_grand_total();
     });
@@ -960,12 +937,23 @@ function append_purchase_lines(data, row_count, trigger_change = false) {
 function update_purchase_entry_row_values(row) {
     if (typeof row != 'undefined') {
         var quantity = __read_number(row.find('.purchase_quantity'), true);
-        var unit_cost_price = __read_number(row.find('.purchase_unit_cost'), true);
+        var purchase_before_discount = __read_number(row.find('input.purchase_unit_cost_without_discount'), true);
+        var discount_percent = __read_number(row.find('input.inline_discounts'), true);
+
+        var unit_cost_price =
+            parseFloat(purchase_before_discount) -
+            __calculate_amount('percentage', discount_percent, purchase_before_discount);
+
+        __write_number(row.find('input.purchase_unit_cost'), unit_cost_price, true);
+
         var row_subtotal_before_tax = quantity * unit_cost_price;
 
         var tax_rate = parseFloat(
             $('option:selected', row.find('.purchase_line_tax_id')).attr('data-tax_amount')
         );
+        if (isNaN(tax_rate)) {
+            tax_rate = 0;
+        }
 
         var unit_product_tax = __calculate_amount('percentage', tax_rate, unit_cost_price);
 
@@ -980,6 +968,7 @@ function update_purchase_entry_row_values(row) {
         row.find('.purchase_product_unit_tax_text').text(
             __currency_trans_from_en(unit_product_tax, false, true)
         );
+        __write_number(row.find('input.purchase_unit_cost_after_tax'), unit_cost_price_after_tax, true);
         row.find('.purchase_unit_cost_after_tax').text(
             __currency_trans_from_en(unit_cost_price_after_tax, true)
         );
@@ -1083,9 +1072,6 @@ function update_sn_row_average_prices(tr) {
     var count = 0;
 
     modal.find('tbody tr').each(function() {
-        var pp_val = $(this).find('input[name*="[purchase_price]"]').val();
-        var sp_val = $(this).find('input[name*="[selling_price]"]').val();
-
         var pp = __read_number($(this).find('input[name*="[purchase_price]"]'), true) || 0;
         var sp = __read_number($(this).find('input[name*="[selling_price]"]'), true) || 0;
 
@@ -1109,6 +1095,10 @@ function update_sn_row_average_prices(tr) {
             __write_number(sp_input, avg_sp, true);
             sp_input.trigger('change');
         }
+    } else {
+        update_purchase_entry_row_values(tr);
+        update_table_total();
+        update_grand_total();
     }
 }
 
