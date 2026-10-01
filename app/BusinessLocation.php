@@ -43,21 +43,31 @@ class BusinessLocation extends Model
         }
 
         if ($append_id) {
-            $query->select(
-                DB::raw("IF(location_id IS NULL OR location_id='', name, CONCAT(name, ' (', location_id, ')')) AS name"),
-                'id',
-                'receipt_printer_type',
-                'selling_price_group_id',
-                'default_payment_accounts',
-                'invoice_scheme_id',
-                'invoice_layout_id',
-                'sale_invoice_scheme_id'
-            );
+            if (DB::getDriverName() === 'sqlite') {
+                $query->select('name', 'location_id', 'id', 'receipt_printer_type', 'selling_price_group_id', 'default_payment_accounts', 'invoice_scheme_id', 'invoice_layout_id', 'sale_invoice_scheme_id');
+                $result = $query->get();
+                $locations = $result->mapWithKeys(function ($item) {
+                    $name = ! empty($item->location_id) ? $item->name . ' (' . $item->location_id . ')' : $item->name;
+                    return [$item->id => $name];
+                });
+            } else {
+                $query->select(
+                    DB::raw("IF(location_id IS NULL OR location_id='', name, CONCAT(name, ' (', location_id, ')')) AS name"),
+                    'id',
+                    'receipt_printer_type',
+                    'selling_price_group_id',
+                    'default_payment_accounts',
+                    'invoice_scheme_id',
+                    'invoice_layout_id',
+                    'sale_invoice_scheme_id'
+                );
+                $result = $query->get();
+                $locations = $result->pluck('name', 'id');
+            }
+        } else {
+            $result = $query->get();
+            $locations = $result->pluck('name', 'id');
         }
-
-        $result = $query->get();
-
-        $locations = $result->pluck('name', 'id');
 
         $price_groups = SellingPriceGroup::forDropdown($business_id);
 

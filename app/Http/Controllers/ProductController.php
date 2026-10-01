@@ -121,6 +121,7 @@ class ProductController extends Controller
                 'products.sku',
                 'products.image',
                 'products.enable_stock',
+                'products.enable_sr_no',
                 'products.is_inactive',
                 'products.not_for_selling',
                 'products.product_custom_field1', 'products.product_custom_field2', 'products.product_custom_field3', 'products.product_custom_field4', 'products.product_custom_field5', 'products.product_custom_field6',
@@ -176,6 +177,17 @@ class ProductController extends Controller
             if ($active_state == 'inactive') {
                 $products->Inactive();
             }
+
+            $has_sn = request()->get('has_sn', null);
+            if ($has_sn === '1' || $has_sn === 'true') {
+                $products->where('products.enable_sr_no', 1);
+            } elseif ($has_sn === '0' || $has_sn === 'false') {
+                $products->where(function ($q) {
+                    $q->where('products.enable_sr_no', 0)
+                      ->orWhereNull('products.enable_sr_no');
+                });
+            }
+
             $not_for_selling = request()->get('not_for_selling', null);
             if ($not_for_selling == 'true') {
                 $products->ProductNotForSales();
@@ -261,6 +273,10 @@ class ProductController extends Controller
 
                     $product = $row->not_for_selling == 1 ? $product.' <span class="label bg-gray">'.__('lang_v1.not_for_selling').
                         '</span>' : $product;
+
+                    if (! empty($row->enable_sr_no) && $row->enable_sr_no == 1) {
+                        $product = $product.' <span class="label bg-blue" title="'.__('lang_v1.enable_imei_or_sr_no').'"><i class="fa fa-barcode"></i> SN/IMEI</span>';
+                    }
 
                     if ($is_woocommerce && ! $row->woocommerce_disable_sync) {
                         $product = $product.'<br><i class="fab fa-wordpress"></i>';

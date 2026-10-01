@@ -1,0 +1,1 @@
+{"version":1,"defects":[],"times":{"Tests\\Feature\\ProductSerialNumberFilterTest::test_product_list_displays_sn_badge_and_filters_by_has_sn":0.275}}
