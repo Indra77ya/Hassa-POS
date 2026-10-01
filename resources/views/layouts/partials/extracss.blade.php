@@ -929,4 +929,25 @@
       width: 96% !important;
       max-width: 1500px !important;
     }
+
+    /* Product Price Table Column Widths */
+    .add-product-price-table {
+      width: 100% !important;
+      table-layout: fixed !important;
+    }
+
+    .add-product-price-table th:first-child,
+    .add-product-price-table td:first-child {
+      width: 45% !important;
+    }
+
+    .add-product-price-table th:nth-child(2),
+    .add-product-price-table td:nth-child(2) {
+      width: 20% !important;
+    }
+
+    .add-product-price-table th:nth-child(3),
+    .add-product-price-table td:nth-child(3) {
+      width: 35% !important;
+    }
   </style>
