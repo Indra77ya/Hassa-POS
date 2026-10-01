@@ -63,11 +63,14 @@ $(document).ready(function() {
                     sn = $.trim(sn);
                     if (sn) {
                         var opt = $select.find('option[value="' + sn + '"]');
-                        var opt_pp = opt.length ? opt.data('purchase_price') : null;
-                        var opt_sp = opt.length ? opt.data('selling_price') : null;
+                        var opt_pp = opt.length ? (opt.data('purchase_price') || opt.data('purchase-price') || opt.attr('data-purchase_price') || opt.attr('data-purchase-price')) : null;
+                        var opt_sp = opt.length ? (opt.data('selling_price') || opt.data('selling-price') || opt.attr('data-selling_price') || opt.attr('data-selling-price')) : null;
 
-                        var pp = existing_rows[sn] ? existing_rows[sn].purchase_price : (opt_pp !== null && typeof opt_pp !== 'undefined' ? opt_pp : default_pp);
-                        var sp = existing_rows[sn] ? existing_rows[sn].selling_price : (opt_sp !== null && typeof opt_sp !== 'undefined' ? opt_sp : default_sp);
+                        var raw_pp = (opt_pp !== null && typeof opt_pp !== 'undefined' && opt_pp !== '') ? opt_pp : (existing_rows[sn] ? existing_rows[sn].purchase_price : default_pp);
+                        var raw_sp = (opt_sp !== null && typeof opt_sp !== 'undefined' && opt_sp !== '') ? opt_sp : (existing_rows[sn] ? existing_rows[sn].selling_price : default_sp);
+
+                        var pp = typeof raw_pp === 'number' ? __number_f(raw_pp) : raw_pp;
+                        var sp = typeof raw_sp === 'number' ? __number_f(raw_sp) : raw_sp;
                         var row_html = '<tr data-sn="' + sn + '">' +
                             '<td><strong>' + sn + '</strong></td>' +
                             '<td><input type="text" name="purchases[' + row_idx + '][sn_details][' + sn + '][purchase_price]" class="form-control input-sm input_number" value="' + pp + '"></td>' +
