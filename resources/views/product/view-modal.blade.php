@@ -171,6 +171,50 @@
 	      			</div>
 	      		</div>
       		@endif
+		@if(!empty($product->enable_sr_no) && $product->enable_sr_no == 1)
+			@php
+				$product_sns = \App\ProductSerialNumber::where('business_id', session('user.business_id'))
+					->where('product_id', $product->id)
+					->get();
+			@endphp
+			@if($product_sns->count() > 0)
+				<div class="row tw-mt-4">
+					<div class="col-md-12">
+						<strong>@lang('lang_v1.serial_numbers') Details</strong>
+					</div>
+					<div class="col-md-12">
+						<div class="table-responsive">
+							<table class="table table-bordered table-striped table-condensed bg-gray">
+								<tr class="bg-green">
+									<th>Serial Number / IMEI</th>
+									<th>@lang('sale.status')</th>
+									<th>@lang('lang_v1.sn_purchase_price')</th>
+									<th>@lang('lang_v1.sn_selling_price')</th>
+								</tr>
+								@foreach($product_sns as $sn)
+									<tr>
+										<td><strong>{{$sn->serial_number}}</strong></td>
+										<td>
+											@if($sn->status == 'in_stock')
+												<span class="label label-success">@lang('lang_v1.in_stock')</span>
+											@elseif($sn->status == 'sold')
+												<span class="label label-danger">@lang('lang_v1.sold')</span>
+											@elseif($sn->status == 'used_in_repair')
+												<span class="label label-warning">In Repair</span>
+											@else
+												<span class="label label-info">{{$sn->status}}</span>
+											@endif
+										</td>
+										<td><span class="display_currency" data-currency_symbol="true">{{$sn->purchase_price}}</span></td>
+										<td><span class="display_currency" data-currency_symbol="true">{{$sn->selling_price}}</span></td>
+									</tr>
+								@endforeach
+							</table>
+						</div>
+					</div>
+				</div>
+			@endif
+		@endif
       	</div>
       	<div class="modal-footer">
       		<button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white no-print" 
