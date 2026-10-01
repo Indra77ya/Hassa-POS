@@ -923,4 +923,10 @@
       white-space: normal !important;
       display: inline-block;
     }
+
+    /* Widen Quick Add Product Modal */
+    .quick_add_product_modal .modal-dialog {
+      width: 90% !important;
+      max-width: 1200px !important;
+    }
   </style>
