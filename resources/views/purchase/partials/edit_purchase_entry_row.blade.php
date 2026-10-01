@@ -87,7 +87,7 @@
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                    <h4 class="modal-title">@lang('lang_v1.sn_price_modal_title')</h4>
+                                    <h4 class="modal-title">@lang('lang_v1.sn_price_modal_title') &ndash; <span class="text-primary">{{ $purchase_line->product->name }} ({{$purchase_line->variations->sub_sku}})@if($purchase_line->product->type == 'variable') - {{ $purchase_line->variations->product_variation->name }} : {{ $purchase_line->variations->name }}@endif</span></h4>
                                 </div>
                                 <div class="modal-body">
                                     <p class="help-block"><small>@lang('lang_v1.sn_price_modal_help')</small></p>
