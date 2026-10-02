@@ -28,7 +28,7 @@
             <div class="tw-px-5 tw-pt-3">
                 <div class="tw-flex tw-flex-col tw-gap-3">
                     @if ($is_admin && count($all_locations) > 1)
-                        <div class="tw-w-full sm:tw-w-72 md:tw-w-80">
+                        <div class="tw-w-full sm:tw-w-52 md:tw-w-60">
                             {!! Form::select('dashboard_location', $all_locations, null, [
                                 'class' => 'form-control select2',
                                 'placeholder' => __('lang_v1.select_location'),
