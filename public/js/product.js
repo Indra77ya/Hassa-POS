@@ -1,6 +1,14 @@
 //This file contains all functions used products tab
 
 $(document).ready(function() {
+    // Check initial enable_sr_no state on edit/create forms
+    $('form.product_form').each(function() {
+        if ($(this).find('input[name="enable_sr_no"]').is(':checked')) {
+            $(this).find('input#single_dpp, input#single_dpp_inc_tax, input#single_dsp, input#single_dsp_inc_tax, input#profit_percent').prop('readonly', true);
+            calculate_product_sn_average_prices($(this));
+        }
+    });
+
     // Enable Serial Number toggle
     $(document).on('ifChecked', 'input[name="enable_sr_no"]', function() {
         var form = $(this).closest('form');

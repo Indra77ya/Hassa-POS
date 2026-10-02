@@ -237,12 +237,33 @@ function stock_transfer_product_row(variation_id) {
         data: { row_index: row_index, variation_id: variation_id, location_id: location_id, type: 'stock_transfer' },
         dataType: 'html',
         success: function(result) {
-            $('table#stock_adjustment_product_table tbody').append(result);
+            var $row = $(result);
+            $('table#stock_adjustment_product_table tbody').append($row);
+            $row.find('.stock_transfer_serial_number_select').select2({
+                tags: true,
+                tokenSeparators: [',', ' ']
+            });
             update_table_total();
             $('#product_row_index').val(row_index + 1);
         },
     });
 }
+
+$(document).ready(function() {
+    $('.stock_transfer_serial_number_select').select2({
+        tags: true,
+        tokenSeparators: [',', ' ']
+    });
+});
+
+$(document).on('change', '.stock_transfer_serial_number_select', function() {
+    var tr = $(this).closest('tr');
+    var selected_sns = $(this).val() || [];
+    var qty = selected_sns.length;
+    var qty_input = tr.find('input.product_quantity');
+    __write_number(qty_input, qty);
+    qty_input.trigger('change');
+});
 
 function update_table_total() {
     var table_total = 0;

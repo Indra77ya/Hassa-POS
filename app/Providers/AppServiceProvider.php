@@ -223,13 +223,14 @@ class AppServiceProvider extends ServiceProvider
         Blade::directive('format_currency', function ($number) {
             return '<?php 
             $formated_number = "";
+            $currency = session("currency") ?? ["symbol" => "Rp", "decimal_separator" => ".", "thousand_separator" => ","];
             if (session("business.currency_symbol_placement") == "before") {
-                $formated_number .= session("currency")["symbol"] . " ";
+                $formated_number .= ($currency["symbol"] ?? "") . " ";
             } 
-            $formated_number .= number_format((float) '.$number.', session("business.currency_precision", 2) , session("currency")["decimal_separator"], session("currency")["thousand_separator"]);
+            $formated_number .= number_format((float) '.$number.', session("business.currency_precision", 2) , $currency["decimal_separator"] ?? ".", $currency["thousand_separator"] ?? ",");
 
             if (session("business.currency_symbol_placement") == "after") {
-                $formated_number .= " " . session("currency")["symbol"];
+                $formated_number .= " " . ($currency["symbol"] ?? "");
             }
             echo $formated_number; ?>';
         });

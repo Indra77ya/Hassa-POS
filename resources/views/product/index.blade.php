@@ -91,8 +91,8 @@
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <br>
                         <div class="form-group">
+                            {!! Form::label('active_state', __('business.is_active') . ':') !!}
                             {!! Form::select(
                                 'active_state',
                                 ['active' => __('business.is_active'), 'inactive' => __('lang_v1.inactive')],
@@ -101,6 +101,22 @@
                                     'class' => 'form-control select2',
                                     'style' => 'width:100%',
                                     'id' => 'active_state',
+                                    'placeholder' => __('lang_v1.all'),
+                                ],
+                            ) !!}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            {!! Form::label('product_list_filter_has_sn', __('lang_v1.enable_imei_or_sr_no') . ':') !!}
+                            {!! Form::select(
+                                'has_sn',
+                                ['1' => __('messages.yes'), '0' => __('messages.no')],
+                                null,
+                                [
+                                    'class' => 'form-control select2',
+                                    'style' => 'width:100%',
+                                    'id' => 'product_list_filter_has_sn',
                                     'placeholder' => __('lang_v1.all'),
                                 ],
                             ) !!}
@@ -289,6 +305,7 @@
                         d.unit_id = $('#product_list_filter_unit_id').val();
                         d.tax_id = $('#product_list_filter_tax_id').val();
                         d.active_state = $('#active_state').val();
+                        d.has_sn = $('#product_list_filter_has_sn').val();
                         d.not_for_selling = $('#not_for_selling').is(':checked');
                         d.location_id = $('#location_id').val();
                         if ($('#repair_model_id').length == 1) {
@@ -322,6 +339,12 @@
                     {
                         data: 'product',
                         name: 'products.name'
+                    },
+                    {
+                        data: 'serial_numbers',
+                        name: 'serial_numbers',
+                        searchable: false,
+                        orderable: false
                     },
                     {
                         data: 'product_locations',
@@ -589,7 +612,7 @@
             });
 
             $(document).on('change',
-                '#product_list_filter_type, #product_list_filter_category_id, #product_list_filter_brand_id, #product_list_filter_unit_id, #product_list_filter_tax_id, #location_id, #active_state, #repair_model_id',
+                '#product_list_filter_type, #product_list_filter_category_id, #product_list_filter_brand_id, #product_list_filter_unit_id, #product_list_filter_tax_id, #location_id, #active_state, #repair_model_id, #product_list_filter_has_sn',
                 function() {
                     if ($("#product_list_tab").hasClass('active')) {
                         product_table.ajax.reload();
