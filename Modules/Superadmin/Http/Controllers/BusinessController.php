@@ -679,7 +679,7 @@ class BusinessController extends BaseController
                     $sell_line_ids = DB::table('transaction_sell_lines')->whereIn('transaction_id', $sales_ids)->pluck('id')->toArray();
                     if (!empty($sell_line_ids)) {
                         if (\Illuminate\Support\Facades\Schema::hasTable('sell_line_warranties')) {
-                            DB::table('sell_line_warranties')->whereIn('transaction_sell_line_id', $sell_line_ids)->delete();
+                            DB::table('sell_line_warranties')->whereIn('sell_line_id', $sell_line_ids)->delete();
                         }
                         if (\Illuminate\Support\Facades\Schema::hasTable('product_serial_numbers')) {
                             DB::table('product_serial_numbers')
