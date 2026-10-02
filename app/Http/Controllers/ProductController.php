@@ -253,7 +253,7 @@ class ProductController extends Controller
 
                         if (auth()->user()->can('product.delete')) {
                             $html .=
-                            '<li><a href="'.action([\App\Http\Controllers\ProductController::class, 'destroy'], [$row->id]).'" class="delete-product"><i class="fa fa-trash"></i> '.__('messages.delete').'</a></li>';
+                            '<li><a href="#" data-href="'.action([\App\Http\Controllers\ProductController::class, 'destroy'], [$row->id]).'" class="delete-product"><i class="fa fa-trash"></i> '.__('messages.delete').'</a></li>';
                         }
 
                         if ($row->is_inactive == 1) {
@@ -682,14 +682,7 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        if (! auth()->user()->can('product.view')) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        $business_id = request()->session()->get('user.business_id');
-        $details = $this->productUtil->getRackDetails($business_id, $id, true);
-
-        return view('product.show')->with(compact('details'));
+        return $this->view($id);
     }
 
     /**

@@ -490,8 +490,12 @@
                 product_table.ajax.reload();
             });
 
-            $('table#product_table tbody').on('click', 'a.delete-product', function(e) {
+            $(document).on('click', 'a.delete-product', function(e) {
                 e.preventDefault();
+                var href = $(this).attr('data-href') || $(this).attr('href');
+                if (!href || href === '#') {
+                    return;
+                }
                 swal({
                     title: LANG.sure,
                     icon: "warning",
@@ -499,7 +503,6 @@
                     dangerMode: true,
                 }).then((willDelete) => {
                     if (willDelete) {
-                        var href = $(this).attr('href');
                         $.ajax({
                             method: "DELETE",
                             url: href,
