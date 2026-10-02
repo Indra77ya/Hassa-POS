@@ -17,7 +17,7 @@
         <div class="modal-body" style="padding: 20px; background-color: #f8fafc;">
 
             <!-- Global Select All Banner -->
-            <div style="background-color: #ffffff; border: 1px solid #fee2e2; border-left: 4px solid #ef4444; border-radius: 6px; padding: 12px 16px; margin-bottom: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+            <div style="background-color: #ffffff; border: 1px solid #fca5a5; border-radius: 6px; padding: 12px 16px; margin-bottom: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
                 <label style="cursor: pointer; font-size: 14px; font-weight: 600; color: #991b1b; margin-bottom: 0; display: flex; align-items: center; gap: 8px;">
                     {!! Form::checkbox('select_all_global', 1, false, ['id' => 'select_all_global', 'style' => 'width: 16px; height: 16px; cursor: pointer; margin: 0;']) !!}
                     <i class="fa fa-exclamation-triangle" style="color: #dc2626;"></i>
