@@ -750,9 +750,8 @@
     }
   </style>
   <style>
-    /* Prevent Datatables responsive scroll container from clipping dropdown menus when opened */
-    .table-responsive.dropdown-opened,
-    .dataTables_scrollBody.dropdown-opened {
+    /* Prevent Datatables responsive container from clipping dropdown menus when opened */
+    .table-responsive.dropdown-opened {
       overflow: visible !important;
     }
 
