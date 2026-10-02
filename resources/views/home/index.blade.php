@@ -33,9 +33,9 @@
                         </h1>
                     </div>
                     @if ($is_admin)
-                        <div class="tw-mt-2 sm:tw-flex sm:tw-items-center sm:tw-justify-end sm:tw-gap-3">
+                        <div class="tw-mt-2 tw-flex tw-flex-col sm:tw-items-end tw-gap-2.5">
                             @if (count($all_locations) > 1)
-                                <div class="tw-w-full sm:tw-w-56 md:tw-w-64">
+                                <div class="tw-w-full sm:tw-w-56 md:tw-w-60">
                                     {!! Form::select('dashboard_location', $all_locations, null, [
                                         'class' => 'form-control select2',
                                         'placeholder' => __('lang_v1.select_location'),
@@ -44,7 +44,7 @@
                                 </div>
                             @endif
 
-                            <div class="tw-mt-2 sm:tw-mt-0 tw-shrink-0">
+                            <div class="tw-w-full sm:tw-w-auto">
                                 <button type="button" id="dashboard_date_filter"
                                     class="tw-inline-flex tw-items-center tw-justify-center tw-w-full sm:tw-w-auto tw-gap-1.5 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-gray-900 tw-whitespace-nowrap tw-transition-all tw-duration-200 tw-bg-white tw-rounded-lg hover:tw-bg-primary-50">
                                     <svg aria-hidden="true" class="tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg"
