@@ -83,8 +83,8 @@ class BusinessLocationController extends Controller
                     'status',
                     function ($row) {
                         return $row->is_active
-                            ? '<span class="label bg-light-green">'.__('lang_v1.active').'</span>'
-                            : '<span class="label bg-red">'.__('lang_v1.inactive').'</span>';
+                            ? '<span class="label" style="background-color: #dcfce7; color: #166534; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px;">'.__('business.is_active').'</span>'
+                            : '<span class="label" style="background-color: #fee2e2; color: #991b1b; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px;">'.__('lang_v1.inactive').'</span>';
                     }
                 )
                 ->addColumn(
