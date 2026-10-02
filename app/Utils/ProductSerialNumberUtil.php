@@ -8,6 +8,65 @@ use App\TransactionSellLine;
 class ProductSerialNumberUtil extends Util
 {
     /**
+     * Check if serial numbers contain duplicates internally or already exist as in_stock within the business.
+     * Returns an array of duplicate serial numbers if found, or empty array if valid.
+     *
+     * @param int $business_id
+     * @param array $serials
+     * @param int|null $exclude_purchase_line_id
+     * @return array
+     */
+    public function checkDuplicateInStockSerials($business_id, array $serials, $exclude_purchase_line_ids = null, $exclude_product_id = null)
+    {
+        $serials = array_values(array_filter(array_map('trim', $serials)));
+        if (empty($serials)) {
+            return [];
+        }
+
+        $duplicates = [];
+
+        // 1. Check internal case-insensitive duplicates in input array
+        $counts = array_count_values(array_map('strtolower', $serials));
+        foreach ($counts as $sn_lower => $count) {
+            if ($count > 1) {
+                foreach ($serials as $s) {
+                    if (strtolower($s) === $sn_lower && !in_array($s, $duplicates)) {
+                        $duplicates[] = $s;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 2. Check existing in_stock serials in the business
+        $query = ProductSerialNumber::where('business_id', $business_id)
+            ->where('status', 'in_stock')
+            ->whereIn('serial_number', $serials);
+
+        if (!empty($exclude_product_id)) {
+            $query->where('product_id', '!=', $exclude_product_id);
+        }
+
+        if (!empty($exclude_purchase_line_ids)) {
+            $exclude_ids = is_array($exclude_purchase_line_ids) ? $exclude_purchase_line_ids : [$exclude_purchase_line_ids];
+            $query->where(function($q) use ($exclude_ids) {
+                $q->whereNull('purchase_line_id')
+                  ->orWhereNotIn('purchase_line_id', $exclude_ids);
+            });
+        }
+
+        $existing_serials = $query->pluck('serial_number')->toArray();
+
+        foreach ($existing_serials as $existing_sn) {
+            if (!in_array($existing_sn, $duplicates)) {
+                $duplicates[] = $existing_sn;
+            }
+        }
+
+        return array_values(array_unique($duplicates));
+    }
+
+    /**
      * Sync serial numbers on purchase line creation or update with custom HPP and Selling Price.
      */
     public function syncPurchaseSerialNumbers($business_id, $product_id, $variation_id, $purchase_line_id, array $serials, $default_purchase_price = 0, array $sn_details = [])

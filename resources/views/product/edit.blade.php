@@ -223,9 +223,67 @@
           <div class="col-sm-4">
             <div class="checkbox">
               <label>
-                {!! Form::checkbox('enable_sr_no', 1, $product->enable_sr_no, ['class' => 'input-icheck']); !!} <strong>@lang('lang_v1.enable_imei_or_sr_no')</strong>
+                {!! Form::checkbox('enable_sr_no', 1, $product->enable_sr_no, ['class' => 'input-icheck', 'id' => 'enable_sr_no']); !!} <strong>@lang('lang_v1.enable_imei_or_sr_no')</strong>
               </label>
               @show_tooltip(__('lang_v1.tooltip_sr_no'))
+            </div>
+          </div>
+
+          <div class="col-sm-12 product_sr_no_container @if(empty($product->enable_sr_no)) hide @endif">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <strong><i class="fa fa-barcode"></i> Serial Number / IMEI Details</strong>
+                    <small class="text-muted">(Edit in-stock serial numbers or add new ones with purchase & selling prices)</small>
+                </div>
+                <div class="panel-body">
+                    <table class="table table-bordered table-striped" id="product_sr_no_table">
+                        <thead>
+                            <tr>
+                                <th>Serial Number / IMEI <span class="text-danger">*</span></th>
+                                <th>Purchase Price (Cost) <span class="text-danger">*</span></th>
+                                <th>Selling Price <span class="text-danger">*</span></th>
+                                <th class="text-center" style="width: 50px;">
+                                    <button type="button" class="btn btn-xs btn-primary add_product_sr_no_row"><i class="fa fa-plus"></i></button>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if(!empty($in_stock_serials) && count($in_stock_serials) > 0)
+                                @foreach($in_stock_serials as $index => $sn)
+                                    <tr class="product_sr_no_row">
+                                        <td>
+                                            <input type="text" name="product_serials[{{ $index }}][serial_number]" value="{{ $sn->serial_number }}" class="form-control input-sm product_sn_input" placeholder="Enter Serial / IMEI">
+                                        </td>
+                                        <td>
+                                            <input type="text" name="product_serials[{{ $index }}][purchase_price]" value="{{ @num_format($sn->purchase_price) }}" class="form-control input-sm input_number product_sn_purchase_price" placeholder="Purchase Price (Cost)">
+                                        </td>
+                                        <td>
+                                            <input type="text" name="product_serials[{{ $index }}][selling_price]" value="{{ @num_format($sn->selling_price) }}" class="form-control input-sm input_number product_sn_selling_price" placeholder="Selling Price">
+                                        </td>
+                                        <td class="text-center">
+                                            <button type="button" class="btn btn-xs btn-danger remove_product_sr_no_row"><i class="fa fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @else
+                                <tr class="product_sr_no_row">
+                                    <td>
+                                        <input type="text" name="product_serials[0][serial_number]" class="form-control input-sm product_sn_input" placeholder="Enter Serial / IMEI">
+                                    </td>
+                                    <td>
+                                        <input type="text" name="product_serials[0][purchase_price]" class="form-control input-sm input_number product_sn_purchase_price" placeholder="Purchase Price (Cost)">
+                                    </td>
+                                    <td>
+                                        <input type="text" name="product_serials[0][selling_price]" class="form-control input-sm input_number product_sn_selling_price" placeholder="Selling Price">
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-xs btn-danger remove_product_sr_no_row"><i class="fa fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                            @endif
+                        </tbody>
+                    </table>
+                </div>
             </div>
           </div>
 

@@ -1,6 +1,115 @@
 //This file contains all functions used products tab
 
 $(document).ready(function() {
+    // Check initial enable_sr_no state on edit/create forms
+    $('form.product_form').each(function() {
+        if ($(this).find('input[name="enable_sr_no"]').is(':checked')) {
+            $(this).find('input#single_dpp, input#single_dpp_inc_tax, input#single_dsp, input#single_dsp_inc_tax, input#profit_percent').prop('readonly', true);
+            calculate_product_sn_average_prices($(this));
+        }
+    });
+
+    // Enable Serial Number toggle
+    $(document).on('ifChecked', 'input[name="enable_sr_no"]', function() {
+        var form = $(this).closest('form');
+        form.find('.product_sr_no_container').removeClass('hide');
+        form.find('input#single_dpp, input#single_dpp_inc_tax, input#single_dsp, input#single_dsp_inc_tax, input#profit_percent').prop('readonly', true);
+        calculate_product_sn_average_prices(form);
+    });
+
+    $(document).on('ifUnchecked', 'input[name="enable_sr_no"]', function() {
+        var form = $(this).closest('form');
+        form.find('.product_sr_no_container').addClass('hide');
+        form.find('input#single_dpp, input#single_dpp_inc_tax, input#single_dsp, input#single_dsp_inc_tax, input#profit_percent').prop('readonly', false);
+    });
+
+    // Add new Serial Number row
+    $(document).on('click', '.add_product_sr_no_row', function() {
+        var table = $(this).closest('table');
+        var index = table.find('tbody tr').length;
+        var new_row = '<tr class="product_sr_no_row">' +
+            '<td><input type="text" name="product_serials[' + index + '][serial_number]" class="form-control input-sm product_sn_input" placeholder="Enter Serial / IMEI"></td>' +
+            '<td><input type="text" name="product_serials[' + index + '][purchase_price]" class="form-control input-sm input_number product_sn_purchase_price" placeholder="Purchase Price (Cost)"></td>' +
+            '<td><input type="text" name="product_serials[' + index + '][selling_price]" class="form-control input-sm input_number product_sn_selling_price" placeholder="Selling Price"></td>' +
+            '<td class="text-center"><button type="button" class="btn btn-xs btn-danger remove_product_sr_no_row"><i class="fa fa-trash"></i></button></td>' +
+            '</tr>';
+        table.find('tbody').append(new_row);
+    });
+
+    // Remove Serial Number row
+    $(document).on('click', '.remove_product_sr_no_row', function() {
+        var form = $(this).closest('form');
+        var tbody = $(this).closest('tbody');
+        if (tbody.find('tr').length > 1) {
+            $(this).closest('tr').remove();
+            calculate_product_sn_average_prices(form);
+        } else {
+            toastr.error('At least 1 serial number must be filled.');
+        }
+    });
+
+    // Validate duplicate SN input in product form
+    $(document).on('change blur', '.product_sn_input', function() {
+        var current_input = $(this);
+        var current_val = $.trim(current_input.val());
+        if (current_val === '') return;
+
+        var form = current_input.closest('form');
+        var is_dup = false;
+
+        form.find('.product_sn_input').not(current_input).each(function() {
+            if ($.trim($(this).val()).toLowerCase() === current_val.toLowerCase()) {
+                is_dup = true;
+                return false;
+            }
+        });
+
+        if (is_dup) {
+            toastr.error('Serial Number / IMEI "' + current_val + '" duplikat di dalam form.');
+            current_input.val('').focus();
+        }
+    });
+
+    // Calculate average prices when SN prices change
+    $(document).on('change keyup', '.product_sn_purchase_price, .product_sn_selling_price', function() {
+        var form = $(this).closest('form');
+        calculate_product_sn_average_prices(form);
+    });
+
+    function calculate_product_sn_average_prices(form) {
+        if (!form.find('input[name="enable_sr_no"]').is(':checked')) {
+            return;
+        }
+
+        var total_pp = 0;
+        var total_sp = 0;
+        var count = 0;
+
+        form.find('tr.product_sr_no_row').each(function() {
+            var pp = __read_number($(this).find('.product_sn_purchase_price'));
+            var sp = __read_number($(this).find('.product_sn_selling_price'));
+            if (pp != undefined && pp >= 0) {
+                total_pp += parseFloat(pp);
+            }
+            if (sp != undefined && sp >= 0) {
+                total_sp += parseFloat(sp);
+            }
+            count++;
+        });
+
+        if (count > 0) {
+            var avg_pp = total_pp / count;
+            var avg_sp = total_sp / count;
+
+            __write_number(form.find('input#single_dpp'), avg_pp);
+            __write_number(form.find('input#single_dpp_inc_tax'), avg_pp);
+            __write_number(form.find('input#single_dsp'), avg_sp);
+            __write_number(form.find('input#single_dsp_inc_tax'), avg_sp);
+
+            form.find('input#single_dpp').trigger('change');
+        }
+    }
+
     $(document).on('ifChecked', 'input#enable_stock', function() {
         $('div#alert_quantity_div').show();
         $('div#quick_product_opening_stock_div').show();
@@ -275,6 +384,32 @@ $(document).ready(function() {
             variation_skus.push({sku: element.val(), variation_id: row_variation_id});
             
         });
+
+        var form = $('form#product_add_form');
+        if (form.find('input[name="enable_sr_no"]').is(':checked')) {
+            var sn_valid = true;
+            var sn_count = 0;
+            form.find('tr.product_sr_no_row').each(function() {
+                var sn = $(this).find('.product_sn_input').val().trim();
+                var pp = $(this).find('.product_sn_purchase_price').val().trim();
+                var sp = $(this).find('.product_sn_selling_price').val().trim();
+                if (sn !== '') {
+                    sn_count++;
+                    if (pp === '' || sp === '') {
+                        sn_valid = false;
+                    }
+                }
+            });
+
+            if (sn_count === 0) {
+                toastr.error('At least 1 serial number is required when Enable Serial Number is checked.');
+                return false;
+            }
+            if (!sn_valid) {
+                toastr.error('Please fill in Serial Number, Purchase Price, and Selling Price for every row.');
+                return false;
+            }
+        }
 
         if (variation_skus.length > 0) {
             $.ajax({

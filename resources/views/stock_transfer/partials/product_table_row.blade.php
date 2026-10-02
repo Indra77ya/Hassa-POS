@@ -10,6 +10,43 @@
         <br/>
         {{$product->sub_sku}}
 
+        @if(!empty($product->enable_sr_no) && $product->enable_sr_no == 1)
+            @php
+                $p_id = !empty($product->product_id) ? $product->product_id : (isset($product->id) ? $product->id : null);
+                $v_id = !empty($product->variation_id) ? $product->variation_id : null;
+                $sell_line_id = !empty($product->transaction_sell_lines_id) ? $product->transaction_sell_lines_id : null;
+
+                $sn_query = \App\ProductSerialNumber::where('business_id', session('user.business_id'))
+                    ->where('product_id', $p_id);
+
+                if (!empty($v_id)) {
+                    $sn_query->where('variation_id', $v_id);
+                }
+
+                $available_sns = $sn_query->where(function($q) use ($sell_line_id) {
+                    $q->where('status', 'in_stock');
+                    if (!empty($sell_line_id)) {
+                        $q->orWhere('transaction_sell_line_id', $sell_line_id);
+                    }
+                })->get();
+
+                $selected_sns = [];
+                if (!empty($sell_line_id)) {
+                    $selected_sns = \App\ProductSerialNumber::where('transaction_sell_line_id', $sell_line_id)->pluck('serial_number')->toArray();
+                }
+            @endphp
+            <div class="margin-top-10">
+                <label class="text-info"><i class="fa fa-barcode"></i> Serial Number / IMEI:</label>
+                <select name="products[{{$row_index}}][serial_numbers][]" class="form-control input-sm stock_transfer_serial_number_select select2" multiple="multiple" style="width: 100%;">
+                    @foreach($available_sns as $sn_item)
+                        <option value="{{$sn_item->serial_number}}" @if(in_array($sn_item->serial_number, $selected_sns)) selected @endif>
+                            {{$sn_item->serial_number}}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+        @endif
+
             @if( session()->get('business.enable_lot_number') == 1 || session()->get('business.enable_product_expiry') == 1)
             @php
                 $lot_enabled = session()->get('business.enable_lot_number');
@@ -103,6 +140,7 @@
         @endif
 
         <input type="text" class="form-control product_quantity input_number input_quantity" value="{{@format_quantity($qty_ordered)}}" name="products[{{$row_index}}][quantity]" 
+        @if(!empty($product->enable_sr_no) && $product->enable_sr_no == 1) readonly @endif
         @if($product->unit_allow_decimal == 1) data-decimal=1 @else data-rule-abs_digit="true" data-msg-abs_digit="@lang('lang_v1.decimal_value_not_allowed')" data-decimal=0 @endif
         data-rule-required="true" data-msg-required="@lang('validation.custom-messages.this_field_is_required')" @if($product->enable_stock) data-rule-max-value="{{$max_qty_rule}}" data-msg-max-value="{{$max_qty_msg}}"
         data-qty_available="{{$product->qty_available}}" 

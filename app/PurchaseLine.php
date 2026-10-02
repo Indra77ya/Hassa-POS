@@ -82,4 +82,9 @@ class PurchaseLine extends Model
     {
         return $this->belongsTo(\App\PurchaseLine::class, 'purchase_requisition_line_id');
     }
+
+    public function serial_numbers()
+    {
+        return $this->hasMany(\App\ProductSerialNumber::class, 'purchase_line_id');
+    }
 }

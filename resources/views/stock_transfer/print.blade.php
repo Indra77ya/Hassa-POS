@@ -80,6 +80,12 @@
           $total = 0.00;
         @endphp
         @foreach($sell_transfer->sell_lines as $sell_lines)
+          @php
+            $sn_records = $sell_lines->relationLoaded('serial_numbers')
+                ? $sell_lines->serial_numbers
+                : \App\ProductSerialNumber::where('transaction_sell_line_id', $sell_lines->id)->get();
+            $has_sn = !empty($sn_records) && $sn_records->count() > 0;
+          @endphp
           <tr>
             <td>{{ $loop->iteration }}</td>
             <td>
@@ -98,6 +104,13 @@
                 @if(!empty($sell_lines->lot_details->exp_date))
                   - {{@format_date($sell_lines->lot_details->exp_date)}}
                 @endif
+               @endif
+               @if($has_sn)
+                <br>
+                <small style="color: #1e40af; font-weight: 600;"><i class="fa fa-barcode"></i> Serial Number / IMEI:</small>
+                <div style="font-size: 11px; color: #334155;">
+                  {{ implode(', ', $sn_records->pluck('serial_number')->toArray()) }}
+                </div>
                @endif
             </td>
             <td>{{ @format_quantity($sell_lines->quantity) }} {{$sell_lines->product->unit->short_name ?? ""}}</td>

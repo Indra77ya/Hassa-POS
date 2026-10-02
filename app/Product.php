@@ -213,6 +213,16 @@ class Product extends Model
         return $this->belongsTo(\App\Warranty::class);
     }
 
+    public function serial_numbers()
+    {
+        return $this->hasMany(\App\ProductSerialNumber::class, 'product_id');
+    }
+
+    public function in_stock_serial_numbers()
+    {
+        return $this->hasMany(\App\ProductSerialNumber::class, 'product_id')->where('status', 'in_stock');
+    }
+
     public function media()
     {
         return $this->morphMany(\App\Media::class, 'model');
