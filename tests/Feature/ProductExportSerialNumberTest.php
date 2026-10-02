@@ -448,6 +448,7 @@ class ProductExportSerialNumberTest extends TestCase
             'business_id' => $this->business->id,
             'product_id' => $product->id,
             'serial_number' => 'IMEI-DT-001',
+            'selling_price' => 5000000,
             'status' => 'in_stock',
         ]);
 
@@ -455,6 +456,7 @@ class ProductExportSerialNumberTest extends TestCase
             'business_id' => $this->business->id,
             'product_id' => $product->id,
             'serial_number' => 'IMEI-DT-002',
+            'selling_price' => 6000000,
             'status' => 'in_stock',
         ]);
 
@@ -471,7 +473,9 @@ class ProductExportSerialNumberTest extends TestCase
         $found = false;
         foreach ($data as $item) {
             if (isset($item['sku']) && $item['sku'] === 'TEST-SN-DT-01') {
-                $this->assertStringContainsString('IMEI-DT-001, IMEI-DT-002', $item['serial_numbers']);
+                $this->assertStringContainsString('IMEI-DT-001', $item['serial_numbers']);
+                $this->assertStringContainsString('IMEI-DT-002', $item['serial_numbers']);
+                $this->assertStringContainsString('<br/>', $item['serial_numbers']);
                 $found = true;
                 break;
             }

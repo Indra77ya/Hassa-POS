@@ -215,15 +215,23 @@ class ProductController extends Controller
                         if (empty($row->enable_sr_no) || $row->enable_sr_no != 1) {
                             return '--';
                         }
-                        $sns = $row->in_stock_serial_numbers
-                            ->pluck('serial_number')
-                            ->toArray();
+                        $in_stock_serials = $row->in_stock_serial_numbers;
 
-                        if (empty($sns)) {
+                        if ($in_stock_serials->isEmpty()) {
                             return '--';
                         }
 
-                        return implode(', ', $sns);
+                        $sn_strings = [];
+                        foreach ($in_stock_serials as $sn_record) {
+                            $price = $sn_record->selling_price;
+                            if (is_null($price)) {
+                                $price = $row->min_price;
+                            }
+                            $formatted_price = $this->productUtil->num_f($price, true);
+                            $sn_strings[] = e($sn_record->serial_number) . ' - ' . $formatted_price;
+                        }
+
+                        return implode('<br/>', $sn_strings);
                     }
                 )
                 ->editColumn('category', '{{$category}} @if(!empty($sub_category))<br/> -- {{$sub_category}}@endif')
@@ -339,7 +347,7 @@ class ProductController extends Controller
                             return '';
                         }
                     }, ])
-                ->rawColumns(['action', 'image', 'mass_delete', 'product', 'selling_price', 'purchase_price', 'category', 'current_stock'])
+                ->rawColumns(['action', 'image', 'mass_delete', 'product', 'selling_price', 'purchase_price', 'category', 'current_stock', 'serial_numbers'])
                 ->make(true);
         }
 
