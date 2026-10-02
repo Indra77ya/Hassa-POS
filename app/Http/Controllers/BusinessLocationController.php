@@ -115,7 +115,7 @@ class BusinessLocationController extends Controller
                 ->removeColumn('id')
                 ->removeColumn('is_active')
                 ->rawColumns(['status', 'action'])
-                ->make(false);
+                ->make(true);
         }
 
         return view('business_location.index');
