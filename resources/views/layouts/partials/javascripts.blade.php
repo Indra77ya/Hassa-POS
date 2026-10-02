@@ -175,13 +175,82 @@
    
         // Fix Bootstrap dropdown menu clipping inside scrollable/responsive containers (like DataTables)
         $(document).on('show.bs.dropdown', '.dropdown, .btn-group', function (e) {
-            $(this).closest('.table-responsive, .dataTables_scrollBody').addClass('dropdown-opened');
+            $(this).closest('.table-responsive').addClass('dropdown-opened');
             $(this).closest('td, tr').addClass('dropdown-opened');
+
+            // If the dropdown is inside a DataTables scroll container, detach and position it relative to viewport/body
+            var $scrollContainer = $(this).closest('.dataTables_scrollBody');
+            if ($scrollContainer.length) {
+                var $dropdownMenu = $(this).find('.dropdown-menu');
+                if ($dropdownMenu.length) {
+                    // Store reference to parent container for restoration on hide
+                    $dropdownMenu.data('parent-btn-group', $(this));
+
+                    var offset = $(this).offset();
+                    var height = $(this).outerHeight();
+                    var width = $dropdownMenu.outerWidth();
+                    var windowWidth = $(window).width();
+
+                    // Calculate top and left positions
+                    var top = offset.top + height - $(window).scrollTop();
+                    var left = offset.left;
+
+                    // If dropdown goes off right edge, align to right side of button
+                    if (left + width > windowWidth - 10) {
+                        left = Math.max(10, offset.left + $(this).outerWidth() - width);
+                    }
+
+                    $dropdownMenu.css({
+                        position: 'fixed',
+                        top: top + 'px',
+                        left: left + 'px',
+                        zIndex: 99999,
+                        display: 'block'
+                    }).appendTo('body');
+                }
+            }
         });
 
         $(document).on('hide.bs.dropdown', '.dropdown, .btn-group', function (e) {
-            $(this).closest('.table-responsive, .dataTables_scrollBody').removeClass('dropdown-opened');
+            $(this).closest('.table-responsive').removeClass('dropdown-opened');
             $(this).closest('td, tr').removeClass('dropdown-opened');
+
+            // Restore detached dropdown menu back to original button group
+            var $dropdownMenu = $('body > .dropdown-menu');
+            if ($dropdownMenu.length) {
+                $dropdownMenu.each(function() {
+                    var $parent = $(this).data('parent-btn-group');
+                    if ($parent && $parent.length) {
+                        $(this).css({
+                            position: '',
+                            top: '',
+                            left: '',
+                            zIndex: '',
+                            display: ''
+                        }).appendTo($parent);
+                    }
+                });
+            }
+        });
+
+        // Close/reposition detached dropdown menus on scroll or resize
+        $(window).add('.dataTables_scrollBody').on('scroll resize', function() {
+            var $detachedDropdown = $('body > .dropdown-menu');
+            if ($detachedDropdown.length) {
+                $('.dropdown.open, .btn-group.open').removeClass('open');
+                $detachedDropdown.each(function() {
+                    var $parent = $(this).data('parent-btn-group');
+                    if ($parent && $parent.length) {
+                        $(this).css({
+                            position: '',
+                            top: '',
+                            left: '',
+                            zIndex: '',
+                            display: ''
+                        }).appendTo($parent);
+                    }
+                });
+            }
         });
 
         // Auto scroll sidebar to the active menu item on page load
