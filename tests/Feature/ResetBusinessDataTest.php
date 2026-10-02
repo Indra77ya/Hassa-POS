@@ -179,6 +179,22 @@ class ResetBusinessDataTest extends TestCase
             });
         }
 
+        // Sell line warranties
+        Schema::dropIfExists('sell_line_warranties');
+        Schema::create('sell_line_warranties', function (Blueprint $table) {
+            $table->integer('sell_line_id');
+            $table->integer('warranty_id');
+        });
+
+        // Warranties
+        Schema::dropIfExists('warranties');
+        Schema::create('warranties', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->integer('business_id');
+            $table->timestamps();
+        });
+
         // Accounts
         Schema::dropIfExists('accounts');
         Schema::create('accounts', function (Blueprint $table) {
@@ -607,5 +623,63 @@ class ResetBusinessDataTest extends TestCase
         // Assert business 2 data preserved
         $this->assertNotNull(DB::table('laundry_order_sheets')->find($sheet_other));
         $this->assertNotNull(DB::table('laundry_statuses')->find($status_other));
+    }
+
+    /**
+     * Test that resetting sales deletes sell line warranties records without error.
+     */
+    public function testResetSalesDeletesSellLineWarranties()
+    {
+        // Create transaction
+        $tx_id = DB::table('transactions')->insertGetId([
+            'business_id' => 1,
+            'type' => 'sell',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Create transaction sell line
+        $sell_line_id = DB::table('transaction_sell_lines')->insertGetId([
+            'transaction_id' => $tx_id,
+            'product_id' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Create warranty
+        $warranty_id = DB::table('warranties')->insertGetId([
+            'business_id' => 1,
+            'name' => '1 Year Warranty',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Link sell line warranty
+        DB::table('sell_line_warranties')->insert([
+            'sell_line_id' => $sell_line_id,
+            'warranty_id' => $warranty_id,
+        ]);
+
+        // Mock login as superadmin
+        $user = \Mockery::mock(\App\User::class)->makePartial();
+        $user->shouldReceive('can')->with('superadmin')->andReturn(true);
+        $user->id = 1;
+        $user->business_id = 1;
+        $this->actingAs($user);
+
+        // Call postResetData for sales
+        $controller = new BusinessController(app(BusinessUtil::class), app(ModuleUtil::class));
+        $request = new Request();
+        $request->merge([
+            'reset_transactions' => ['sales']
+        ]);
+
+        $response = $controller->postResetData($request, 1);
+        $result = $response->getData(true);
+
+        $this->assertTrue($result['success']);
+
+        // Assert sell_line_warranties record is deleted
+        $this->assertEquals(0, DB::table('sell_line_warranties')->where('sell_line_id', $sell_line_id)->count());
     }
 }
