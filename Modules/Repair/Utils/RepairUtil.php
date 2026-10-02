@@ -469,9 +469,6 @@ class RepairUtil extends Util
         // 1. Create or update Product for the trade-in item
         if (empty($product_id)) {
             $product_name = '[BEKAS/SECOND] ' . $trade_in_data['model_name'];
-            if (!empty($trade_in_data['serial_no'])) {
-                $product_name .= ' (' . $trade_in_data['serial_no'] . ')';
-            }
 
             $product = \App\Product::create([
                 'name' => $product_name,
