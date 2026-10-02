@@ -74,7 +74,7 @@ class ProductController extends Controller
             $location_id = request()->get('location_id', null);
             $permitted_locations = auth()->user()->permitted_locations();
 
-            $query = Product::with(['media'])
+            $query = Product::with(['media', 'in_stock_serial_numbers'])
                 ->leftJoin('brands', 'products.brand_id', '=', 'brands.id')
                 ->join('units', 'products.unit_id', '=', 'units.id')
                 ->leftJoin('categories as c1', 'products.category_id', '=', 'c1.id')
@@ -207,6 +207,23 @@ class ProductController extends Controller
                     'product_locations',
                     function ($row) {
                         return $row->product_locations->implode('name', ', ');
+                    }
+                )
+                ->addColumn(
+                    'serial_numbers',
+                    function ($row) {
+                        if (empty($row->enable_sr_no) || $row->enable_sr_no != 1) {
+                            return '--';
+                        }
+                        $sns = $row->in_stock_serial_numbers
+                            ->pluck('serial_number')
+                            ->toArray();
+
+                        if (empty($sns)) {
+                            return '--';
+                        }
+
+                        return implode(', ', $sns);
                     }
                 )
                 ->editColumn('category', '{{$category}} @if(!empty($sub_category))<br/> -- {{$sub_category}}@endif')
