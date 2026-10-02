@@ -48,6 +48,7 @@
                         <th style="white-space: nowrap !important;">@lang( 'invoice.invoice_scheme' )</th>
                         <th style="white-space: nowrap !important;">@lang('lang_v1.invoice_layout_for_pos')</th>
                         <th style="white-space: nowrap !important;">@lang('lang_v1.invoice_layout_for_sale')</th>
+                        <th style="white-space: nowrap !important;">@lang('sale.status')</th>
                         <th class="not-export" style="white-space: nowrap !important;">@lang( 'messages.action' )</th>
                     </tr>
                 </thead>
