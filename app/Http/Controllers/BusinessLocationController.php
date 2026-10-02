@@ -80,6 +80,14 @@ class BusinessLocationController extends Controller
 
             return Datatables::of($locations)
                 ->addColumn(
+                    'status',
+                    function ($row) {
+                        return $row->is_active
+                            ? '<span class="label bg-light-green">'.__('business.is_active').'</span>'
+                            : '<span class="label bg-red">'.__('lang_v1.inactive').'</span>';
+                    }
+                )
+                ->addColumn(
                     'action',
                     '<div class="btn-group">
                         <button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-info tw-w-max dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
@@ -106,8 +114,8 @@ class BusinessLocationController extends Controller
                 )
                 ->removeColumn('id')
                 ->removeColumn('is_active')
-                ->rawColumns([11])
-                ->make(false);
+                ->rawColumns(['status', 'action'])
+                ->make(true);
         }
 
         return view('business_location.index');

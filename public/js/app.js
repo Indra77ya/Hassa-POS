@@ -1303,15 +1303,23 @@ $(document).ready(function() {
         serverSide: true,
         bPaginate: false,
         fixedHeader:false,
-        scrollX: true,
+        scrollX: false,
         buttons: [],
         ajax: '/business-location',
-        columnDefs: [
-            {
-                targets: 11,
-                orderable: false,
-                searchable: false,
-            },
+        columns: [
+            { data: 'name', name: 'name' },
+            { data: 'location_id', name: 'location_id' },
+            { data: 'landmark', name: 'landmark' },
+            { data: 'city', name: 'city' },
+            { data: 'zip_code', name: 'zip_code' },
+            { data: 'state', name: 'state' },
+            { data: 'country', name: 'country' },
+            { data: 'price_group', name: 'spg.name' },
+            { data: 'invoice_scheme', name: 'ic.name' },
+            { data: 'invoice_layout', name: 'il.name' },
+            { data: 'sale_invoice_layout', name: 'sil.name' },
+            { data: 'status', name: 'status', orderable: false, searchable: false },
+            { data: 'action', name: 'action', orderable: false, searchable: false },
         ],
     });
     $('.location_add_modal, .location_edit_modal').on('shown.bs.modal', function(e) {
@@ -2649,7 +2657,9 @@ function updateStockBySellingPrice (data) {
     }
 }
 
-$(document).on('click', 'button.activate-deactivate-location', function(){
+$(document).on('click', '.activate-deactivate-location', function(e){
+    e.preventDefault();
+    var href = $(this).data('href') || $(this).attr('href');
     swal({
         title: LANG.sure,
         icon: 'warning',
@@ -2658,7 +2668,7 @@ $(document).on('click', 'button.activate-deactivate-location', function(){
     }).then(willDelete => {
         if (willDelete) {
             $.ajax({
-                url: $(this).data('href'),
+                url: href,
                 dataType: 'json',
                 success: function(result) {
                     if (result.success == true) {
