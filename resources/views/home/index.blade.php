@@ -26,25 +26,25 @@
     @if (auth()->user()->can('dashboard.data'))
         <div class="tw-pb-6 theme-header-bg xl:tw-pb-0">
             <div class="tw-px-5 tw-pt-3">
-                <div class="sm:tw-flex sm:tw-items-center sm:tw-justify-between sm:tw-gap-6">
-                    <div class="tw-mt-2">
-                        <h1 class="tw-text-2xl md:tw-text-3xl tw-tracking-tight tw-font-bold tw-text-white tw-mb-1 md:tw-mb-0">
-                            {{ __('home.welcome_message', ['name' => $user_first_name]) }} 👋
-                        </h1>
-                    </div>
-                    @if ($is_admin)
-                        <div class="tw-mt-2 tw-flex tw-flex-col sm:tw-items-end tw-gap-2.5">
-                            @if (count($all_locations) > 1)
-                                <div class="tw-w-full sm:tw-w-72 md:tw-w-80">
-                                    {!! Form::select('dashboard_location', $all_locations, null, [
-                                        'class' => 'form-control select2',
-                                        'placeholder' => __('lang_v1.select_location'),
-                                        'id' => 'dashboard_location',
-                                    ]) !!}
-                                </div>
-                            @endif
+                <div class="tw-flex tw-flex-col tw-gap-3">
+                    @if ($is_admin && count($all_locations) > 1)
+                        <div class="tw-w-full sm:tw-w-72 md:tw-w-80">
+                            {!! Form::select('dashboard_location', $all_locations, null, [
+                                'class' => 'form-control select2',
+                                'placeholder' => __('lang_v1.select_location'),
+                                'id' => 'dashboard_location',
+                            ]) !!}
+                        </div>
+                    @endif
 
-                            <div class="tw-w-full sm:tw-w-auto">
+                    <div class="sm:tw-flex sm:tw-items-center sm:tw-justify-between sm:tw-gap-6">
+                        <div>
+                            <h1 class="tw-text-2xl md:tw-text-3xl tw-tracking-tight tw-font-bold tw-text-white tw-mb-1 md:tw-mb-0">
+                                {{ __('home.welcome_message', ['name' => $user_first_name]) }} 👋
+                            </h1>
+                        </div>
+                        @if ($is_admin)
+                            <div class="tw-mt-2 sm:tw-mt-0">
                                 <button type="button" id="dashboard_date_filter"
                                     class="tw-inline-flex tw-items-center tw-justify-center tw-w-full sm:tw-w-auto tw-gap-1.5 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-gray-900 tw-whitespace-nowrap tw-transition-all tw-duration-200 tw-bg-white tw-rounded-lg hover:tw-bg-primary-50">
                                     <svg aria-hidden="true" class="tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg"
@@ -74,8 +74,8 @@
                                     </svg>
                                 </button>
                             </div>
-                        </div>
-                    @endif
+                        @endif
+                    </div>
                 </div>
 
                 @if ($is_admin)
