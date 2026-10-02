@@ -396,8 +396,40 @@ class PurchaseController extends Controller
 
             $transaction = Transaction::create($transaction_data);
 
-            $purchase_lines = [];
             $purchases = $request->input('purchases');
+
+            // Validate serial numbers for duplicates before proceeding, excluding current transaction's purchase lines
+            $all_purchase_serials = [];
+            if (is_array($purchases)) {
+                foreach ($purchases as $p_line) {
+                    if (!empty($p_line['serial_numbers'])) {
+                        $raw_sns = $p_line['serial_numbers'];
+                        $serials = is_array($raw_sns) ? $raw_sns : preg_split('/[\r\n,]+/', $raw_sns);
+                        foreach ($serials as $sn_item) {
+                            $sn_item = trim($sn_item);
+                            if (!empty($sn_item)) {
+                                $all_purchase_serials[] = $sn_item;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!empty($all_purchase_serials)) {
+                $snUtil = new \App\Utils\ProductSerialNumberUtil();
+                $existing_pl_ids = $transaction->purchase_lines()->pluck('id')->toArray();
+                $duplicates = $snUtil->checkDuplicateInStockSerials($business_id, $all_purchase_serials, $existing_pl_ids);
+                if (!empty($duplicates)) {
+                    DB::rollBack();
+                    $dup_str = implode(', ', $duplicates);
+                    return redirect()->back()->withInput()->with('status', [
+                        'success' => 0,
+                        'msg' => "Serial number / IMEI '{$dup_str}' sudah ada (in stock) atau terduplikasi."
+                    ]);
+                }
+            }
+
+            $purchase_lines = [];
 
             $this->productUtil->createOrUpdatePurchaseLines($transaction, $purchases, $currency_details, $enable_product_editing);
 
@@ -463,6 +495,7 @@ class PurchaseController extends Controller
                                     'purchase_lines.variations',
                                     'purchase_lines.variations.product_variation',
                                     'purchase_lines.sub_unit',
+                                    'purchase_lines.serial_numbers',
                                     'location',
                                     'payment_lines',
                                     'tax'
@@ -734,6 +767,36 @@ class PurchaseController extends Controller
             $transaction->payment_status = $payment_status;
 
             $purchases = $request->input('purchases');
+
+            // Validate serial numbers for duplicates before proceeding
+            $all_purchase_serials = [];
+            if (is_array($purchases)) {
+                foreach ($purchases as $p_line) {
+                    if (!empty($p_line['serial_numbers'])) {
+                        $raw_sns = $p_line['serial_numbers'];
+                        $serials = is_array($raw_sns) ? $raw_sns : preg_split('/[\r\n,]+/', $raw_sns);
+                        foreach ($serials as $sn_item) {
+                            $sn_item = trim($sn_item);
+                            if (!empty($sn_item)) {
+                                $all_purchase_serials[] = $sn_item;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!empty($all_purchase_serials)) {
+                $snUtil = new \App\Utils\ProductSerialNumberUtil();
+                $duplicates = $snUtil->checkDuplicateInStockSerials($business_id, $all_purchase_serials);
+                if (!empty($duplicates)) {
+                    DB::rollBack();
+                    $dup_str = implode(', ', $duplicates);
+                    return redirect()->back()->withInput()->with('status', [
+                        'success' => 0,
+                        'msg' => "Serial number / IMEI '{$dup_str}' sudah ada (in stock) atau terduplikasi."
+                    ]);
+                }
+            }
 
             $delete_purchase_lines = $this->productUtil->createOrUpdatePurchaseLines($transaction, $purchases, $currency_details, $enable_product_editing, $before_status);
 
@@ -1322,6 +1385,7 @@ class PurchaseController extends Controller
                                         'purchase_lines.product',
                                         'purchase_lines.variations',
                                         'purchase_lines.variations.product_variation',
+                                        'purchase_lines.serial_numbers',
                                         'location',
                                         'payment_lines'
                                     )

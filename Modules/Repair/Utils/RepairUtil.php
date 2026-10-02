@@ -469,9 +469,6 @@ class RepairUtil extends Util
         // 1. Create or update Product for the trade-in item
         if (empty($product_id)) {
             $product_name = '[BEKAS/SECOND] ' . $trade_in_data['model_name'];
-            if (!empty($trade_in_data['serial_no'])) {
-                $product_name .= ' (' . $trade_in_data['serial_no'] . ')';
-            }
 
             $product = \App\Product::create([
                 'name' => $product_name,
@@ -481,6 +478,7 @@ class RepairUtil extends Util
                 'category_id' => $category_id,
                 'sku' => 'TRD-' . strtoupper(\Str::random(6)),
                 'enable_stock' => 1,
+                'enable_sr_no' => 1,
                 'created_by' => $user_id,
             ]);
             $product_id = $product->id;
@@ -503,7 +501,7 @@ class RepairUtil extends Util
                 $resale_price
             );
         } else {
-            // Update product unit and category if provided
+            // Update product unit, category, and enable_sr_no if provided
             $product_obj = \App\Product::find($product_id);
             if ($product_obj) {
                 if (!empty($unit_id)) {
@@ -512,6 +510,7 @@ class RepairUtil extends Util
                 if (!empty($category_id)) {
                     $product_obj->category_id = $category_id;
                 }
+                $product_obj->enable_sr_no = 1;
                 $product_obj->save();
             }
 
@@ -552,7 +551,7 @@ class RepairUtil extends Util
             $purchase_transaction_id = $purchase->id;
 
             // Create Purchase Line
-            \App\PurchaseLine::create([
+            $purchase_line = \App\PurchaseLine::create([
                 'transaction_id' => $purchase->id,
                 'product_id' => $product_id,
                 'variation_id' => $variation_id,
@@ -582,6 +581,28 @@ class RepairUtil extends Util
 
             // Dispatch PurchaseCreatedOrModified event to sync accounting double-entry journal (inventory debit)
             event(new \App\Events\PurchaseCreatedOrModified($purchase));
+        } else {
+            $purchase_line = \App\PurchaseLine::where('transaction_id', $purchase_transaction_id)->first();
+        }
+
+        // 2.1 Register Serial Number / IMEI if provided
+        $sn_str = !empty($trade_in_data['serial_no']) ? trim($trade_in_data['serial_no']) : null;
+        if (!empty($sn_str) && !empty($variation_id)) {
+            $purchase_line_id = $purchase_line ? $purchase_line->id : null;
+            \App\ProductSerialNumber::updateOrCreate(
+                [
+                    'business_id' => $business_id,
+                    'product_id' => $product_id,
+                    'serial_number' => $sn_str,
+                ],
+                [
+                    'variation_id' => $variation_id,
+                    'purchase_line_id' => $purchase_line_id,
+                    'status' => 'in_stock',
+                    'purchase_price' => $trade_in_amount,
+                    'selling_price' => $resale_price,
+                ]
+            );
         }
 
         // 3. Save or update RepairTradeIn model record

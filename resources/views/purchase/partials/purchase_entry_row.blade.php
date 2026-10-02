@@ -23,8 +23,18 @@
                 <small class="text-primary"><strong>@lang('lang_v1.sn_input_help')</strong></small>
                 <select name="purchases[{{$row_count}}][serial_numbers][]" class="form-control input-sm purchase_sn_select" multiple="multiple" style="width: 100%;" data-row_index="{{$row_count}}">
                     @foreach($existing_sn_records as $sn_rec)
-                        <option value="{{$sn_rec->serial_number}}" data-status="{{$sn_rec->status}}" data-is_existing_instock="1">
-                            {{$sn_rec->serial_number}} (@lang('lang_v1.in_stock'))
+                        @php
+                            $is_unlinked = empty($sn_rec->purchase_line_id);
+                        @endphp
+                        <option value="{{$sn_rec->serial_number}}"
+                                data-status="{{$sn_rec->status}}"
+                                data-is_existing_instock="{{ $is_unlinked ? 0 : 1 }}"
+                                data-purchase_price="{{@num_format($sn_rec->purchase_price)}}"
+                                data-purchase-price="{{@num_format($sn_rec->purchase_price)}}"
+                                data-selling_price="{{@num_format($sn_rec->selling_price)}}"
+                                data-selling-price="{{@num_format($sn_rec->selling_price)}}"
+                                @if($is_unlinked) selected="selected" @endif>
+                            {{$sn_rec->serial_number}}
                         </option>
                     @endforeach
                 </select>
@@ -34,11 +44,11 @@
 
                 <!-- Modal for SN Price Details -->
                 <div class="modal fade sn_price_modal" id="sn_price_modal_{{$row_count}}" data-row_index="{{$row_count}}" tabindex="-1" role="dialog">
-                    <div class="modal-dialog" role="document">
+                    <div class="modal-dialog modal-lg" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                <h4 class="modal-title">@lang('lang_v1.sn_price_modal_title')</h4>
+                                <h4 class="modal-title">@lang('lang_v1.sn_price_modal_title') &ndash; <span class="text-primary">{{ $product->name }} ({{$variation->sub_sku}})@if($product->type == 'variable') - {{ $variation->product_variation->name }} : {{ $variation->name }}@endif</span></h4>
                             </div>
                             <div class="modal-body">
                                 <p class="help-block"><small>@lang('lang_v1.sn_price_modal_help')</small></p>
@@ -285,5 +295,3 @@
         <td><i class="fa fa-times remove_purchase_entry_row text-danger" title="Remove" style="cursor:pointer;"></i></td>
     </tr>
 @endforeach
-
-<input type="hidden" id="row_count" value="{{ $row_count }}">

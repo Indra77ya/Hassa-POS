@@ -161,13 +161,6 @@ class AdminSidebarMenu
                                 ['icon' => '', 'active' => request()->segment(1) == 'products' && request()->segment(2) == 'create']
                             );
                         }
-                        if (auth()->user()->can('product.view')) {
-                            $sub->url(
-                                action([\App\Http\Controllers\ProductSerialNumberController::class, 'index']),
-                                __('lang_v1.serial_numbers'),
-                                ['icon' => '', 'active' => request()->segment(1) == 'product-serial-numbers']
-                            );
-                        }
                         if (auth()->user()->can('product.create')) {
                             $sub->url(
                                 action([\App\Http\Controllers\SellingPriceGroupController::class, 'updateProductPrice']),
