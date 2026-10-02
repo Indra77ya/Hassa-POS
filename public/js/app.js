@@ -1303,7 +1303,7 @@ $(document).ready(function() {
         serverSide: true,
         bPaginate: false,
         fixedHeader:false,
-        scrollX: true,
+        scrollX: false,
         buttons: [],
         ajax: '/business-location',
         columns: [

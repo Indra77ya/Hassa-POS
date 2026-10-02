@@ -37,19 +37,19 @@
             <table class="table table-bordered table-striped" id="business_location_table" style="width: 100%;">
                 <thead>
                     <tr>
-                        <th style="white-space: nowrap !important; min-width: 160px;">@lang( 'invoice.name' )</th>
-                        <th style="white-space: nowrap !important; min-width: 120px;">@lang( 'lang_v1.location_id' )</th>
-                        <th style="white-space: nowrap !important; min-width: 250px;">@lang( 'business.landmark' )</th>
-                        <th style="white-space: nowrap !important; min-width: 130px;">@lang( 'business.city' )</th>
-                        <th style="white-space: nowrap !important; min-width: 100px;">@lang( 'business.zip_code' )</th>
-                        <th style="white-space: nowrap !important; min-width: 130px;">@lang( 'business.state' )</th>
-                        <th style="white-space: nowrap !important; min-width: 130px;">@lang( 'business.country' )</th>
-                        <th style="white-space: nowrap !important; min-width: 140px;">@lang( 'lang_v1.price_group' )</th>
-                        <th style="white-space: nowrap !important; min-width: 150px;">@lang( 'invoice.invoice_scheme' )</th>
-                        <th style="white-space: nowrap !important; min-width: 170px;">@lang('lang_v1.invoice_layout_for_pos')</th>
-                        <th style="white-space: nowrap !important; min-width: 170px;">@lang('lang_v1.invoice_layout_for_sale')</th>
-                        <th style="white-space: nowrap !important; min-width: 100px;">@lang('sale.status')</th>
-                        <th class="not-export" style="white-space: nowrap !important; min-width: 110px;">@lang( 'messages.action' )</th>
+                        <th>@lang( 'invoice.name' )</th>
+                        <th>@lang( 'lang_v1.location_id' )</th>
+                        <th>@lang( 'business.landmark' )</th>
+                        <th>@lang( 'business.city' )</th>
+                        <th>@lang( 'business.zip_code' )</th>
+                        <th>@lang( 'business.state' )</th>
+                        <th>@lang( 'business.country' )</th>
+                        <th>@lang( 'lang_v1.price_group' )</th>
+                        <th>@lang( 'invoice.invoice_scheme' )</th>
+                        <th>@lang('lang_v1.invoice_layout_for_pos')</th>
+                        <th>@lang('lang_v1.invoice_layout_for_sale')</th>
+                        <th>@lang('sale.status')</th>
+                        <th class="not-export">@lang( 'messages.action' )</th>
                     </tr>
                 </thead>
             </table>
