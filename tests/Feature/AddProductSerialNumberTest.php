@@ -177,4 +177,44 @@ class AddProductSerialNumberTest extends TestCase
             'status' => 'in_stock'
         ]);
     }
+
+    public function test_add_product_fails_when_duplicate_in_stock_serial_number_provided()
+    {
+        // Existing serial in stock
+        ProductSerialNumber::create([
+            'business_id' => $this->business->id,
+            'serial_number' => 'DUPLICATE-SN-999',
+            'purchase_price' => 1000,
+            'selling_price' => 1200,
+            'status' => 'in_stock'
+        ]);
+
+        $data = [
+            'name' => 'Duplicate Test Phone',
+            'unit_id' => $this->unit->id,
+            'category_id' => $this->category->id,
+            'barcode_type' => 'C128',
+            'tax_type' => 'exclusive',
+            'type' => 'single',
+            'enable_sr_no' => 1,
+            'single_dpp' => 10000000,
+            'single_dpp_inc_tax' => 10000000,
+            'profit_percent' => 20,
+            'single_dsp' => 12000000,
+            'single_dsp_inc_tax' => 12000000,
+            'product_serials' => [
+                [
+                    'serial_number' => 'DUPLICATE-SN-999',
+                    'purchase_price' => 10000000,
+                    'selling_price' => 12000000
+                ]
+            ]
+        ];
+
+        $response = $this->post('/products', $data);
+
+        $this->assertDatabaseMissing('products', [
+            'name' => 'Duplicate Test Phone'
+        ]);
+    }
 }

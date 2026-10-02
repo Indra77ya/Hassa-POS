@@ -10,6 +10,7 @@
             <th style="width: 50px !important; white-space: nowrap !important;" class="not-export" data-pdf-include="image">{{__('lang_v1.product_image')}} </th>
             <th class="not-export" style="white-space: nowrap !important;">@lang('messages.action')</th>
             <th style="white-space: nowrap !important;">@lang('sale.product')</th>
+            <th style="white-space: nowrap !important;">@lang('lang_v1.serial_numbers')</th>
             <th style="white-space: nowrap !important;">@lang('purchase.business_location') @show_tooltip(__('lang_v1.product_business_location_tooltip'))</th>
             @can('view_purchase_price')
                 @php 

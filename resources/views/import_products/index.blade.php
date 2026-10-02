@@ -285,6 +285,21 @@
                             <strong>@lang('lang_v1.available_options'): percentage, fixed</strong>
                         </td>
                     </tr>
+                    <tr>
+                        <td>39</td>
+                        <td>@lang('lang_v1.serial_numbers') <small class="text-muted">(@lang('lang_v1.optional'))</small></td>
+                        <td>@lang('lang_v1.serial_number_ins')</td>
+                    </tr>
+                    <tr>
+                        <td>40</td>
+                        <td>@lang('lang_v1.serial_purchase_price') <small class="text-muted">(@lang('lang_v1.optional'))</small></td>
+                        <td>@lang('lang_v1.serial_purchase_price_ins')</td>
+                    </tr>
+                    <tr>
+                        <td>41</td>
+                        <td>@lang('lang_v1.serial_selling_price') <small class="text-muted">(@lang('lang_v1.optional'))</small></td>
+                        <td>@lang('lang_v1.serial_selling_price_ins')</td>
+                    </tr>
 
                 </table>
             @endcomponent

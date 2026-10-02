@@ -1,6 +1,14 @@
 //This file contains all functions used products tab
 
 $(document).ready(function() {
+    // Check initial enable_sr_no state on edit/create forms
+    $('form.product_form').each(function() {
+        if ($(this).find('input[name="enable_sr_no"]').is(':checked')) {
+            $(this).find('input#single_dpp, input#single_dpp_inc_tax, input#single_dsp, input#single_dsp_inc_tax, input#profit_percent').prop('readonly', true);
+            calculate_product_sn_average_prices($(this));
+        }
+    });
+
     // Enable Serial Number toggle
     $(document).on('ifChecked', 'input[name="enable_sr_no"]', function() {
         var form = $(this).closest('form');
@@ -37,6 +45,28 @@ $(document).ready(function() {
             calculate_product_sn_average_prices(form);
         } else {
             toastr.error('At least 1 serial number must be filled.');
+        }
+    });
+
+    // Validate duplicate SN input in product form
+    $(document).on('change blur', '.product_sn_input', function() {
+        var current_input = $(this);
+        var current_val = $.trim(current_input.val());
+        if (current_val === '') return;
+
+        var form = current_input.closest('form');
+        var is_dup = false;
+
+        form.find('.product_sn_input').not(current_input).each(function() {
+            if ($.trim($(this).val()).toLowerCase() === current_val.toLowerCase()) {
+                is_dup = true;
+                return false;
+            }
+        });
+
+        if (is_dup) {
+            toastr.error('Serial Number / IMEI "' + current_val + '" duplikat di dalam form.');
+            current_input.val('').focus();
         }
     });
 
