@@ -678,6 +678,14 @@ class BusinessController extends BaseController
 
                     $sell_line_ids = DB::table('transaction_sell_lines')->whereIn('transaction_id', $sales_ids)->pluck('id')->toArray();
                     if (!empty($sell_line_ids)) {
+                        if (\Illuminate\Support\Facades\Schema::hasTable('sell_line_warranties')) {
+                            DB::table('sell_line_warranties')->whereIn('transaction_sell_line_id', $sell_line_ids)->delete();
+                        }
+                        if (\Illuminate\Support\Facades\Schema::hasTable('product_serial_numbers')) {
+                            DB::table('product_serial_numbers')
+                                ->whereIn('transaction_sell_line_id', $sell_line_ids)
+                                ->update(['transaction_sell_line_id' => null, 'status' => 'in_stock']);
+                        }
                         DB::table('transaction_sell_lines_purchase_lines')->whereIn('sell_line_id', $sell_line_ids)->delete();
                         DB::table('transaction_sell_lines')->whereIn('id', $sell_line_ids)->delete();
                     }
@@ -727,6 +735,9 @@ class BusinessController extends BaseController
 
                     $purchase_line_ids = DB::table('purchase_lines')->whereIn('transaction_id', $purchase_ids)->pluck('id')->toArray();
                     if (!empty($purchase_line_ids)) {
+                        if (\Illuminate\Support\Facades\Schema::hasTable('product_serial_numbers')) {
+                            DB::table('product_serial_numbers')->whereIn('purchase_line_id', $purchase_line_ids)->delete();
+                        }
                         DB::table('transaction_sell_lines_purchase_lines')->whereIn('purchase_line_id', $purchase_line_ids)->delete();
                         DB::table('purchase_lines')->whereIn('id', $purchase_line_ids)->delete();
                     }
@@ -943,6 +954,16 @@ class BusinessController extends BaseController
 
             // Sub-category: products
             if ($reset_all_mst || in_array('products', $reset_master)) {
+                if (\Illuminate\Support\Facades\Schema::hasTable('product_serial_numbers')) {
+                    DB::table('product_serial_numbers')->where('business_id', $business_id)->delete();
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('discounts')) {
+                    $discount_ids = DB::table('discounts')->where('business_id', $business_id)->pluck('id')->toArray();
+                    if (!empty($discount_ids) && \Illuminate\Support\Facades\Schema::hasTable('discount_variations')) {
+                        DB::table('discount_variations')->whereIn('discount_id', $discount_ids)->delete();
+                    }
+                    DB::table('discounts')->where('business_id', $business_id)->delete();
+                }
                 $product_ids = DB::table('products')->where('business_id', $business_id)->pluck('id')->toArray();
                 if (!empty($product_ids)) {
                     DB::table('variation_location_details')->whereIn('product_id', $product_ids)->delete();
@@ -1116,6 +1137,9 @@ class BusinessController extends BaseController
                 }
                 if (\Illuminate\Support\Facades\Schema::hasTable('repair_device_models')) {
                     DB::table('repair_device_models')->where('business_id', $business_id)->delete();
+                }
+                if (\Illuminate\Support\Facades\Schema::hasTable('repair_trade_ins')) {
+                    DB::table('repair_trade_ins')->where('business_id', $business_id)->delete();
                 }
             }
 
