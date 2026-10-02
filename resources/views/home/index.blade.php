@@ -33,9 +33,9 @@
                         </h1>
                     </div>
                     @if ($is_admin)
-                        <div class="tw-mt-2 sm:tw-flex sm:tw-items-center sm:tw-justify-end sm:tw-gap-3 sm:tw-shrink-0">
+                        <div class="tw-mt-2 sm:tw-flex sm:tw-items-center sm:tw-justify-end sm:tw-gap-3">
                             @if (count($all_locations) > 1)
-                                <div class="tw-w-full sm:tw-w-52 md:tw-w-60">
+                                <div class="tw-w-full sm:tw-w-56 md:tw-w-64">
                                     {!! Form::select('dashboard_location', $all_locations, null, [
                                         'class' => 'form-control select2',
                                         'placeholder' => __('lang_v1.select_location'),
@@ -44,10 +44,10 @@
                                 </div>
                             @endif
 
-                            <div class="tw-mt-2 sm:tw-mt-0">
+                            <div class="tw-mt-2 sm:tw-mt-0 tw-shrink-0">
                                 <button type="button" id="dashboard_date_filter"
-                                    class="tw-inline-flex tw-items-center tw-justify-center tw-w-full tw-gap-1 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-gray-900 tw-transition-all tw-duration-200 tw-bg-white tw-rounded-lg sm:tw-w-auto hover:tw-bg-primary-50">
-                                    <svg aria-hidden="true" class="tw-size-5" xmlns="http://www.w3.org/2000/svg"
+                                    class="tw-inline-flex tw-items-center tw-justify-center tw-w-full sm:tw-w-auto tw-gap-1.5 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-gray-900 tw-whitespace-nowrap tw-transition-all tw-duration-200 tw-bg-white tw-rounded-lg hover:tw-bg-primary-50">
+                                    <svg aria-hidden="true" class="tw-size-5 tw-shrink-0" xmlns="http://www.w3.org/2000/svg"
                                         viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none"
                                         stroke-linecap="round" stroke-linejoin="round">
                                         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -63,10 +63,10 @@
                                         <path d="M7.01 17h.005" />
                                         <path d="M10.01 17h.005" />
                                     </svg>
-                                    <span>
+                                    <span class="tw-whitespace-nowrap">
                                         {{ __('messages.filter_by_date') }}
                                     </span>
-                                    <svg aria-hidden="true" class="tw-size-4" xmlns="http://www.w3.org/2000/svg"
+                                    <svg aria-hidden="true" class="tw-size-4 tw-shrink-0" xmlns="http://www.w3.org/2000/svg"
                                         viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
                                         stroke-linecap="round" stroke-linejoin="round">
                                         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
