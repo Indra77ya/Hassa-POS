@@ -1,79 +1,86 @@
-<div class="modal-dialog modal-lg" role="document" style="max-width: 900px;">
-    <div class="modal-content" style="border-radius: 8px; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.2); border: none;">
+<div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content" style="border-radius: 8px; border: none; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);">
         {!! Form::open(['url' => action([\Modules\Superadmin\Http\Controllers\BusinessController::class, 'postResetData'], [$business->id]), 'method' => 'post', 'id' => 'business_reset_data_form' ]) !!}
-        <div class="modal-header" style="background: linear-gradient(135deg, #d9534f 0%, #c9302c 100%); color: white; padding: 15px 20px;">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white; opacity: 0.8; font-size: 24px;"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" style="font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 8px;">
-                <i class="fa fa-undo"></i> @lang('superadmin::lang.reset_business_data') &mdash; <span style="font-weight: 400; opacity: 0.95;">{{ $business->name }}</span>
+
+        <!-- Modal Header -->
+        <div class="modal-header" style="padding: 16px 20px; border-bottom: 1px solid #e2e8f0; background-color: #ffffff; border-top-left-radius: 8px; border-top-right-radius: 8px;">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="font-size: 20px; color: #64748b; opacity: 0.7;"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" style="font-weight: 600; font-size: 16px; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 8px;">
+                <i class="fa fa-undo" style="color: #64748b;"></i>
+                <span>@lang('superadmin::lang.reset_business_data')</span>
+                <span style="color: #94a3b8; font-weight: 400;">&mdash;</span>
+                <span style="color: #334155; font-weight: 500;">{{ $business->name }}</span>
             </h4>
         </div>
 
+        <!-- Modal Body -->
         <div class="modal-body" style="padding: 20px; background-color: #f8fafc;">
-            <!-- Global Select All / Total Reset Banner -->
-            <div class="panel" style="border-radius: 6px; border: 1.5px solid #f87171; background-color: #fef2f2; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                <div class="panel-body" style="padding: 12px 16px;">
-                    <label style="cursor: pointer; font-size: 15px; font-weight: 700; color: #991b1b; margin-bottom: 0; display: flex; align-items: center; gap: 10px;">
-                        {!! Form::checkbox('select_all_global', 1, false, ['id' => 'select_all_global', 'style' => 'width: 18px; height: 18px; cursor: pointer; accent-color: #dc2626;']) !!}
-                        <i class="fa fa-exclamation-triangle text-danger" style="font-size: 18px;"></i>
-                        <span>@lang('superadmin::lang.select_all_global')</span>
-                    </label>
-                    <div class="help-block" style="margin: 4px 0 0 28px; color: #7f1d1d; font-size: 12px; font-weight: 500;">
-                        @lang('superadmin::lang.select_all_global_help')
-                    </div>
+
+            <!-- Global Select All Banner -->
+            <div style="background-color: #ffffff; border: 1px solid #fee2e2; border-left: 4px solid #ef4444; border-radius: 6px; padding: 12px 16px; margin-bottom: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+                <label style="cursor: pointer; font-size: 14px; font-weight: 600; color: #991b1b; margin-bottom: 0; display: flex; align-items: center; gap: 8px;">
+                    {!! Form::checkbox('select_all_global', 1, false, ['id' => 'select_all_global', 'style' => 'width: 16px; height: 16px; cursor: pointer; margin: 0;']) !!}
+                    <i class="fa fa-exclamation-triangle" style="color: #dc2626;"></i>
+                    <span>@lang('superadmin::lang.select_all_global')</span>
+                </label>
+                <div style="margin-top: 4px; margin-left: 24px; color: #64748b; font-size: 12px; font-weight: 400;">
+                    @lang('superadmin::lang.select_all_global_help')
                 </div>
             </div>
 
-            <div class="row">
+            <!-- Categories Columns Grid -->
+            <div class="row" style="margin-left: -8px; margin-right: -8px;">
+
                 <!-- Column 1: Data Transaksi -->
-                <div class="col-md-4">
-                    <div class="panel panel-default" style="border-radius: 6px; border: 1px solid #e2e8f0; min-height: 410px; background-color: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.04); display: flex; flex-direction: column;">
-                        <div class="panel-heading" style="background-color: #fef2f2; border-bottom: 2px solid #ef4444; padding: 10px 14px;">
-                            <label style="cursor: pointer; font-size: 14px; font-weight: 700; color: #991b1b; margin-bottom: 0; display: flex; align-items: center; gap: 8px;">
-                                {!! Form::checkbox('select_all_transactions', 1, false, ['id' => 'select_all_transactions', 'class' => 'parent_category', 'style' => 'width: 16px; height: 16px; accent-color: #dc2626;']) !!}
-                                <i class="fa fa-calculator text-danger"></i>
+                <div class="col-md-4" style="padding-left: 8px; padding-right: 8px;">
+                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; min-height: 380px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); display: flex; flex-direction: column;">
+                        <div style="padding: 12px 14px; border-bottom: 1px solid #f1f5f9; background-color: #fafafa; border-top-left-radius: 6px; border-top-right-radius: 6px;">
+                            <label style="cursor: pointer; font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 0; display: flex; align-items: center; gap: 8px;">
+                                {!! Form::checkbox('select_all_transactions', 1, false, ['id' => 'select_all_transactions', 'class' => 'parent_category', 'style' => 'margin: 0;']) !!}
+                                <i class="fa fa-calculator" style="color: #64748b;"></i>
                                 <span>@lang('superadmin::lang.select_all_transactions')</span>
                             </label>
                         </div>
-                        <div class="panel-body transaction-children-container" style="padding: 12px 14px; flex-grow: 1;">
-                            <div class="checkbox" style="margin-top: 5px; margin-bottom: 10px;">
-                                <label style="font-size: 13px; cursor: pointer; font-weight: 500; color: #334155;">
-                                    {!! Form::checkbox('reset_transactions[]', 'sales', false, ['class' => 'transaction_child child_checkbox', 'style' => 'accent-color: #dc2626;']) !!}
+                        <div class="transaction-children-container" style="padding: 14px; flex-grow: 1;">
+                            <div class="checkbox" style="margin-top: 0; margin-bottom: 10px;">
+                                <label style="font-size: 13px; cursor: pointer; color: #334155; font-weight: 400;">
+                                    {!! Form::checkbox('reset_transactions[]', 'sales', false, ['class' => 'transaction_child child_checkbox']) !!}
                                     @lang('superadmin::lang.reset_sales')
                                 </label>
                             </div>
                             <div class="checkbox" style="margin-bottom: 10px;">
-                                <label style="font-size: 13px; cursor: pointer; font-weight: 500; color: #334155;">
-                                    {!! Form::checkbox('reset_transactions[]', 'purchases', false, ['class' => 'transaction_child child_checkbox', 'style' => 'accent-color: #dc2626;']) !!}
+                                <label style="font-size: 13px; cursor: pointer; color: #334155; font-weight: 400;">
+                                    {!! Form::checkbox('reset_transactions[]', 'purchases', false, ['class' => 'transaction_child child_checkbox']) !!}
                                     @lang('superadmin::lang.reset_purchases')
                                 </label>
                             </div>
                             <div class="checkbox" style="margin-bottom: 10px;">
-                                <label style="font-size: 13px; cursor: pointer; font-weight: 500; color: #334155;">
-                                    {!! Form::checkbox('reset_transactions[]', 'expenses', false, ['class' => 'transaction_child child_checkbox', 'style' => 'accent-color: #dc2626;']) !!}
+                                <label style="font-size: 13px; cursor: pointer; color: #334155; font-weight: 400;">
+                                    {!! Form::checkbox('reset_transactions[]', 'expenses', false, ['class' => 'transaction_child child_checkbox']) !!}
                                     @lang('superadmin::lang.reset_expenses')
                                 </label>
                             </div>
                             <div class="checkbox" style="margin-bottom: 10px;">
-                                <label style="font-size: 13px; cursor: pointer; font-weight: 500; color: #334155;">
-                                    {!! Form::checkbox('reset_transactions[]', 'registers', false, ['class' => 'transaction_child child_checkbox', 'style' => 'accent-color: #dc2626;']) !!}
+                                <label style="font-size: 13px; cursor: pointer; color: #334155; font-weight: 400;">
+                                    {!! Form::checkbox('reset_transactions[]', 'registers', false, ['class' => 'transaction_child child_checkbox']) !!}
                                     @lang('superadmin::lang.reset_registers')
                                 </label>
                             </div>
                             <div class="checkbox" style="margin-bottom: 10px;">
-                                <label style="font-size: 13px; cursor: pointer; font-weight: 500; color: #334155;">
-                                    {!! Form::checkbox('reset_transactions[]', 'stock_adjustments', false, ['class' => 'transaction_child child_checkbox', 'style' => 'accent-color: #dc2626;']) !!}
+                                <label style="font-size: 13px; cursor: pointer; color: #334155; font-weight: 400;">
+                                    {!! Form::checkbox('reset_transactions[]', 'stock_adjustments', false, ['class' => 'transaction_child child_checkbox']) !!}
                                     @lang('superadmin::lang.reset_stock_adjustments')
                                 </label>
                             </div>
                             <div class="checkbox" style="margin-bottom: 10px;">
-                                <label style="font-size: 13px; cursor: pointer; font-weight: 500; color: #334155;">
-                                    {!! Form::checkbox('reset_transactions[]', 'finance', false, ['class' => 'transaction_child child_checkbox', 'style' => 'accent-color: #dc2626;']) !!}
+                                <label style="font-size: 13px; cursor: pointer; color: #334155; font-weight: 400;">
+                                    {!! Form::checkbox('reset_transactions[]', 'finance', false, ['class' => 'transaction_child child_checkbox']) !!}
                                     @lang('superadmin::lang.reset_finance')
                                 </label>
                             </div>
-                            <div class="checkbox" style="margin-bottom: 5px; padding-top: 8px; border-top: 1px dashed #e2e8f0;">
-                                <label style="font-size: 13px; cursor: pointer; color: #dc2626; font-weight: 700;">
-                                    {!! Form::checkbox('reset_transactions[]', 'reset_stock', false, ['class' => 'transaction_child child_checkbox', 'style' => 'accent-color: #dc2626;']) !!}
+                            <div class="checkbox" style="margin-bottom: 0; padding-top: 10px; border-top: 1px solid #f1f5f9;">
+                                <label style="font-size: 13px; cursor: pointer; color: #dc2626; font-weight: 600;">
+                                    {!! Form::checkbox('reset_transactions[]', 'reset_stock', false, ['class' => 'transaction_child child_checkbox']) !!}
                                     @lang('superadmin::lang.reset_stock') <span class="text-danger">*</span>
                                 </label>
                             </div>
@@ -82,61 +89,61 @@
                 </div>
 
                 <!-- Column 2: Data Master -->
-                <div class="col-md-4">
-                    <div class="panel panel-default" style="border-radius: 6px; border: 1px solid #e2e8f0; min-height: 410px; background-color: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.04); display: flex; flex-direction: column;">
-                        <div class="panel-heading" style="background-color: #fffbe3; border-bottom: 2px solid #f59e0b; padding: 10px 14px;">
-                            <label style="cursor: pointer; font-size: 14px; font-weight: 700; color: #92400e; margin-bottom: 0; display: flex; align-items: center; gap: 8px;">
-                                {!! Form::checkbox('select_all_master', 1, false, ['id' => 'select_all_master', 'class' => 'parent_category', 'style' => 'width: 16px; height: 16px; accent-color: #d97706;']) !!}
-                                <i class="fa fa-database text-warning"></i>
+                <div class="col-md-4" style="padding-left: 8px; padding-right: 8px;">
+                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; min-height: 380px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); display: flex; flex-direction: column;">
+                        <div style="padding: 12px 14px; border-bottom: 1px solid #f1f5f9; background-color: #fafafa; border-top-left-radius: 6px; border-top-right-radius: 6px;">
+                            <label style="cursor: pointer; font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 0; display: flex; align-items: center; gap: 8px;">
+                                {!! Form::checkbox('select_all_master', 1, false, ['id' => 'select_all_master', 'class' => 'parent_category', 'style' => 'margin: 0;']) !!}
+                                <i class="fa fa-database" style="color: #64748b;"></i>
                                 <span>@lang('superadmin::lang.select_all_master')</span>
                             </label>
                         </div>
-                        <div class="panel-body master-children-container" style="padding: 12px 14px; flex-grow: 1;">
-                            <div class="checkbox" style="margin-top: 5px; margin-bottom: 10px;">
-                                <label style="font-size: 13px; cursor: pointer; font-weight: 500; color: #334155;">
-                                    {!! Form::checkbox('reset_master[]', 'products', false, ['class' => 'master_child child_checkbox', 'style' => 'accent-color: #d97706;']) !!}
+                        <div class="master-children-container" style="padding: 14px; flex-grow: 1;">
+                            <div class="checkbox" style="margin-top: 0; margin-bottom: 10px;">
+                                <label style="font-size: 13px; cursor: pointer; color: #334155; font-weight: 400;">
+                                    {!! Form::checkbox('reset_master[]', 'products', false, ['class' => 'master_child child_checkbox']) !!}
                                     @lang('superadmin::lang.reset_products')
                                 </label>
                             </div>
                             <div class="checkbox" style="margin-bottom: 10px;">
-                                <label style="font-size: 13px; cursor: pointer; font-weight: 500; color: #334155;">
-                                    {!! Form::checkbox('reset_master[]', 'contacts', false, ['class' => 'master_child child_checkbox', 'style' => 'accent-color: #d97706;']) !!}
+                                <label style="font-size: 13px; cursor: pointer; color: #334155; font-weight: 400;">
+                                    {!! Form::checkbox('reset_master[]', 'contacts', false, ['class' => 'master_child child_checkbox']) !!}
                                     @lang('superadmin::lang.reset_contacts')
                                 </label>
                             </div>
                             <div class="checkbox" style="margin-bottom: 10px;">
-                                <label style="font-size: 13px; cursor: pointer; font-weight: 500; color: #334155;">
-                                    {!! Form::checkbox('reset_master[]', 'categories', false, ['class' => 'master_child child_checkbox', 'style' => 'accent-color: #d97706;']) !!}
+                                <label style="font-size: 13px; cursor: pointer; color: #334155; font-weight: 400;">
+                                    {!! Form::checkbox('reset_master[]', 'categories', false, ['class' => 'master_child child_checkbox']) !!}
                                     @lang('superadmin::lang.reset_categories')
                                 </label>
                             </div>
                             <div class="checkbox" style="margin-bottom: 10px;">
-                                <label style="font-size: 13px; cursor: pointer; font-weight: 500; color: #334155;">
-                                    {!! Form::checkbox('reset_master[]', 'brands', false, ['class' => 'master_child child_checkbox', 'style' => 'accent-color: #d97706;']) !!}
+                                <label style="font-size: 13px; cursor: pointer; color: #334155; font-weight: 400;">
+                                    {!! Form::checkbox('reset_master[]', 'brands', false, ['class' => 'master_child child_checkbox']) !!}
                                     @lang('superadmin::lang.reset_brands')
                                 </label>
                             </div>
                             <div class="checkbox" style="margin-bottom: 10px;">
-                                <label style="font-size: 13px; cursor: pointer; font-weight: 500; color: #334155;">
-                                    {!! Form::checkbox('reset_master[]', 'taxes', false, ['class' => 'master_child child_checkbox', 'style' => 'accent-color: #d97706;']) !!}
+                                <label style="font-size: 13px; cursor: pointer; color: #334155; font-weight: 400;">
+                                    {!! Form::checkbox('reset_master[]', 'taxes', false, ['class' => 'master_child child_checkbox']) !!}
                                     @lang('superadmin::lang.reset_taxes')
                                 </label>
                             </div>
                             <div class="checkbox" style="margin-bottom: 10px;">
-                                <label style="font-size: 13px; cursor: pointer; font-weight: 500; color: #334155;">
-                                    {!! Form::checkbox('reset_master[]', 'units', false, ['class' => 'master_child child_checkbox', 'style' => 'accent-color: #d97706;']) !!}
+                                <label style="font-size: 13px; cursor: pointer; color: #334155; font-weight: 400;">
+                                    {!! Form::checkbox('reset_master[]', 'units', false, ['class' => 'master_child child_checkbox']) !!}
                                     @lang('superadmin::lang.reset_units')
                                 </label>
                             </div>
                             <div class="checkbox" style="margin-bottom: 10px;">
-                                <label style="font-size: 13px; cursor: pointer; font-weight: 500; color: #334155;">
-                                    {!! Form::checkbox('reset_master[]', 'customer_groups', false, ['class' => 'master_child child_checkbox', 'style' => 'accent-color: #d97706;']) !!}
+                                <label style="font-size: 13px; cursor: pointer; color: #334155; font-weight: 400;">
+                                    {!! Form::checkbox('reset_master[]', 'customer_groups', false, ['class' => 'master_child child_checkbox']) !!}
                                     @lang('superadmin::lang.reset_customer_groups')
                                 </label>
                             </div>
-                            <div class="checkbox" style="margin-bottom: 5px;">
-                                <label style="font-size: 13px; cursor: pointer; font-weight: 500; color: #334155;">
-                                    {!! Form::checkbox('reset_master[]', 'warranties', false, ['class' => 'master_child child_checkbox', 'style' => 'accent-color: #d97706;']) !!}
+                            <div class="checkbox" style="margin-bottom: 0;">
+                                <label style="font-size: 13px; cursor: pointer; color: #334155; font-weight: 400;">
+                                    {!! Form::checkbox('reset_master[]', 'warranties', false, ['class' => 'master_child child_checkbox']) !!}
                                     @lang('superadmin::lang.reset_warranties')
                                 </label>
                             </div>
@@ -145,62 +152,66 @@
                 </div>
 
                 <!-- Column 3: Data Modul -->
-                <div class="col-md-4">
-                    <div class="panel panel-default" style="border-radius: 6px; border: 1px solid #e2e8f0; min-height: 410px; background-color: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.04); display: flex; flex-direction: column;">
-                        <div class="panel-heading" style="background-color: #eff6ff; border-bottom: 2px solid #3b82f6; padding: 10px 14px;">
-                            <label style="cursor: pointer; font-size: 14px; font-weight: 700; color: #1e40af; margin-bottom: 0; display: flex; align-items: center; gap: 8px;">
-                                {!! Form::checkbox('select_all_modules', 1, false, ['id' => 'select_all_modules', 'class' => 'parent_category', 'style' => 'width: 16px; height: 16px; accent-color: #2563eb;']) !!}
-                                <i class="fa fa-cubes text-primary"></i>
+                <div class="col-md-4" style="padding-left: 8px; padding-right: 8px;">
+                    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; min-height: 380px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); display: flex; flex-direction: column;">
+                        <div style="padding: 12px 14px; border-bottom: 1px solid #f1f5f9; background-color: #fafafa; border-top-left-radius: 6px; border-top-right-radius: 6px;">
+                            <label style="cursor: pointer; font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 0; display: flex; align-items: center; gap: 8px;">
+                                {!! Form::checkbox('select_all_modules', 1, false, ['id' => 'select_all_modules', 'class' => 'parent_category', 'style' => 'margin: 0;']) !!}
+                                <i class="fa fa-cubes" style="color: #64748b;"></i>
                                 <span>@lang('superadmin::lang.select_all_modules')</span>
                             </label>
                         </div>
-                        <div class="panel-body module-children-container" style="padding: 12px 14px; flex-grow: 1;">
-                            <div class="checkbox" style="margin-top: 5px; margin-bottom: 10px;">
-                                <label style="font-size: 13px; cursor: pointer; font-weight: 500; color: #334155;">
-                                    {!! Form::checkbox('reset_modules[]', 'asset_management', false, ['class' => 'module_child child_checkbox', 'style' => 'accent-color: #2563eb;']) !!}
+                        <div class="module-children-container" style="padding: 14px; flex-grow: 1;">
+                            <div class="checkbox" style="margin-top: 0; margin-bottom: 10px;">
+                                <label style="font-size: 13px; cursor: pointer; color: #334155; font-weight: 400;">
+                                    {!! Form::checkbox('reset_modules[]', 'asset_management', false, ['class' => 'module_child child_checkbox']) !!}
                                     @lang('superadmin::lang.reset_asset_management')
                                 </label>
                             </div>
                             <div class="checkbox" style="margin-bottom: 10px;">
-                                <label style="font-size: 13px; cursor: pointer; font-weight: 500; color: #334155;">
-                                    {!! Form::checkbox('reset_modules[]', 'manufacturing', false, ['class' => 'module_child child_checkbox', 'style' => 'accent-color: #2563eb;']) !!}
+                                <label style="font-size: 13px; cursor: pointer; color: #334155; font-weight: 400;">
+                                    {!! Form::checkbox('reset_modules[]', 'manufacturing', false, ['class' => 'module_child child_checkbox']) !!}
                                     @lang('superadmin::lang.reset_manufacturing')
                                 </label>
                             </div>
                             <div class="checkbox" style="margin-bottom: 10px;">
-                                <label style="font-size: 13px; cursor: pointer; font-weight: 500; color: #334155;">
-                                    {!! Form::checkbox('reset_modules[]', 'repair', false, ['class' => 'module_child child_checkbox', 'style' => 'accent-color: #2563eb;']) !!}
+                                <label style="font-size: 13px; cursor: pointer; color: #334155; font-weight: 400;">
+                                    {!! Form::checkbox('reset_modules[]', 'repair', false, ['class' => 'module_child child_checkbox']) !!}
                                     @lang('superadmin::lang.reset_repair')
                                 </label>
                             </div>
                             <div class="checkbox" style="margin-bottom: 10px;">
-                                <label style="font-size: 13px; cursor: pointer; font-weight: 500; color: #334155;">
-                                    {!! Form::checkbox('reset_modules[]', 'essentials', false, ['class' => 'module_child child_checkbox', 'style' => 'accent-color: #2563eb;']) !!}
+                                <label style="font-size: 13px; cursor: pointer; color: #334155; font-weight: 400;">
+                                    {!! Form::checkbox('reset_modules[]', 'essentials', false, ['class' => 'module_child child_checkbox']) !!}
                                     @lang('superadmin::lang.reset_essentials')
                                 </label>
                             </div>
                             <div class="checkbox" style="margin-bottom: 10px;">
-                                <label style="font-size: 13px; cursor: pointer; font-weight: 500; color: #334155;">
-                                    {!! Form::checkbox('reset_modules[]', 'crm', false, ['class' => 'module_child child_checkbox', 'style' => 'accent-color: #2563eb;']) !!}
+                                <label style="font-size: 13px; cursor: pointer; color: #334155; font-weight: 400;">
+                                    {!! Form::checkbox('reset_modules[]', 'crm', false, ['class' => 'module_child child_checkbox']) !!}
                                     @lang('superadmin::lang.reset_crm')
                                 </label>
                             </div>
-                            <div class="checkbox" style="margin-bottom: 5px;">
-                                <label style="font-size: 13px; cursor: pointer; font-weight: 500; color: #334155;">
-                                    {!! Form::checkbox('reset_modules[]', 'laundry', false, ['class' => 'module_child child_checkbox', 'style' => 'accent-color: #2563eb;']) !!}
+                            <div class="checkbox" style="margin-bottom: 0;">
+                                <label style="font-size: 13px; cursor: pointer; color: #334155; font-weight: 400;">
+                                    {!! Form::checkbox('reset_modules[]', 'laundry', false, ['class' => 'module_child child_checkbox']) !!}
                                     @lang('superadmin::lang.reset_laundry')
                                 </label>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
 
-        <div class="modal-footer" style="background-color: #f1f5f9; padding: 12px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px;">
-            <button type="button" class="btn btn-default" data-dismiss="modal" style="font-weight: 600; border-radius: 4px;">@lang('messages.close')</button>
-            <button type="submit" class="btn btn-danger" id="btn-submit-reset" style="font-weight: 600; border-radius: 4px; background-color: #dc2626; border-color: #dc2626;">
-                <i class="fa fa-refresh"></i> @lang('superadmin::lang.reset_selected')
+        <!-- Modal Footer -->
+        <div class="modal-footer" style="padding: 12px 20px; border-top: 1px solid #e2e8f0; background-color: #ffffff; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; display: flex; justify-content: flex-end; gap: 8px;">
+            <button type="button" class="btn btn-default" data-dismiss="modal" style="font-weight: 500; font-size: 13px; color: #475569; border-color: #cbd5e1; border-radius: 4px; padding: 6px 16px;">
+                @lang('messages.close')
+            </button>
+            <button type="submit" class="btn btn-danger" id="btn-submit-reset" style="font-weight: 500; font-size: 13px; background-color: #dc2626; border-color: #dc2626; border-radius: 4px; padding: 6px 18px;">
+                <i class="fa fa-undo" style="margin-right: 4px;"></i> @lang('superadmin::lang.reset_selected')
             </button>
         </div>
         {!! Form::close() !!}
