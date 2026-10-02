@@ -341,6 +341,12 @@
                         name: 'products.name'
                     },
                     {
+                        data: 'serial_numbers',
+                        name: 'serial_numbers',
+                        searchable: false,
+                        orderable: false
+                    },
+                    {
                         data: 'product_locations',
                         name: 'product_locations'
                     },
