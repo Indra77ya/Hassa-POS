@@ -16,7 +16,7 @@ class ProductSerialNumberUtil extends Util
      * @param int|null $exclude_purchase_line_id
      * @return array
      */
-    public function checkDuplicateInStockSerials($business_id, array $serials, $exclude_purchase_line_ids = null)
+    public function checkDuplicateInStockSerials($business_id, array $serials, $exclude_purchase_line_ids = null, $exclude_product_id = null)
     {
         $serials = array_values(array_filter(array_map('trim', $serials)));
         if (empty($serials)) {
@@ -42,6 +42,10 @@ class ProductSerialNumberUtil extends Util
         $query = ProductSerialNumber::where('business_id', $business_id)
             ->where('status', 'in_stock')
             ->whereIn('serial_number', $serials);
+
+        if (!empty($exclude_product_id)) {
+            $query->where('product_id', '!=', $exclude_product_id);
+        }
 
         if (!empty($exclude_purchase_line_ids)) {
             $exclude_ids = is_array($exclude_purchase_line_ids) ? $exclude_purchase_line_ids : [$exclude_purchase_line_ids];
