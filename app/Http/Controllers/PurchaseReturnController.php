@@ -348,7 +348,7 @@ class PurchaseReturnController extends Controller
         $business_id = request()->session()->get('user.business_id');
 
         $purchase = Transaction::where('business_id', $business_id)
-                        ->with(['return_parent', 'return_parent.tax', 'purchase_lines', 'contact', 'tax', 'purchase_lines.sub_unit', 'purchase_lines.product', 'purchase_lines.product.unit'])
+                        ->with(['return_parent', 'return_parent.tax', 'purchase_lines', 'purchase_lines.serial_numbers', 'contact', 'tax', 'purchase_lines.sub_unit', 'purchase_lines.product', 'purchase_lines.product.unit'])
                         ->find($id);
 
         foreach ($purchase->purchase_lines as $key => $value) {

@@ -10,6 +10,7 @@ use App\TaxRate;
 use App\Transaction;
 use App\Unit;
 use App\Utils\ModuleUtil;
+use App\Utils\ProductSerialNumberUtil;
 use App\Utils\ProductUtil;
 use App\Variation;
 use App\VariationValueTemplate;
@@ -118,8 +119,47 @@ class ImportProductsController extends Controller
                 }
 
                 $business_locations = BusinessLocation::where('business_id', $business_id)->get();
-                DB::beginTransaction();
+
+                // Pre-check for duplicate Serial Numbers across input file and database in-stock records
+                $all_input_serials = [];
                 foreach ($imported_data as $key => $value) {
+                    $sn = isset($value[38]) ? trim($value[38]) : '';
+                    if (! empty($sn)) {
+                        $all_input_serials[] = $sn;
+                    }
+                }
+
+                if (! empty($all_input_serials)) {
+                    $snUtil = new ProductSerialNumberUtil();
+                    $duplicates = $snUtil->checkDuplicateInStockSerials($business_id, $all_input_serials);
+                    if (! empty($duplicates)) {
+                        $dup_str = implode(', ', $duplicates);
+                        throw new \Exception("Serial number / IMEI '{$dup_str}' sudah ada (in stock) atau terduplikasi.");
+                    }
+                }
+
+                DB::beginTransaction();
+
+                // Group imported data rows by SKU or Product Name (if SKU is blank)
+                $grouped_imported_data = [];
+                foreach ($imported_data as $key => $value) {
+                    $sku = trim($value[5] ?? '');
+                    $p_name = trim($value[0] ?? '');
+                    $group_key = ! empty($sku) ? 'sku_' . strtolower($sku) : 'name_' . strtolower($p_name);
+
+                    if (! isset($grouped_imported_data[$group_key])) {
+                        $grouped_imported_data[$group_key] = [];
+                    }
+                    $grouped_imported_data[$group_key][] = [
+                        'row_no' => $key + 1,
+                        'data' => $value,
+                    ];
+                }
+
+                foreach ($grouped_imported_data as $group_key => $rows) {
+                    $first_row_item = $rows[0];
+                    $value = $first_row_item['data'];
+                    $row_no = $first_row_item['row_no'];
 
                     //Check if any column is missing
                     if (count($value) < 37) {
@@ -128,10 +168,10 @@ class ImportProductsController extends Controller
                         break;
                     }
 
-                    $row_no = $key + 1;
                     $product_array = [];
                     $product_array['business_id'] = $business_id;
                     $product_array['created_by'] = $user_id;
+                    $product_array['original_row_index'] = $first_row_item['row_no'] - 1;
 
                     //Add name
                     $product_name = trim($value[0]);
@@ -311,7 +351,7 @@ class ImportProductsController extends Controller
                     $sku = trim($value[5]);
                     if (! empty($sku)) {
                         $product_array['sku'] = $sku;
-                        //Check if product with same SKU already exist
+                        //Check if product with same SKU already exist in database
                         $is_exist = Product::where('sku', $product_array['sku'])
                                         ->where('business_id', $business_id)
                                         ->exists();
@@ -350,6 +390,28 @@ class ImportProductsController extends Controller
                         break;
                     }
 
+                    // Extract serial numbers and custom prices across all grouped rows
+                    $serials_list = [];
+                    $sn_details = [];
+                    if ($product_array['enable_sr_no'] == 1) {
+                        foreach ($rows as $r) {
+                            $r_val = $r['data'];
+                            $sn = isset($r_val[38]) ? trim($r_val[38]) : '';
+                            if (! empty($sn)) {
+                                $serials_list[] = $sn;
+                                $sn_pp = isset($r_val[39]) && trim($r_val[39]) !== '' ? $this->productUtil->num_uf(trim($r_val[39])) : null;
+                                $sn_sp = isset($r_val[40]) && trim($r_val[40]) !== '' ? $this->productUtil->num_uf(trim($r_val[40])) : null;
+                                $sn_details[$sn] = [
+                                    'purchase_price' => $sn_pp,
+                                    'selling_price' => $sn_sp,
+                                ];
+                            }
+                        }
+                    }
+
+                    $product_array['serials_list'] = $serials_list;
+                    $product_array['sn_details'] = $sn_details;
+
                     //Weight
                     if (isset($value[25])) {
                         $product_array['weight'] = trim($value[25]);
@@ -379,12 +441,32 @@ class ImportProductsController extends Controller
                             $error_msg = "PURCHASE PRICE is required in row no. $row_no";
                             break;
                         } else {
-                            $dpp_inc_tax = ($dpp_inc_tax != '') ? $dpp_inc_tax : 0;
-                            $dpp_exc_tax = ($dpp_exc_tax != '') ? $dpp_exc_tax : 0;
+                            $dpp_inc_tax = ($dpp_inc_tax != '') ? $this->productUtil->num_uf($dpp_inc_tax) : 0;
+                            $dpp_exc_tax = ($dpp_exc_tax != '') ? $this->productUtil->num_uf($dpp_exc_tax) : 0;
                         }
 
                         //Calculate Selling price
-                        $selling_price = ! empty(trim($value[20])) ? trim($value[20]) : 0;
+                        $selling_price = ! empty(trim($value[20])) ? $this->productUtil->num_uf(trim($value[20])) : 0;
+
+                        // Calculate average prices from serial numbers if provided
+                        if ($product_array['enable_sr_no'] == 1 && ! empty($sn_details)) {
+                            $sum_sn_pp = 0;
+                            $sum_sn_sp = 0;
+                            $sn_count = count($sn_details);
+
+                            foreach ($sn_details as $sn_code => $prices) {
+                                $sum_sn_pp += ($prices['purchase_price'] !== null) ? $prices['purchase_price'] : $dpp_exc_tax;
+                                $sum_sn_sp += ($prices['selling_price'] !== null) ? $prices['selling_price'] : $selling_price;
+                            }
+
+                            if ($sn_count > 0) {
+                                $avg_pp = $sum_sn_pp / $sn_count;
+                                $avg_sp = $sum_sn_sp / $sn_count;
+                                $dpp_exc_tax = $avg_pp;
+                                $dpp_inc_tax = 0; // reset so calculateVariationPrices recomputes with tax
+                                $selling_price = $avg_sp;
+                            }
+                        }
 
                         //Calculate product prices
                         $product_prices = $this->calculateVariationPrices($dpp_exc_tax, $dpp_inc_tax, $selling_price, $tax_amount, $tax_type, $profit_margin, $profit_margin_type);
@@ -396,33 +478,43 @@ class ImportProductsController extends Controller
                         $product_array['variation']['dsp_exc_tax'] = $product_prices['dsp_exc_tax'];
 
                         //Opening stock
-                        if (! empty($value[21]) && $enable_stock == 1) {
-                            $product_array['opening_stock_details']['quantity'] = trim($value[21]);
+                        if ($enable_stock == 1) {
+                            $opening_stock_qty = 0;
 
-                            if (! empty(trim($value[22]))) {
-                                $location_name = trim($value[22]);
-                                $location = BusinessLocation::where('name', $location_name)
-                                                            ->where('business_id', $business_id)
-                                                            ->first();
-                                if (! empty($location)) {
-                                    $product_array['opening_stock_details']['location_id'] = $location->id;
-                                } else {
-                                    $is_valid = false;
-                                    $error_msg = "No location with name '$location_name' found in row no. $row_no";
-                                    break;
-                                }
-                            } else {
-                                $location = BusinessLocation::where('business_id', $business_id)->first();
-                                $product_array['opening_stock_details']['location_id'] = $location->id;
+                            if ($product_array['enable_sr_no'] == 1 && ! empty($serials_list)) {
+                                $opening_stock_qty = count($serials_list);
+                            } elseif (! empty($value[21])) {
+                                $opening_stock_qty = $this->productUtil->num_uf(trim($value[21]));
                             }
 
-                            $product_array['opening_stock_details']['expiry_date'] = null;
+                            if ($opening_stock_qty > 0) {
+                                $product_array['opening_stock_details']['quantity'] = $opening_stock_qty;
 
-                            //Stock expiry date
-                            if (! empty($value[23])) {
-                                $product_array['opening_stock_details']['exp_date'] = \Carbon::createFromFormat('m-d-Y', trim($value[23]))->format('Y-m-d');
-                            } else {
-                                $product_array['opening_stock_details']['exp_date'] = null;
+                                if (! empty(trim($value[22]))) {
+                                    $location_name = trim($value[22]);
+                                    $location = BusinessLocation::where('name', $location_name)
+                                                                ->where('business_id', $business_id)
+                                                                ->first();
+                                    if (! empty($location)) {
+                                        $product_array['opening_stock_details']['location_id'] = $location->id;
+                                    } else {
+                                        $is_valid = false;
+                                        $error_msg = "No location with name '$location_name' found in row no. $row_no";
+                                        break;
+                                    }
+                                } else {
+                                    $location = BusinessLocation::where('business_id', $business_id)->first();
+                                    $product_array['opening_stock_details']['location_id'] = $location->id;
+                                }
+
+                                $product_array['opening_stock_details']['expiry_date'] = null;
+
+                                //Stock expiry date
+                                if (! empty($value[23])) {
+                                    $product_array['opening_stock_details']['exp_date'] = \Carbon::createFromFormat('m-d-Y', trim($value[23]))->format('Y-m-d');
+                                } else {
+                                    $product_array['opening_stock_details']['exp_date'] = null;
+                                }
                             }
                         }
                     } elseif ($product_array['type'] == 'variable') {
@@ -585,8 +677,6 @@ class ImportProductsController extends Controller
                         if (! empty($value[21]) && $enable_stock == 1) {
                             $variation_os = array_map('trim', explode('|', $value[21]));
 
-                            //$product_array['opening_stock_details']['quantity'] = $variation_os;
-
                             //Check if count of variation and opening stock is matching or not.
                             if (count($product_array['variation']['variations']) != count($variation_os)) {
                                 $is_valid = false;
@@ -634,6 +724,14 @@ class ImportProductsController extends Controller
                         $variation_data = $product_data['variation'];
                         unset($product_data['variation']);
 
+                        $serials_list = $product_data['serials_list'] ?? [];
+                        $sn_details = $product_data['sn_details'] ?? [];
+                        $orig_row_idx = $product_data['original_row_index'] ?? $index;
+
+                        unset($product_data['serials_list']);
+                        unset($product_data['sn_details']);
+                        unset($product_data['original_row_index']);
+
                         $opening_stock = null;
                         if (! empty($product_data['opening_stock_details'])) {
                             $opening_stock = $product_data['opening_stock_details'];
@@ -653,17 +751,17 @@ class ImportProductsController extends Controller
 
                         //Rack, Row & Position.
                         $this->rackDetails(
-                            $imported_data[$index][26],
-                            $imported_data[$index][27],
-                            $imported_data[$index][28],
+                            $imported_data[$orig_row_idx][26] ?? null,
+                            $imported_data[$orig_row_idx][27] ?? null,
+                            $imported_data[$orig_row_idx][28] ?? null,
                             $business_id,
                             $product->id,
-                            $index + 1
+                            $orig_row_idx + 1
                         );
 
                         //Product locations
-                        if (! empty($imported_data[$index][36])) {
-                            $locations_array = explode(',', $imported_data[$index][36]);
+                        if (! empty($imported_data[$orig_row_idx][36])) {
+                            $locations_array = explode(',', $imported_data[$orig_row_idx][36]);
                             $location_ids = [];
                             foreach ($locations_array as $business_location) {
                                 foreach ($business_locations as $loc) {
@@ -690,9 +788,32 @@ class ImportProductsController extends Controller
                                 [],
                                 $variation_data['profit_margin_type']
                             );
+
+                            $purchase_line_id = null;
                             if (! empty($opening_stock)) {
-                                $this->addOpeningStock($opening_stock, $product, $business_id);
+                                $purchase_line = $this->addOpeningStock($opening_stock, $product, $business_id);
+                                if ($purchase_line) {
+                                    $purchase_line_id = $purchase_line->id;
+                                }
                             }
+
+                            // Sync Serial Numbers for Single Product
+                            if (! empty($product->enable_sr_no) && $product->enable_sr_no == 1 && ! empty($serials_list)) {
+                                $first_variation = $product->variations()->first();
+                                $variation_id = $first_variation ? $first_variation->id : null;
+
+                                $snUtil = new ProductSerialNumberUtil();
+                                $snUtil->syncPurchaseSerialNumbers(
+                                    $business_id,
+                                    $product->id,
+                                    $variation_id,
+                                    $purchase_line_id,
+                                    $serials_list,
+                                    $variation_data['dpp_exc_tax'],
+                                    $sn_details
+                                );
+                            }
+
                         } elseif ($product->type == 'variable') {
                             //Create variable product variations and with_out_variation is sku type of variation
 
@@ -792,7 +913,7 @@ class ImportProductsController extends Controller
      * @param  array  $opening_stock
      * @param  obj  $product
      * @param  int  $business_id
-     * @return void
+     * @return \App\PurchaseLine|null
      */
     private function addOpeningStock($opening_stock, $product, $business_id)
     {
@@ -827,7 +948,7 @@ class ImportProductsController extends Controller
         $item_tax = $this->productUtil->calc_percentage($variation->default_purchase_price, $tax_percent);
 
         //Create purchase line
-        $transaction->purchase_lines()->create([
+        $purchase_line = $transaction->purchase_lines()->create([
             'product_id' => $product->id,
             'variation_id' => $variation->id,
             'quantity' => $opening_stock['quantity'],
@@ -843,6 +964,8 @@ class ImportProductsController extends Controller
 
         //Add product location
         $this->__addProductLocation($product, $opening_stock['location_id']);
+
+        return $purchase_line;
     }
 
     private function __addProductLocation($product, $location_id)

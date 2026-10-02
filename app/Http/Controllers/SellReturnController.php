@@ -443,6 +443,7 @@ class SellReturnController extends Controller
                 'sell_lines.product',
                 'sell_lines.variations',
                 'sell_lines.sub_unit',
+                'sell_lines.serial_numbers',
                 'sell_lines.product',
                 'sell_lines.product.unit',
                 'location'

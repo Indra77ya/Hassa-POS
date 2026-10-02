@@ -23,8 +23,18 @@
                 <small class="text-primary"><strong>@lang('lang_v1.sn_input_help')</strong></small>
                 <select name="purchases[{{$row_count}}][serial_numbers][]" class="form-control input-sm purchase_sn_select" multiple="multiple" style="width: 100%;" data-row_index="{{$row_count}}">
                     @foreach($existing_sn_records as $sn_rec)
-                        <option value="{{$sn_rec->serial_number}}" data-status="{{$sn_rec->status}}" data-is_existing_instock="1">
-                            {{$sn_rec->serial_number}} (@lang('lang_v1.in_stock'))
+                        @php
+                            $is_unlinked = empty($sn_rec->purchase_line_id);
+                        @endphp
+                        <option value="{{$sn_rec->serial_number}}"
+                                data-status="{{$sn_rec->status}}"
+                                data-is_existing_instock="{{ $is_unlinked ? 0 : 1 }}"
+                                data-purchase_price="{{@num_format($sn_rec->purchase_price)}}"
+                                data-purchase-price="{{@num_format($sn_rec->purchase_price)}}"
+                                data-selling_price="{{@num_format($sn_rec->selling_price)}}"
+                                data-selling-price="{{@num_format($sn_rec->selling_price)}}"
+                                @if($is_unlinked) selected="selected" @endif>
+                            {{$sn_rec->serial_number}}
                         </option>
                     @endforeach
                 </select>

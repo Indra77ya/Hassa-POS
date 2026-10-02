@@ -62,8 +62,15 @@ $(document).ready(function() {
                 $.each(selected, function(i, sn) {
                     sn = $.trim(sn);
                     if (sn) {
-                        var pp = existing_rows[sn] ? existing_rows[sn].purchase_price : default_pp;
-                        var sp = existing_rows[sn] ? existing_rows[sn].selling_price : default_sp;
+                        var opt = $select.find('option[value="' + sn + '"]');
+                        var opt_pp = opt.length ? (opt.data('purchase_price') || opt.data('purchase-price') || opt.attr('data-purchase_price') || opt.attr('data-purchase-price')) : null;
+                        var opt_sp = opt.length ? (opt.data('selling_price') || opt.data('selling-price') || opt.attr('data-selling_price') || opt.attr('data-selling-price')) : null;
+
+                        var raw_pp = (opt_pp !== null && typeof opt_pp !== 'undefined' && opt_pp !== '') ? opt_pp : (existing_rows[sn] ? existing_rows[sn].purchase_price : default_pp);
+                        var raw_sp = (opt_sp !== null && typeof opt_sp !== 'undefined' && opt_sp !== '') ? opt_sp : (existing_rows[sn] ? existing_rows[sn].selling_price : default_sp);
+
+                        var pp = typeof raw_pp === 'number' ? __number_f(raw_pp) : raw_pp;
+                        var sp = typeof raw_sp === 'number' ? __number_f(raw_sp) : raw_sp;
                         var row_html = '<tr data-sn="' + sn + '">' +
                             '<td><strong>' + sn + '</strong></td>' +
                             '<td><input type="text" name="purchases[' + row_idx + '][sn_details][' + sn + '][purchase_price]" class="form-control input-sm input_number" value="' + pp + '"></td>' +
@@ -75,6 +82,53 @@ $(document).ready(function() {
             }
 
             update_sn_row_average_prices(tr);
+        }
+    });
+
+    $(document).on('change', '.purchase_sn_select', function() {
+        var $current_select = $(this);
+        var current_vals = $current_select.val() || [];
+
+        if (current_vals.length > 0) {
+            var all_selected = [];
+            var has_dup = false;
+            var dup_sn = '';
+
+            $('.purchase_sn_select').each(function() {
+                var $other = $(this);
+                var vals = $other.val() || [];
+                $.each(vals, function(i, sn) {
+                    sn = $.trim(sn);
+                    if (!sn) return;
+                    if ($other.is($current_select)) {
+                        if (all_selected.indexOf(sn.toLowerCase()) !== -1) {
+                            has_dup = true;
+                            dup_sn = sn;
+                            return false;
+                        }
+                    } else {
+                        if (all_selected.indexOf(sn.toLowerCase()) !== -1) {
+                            has_dup = true;
+                            dup_sn = sn;
+                            return false;
+                        }
+                    }
+                    all_selected.push(sn.toLowerCase());
+                });
+                if (has_dup) return false;
+            });
+
+            if (has_dup) {
+                toastr.error('Serial Number / IMEI "' + dup_sn + '" terduplikasi di dalam tabel.');
+                var clean_vals = [];
+                $.each(current_vals, function(i, v) {
+                    if ($.trim(v).toLowerCase() !== dup_sn.toLowerCase()) {
+                        clean_vals.push(v);
+                    }
+                });
+                $current_select.val(clean_vals).trigger('change.select2');
+                return;
+            }
         }
     });
 
@@ -893,6 +947,9 @@ function init_purchase_sn_select(element) {
             placeholder: "Scan / ketik SN per-unit",
             width: '100%'
         });
+        if ($el.val() && $el.val().length > 0) {
+            $el.trigger('change');
+        }
     });
 }
 
