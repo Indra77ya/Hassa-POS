@@ -398,8 +398,51 @@ $(document).ready(function() {
     }
 
     $('table#pos_table tbody').on('change', '.pos_serial_number_select', function() {
-        var tr = $(this).closest('tr');
-        var selected_vals = $(this).val();
+        var $current_select = $(this);
+        var tr = $current_select.closest('tr');
+        var selected_vals = $current_select.val();
+
+        if (selected_vals && selected_vals.length > 0) {
+            var all_selected = [];
+            var has_dup = false;
+            var dup_sn = '';
+
+            $('.pos_serial_number_select').each(function() {
+                var $other = $(this);
+                var vals = $other.val() || [];
+                $.each(vals, function(i, sn) {
+                    sn = $.trim(sn);
+                    if (!sn) return;
+                    if ($other.is($current_select)) {
+                        if (all_selected.indexOf(sn.toLowerCase()) !== -1) {
+                            has_dup = true;
+                            dup_sn = sn;
+                            return false;
+                        }
+                    } else {
+                        if (all_selected.indexOf(sn.toLowerCase()) !== -1) {
+                            has_dup = true;
+                            dup_sn = sn;
+                            return false;
+                        }
+                    }
+                    all_selected.push(sn.toLowerCase());
+                });
+                if (has_dup) return false;
+            });
+
+            if (has_dup) {
+                toastr.error('Serial Number / IMEI "' + dup_sn + '" terduplikasi di keranjang penjualan.');
+                var clean_vals = [];
+                $.each(selected_vals, function(i, v) {
+                    if ($.trim(v).toLowerCase() !== dup_sn.toLowerCase()) {
+                        clean_vals.push(v);
+                    }
+                });
+                $current_select.val(clean_vals).trigger('change.select2');
+                return;
+            }
+        }
         var count = selected_vals ? selected_vals.length : 0;
         var qty_elem = tr.find('input.pos_quantity');
         if (count > 0) {

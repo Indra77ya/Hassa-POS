@@ -85,6 +85,53 @@ $(document).ready(function() {
         }
     });
 
+    $(document).on('change', '.purchase_sn_select', function() {
+        var $current_select = $(this);
+        var current_vals = $current_select.val() || [];
+
+        if (current_vals.length > 0) {
+            var all_selected = [];
+            var has_dup = false;
+            var dup_sn = '';
+
+            $('.purchase_sn_select').each(function() {
+                var $other = $(this);
+                var vals = $other.val() || [];
+                $.each(vals, function(i, sn) {
+                    sn = $.trim(sn);
+                    if (!sn) return;
+                    if ($other.is($current_select)) {
+                        if (all_selected.indexOf(sn.toLowerCase()) !== -1) {
+                            has_dup = true;
+                            dup_sn = sn;
+                            return false;
+                        }
+                    } else {
+                        if (all_selected.indexOf(sn.toLowerCase()) !== -1) {
+                            has_dup = true;
+                            dup_sn = sn;
+                            return false;
+                        }
+                    }
+                    all_selected.push(sn.toLowerCase());
+                });
+                if (has_dup) return false;
+            });
+
+            if (has_dup) {
+                toastr.error('Serial Number / IMEI "' + dup_sn + '" terduplikasi di dalam tabel.');
+                var clean_vals = [];
+                $.each(current_vals, function(i, v) {
+                    if ($.trim(v).toLowerCase() !== dup_sn.toLowerCase()) {
+                        clean_vals.push(v);
+                    }
+                });
+                $current_select.val(clean_vals).trigger('change.select2');
+                return;
+            }
+        }
+    });
+
     $(document).on('show.bs.modal', '.sn_price_modal', function() {
         var modal = $(this);
         var form = modal.closest('form');

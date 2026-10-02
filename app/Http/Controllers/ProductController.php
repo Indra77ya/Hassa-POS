@@ -74,7 +74,7 @@ class ProductController extends Controller
             $location_id = request()->get('location_id', null);
             $permitted_locations = auth()->user()->permitted_locations();
 
-            $query = Product::with(['media'])
+            $query = Product::with(['media', 'in_stock_serial_numbers'])
                 ->leftJoin('brands', 'products.brand_id', '=', 'brands.id')
                 ->join('units', 'products.unit_id', '=', 'units.id')
                 ->leftJoin('categories as c1', 'products.category_id', '=', 'c1.id')
@@ -121,6 +121,7 @@ class ProductController extends Controller
                 'products.sku',
                 'products.image',
                 'products.enable_stock',
+                'products.enable_sr_no',
                 'products.is_inactive',
                 'products.not_for_selling',
                 'products.product_custom_field1', 'products.product_custom_field2', 'products.product_custom_field3', 'products.product_custom_field4', 'products.product_custom_field5', 'products.product_custom_field6',
@@ -176,6 +177,17 @@ class ProductController extends Controller
             if ($active_state == 'inactive') {
                 $products->Inactive();
             }
+
+            $has_sn = request()->get('has_sn', null);
+            if ($has_sn === '1' || $has_sn === 'true') {
+                $products->where('products.enable_sr_no', 1);
+            } elseif ($has_sn === '0' || $has_sn === 'false') {
+                $products->where(function ($q) {
+                    $q->where('products.enable_sr_no', 0)
+                      ->orWhereNull('products.enable_sr_no');
+                });
+            }
+
             $not_for_selling = request()->get('not_for_selling', null);
             if ($not_for_selling == 'true') {
                 $products->ProductNotForSales();
@@ -195,6 +207,31 @@ class ProductController extends Controller
                     'product_locations',
                     function ($row) {
                         return $row->product_locations->implode('name', ', ');
+                    }
+                )
+                ->addColumn(
+                    'serial_numbers',
+                    function ($row) {
+                        if (empty($row->enable_sr_no) || $row->enable_sr_no != 1) {
+                            return '--';
+                        }
+                        $in_stock_serials = $row->in_stock_serial_numbers;
+
+                        if ($in_stock_serials->isEmpty()) {
+                            return '--';
+                        }
+
+                        $sn_strings = [];
+                        foreach ($in_stock_serials as $sn_record) {
+                            $price = $sn_record->selling_price;
+                            if (is_null($price)) {
+                                $price = $row->min_price;
+                            }
+                            $formatted_price = $this->productUtil->num_f($price, true);
+                            $sn_strings[] = e($sn_record->serial_number) . ' - ' . $formatted_price;
+                        }
+
+                        return implode('<br/>', $sn_strings);
                     }
                 )
                 ->editColumn('category', '{{$category}} @if(!empty($sub_category))<br/> -- {{$sub_category}}@endif')
@@ -262,6 +299,10 @@ class ProductController extends Controller
                     $product = $row->not_for_selling == 1 ? $product.' <span class="label bg-gray">'.__('lang_v1.not_for_selling').
                         '</span>' : $product;
 
+                    if (! empty($row->enable_sr_no) && $row->enable_sr_no == 1) {
+                        $product = $product.' <span class="label bg-blue" title="'.__('lang_v1.enable_imei_or_sr_no').'"><i class="fa fa-barcode"></i> SN/IMEI</span>';
+                    }
+
                     if ($is_woocommerce && ! $row->woocommerce_disable_sync) {
                         $product = $product.'<br><i class="fab fa-wordpress"></i>';
                     }
@@ -306,7 +347,7 @@ class ProductController extends Controller
                             return '';
                         }
                     }, ])
-                ->rawColumns(['action', 'image', 'mass_delete', 'product', 'selling_price', 'purchase_price', 'category', 'current_stock'])
+                ->rawColumns(['action', 'image', 'mass_delete', 'product', 'selling_price', 'purchase_price', 'category', 'current_stock', 'serial_numbers'])
                 ->make(true);
         }
 
@@ -494,6 +535,20 @@ class ProductController extends Controller
                     return redirect()->back()->withInput()->with('status', [
                         'success' => 0,
                         'msg' => 'At least 1 serial number is required when Enable Serial Number is checked.'
+                    ]);
+                }
+
+                $sn_list = array_map(function($item) {
+                    return trim($item['serial_number']);
+                }, $filtered_serials);
+
+                $snUtil = new \App\Utils\ProductSerialNumberUtil();
+                $duplicates = $snUtil->checkDuplicateInStockSerials($business_id, $sn_list);
+                if (!empty($duplicates)) {
+                    $dup_str = implode(', ', $duplicates);
+                    return redirect()->back()->withInput()->with('status', [
+                        'success' => 0,
+                        'msg' => __('lang_v1.serial_number_already_exists', ['serial' => $dup_str]) ?? "Serial number / IMEI '{$dup_str}' sudah ada (in stock) atau terduplikasi."
                     ]);
                 }
             }
@@ -695,8 +750,13 @@ class ProductController extends Controller
 
         $alert_quantity = ! is_null($product->alert_quantity) ? $this->productUtil->num_f($product->alert_quantity, false, null, true) : null;
 
+        $in_stock_serials = \App\ProductSerialNumber::where('business_id', $business_id)
+            ->where('product_id', $product->id)
+            ->where('status', 'in_stock')
+            ->get();
+
         return view('product.edit')
-                ->with(compact('categories', 'brands', 'units', 'sub_units', 'taxes', 'tax_attributes', 'barcode_types', 'product', 'sub_categories', 'default_profit_percent', 'business_locations', 'rack_details', 'selling_price_group_count', 'module_form_parts', 'product_types', 'common_settings', 'warranties', 'pos_module_data', 'alert_quantity'));
+                ->with(compact('categories', 'brands', 'units', 'sub_units', 'taxes', 'tax_attributes', 'barcode_types', 'product', 'sub_categories', 'default_profit_percent', 'business_locations', 'rack_details', 'selling_price_group_count', 'module_form_parts', 'product_types', 'common_settings', 'warranties', 'pos_module_data', 'alert_quantity', 'in_stock_serials'));
     }
 
     /**
@@ -794,6 +854,29 @@ class ProductController extends Controller
 
             if (! empty($request->input('enable_sr_no')) && $request->input('enable_sr_no') == 1) {
                 $product->enable_sr_no = 1;
+
+                if ($request->has('product_serials')) {
+                    $product_serials = $request->input('product_serials', []);
+                    $filtered_serials = array_filter($product_serials, function ($item) {
+                        return !empty(trim($item['serial_number'] ?? ''));
+                    });
+
+                    if (!empty($filtered_serials)) {
+                        $sn_list = array_map(function($item) {
+                            return trim($item['serial_number']);
+                        }, $filtered_serials);
+
+                        // Check duplicate serial numbers in stock (excluding non in-stock or current product serials)
+                        $snUtil = new \App\Utils\ProductSerialNumberUtil();
+                        $duplicate_sn = $snUtil->checkDuplicateInStockSerials($business_id, $sn_list, null, $product->id);
+                        if (!empty($duplicate_sn)) {
+                            return redirect()->back()->withInput()->with('status', [
+                                'success' => 0,
+                                'msg' => 'Serial Number / IMEI berikut sudah ada di sistem dan masih tersedia (In Stock): ' . implode(', ', $duplicate_sn)
+                            ]);
+                        }
+                    }
+                }
             } else {
                 $product->enable_sr_no = 0;
             }
@@ -903,6 +986,91 @@ class ProductController extends Controller
             $product_racks_update = $request->get('product_racks_update', null);
             if (! empty($product_racks_update)) {
                 $this->productUtil->updateRackDetails($business_id, $product->id, $product_racks_update);
+            }
+
+            //Save / Sync Serial Numbers if enable_sr_no is enabled on edit
+            if (! empty($product->enable_sr_no) && $product->enable_sr_no == 1 && ! empty($request->input('product_serials'))) {
+                $first_variation = $product->variations()->first();
+                $variation_id = $first_variation ? $first_variation->id : null;
+                $submitted_sn_rows = $request->input('product_serials');
+
+                $submitted_serials = [];
+                $sn_details = [];
+                $total_pp = 0;
+                $total_sp = 0;
+                $sn_count = 0;
+
+                foreach ($submitted_sn_rows as $sn_row) {
+                    $sn = trim($sn_row['serial_number'] ?? '');
+                    if (! empty($sn)) {
+                        $submitted_serials[] = $sn;
+                        $pp = !empty($sn_row['purchase_price']) ? $this->productUtil->num_uf($sn_row['purchase_price']) : 0;
+                        $sp = !empty($sn_row['selling_price']) ? $this->productUtil->num_uf($sn_row['selling_price']) : 0;
+                        $sn_details[$sn] = [
+                            'purchase_price' => $pp,
+                            'selling_price' => $sp,
+                        ];
+                        $total_pp += $pp;
+                        $total_sp += $sp;
+                        $sn_count++;
+                    }
+                }
+
+                if ($sn_count > 0) {
+                    // 1. Delete in-stock serial numbers for this product that were removed from the form
+                    \App\ProductSerialNumber::where('business_id', $business_id)
+                        ->where('product_id', $product->id)
+                        ->where('status', 'in_stock')
+                        ->whereNotIn('serial_number', $submitted_serials)
+                        ->delete();
+
+                    // 2. Update existing or create new in-stock serial numbers
+                    foreach ($submitted_serials as $sn) {
+                        $record = \App\ProductSerialNumber::where('business_id', $business_id)
+                            ->where('product_id', $product->id)
+                            ->where('serial_number', $sn)
+                            ->where('status', 'in_stock')
+                            ->first();
+
+                        if ($record) {
+                            $record->update([
+                                'purchase_price' => $sn_details[$sn]['purchase_price'],
+                                'selling_price' => $sn_details[$sn]['selling_price'],
+                            ]);
+                        } else {
+                            \App\ProductSerialNumber::create([
+                                'business_id' => $business_id,
+                                'product_id' => $product->id,
+                                'variation_id' => $variation_id,
+                                'serial_number' => $sn,
+                                'purchase_price' => $sn_details[$sn]['purchase_price'],
+                                'selling_price' => $sn_details[$sn]['selling_price'],
+                                'status' => 'in_stock',
+                            ]);
+                        }
+                    }
+
+                    // 3. Recalculate average purchase price and selling price for variation
+                    $avg_pp = $total_pp / $sn_count;
+                    $avg_sp = $total_sp / $sn_count;
+
+                    if ($first_variation) {
+                        $tax_rate = 0;
+                        if (!empty($product->tax)) {
+                            $tax = \App\TaxRate::find($product->tax);
+                            $tax_rate = $tax ? $tax->amount : 0;
+                        }
+
+                        $dpp_inc_tax = $this->productUtil->calc_percentage($avg_pp, $tax_rate, $avg_pp);
+                        $sp_inc_tax = $this->productUtil->calc_percentage($avg_sp, $tax_rate, $avg_sp);
+
+                        $first_variation->default_purchase_price = $avg_pp;
+                        $first_variation->dpp_inc_tax = $dpp_inc_tax;
+                        $first_variation->default_sell_price = $avg_sp;
+                        $first_variation->sell_price_inc_tax = $sp_inc_tax;
+                        $first_variation->save();
+                    }
+                }
             }
 
             //Set Module fields
@@ -1651,6 +1819,20 @@ class ProductController extends Controller
                     return ['success' => 0,
                         'msg' => 'At least 1 serial number is required when Enable Serial Number is checked.',
                     ];
+                }
+
+                $sn_list = array_map(function($item) {
+                    return trim($item['serial_number']);
+                }, $filtered_serials);
+
+                $snUtil = new \App\Utils\ProductSerialNumberUtil();
+                $duplicates = $snUtil->checkDuplicateInStockSerials($business_id, $sn_list);
+                if (!empty($duplicates)) {
+                    $dup_str = implode(', ', $duplicates);
+                    return response()->json([
+                        'success' => false,
+                        'msg' => "Serial number / IMEI '{$dup_str}' sudah ada (in stock) atau terduplikasi."
+                    ]);
                 }
             }
 

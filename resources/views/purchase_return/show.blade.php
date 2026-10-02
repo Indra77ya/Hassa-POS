@@ -1,3 +1,10 @@
+<style>
+  @media print {
+    .sn-details-row {
+      display: table-row !important;
+    }
+  }
+</style>
 <div class="modal-dialog modal-xl" role="document">
   <div class="modal-content">
     <div class="modal-header">
@@ -68,14 +75,32 @@
                 if(!empty($purchase_line->sub_unit)) {
                   $unit_name = $purchase_line->sub_unit->short_name;
                 }
+                $sn_records = $purchase_line->relationLoaded('serial_numbers')
+                    ? $purchase_line->serial_numbers
+                    : \App\ProductSerialNumber::where('purchase_line_id', $purchase_line->id)->get();
+                $has_sn = !empty($sn_records) && $sn_records->count() > 0;
+                $sn_collapse_id = 'purchase_return_line_sn_' . $purchase_line->id;
               @endphp
               <tr>
                   <td>{{ $loop->iteration }}</td>
                   <td>
-                    {{ $purchase_line->product->name }}
-                    @if( $purchase_line->product->type == 'variable')
-                      - {{ $purchase_line->variations->product_variation->name}}
-                      - {{ $purchase_line->variations->name}}
+                    @if($has_sn)
+                      <a href="#{{ $sn_collapse_id }}" data-toggle="collapse" style="cursor: pointer; text-decoration: none; font-weight: 600;" title="Klik untuk melihat daftar Serial Number">
+                        {{ $purchase_line->product->name }}
+                        @if( $purchase_line->product->type == 'variable')
+                          - {{ $purchase_line->variations->product_variation->name}}
+                          - {{ $purchase_line->variations->name}}
+                        @endif
+                        <span class="label" style="margin-left: 5px; background-color: #1e40af; color: #ffffff !important; font-weight: 700; font-size: 11px; padding: 2px 7px; border-radius: 4px; display: inline-block; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                          <i class="fa fa-barcode" style="color: #ffffff !important;"></i> {{ $sn_records->count() }} SN
+                        </span>
+                      </a>
+                    @else
+                      {{ $purchase_line->product->name }}
+                      @if( $purchase_line->product->type == 'variable')
+                        - {{ $purchase_line->variations->product_variation->name}}
+                        - {{ $purchase_line->variations->name}}
+                      @endif
                     @endif
                   </td>
                   <td><span class="display_currency" data-currency_symbol="true">{{ $purchase_line->purchase_price_inc_tax }}</span></td>
@@ -88,6 +113,45 @@
                     <span class="display_currency" data-currency_symbol="true">{{$line_total}}</span>
                   </td>
               </tr>
+              @if($has_sn)
+                <tr id="{{ $sn_collapse_id }}" class="collapse sn-details-row">
+                  <td colspan="100%" style="padding: 0; border-top: none;">
+                    <div style="padding: 8px 12px; background-color: #fafafa; border-bottom: 1px solid #e2e8f0;">
+                      <small class="text-muted" style="font-weight: 600;"><i class="fa fa-barcode"></i> @lang('lang_v1.serial_numbers') ({{ $sn_records->count() }}):</small>
+                      <table class="table table-bordered table-condensed bg-white" style="margin-top: 6px; margin-bottom: 0;">
+                        <thead>
+                          <tr style="background-color: #f1f5f9; color: #475569; font-size: 11px;">
+                            <th style="width: 40px;">#</th>
+                            <th>Serial Number / IMEI</th>
+                            <th class="text-right">@lang('lang_v1.purchase_price')</th>
+                            <th class="text-right">@lang('lang_v1.selling_price')</th>
+                            <th class="text-center" style="width: 130px;">@lang('sale.status')</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @foreach($sn_records as $sn)
+                            <tr style="font-size: 11px;">
+                              <td>{{ $loop->iteration }}</td>
+                              <td><strong style="color: #2563eb;">{{ $sn->serial_number }}</strong></td>
+                              <td class="text-right"><span class="display_currency" data-currency_symbol="true">{{ $sn->purchase_price }}</span></td>
+                              <td class="text-right"><span class="display_currency" data-currency_symbol="true">{{ $sn->selling_price }}</span></td>
+                              <td class="text-center">
+                                @if($sn->status == 'in_stock')
+                                  <span class="label" style="background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; font-weight: 700; font-size: 11px; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; display: inline-block;">@lang('lang_v1.in_stock')</span>
+                                @elseif($sn->status == 'sold')
+                                  <span class="label" style="background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; font-weight: 700; font-size: 11px; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; display: inline-block;">@lang('lang_v1.sold')</span>
+                                @else
+                                  <span class="label" style="background-color: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; font-weight: 700; font-size: 11px; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; display: inline-block;">{{ ucfirst($sn->status) }}</span>
+                                @endif
+                              </td>
+                            </tr>
+                          @endforeach
+                        </tbody>
+                      </table>
+                    </div>
+                  </td>
+                </tr>
+              @endif
               @endforeach
             </tbody>
           </table>

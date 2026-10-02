@@ -79,6 +79,19 @@ class Category extends Model
      */
     public static function forDropdown($business_id, $type)
     {
+        if (DB::getDriverName() === 'sqlite') {
+            $categories = Category::where('business_id', $business_id)
+                                ->where('parent_id', 0)
+                                ->where('category_type', $type)
+                                ->select('name', 'short_code', 'id')
+                                ->orderBy('name', 'asc')
+                                ->get();
+            return $categories->mapWithKeys(function ($item) {
+                $name = ! empty($item->short_code) ? $item->name . '-' . $item->short_code : $item->name;
+                return [$item->id => $name];
+            });
+        }
+
         $categories = Category::where('business_id', $business_id)
                             ->where('parent_id', 0)
                             ->where('category_type', $type)
