@@ -285,6 +285,21 @@
                             <strong>@lang('lang_v1.available_options'): percentage, fixed</strong>
                         </td>
                     </tr>
+                    <tr>
+                        <td>39</td>
+                        <td>@lang('lang_v1.serial_number') / IMEI <small class="text-muted">(@lang('lang_v1.optional'))</small></td>
+                        <td>Nomor Seri / IMEI individual per produk (jika @lang('lang_v1.enable_imei_or_sr_no') = 1). Buat baris CSV baru untuk setiap Serial Number.</td>
+                    </tr>
+                    <tr>
+                        <td>40</td>
+                        <td>Harga Beli Serial Number (HPP) <small class="text-muted">(@lang('lang_v1.optional'))</small></td>
+                        <td>Harga Pokok (HPP) khusus untuk Serial Number pada baris tersebut. Jika kosong, menggunakan Harga Beli Produk.</td>
+                    </tr>
+                    <tr>
+                        <td>41</td>
+                        <td>Harga Jual Serial Number <small class="text-muted">(@lang('lang_v1.optional'))</small></td>
+                        <td>Harga Jual khusus untuk Serial Number pada baris tersebut. Jika kosong, menggunakan Harga Jual Produk.</td>
+                    </tr>
 
                 </table>
             @endcomponent
