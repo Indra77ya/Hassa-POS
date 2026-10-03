@@ -14,8 +14,8 @@
 						<div id="import_product_dz" class="dropzone"></div>
 					</div>
 					<div class="col-md-12 mt-10">
-						<a href="{{ asset('files/import_purchase_products_template.csv') }}" class="tw-dw-btn tw-dw-btn-success tw-text-white" download><i class="fa fa-download"></i> Download CSV Template</a>
-						<a href="{{ asset('files/import_purchase_products_template.xls') }}" class="tw-dw-btn tw-dw-btn-info tw-text-white" download><i class="fa fa-download"></i> Download Excel Template (.xls)</a>
+						<a href="{{ asset('files/import_purchase_products_template.csv') }}" class="tw-dw-btn tw-dw-btn-success tw-text-white" download><i class="fa fa-download"></i> @lang('lang_v1.download_csv_template')</a>
+						<a href="{{ asset('files/import_purchase_products_template.xls') }}" class="tw-dw-btn tw-dw-btn-info tw-text-white" download><i class="fa fa-download"></i> @lang('lang_v1.download_excel_template')</a>
 					</div>
 				</div>
 				<div class="row">
@@ -72,18 +72,18 @@
 		                    </tr>
 		                    <tr>
 					<td>9</td>
-		                        <td>Serial Number / IMEI <small class="text-muted">(@lang('lang_v1.optional'))</small></td>
-		                        <td>Serial Number / IMEI produk. Jika terdapat beberapa unit untuk SKU yang sama, dapat dipisahkan dengan koma (,) atau ditulis pada baris terpisah. Untuk produk ber-serial number, jumlah pembelian otomatis dihitung dari banyaknya Serial Number.</td>
+		                        <td>@lang('lang_v1.serial_numbers') <small class="text-muted">(@lang('lang_v1.optional'))</small></td>
+		                        <td>@lang('lang_v1.import_purchase_products_sn_ins')</td>
 		                    </tr>
 		                    <tr>
 					<td>10</td>
-		                        <td>Serial Purchase Price / HPP Unit <small class="text-muted">(@lang('lang_v1.optional'))</small></td>
-		                        <td>Harga beli / HPP per-unit khusus untuk Serial Number / IMEI tersebut. Jika dikosongkan, menggunakan Unit Cost Before Discount.</td>
+		                        <td>@lang('lang_v1.serial_purchase_price') <small class="text-muted">(@lang('lang_v1.optional'))</small></td>
+		                        <td>@lang('lang_v1.serial_purchase_price_ins')</td>
 		                    </tr>
 		                    <tr>
 					<td>11</td>
-		                        <td>Serial Selling Price / Harga Jual Unit <small class="text-muted">(@lang('lang_v1.optional'))</small></td>
-		                        <td>Harga jual per-unit khusus untuk Serial Number / IMEI tersebut. Jika dikosongkan, menggunakan harga jual default produk.</td>
+		                        <td>@lang('lang_v1.serial_selling_price') <small class="text-muted">(@lang('lang_v1.optional'))</small></td>
+		                        <td>@lang('lang_v1.serial_selling_price_ins')</td>
 		                    </tr>
 		                </table>
 		            </div>
