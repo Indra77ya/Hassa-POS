@@ -9,6 +9,13 @@
 <section class="content">
     {!! Form::open(['url' => action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'store']), 'method' => 'post', 'id' => 'add_order_sheet_form']) !!}
     @component('components.widget', ['class' => 'box-primary'])
+        <div class="callout callout-info" style="margin-bottom: 15px; padding: 10px 15px; border-left: 4px solid #00c0ef; background-color: #f0f9ff;">
+            <p style="margin: 0; font-size: 12px; color: #1e293b;">
+                <i class="fa fa-info-circle text-info"></i> <strong>Praktik Terbaik Operasional Laundry:</strong>
+                Jika pelanggan membawa barang berbeda jenis/proses cuci (misal: <em>Sepatu</em> & <em>Bedcover</em>), buatlah <strong>1 Nota Order per Jenis Barang</strong> agar pelacakan proses & waktu pengerjaan barang tetap presisi. Saat pembayaran di Kasir (POS), semua nota order pelanggan tersebut dapat dimasukkan bersamaan dalam 1 Struk Kasir Total.
+            </p>
+        </div>
+
         <div class="row">
             <div class="col-md-4">
                 <div class="form-group">

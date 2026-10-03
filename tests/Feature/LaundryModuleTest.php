@@ -45,6 +45,21 @@ class LaundryModuleTest extends TestCase
         \Illuminate\Support\Facades\Schema::dropIfExists('roles');
         \Illuminate\Support\Facades\Schema::dropIfExists('model_has_roles');
         \Illuminate\Support\Facades\Schema::dropIfExists('notifications');
+        \Illuminate\Support\Facades\Schema::dropIfExists('repair_trade_ins');
+
+        \Illuminate\Support\Facades\Schema::create('repair_trade_ins', function ($table) {
+            $table->id();
+            $table->integer('business_id')->default(1);
+            $table->unsignedBigInteger('transaction_id')->nullable();
+            $table->string('model_name')->nullable();
+            $table->string('serial_no')->nullable();
+            $table->text('condition')->nullable();
+            $table->integer('unit_id')->nullable();
+            $table->integer('category_id')->nullable();
+            $table->decimal('trade_in_value', 22, 4)->default(0);
+            $table->decimal('resale_price', 22, 4)->default(0);
+            $table->timestamps();
+        });
 
         \Illuminate\Support\Facades\Schema::create('notifications', function ($table) {
             $table->uuid('id')->primary();

@@ -60,10 +60,15 @@ class LaundryOrderSheet extends Model
     public function getTotalPaidAttribute()
     {
         $transaction_ids = $this->transactions()->pluck('id')->toArray();
-        if (empty($transaction_ids)) {
+
+        // Also include transactions that linked via sell lines or JSON / array laundry_order_sheet_ids if applicable
+        $linked_tx_ids = \App\Transaction::where('laundry_order_sheet_id', $this->id)->pluck('id')->toArray();
+        $all_tx_ids = array_unique(array_merge($transaction_ids, $linked_tx_ids));
+
+        if (empty($all_tx_ids)) {
             return 0.00;
         }
-        return (float) \App\TransactionPayment::whereIn('transaction_id', $transaction_ids)
+        return (float) \App\TransactionPayment::whereIn('transaction_id', $all_tx_ids)
             ->where('is_return', 0)
             ->sum('amount');
     }

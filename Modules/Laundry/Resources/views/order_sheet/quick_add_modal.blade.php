@@ -9,6 +9,13 @@
     </div>
 
     <div class="modal-body">
+        <div class="callout callout-info" style="margin-bottom: 15px; padding: 10px 15px; border-left: 4px solid #00c0ef; background-color: #f0f9ff;">
+            <p style="margin: 0; font-size: 12px; color: #1e293b;">
+                <i class="fa fa-info-circle text-info"></i> <strong>Tips Beda Barang:</strong>
+                Untuk jenis barang beda proses (misal Sepatu & Bedcover), buat <strong>1 Nota per Jenis Barang</strong> agar tracking pengerjaan akurat, lalu bayar sekaligus di Kasir POS.
+            </p>
+        </div>
+
       <div class="row">
         <div class="col-md-4">
           <div class="form-group">
