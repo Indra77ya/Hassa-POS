@@ -12,6 +12,10 @@ return new class extends Migration
      */
     public function up()
     {
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
+
         //Get all columns with type decimal(20, 2)
         $db_name = env('DB_DATABASE');
 
@@ -30,7 +34,9 @@ return new class extends Migration
                 $col_name = $col->column_name;
                 $default = is_null($col->column_default) ? 'NULL' : $col->column_default;
 
-                DB::statement("ALTER TABLE $table_name MODIFY COLUMN $col_name DECIMAL(22, 4) DEFAULT $default");
+                if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE $table_name MODIFY COLUMN $col_name DECIMAL(22, 4) DEFAULT $default");
+        }
             }
         }
     }

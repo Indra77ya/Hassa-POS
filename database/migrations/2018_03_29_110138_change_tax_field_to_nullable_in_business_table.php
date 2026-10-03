@@ -14,8 +14,12 @@ return new class extends Migration
      */
     public function up()
     {
-        DB::statement('ALTER TABLE business MODIFY COLUMN tax_number_1 VARCHAR(100)');
-        DB::statement('ALTER TABLE business MODIFY COLUMN tax_label_1 VARCHAR(10)');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE business MODIFY COLUMN tax_number_1 VARCHAR(100)');
+        }
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE business MODIFY COLUMN tax_label_1 VARCHAR(10)');
+        }
     }
 
     /**

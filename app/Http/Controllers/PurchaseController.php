@@ -1185,79 +1185,96 @@ class PurchaseController extends Controller
             $location_id = $request->input('location_id');
             $row_count = $request->input('row_count');
 
-            $formatted_data = [];
+            $grouped_rows = [];
             $row_index = 0;
             $error_msg = '';
+
             foreach ($imported_data as $key => $value) {
                 $row_index = $key + 1;
-                $temp_array = [];
+                $sku = ! empty($value[0]) ? trim($value[0]) : '';
 
-                if (! empty($value[0])) {
-                    $variation = Variation::where('sub_sku', trim($value[0]))
-                                        ->join('products', 'products.id', '=', 'variations.product_id')
-                                        ->where('products.business_id', $business_id) 
-                                        ->with([
-                                            'product_variation',
-                                            'variation_location_details' => function ($q) use ($location_id) {
-                                                $q->where('location_id', $location_id);
-                                            },
-                                        ])
-                                        ->select('variations.*')
-                                        ->first();
-                    $temp_array['variation'] = $variation;
+                if (empty($sku)) {
+                    $error_msg = __('lang_v1.product_not_found_exception', ['row' => $row_index, 'sku' => '']);
+                    break;
+                }
 
-                    if (empty($variation)) {
-                        $error_msg = __('lang_v1.product_not_found_exception', ['row' => $row_index, 'sku' => $value[0]]);
-                        break;
-                    }
-
-                    $product = Product::where('id', $variation->product_id)
-                                    ->where('business_id', $business_id)
-                                    ->with(['unit'])
+                $variation = Variation::where('sub_sku', $sku)
+                                    ->join('products', 'products.id', '=', 'variations.product_id')
+                                    ->where('products.business_id', $business_id)
+                                    ->with([
+                                        'product_variation',
+                                        'variation_location_details' => function ($q) use ($location_id) {
+                                            $q->where('location_id', $location_id);
+                                        },
+                                    ])
+                                    ->select('variations.*')
                                     ->first();
 
-                    if (empty($product)) {
-                        $error_msg = __('lang_v1.product_not_found_exception', ['row' => $row_index, 'sku' => $value[0]]);
-                        break;
-                    }
-
-                    $temp_array['product'] = $product;
-
-                    $sub_units = $this->productUtil->getSubUnits($business_id, $product->unit->id, false, $product->id);
-
-                    $temp_array['sub_units'] = $sub_units;
-                } else {
-                    $error_msg = __('lang_v1.product_not_found_exception', ['row' => $row_index, 'sku' => $value[0]]);
+                if (empty($variation)) {
+                    $error_msg = __('lang_v1.product_not_found_exception', ['row' => $row_index, 'sku' => $sku]);
                     break;
                 }
 
-                if (! empty($value[0])) {
-                    $temp_array['quantity'] = $value[1];
-                } else {
-                    $error_msg = __('lang_v1.quantity_required', ['row' => $row_index]);
-                    break;
-                }
-
-                $temp_array['unit_cost_before_discount'] = ! empty($value[2]) ? $value[2] : $variation->default_purchase_price;
-                $temp_array['discount_percent'] = ! empty($value[3]) ? $value[3] : 0;
-
-                $tax_id = null;
-
-                if (! empty($value[4])) {
-                    $tax_name = trim($value[4]);
-                    $tax = TaxRate::where('business_id', $business_id)
-                                ->where('name', 'like', "%{$tax_name}%")
+                $product = Product::where('id', $variation->product_id)
+                                ->where('business_id', $business_id)
+                                ->with(['unit'])
                                 ->first();
 
-                    $tax_id = $tax->id ?? $tax_id;
+                if (empty($product)) {
+                    $error_msg = __('lang_v1.product_not_found_exception', ['row' => $row_index, 'sku' => $sku]);
+                    break;
                 }
 
-                $temp_array['tax_id'] = $tax_id;
-                $temp_array['lot_number'] = ! empty($value[5]) ? $value[5] : null;
-                $temp_array['mfg_date'] = ! empty($value[6]) ? $this->productUtil->format_date($value[6]) : null;
-                $temp_array['exp_date'] = ! empty($value[7]) ? $this->productUtil->format_date($value[7]) : null;
+                $v_id = $variation->id;
+                if (! isset($grouped_rows[$v_id])) {
+                    $sub_units = $this->productUtil->getSubUnits($business_id, $product->unit->id, false, $product->id);
+                    $grouped_rows[$v_id] = [
+                        'variation' => $variation,
+                        'product' => $product,
+                        'sub_units' => $sub_units,
+                        'quantity' => 0,
+                        'unit_cost_before_discount' => isset($value[2]) && trim($value[2]) !== '' ? $this->productUtil->num_uf(trim($value[2])) : $variation->default_purchase_price,
+                        'discount_percent' => isset($value[3]) && trim($value[3]) !== '' ? $this->productUtil->num_uf(trim($value[3])) : 0,
+                        'tax_id' => null,
+                        'lot_number' => ! empty($value[5]) ? $value[5] : null,
+                        'mfg_date' => ! empty($value[6]) ? $this->productUtil->format_date($value[6]) : null,
+                        'exp_date' => ! empty($value[7]) ? $this->productUtil->format_date($value[7]) : null,
+                        'serials' => [],
+                        'has_qty_input' => false,
+                    ];
 
-                $formatted_data[] = $temp_array;
+                    if (! empty($value[4])) {
+                        $tax_name = trim($value[4]);
+                        $tax = TaxRate::where('business_id', $business_id)
+                                    ->where('name', 'like', "%{$tax_name}%")
+                                    ->first();
+                        $grouped_rows[$v_id]['tax_id'] = $tax->id ?? null;
+                    }
+                }
+
+                // Add quantity if explicitly provided
+                if (isset($value[1]) && trim($value[1]) !== '') {
+                    $grouped_rows[$v_id]['quantity'] += (float) $this->productUtil->num_uf(trim($value[1]));
+                    $grouped_rows[$v_id]['has_qty_input'] = true;
+                }
+
+                // Extract Serial Numbers (Column 9 = $value[8], Col 10 = $value[9], Col 11 = $value[10])
+                if (isset($value[8]) && trim($value[8]) !== '') {
+                    $sn_raw = trim($value[8]);
+                    $sn_array = preg_split('/[\r\n,|;]+/', $sn_raw);
+                    foreach ($sn_array as $sn_item) {
+                        $sn_item = trim($sn_item);
+                        if (! empty($sn_item)) {
+                            $sn_pp = isset($value[9]) && trim($value[9]) !== '' ? $this->productUtil->num_uf(trim($value[9])) : $grouped_rows[$v_id]['unit_cost_before_discount'];
+                            $sn_sp = isset($value[10]) && trim($value[10]) !== '' ? $this->productUtil->num_uf(trim($value[10])) : $variation->sell_price_inc_tax;
+                            $grouped_rows[$v_id]['serials'][] = [
+                                'serial_number' => $sn_item,
+                                'purchase_price' => $sn_pp,
+                                'selling_price' => $sn_sp,
+                            ];
+                        }
+                    }
+                }
             }
 
             if (! empty($error_msg)) {
@@ -1265,6 +1282,45 @@ class PurchaseController extends Controller
                     'success' => false,
                     'msg' => $error_msg,
                 ];
+            }
+
+            $all_imported_serials = [];
+            $formatted_data = [];
+            foreach ($grouped_rows as $v_id => $data) {
+                // If serial numbers are provided, validate quantity and calculate average prices
+                if (! empty($data['serials'])) {
+                    foreach ($data['serials'] as $sn_data) {
+                        $all_imported_serials[] = $sn_data['serial_number'];
+                    }
+
+                    // For products with serial numbers, quantity equals number of serials
+                    if ($data['product']->enable_sr_no == 1 || ! $data['has_qty_input']) {
+                        $data['quantity'] = count($data['serials']);
+                    }
+
+                    // Recalculate average purchase price if serial purchase prices were provided
+                    $total_sn_pp = array_sum(array_column($data['serials'], 'purchase_price'));
+                    if (count($data['serials']) > 0) {
+                        $data['unit_cost_before_discount'] = $total_sn_pp / count($data['serials']);
+                    }
+                } elseif (! $data['has_qty_input']) {
+                    $data['quantity'] = 1;
+                }
+
+                $formatted_data[] = $data;
+            }
+
+            // Check duplicate serial numbers across import file or in stock database
+            if (! empty($all_imported_serials)) {
+                $snUtil = new \App\Utils\ProductSerialNumberUtil();
+                $duplicates = $snUtil->checkDuplicateInStockSerials($business_id, $all_imported_serials);
+                if (! empty($duplicates)) {
+                    $dup_str = implode(', ', $duplicates);
+                    return [
+                        'success' => false,
+                        'msg' => "Serial number / IMEI '{$dup_str}' sudah ada (in stock) atau terduplikasi.",
+                    ];
+                }
             }
 
             $hide_tax = 'hide';

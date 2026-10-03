@@ -12,7 +12,9 @@ return new class extends Migration
      */
     public function up()
     {
-        DB::statement('ALTER TABLE transaction_payments MODIFY card_type VARCHAR(191) DEFAULT NULL');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE transaction_payments MODIFY card_type VARCHAR(191) DEFAULT NULL');
+        }
     }
 
     /**

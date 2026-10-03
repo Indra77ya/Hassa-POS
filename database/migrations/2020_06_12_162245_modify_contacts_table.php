@@ -24,9 +24,13 @@ return new class extends Migration
             $table->date('dob')->after('zip_code')->nullable();
         });
 
-        DB::statement('ALTER TABLE contacts CHANGE landmark address_line_1 text;');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE contacts CHANGE landmark address_line_1 text;');
+        }
 
-        DB::statement('UPDATE contacts SET first_name=name;');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('UPDATE contacts SET first_name=name;');
+        }
     }
 
     /**

@@ -19,7 +19,9 @@ return new class extends Migration
             //invoice_scheme_id
         });
 
-        DB::statement('UPDATE business_locations SET sale_invoice_scheme_id = invoice_scheme_id');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('UPDATE business_locations SET sale_invoice_scheme_id = invoice_scheme_id');
+        }
     }
 
     /**

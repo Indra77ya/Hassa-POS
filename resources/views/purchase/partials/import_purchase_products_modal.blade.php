@@ -14,7 +14,8 @@
 						<div id="import_product_dz" class="dropzone"></div>
 					</div>
 					<div class="col-md-12 mt-10">
-						<a href="{{ asset('files/import_purchase_products_template.xls') }}" class="tw-dw-btn tw-dw-btn-success tw-text-white" download><i class="fa fa-download"></i> @lang('lang_v1.download_template_file')</a>
+						<a href="{{ asset('files/import_purchase_products_template.csv') }}" class="tw-dw-btn tw-dw-btn-success tw-text-white" download><i class="fa fa-download"></i> @lang('lang_v1.download_csv_template')</a>
+						<a href="{{ asset('files/import_purchase_products_template.xls') }}" class="tw-dw-btn tw-dw-btn-info tw-text-white" download><i class="fa fa-download"></i> @lang('lang_v1.download_excel_template')</a>
 					</div>
 				</div>
 				<div class="row">
@@ -68,6 +69,21 @@
 		                    	<td>8</td>
 		                        <td>@lang('product.exp_date') <small class="text-muted">(@lang('lang_v1.optional'))</small></td>
 		                        <td>{!! __('lang_v1.exp_date_instructions') !!} <br>{!! __('lang_v1.date_ins') !!}</td>
+		                    </tr>
+		                    <tr>
+					<td>9</td>
+		                        <td>@lang('lang_v1.serial_numbers') <small class="text-muted">(@lang('lang_v1.optional'))</small></td>
+		                        <td>@lang('lang_v1.import_purchase_products_sn_ins')</td>
+		                    </tr>
+		                    <tr>
+					<td>10</td>
+		                        <td>@lang('lang_v1.serial_purchase_price') <small class="text-muted">(@lang('lang_v1.optional'))</small></td>
+		                        <td>@lang('lang_v1.serial_purchase_price_ins')</td>
+		                    </tr>
+		                    <tr>
+					<td>11</td>
+		                        <td>@lang('lang_v1.serial_selling_price') <small class="text-muted">(@lang('lang_v1.optional'))</small></td>
+		                        <td>@lang('lang_v1.serial_selling_price_ins')</td>
 		                    </tr>
 		                </table>
 		            </div>

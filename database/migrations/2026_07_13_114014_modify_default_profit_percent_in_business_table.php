@@ -14,7 +14,9 @@ return new class extends Migration
      */
     public function up()
     {
-        DB::statement("ALTER TABLE business MODIFY COLUMN default_profit_percent DECIMAL(22,4) DEFAULT 0");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE business MODIFY COLUMN default_profit_percent DECIMAL(22,4) DEFAULT 0");
+        }
     }
 
     /**
@@ -24,6 +26,8 @@ return new class extends Migration
      */
     public function down()
     {
-        DB::statement("ALTER TABLE business MODIFY COLUMN default_profit_percent FLOAT(5,2) DEFAULT 0");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE business MODIFY COLUMN default_profit_percent FLOAT(5,2) DEFAULT 0");
+        }
     }
 };

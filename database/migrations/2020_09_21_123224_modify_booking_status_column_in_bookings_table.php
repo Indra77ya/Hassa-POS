@@ -14,7 +14,9 @@ return new class extends Migration
      */
     public function up()
     {
-        DB::statement('ALTER TABLE bookings MODIFY COLUMN `booking_status` VARCHAR(191) NOT NULL;');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE bookings MODIFY COLUMN `booking_status` VARCHAR(191) NOT NULL;');
+        }
         Schema::table('bookings', function (Blueprint $table) {
             $table->index('booking_status');
         });

@@ -12,7 +12,9 @@ return new class extends Migration
      */
     public function up()
     {
-        DB::statement('ALTER TABLE cash_register_transactions MODIFY COLUMN transaction_type VARCHAR(191);');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE cash_register_transactions MODIFY COLUMN transaction_type VARCHAR(191);');
+        }
     }
 
     /**

@@ -48,7 +48,9 @@ return new class extends Migration
                 ->after('export_custom_field_5');
         });
 
-        DB::statement('ALTER TABLE contacts MODIFY COLUMN name VARCHAR(191) DEFAULT NULL');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE contacts MODIFY COLUMN name VARCHAR(191) DEFAULT NULL');
+        }
     }
 
     /**

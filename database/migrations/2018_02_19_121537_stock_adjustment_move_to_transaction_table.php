@@ -14,11 +14,17 @@ return new class extends Migration
      */
     public function up()
     {
-        DB::statement("ALTER TABLE `transactions` CHANGE `type` `type` ENUM('purchase','sell','expense','stock_adjustment') DEFAULT NULL");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE `transactions` CHANGE `type` `type` ENUM('purchase','sell','expense','stock_adjustment') DEFAULT NULL");
+        }
 
-        DB::statement('SET FOREIGN_KEY_CHECKS = 0');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('SET FOREIGN_KEY_CHECKS = 0');
+        }
 
-        DB::statement('DROP TABLE IF EXISTS stock_adjustment_lines');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('DROP TABLE IF EXISTS stock_adjustment_lines');
+        }
 
         Schema::create('stock_adjustment_lines', function (Blueprint $table) {
             $table->increments('id');
@@ -43,10 +49,16 @@ return new class extends Migration
         });
 
         //Create & Rename stock_adjustment table.
-        DB::statement('CREATE TABLE IF NOT EXISTS `stock_adjustments` (`id` int(11) DEFAULT NULL) ');
-        Schema::rename('stock_adjustments', 'stock_adjustments_temp');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('CREATE TABLE IF NOT EXISTS `stock_adjustments` (`id` int(11) DEFAULT NULL) ');
+        }
+        if (Schema::hasTable('stock_adjustments')) {
+            Schema::rename('stock_adjustments', 'stock_adjustments_temp');
+        }
 
-        DB::statement('SET FOREIGN_KEY_CHECKS = 1');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('SET FOREIGN_KEY_CHECKS = 1');
+        }
     }
 
     /**

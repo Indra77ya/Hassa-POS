@@ -12,7 +12,9 @@ return new class extends Migration
      */
     public function up()
     {
-        DB::statement('ALTER TABLE contacts MODIFY COLUMN `type` VARCHAR(191) NOT NULL');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE contacts MODIFY COLUMN `type` VARCHAR(191) NOT NULL');
+        }
 
         Contact::where('type', '=', '')
                  ->orWhereNull('type')

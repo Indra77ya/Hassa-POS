@@ -13,7 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        DB::statement('ALTER TABLE transactions MODIFY COLUMN `status` VARCHAR(191) NOT NULL;');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE transactions MODIFY COLUMN `status` VARCHAR(191) NOT NULL;');
+        }
 
         Transaction::where('type', 'sell_transfer')
                 ->update(['status' => 'final']);

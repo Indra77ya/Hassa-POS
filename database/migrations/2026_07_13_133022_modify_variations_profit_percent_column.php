@@ -13,7 +13,9 @@ return new class extends Migration
     public function up(): void
     {
         // Using raw SQL to avoid doctrine/dbal dependency for column modification
-        DB::statement("ALTER TABLE variations MODIFY COLUMN profit_percent DECIMAL(22, 4) DEFAULT 0.0000");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE variations MODIFY COLUMN profit_percent DECIMAL(22, 4) DEFAULT 0.0000");
+        }
     }
 
     /**
@@ -22,6 +24,8 @@ return new class extends Migration
     public function down(): void
     {
         // Reverting to float(5,2) which was likely the original size for percentage
-        DB::statement("ALTER TABLE variations MODIFY COLUMN profit_percent FLOAT(5, 2) DEFAULT 0.00");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE variations MODIFY COLUMN profit_percent FLOAT(5, 2) DEFAULT 0.00");
+        }
     }
 };

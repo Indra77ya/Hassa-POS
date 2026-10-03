@@ -26,7 +26,9 @@ return new class extends Migration
             $table->integer('account_type_id')->nullable()->after('account_number');
         });
 
-        DB::statement('ALTER TABLE accounts DROP COLUMN account_type;');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE accounts DROP COLUMN account_type;');
+        }
     }
 
     /**

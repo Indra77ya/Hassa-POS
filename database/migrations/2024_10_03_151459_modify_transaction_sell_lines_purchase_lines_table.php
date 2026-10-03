@@ -14,7 +14,9 @@ return new class extends Migration
      */
     public function up()
     {
-        DB::statement("ALTER TABLE transaction_sell_lines_purchase_lines MODIFY COLUMN id BIGINT AUTO_INCREMENT");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE transaction_sell_lines_purchase_lines MODIFY COLUMN id BIGINT AUTO_INCREMENT");
+        }
     }
 
     /**
