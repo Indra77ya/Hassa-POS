@@ -23,22 +23,26 @@ class AddLocationIdToAccountingAccTransMappingsTable extends Migration
         // Backfill location_id for existing asset acquisition and depreciation journals
         if (Schema::hasTable('assets') && Schema::hasTable('accounting_acc_trans_mappings')) {
             // 1. Asset acquisition mappings
+            if (DB::getDriverName() !== 'sqlite') {
             DB::statement("
                 UPDATE accounting_acc_trans_mappings ATM
                 JOIN assets A ON A.accounting_acc_trans_mapping_id = ATM.id
                 SET ATM.location_id = A.location_id
                 WHERE A.location_id IS NOT NULL AND ATM.location_id IS NULL
             ");
+        }
 
             // 2. Asset depreciation mappings
             if (Schema::hasTable('asset_depreciation_logs')) {
-                DB::statement("
+                if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("
                     UPDATE accounting_acc_trans_mappings ATM
                     JOIN asset_depreciation_logs ADL ON ADL.accounting_acc_trans_mapping_id = ATM.id
                     JOIN assets A ON ADL.asset_id = A.id
                     SET ATM.location_id = A.location_id
                     WHERE A.location_id IS NOT NULL AND ATM.location_id IS NULL
                 ");
+        }
             }
         }
     }

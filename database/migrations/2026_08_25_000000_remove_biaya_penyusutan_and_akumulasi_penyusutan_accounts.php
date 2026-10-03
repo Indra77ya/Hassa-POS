@@ -29,10 +29,12 @@ class RemoveBiayaPenyusutanAndAkumulasiPenyusutanAccounts extends Migration
         }
 
         // 2. Delete Accounting Accounts and their transactions
-        if (class_exists(AccountingAccount::class)) {
+        if (class_exists(AccountingAccount::class) && \Schema::hasTable('accounting_accounts')) {
             $accounting_accounts = AccountingAccount::whereIn('name', $target_names)->get();
             foreach ($accounting_accounts as $account) {
-                \DB::table('accounting_accounts_transactions')->where('accounting_account_id', $account->id)->delete();
+                if (\Schema::hasTable('accounting_accounts_transactions')) {
+                    \DB::table('accounting_accounts_transactions')->where('accounting_account_id', $account->id)->delete();
+                }
                 $account->delete();
             }
         }

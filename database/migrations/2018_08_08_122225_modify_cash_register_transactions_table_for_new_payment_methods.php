@@ -12,7 +12,9 @@ return new class extends Migration
      */
     public function up()
     {
-        DB::statement("ALTER TABLE cash_register_transactions MODIFY COLUMN pay_method ENUM('cash','card', 'cheque', 'bank_transfer', 'custom_pay_1', 'custom_pay_2', 'custom_pay_3', 'other')");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE cash_register_transactions MODIFY COLUMN pay_method ENUM('cash','card', 'cheque', 'bank_transfer', 'custom_pay_1', 'custom_pay_2', 'custom_pay_3', 'other')");
+        }
     }
 
     /**

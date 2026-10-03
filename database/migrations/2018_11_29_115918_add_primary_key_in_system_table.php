@@ -13,9 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('system', function (Blueprint $table) {
-            $table->increments('id')->first();
-        });
+        if (DB::getDriverName() !== 'sqlite') {
+            Schema::table('system', function (Blueprint $table) {
+                $table->increments('id')->first();
+            });
+        }
     }
 
     /**

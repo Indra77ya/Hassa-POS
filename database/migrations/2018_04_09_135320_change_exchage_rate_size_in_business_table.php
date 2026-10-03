@@ -12,8 +12,12 @@ return new class extends Migration
      */
     public function up()
     {
-        DB::statement('ALTER TABLE business MODIFY COLUMN p_exchange_rate DECIMAL(20, 3) NOT NULL DEFAULT 1');
-        DB::statement('ALTER TABLE transactions MODIFY COLUMN exchange_rate DECIMAL(20,3) NOT NULL DEFAULT 1');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE business MODIFY COLUMN p_exchange_rate DECIMAL(20, 3) NOT NULL DEFAULT 1');
+        }
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE transactions MODIFY COLUMN exchange_rate DECIMAL(20,3) NOT NULL DEFAULT 1');
+        }
 
         //Update 0 to 1
         DB::table('transactions')

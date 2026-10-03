@@ -15,7 +15,9 @@ return new class extends Migration
     public function up()
     {
         Schema::table('products', function (Blueprint $table) {
+            if (DB::getDriverName() !== 'sqlite') {
             DB::statement("ALTER TABLE `products` CHANGE `barcode_type` `barcode_type` ENUM('C39','C128','EAN13','EAN8','UPCA','UPCE') DEFAULT 'C128' ");
+        }
         });
     }
 

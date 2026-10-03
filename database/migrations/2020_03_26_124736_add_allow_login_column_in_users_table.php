@@ -18,8 +18,12 @@ return new class extends Migration
             $table->boolean('allow_login')->default(1)->after('business_id');
         });
 
-        DB::statement('ALTER TABLE users CHANGE username username VARCHAR(191) NULL;');
-        DB::statement('ALTER TABLE users CHANGE password password VARCHAR(191) NULL;');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE users CHANGE username username VARCHAR(191) NULL;');
+        }
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE users CHANGE password password VARCHAR(191) NULL;');
+        }
     }
 
     /**

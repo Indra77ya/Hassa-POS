@@ -12,7 +12,9 @@ return new class extends Migration
      */
     public function up()
     {
-        DB::statement('UPDATE transactions SET total_before_tax=final_total WHERE type="expense" ');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('UPDATE transactions SET total_before_tax=final_total WHERE type="expense" ');
+        }
     }
 
     /**

@@ -11,13 +11,23 @@
                 <br>
                 <small class="text-muted" style="white-space: nowrap;">@lang('report.current_stock'): @if(!empty($variation->variation_location_details->first())) {{@num_format($variation->variation_location_details->first()->qty_available)}} @else 0 @endif {{ $product->unit->short_name }}</small>
             @endif
-            @if(!empty($product->enable_sr_no) && $product->enable_sr_no == 1)
+            @php
+                $imported_serials = !empty($imported_data['serials']) ? $imported_data['serials'] : [];
+                $has_sr_no = (!empty($product->enable_sr_no) && $product->enable_sr_no == 1) || !empty($imported_serials);
+            @endphp
+            @if($has_sr_no)
                 @php
                     $p_id = !empty($product->product_id) ? $product->product_id : (isset($product->id) ? $product->id : null);
                     $existing_sn_records = \App\ProductSerialNumber::where('business_id', session('user.business_id'))
                         ->where('product_id', $p_id)
                         ->where('status', 'in_stock')
                         ->get();
+
+                    $imp_sn_map = [];
+                    foreach ($imported_serials as $imp_s) {
+                        $imp_sn_map[$imp_s['serial_number']] = $imp_s;
+                    }
+                    $rendered_sns = [];
                 @endphp
                 <br>
                 <small class="text-primary"><strong>@lang('lang_v1.sn_input_help')</strong></small>
@@ -25,17 +35,38 @@
                     @foreach($existing_sn_records as $sn_rec)
                         @php
                             $is_unlinked = empty($sn_rec->purchase_line_id);
+                            $is_in_imported = isset($imp_sn_map[$sn_rec->serial_number]);
+                            $rendered_sns[] = $sn_rec->serial_number;
+
+                            $sn_pp = $is_in_imported && isset($imp_sn_map[$sn_rec->serial_number]['purchase_price']) ? $imp_sn_map[$sn_rec->serial_number]['purchase_price'] : $sn_rec->purchase_price;
+                            $sn_sp = $is_in_imported && isset($imp_sn_map[$sn_rec->serial_number]['selling_price']) ? $imp_sn_map[$sn_rec->serial_number]['selling_price'] : $sn_rec->selling_price;
+                            $is_selected = $is_unlinked || $is_in_imported;
                         @endphp
                         <option value="{{$sn_rec->serial_number}}"
                                 data-status="{{$sn_rec->status}}"
                                 data-is_existing_instock="{{ $is_unlinked ? 0 : 1 }}"
-                                data-purchase_price="{{@num_format($sn_rec->purchase_price)}}"
-                                data-purchase-price="{{@num_format($sn_rec->purchase_price)}}"
-                                data-selling_price="{{@num_format($sn_rec->selling_price)}}"
-                                data-selling-price="{{@num_format($sn_rec->selling_price)}}"
-                                @if($is_unlinked) selected="selected" @endif>
+                                data-purchase_price="{{@num_format($sn_pp)}}"
+                                data-purchase-price="{{@num_format($sn_pp)}}"
+                                data-selling_price="{{@num_format($sn_sp)}}"
+                                data-selling-price="{{@num_format($sn_sp)}}"
+                                @if($is_selected) selected="selected" @endif>
                             {{$sn_rec->serial_number}}
                         </option>
+                    @endforeach
+
+                    @foreach($imported_serials as $imp_sn)
+                        @if(!in_array($imp_sn['serial_number'], $rendered_sns))
+                            @php $rendered_sns[] = $imp_sn['serial_number']; @endphp
+                            <option value="{{$imp_sn['serial_number']}}"
+                                    data-is_existing_instock="0"
+                                    data-purchase_price="{{@num_format($imp_sn['purchase_price'])}}"
+                                    data-purchase-price="{{@num_format($imp_sn['purchase_price'])}}"
+                                    data-selling_price="{{@num_format($imp_sn['selling_price'])}}"
+                                    data-selling-price="{{@num_format($imp_sn['selling_price'])}}"
+                                    selected="selected">
+                                {{$imp_sn['serial_number']}}
+                            </option>
+                        @endif
                     @endforeach
                 </select>
                 <button type="button" class="btn btn-xs btn-default tw-mt-1.5 btn_sn_price_details" data-toggle="modal" data-target="#sn_price_modal_{{$row_count}}">
@@ -93,7 +124,7 @@
                 $currency_precision = session('business.currency_precision', 2);
                 $quantity_precision = session('business.quantity_precision', 2);
 
-                $default_qty = (!empty($product->enable_sr_no) && $product->enable_sr_no == 1) ? 0 : 1;
+                $default_qty = $has_sr_no ? 0 : 1;
                 $quantity_value = !empty($purchase_order_line) ? $purchase_order_line->quantity : $default_qty;
 
                 $quantity_value = !empty($purchase_requisition_line) ? $purchase_requisition_line->quantity - $purchase_requisition_line->po_quantity_purchased : $quantity_value;
@@ -115,7 +146,7 @@
                     data-rule-max-value="{{$max_quantity}}"
                     data-msg-max-value="{{__('lang_v1.max_quantity_quantity_allowed', ['quantity' => $max_quantity])}}" 
                 @endif
-                @if(!empty($product->enable_sr_no) && $product->enable_sr_no == 1) readonly @endif
+                @if($has_sr_no) readonly @endif
             >
 
 
@@ -167,7 +198,7 @@
                 $discount_percent = !empty($imported_data['discount_percent']) ? $imported_data['discount_percent'] : $discount_percent;
             @endphp
             {!! Form::text('purchases[' . $row_count . '][pp_without_discount]',
-            number_format($pp_without_discount, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), array_merge(['class' => 'form-control input-sm purchase_unit_cost_without_discount input_number', 'required'], (!empty($product->enable_sr_no) && $product->enable_sr_no == 1) ? ['readonly' => 'readonly'] : [])); !!}
+            number_format($pp_without_discount, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), array_merge(['class' => 'form-control input-sm purchase_unit_cost_without_discount input_number', 'required'], $has_sr_no ? ['readonly' => 'readonly'] : [])); !!}
 
             @if(!empty($last_purchase_line))
                 <br>
@@ -187,7 +218,7 @@
         </td>
         <td>
             {!! Form::text('purchases[' . $row_count . '][purchase_price]',
-            number_format($purchase_price, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), array_merge(['class' => 'form-control input-sm purchase_unit_cost input_number', 'required'], (!empty($product->enable_sr_no) && $product->enable_sr_no == 1) ? ['readonly' => 'readonly'] : [])); !!}
+            number_format($purchase_price, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), array_merge(['class' => 'form-control input-sm purchase_unit_cost input_number', 'required'], $has_sr_no ? ['readonly' => 'readonly'] : [])); !!}
         </td>
         <td class="{{$hide_tax}}">
             <span class="row_subtotal_before_tax display_currency">0</span>
@@ -217,19 +248,19 @@
                 $dpp_inc_tax = !empty($purchase_order_line) ? number_format($purchase_order_line->purchase_price_inc_tax/$purchase_order->exchange_rate, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator) : $dpp_inc_tax;
 
             @endphp
-            {!! Form::text('purchases[' . $row_count . '][purchase_price_inc_tax]', $dpp_inc_tax, array_merge(['class' => 'form-control input-sm purchase_unit_cost_after_tax input_number', 'required'], (!empty($product->enable_sr_no) && $product->enable_sr_no == 1) ? ['readonly' => 'readonly'] : [])); !!}
+            {!! Form::text('purchases[' . $row_count . '][purchase_price_inc_tax]', $dpp_inc_tax, array_merge(['class' => 'form-control input-sm purchase_unit_cost_after_tax input_number', 'required'], $has_sr_no ? ['readonly' => 'readonly'] : [])); !!}
         </td>
         <td>
             <span class="row_subtotal_after_tax display_currency">0</span>
             <input type="hidden" class="row_subtotal_after_tax_hidden" value=0>
         </td>
         <td class="@if(!session('business.enable_editing_product_from_purchase') || !empty($is_purchase_order)) hide @endif">
-            {!! Form::text('purchases[' . $row_count . '][profit_percent]', number_format($variation->profit_percent, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), array_merge(['class' => 'form-control input-sm input_number profit_percent', 'required'], (!empty($product->enable_sr_no) && $product->enable_sr_no == 1) ? ['readonly' => 'readonly'] : [])); !!}
+            {!! Form::text('purchases[' . $row_count . '][profit_percent]', number_format($variation->profit_percent, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), array_merge(['class' => 'form-control input-sm input_number profit_percent', 'required'], $has_sr_no ? ['readonly' => 'readonly'] : [])); !!}
         </td>
         @if(empty($is_purchase_order))
         <td>
             @if(session('business.enable_editing_product_from_purchase'))
-                {!! Form::text('purchases[' . $row_count . '][default_sell_price]', number_format($variation->sell_price_inc_tax, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), array_merge(['class' => 'form-control input-sm input_number default_sell_price', 'required'], (!empty($product->enable_sr_no) && $product->enable_sr_no == 1) ? ['readonly' => 'readonly'] : [])); !!}
+                {!! Form::text('purchases[' . $row_count . '][default_sell_price]', number_format($variation->sell_price_inc_tax, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator), array_merge(['class' => 'form-control input-sm input_number default_sell_price', 'required'], $has_sr_no ? ['readonly' => 'readonly'] : [])); !!}
             @else
                 {{ number_format($variation->sell_price_inc_tax, $currency_precision, $currency_details->decimal_separator, $currency_details->thousand_separator)}}
             @endif

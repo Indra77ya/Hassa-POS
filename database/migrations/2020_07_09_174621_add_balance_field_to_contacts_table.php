@@ -22,8 +22,12 @@ return new class extends Migration
             $table->boolean('is_advance')->default(0)->after('created_by');
         });
 
-        DB::statement('ALTER TABLE transaction_payments MODIFY COLUMN `method` VARCHAR(191) DEFAULT NULL;');
-        DB::statement('ALTER TABLE cash_register_transactions MODIFY COLUMN `pay_method` VARCHAR(191) DEFAULT NULL;');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE transaction_payments MODIFY COLUMN `method` VARCHAR(191) DEFAULT NULL;');
+        }
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE cash_register_transactions MODIFY COLUMN `pay_method` VARCHAR(191) DEFAULT NULL;');
+        }
     }
 
     /**

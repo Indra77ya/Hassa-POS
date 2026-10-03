@@ -18,7 +18,9 @@ return new class extends Migration
             $table->text('combo_variations')->nullable()->comment('Contains the combo variation details');
         });
 
-        DB::statement("ALTER TABLE `products` CHANGE `type` `type` ENUM('single','variable','modifier','combo') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL;");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE `products` CHANGE `type` `type` ENUM('single','variable','modifier','combo') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL;");
+        }
 
         Schema::table('transaction_sell_lines', function (Blueprint $table) {
             $table->string('children_type')
@@ -30,7 +32,9 @@ return new class extends Migration
             $table->index(['parent_sell_line_id']);
         });
 
-        DB::statement("UPDATE transaction_sell_lines SET children_type='modifier' WHERE parent_sell_line_id IS NOT NULL");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("UPDATE transaction_sell_lines SET children_type='modifier' WHERE parent_sell_line_id IS NOT NULL");
+        }
     }
 
     /**

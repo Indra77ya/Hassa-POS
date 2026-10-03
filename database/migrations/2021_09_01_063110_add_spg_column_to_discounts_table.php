@@ -14,7 +14,9 @@ return new class extends Migration
      */
     public function up()
     {
-        DB::statement('ALTER TABLE discounts DROP COLUMN applicable_in_spg');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE discounts DROP COLUMN applicable_in_spg');
+        }
 
         Schema::table('discounts', function (Blueprint $table) {
             $table->string('spg', 100)->nullable()->after('is_active')->comment('Applicable in specified selling price group only. Use of applicable_in_spg column is discontinued')->index();
