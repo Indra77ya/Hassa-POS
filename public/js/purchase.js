@@ -1526,55 +1526,6 @@ function set_po_values(po) {
     $('#additional_expense_value_4').val( __number_f(po.additional_expense_value_4));
 }
 
-if ($("div#import_product_dz").length) {
-    $("div#import_product_dz").dropzone({
-        url: base_path + '/import-purchase-products',
-        paramName: 'file',
-        autoProcessQueue: false,
-        addRemoveLinks: true,
-        uploadMultiple: false,
-        maxFiles:1,
-        init: function() {
-            this.on("addedfile", function(file) {
-                if ($('#location_id').val() == '') {
-                    this.removeFile(file);
-                    toastr.error('select location first');
-                }
-            });
-            this.on("maxfilesexceeded", function(file) {
-                this.removeAllFiles();
-                this.addFile(file);
-            });
-            this.on("sending", function(file, xhr, formData){
-                formData.append("location_id", $('#location_id').val());
-                formData.append("row_count", $('#row_count').val());
-            });
-        },   
-        acceptedFiles: '.csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel',
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        },
-        success: function(file, response) {
-            if (response.success) {
-                toastr.success(response.msg);
-                var row_count = $('#row_count').val();
-                append_purchase_lines(response.html, row_count, true);
-
-                this.removeAllFiles();
-
-                $('#import_purchase_products_modal').modal('hide');
-            } else {
-                toastr.error(response.msg);
-            }
-        },
-    });
-}
-
-$(document).on('click', '#import_purchase_products', function(){
-    var productDz = Dropzone.forElement("#import_product_dz");
-    productDz.processQueue();
-})
-
 function submitQuickAddPurchaseContactForm(form) {
     var data = $(form).serialize();
     $.ajax({
