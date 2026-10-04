@@ -91,14 +91,14 @@
 			@endphp
 			<div class="tw-mt-2 text-left" style="background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
 				<label style="font-size: 11px; margin-bottom: 4px;" class="text-primary">
-					<i class="fa fa-barcode"></i> <strong>Rincian Serial Number / IMEI Per Unit:</strong>
+					<i class="fa fa-barcode"></i> <strong>@lang('lang_v1.sn_details_per_unit')</strong>
 				</label>
 				<table class="table table-bordered table-condensed os_sn_table mb-0" style="background: #ffffff; font-size: 12px;" data-prefix="{{ $unique_prefix }}">
 					<thead>
 						<tr class="bg-gray">
-							<th style="width: 40%;">Serial Number / IMEI <span class="text-danger">*</span></th>
-							<th style="width: 27%;">Harga Beli <span class="text-danger">*</span></th>
-							<th style="width: 27%;">Harga Jual <span class="text-danger">*</span></th>
+							<th style="width: 40%;">@lang('lang_v1.serial_numbers') <span class="text-danger">*</span></th>
+							<th style="width: 27%;">@lang('lang_v1.purchase_price') <span class="text-danger">*</span></th>
+							<th style="width: 27%;">@lang('lang_v1.selling_price') <span class="text-danger">*</span></th>
 							<th style="width: 6%;" class="text-center"><i class="fa fa-trash"></i></th>
 						</tr>
 					</thead>
@@ -110,10 +110,10 @@
 										<input type="text" name="{{ $unique_prefix }}[sn_details][{{ $sn_idx }}][serial_number]" value="{{ $sn_rec->serial_number }}" class="form-control input-sm os_sn_input" placeholder="Enter Serial / IMEI" required>
 									</td>
 									<td>
-										<input type="text" name="{{ $unique_prefix }}[sn_details][{{ $sn_idx }}][purchase_price]" value="{{ @num_format($sn_rec->purchase_price) }}" class="form-control input-sm input_number os_sn_pp_input" placeholder="Harga Beli" required>
+										<input type="text" name="{{ $unique_prefix }}[sn_details][{{ $sn_idx }}][purchase_price]" value="{{ @num_format($sn_rec->purchase_price) }}" class="form-control input-sm input_number os_sn_pp_input" placeholder="@lang('lang_v1.purchase_price')" required>
 									</td>
 									<td>
-										<input type="text" name="{{ $unique_prefix }}[sn_details][{{ $sn_idx }}][selling_price]" value="{{ @num_format($sn_rec->selling_price) }}" class="form-control input-sm input_number os_sn_sp_input" placeholder="Harga Jual" required>
+										<input type="text" name="{{ $unique_prefix }}[sn_details][{{ $sn_idx }}][selling_price]" value="{{ @num_format($sn_rec->selling_price) }}" class="form-control input-sm input_number os_sn_sp_input" placeholder="@lang('lang_v1.selling_price')" required>
 									</td>
 									<td class="text-center">
 										<button type="button" class="btn btn-xs btn-danger remove_os_sn_row"><i class="fa fa-trash"></i></button>
@@ -126,10 +126,10 @@
 									<input type="text" name="{{ $unique_prefix }}[sn_details][0][serial_number]" class="form-control input-sm os_sn_input" placeholder="Enter Serial / IMEI">
 								</td>
 								<td>
-									<input type="text" name="{{ $unique_prefix }}[sn_details][0][purchase_price]" value="{{ @num_format($purcahse_price) }}" class="form-control input-sm input_number os_sn_pp_input" placeholder="Harga Beli">
+									<input type="text" name="{{ $unique_prefix }}[sn_details][0][purchase_price]" value="{{ @num_format($purcahse_price) }}" class="form-control input-sm input_number os_sn_pp_input" placeholder="@lang('lang_v1.purchase_price')">
 								</td>
 								<td>
-									<input type="text" name="{{ $unique_prefix }}[sn_details][0][selling_price]" value="{{ @num_format($selling_price) }}" class="form-control input-sm input_number os_sn_sp_input" placeholder="Harga Jual">
+									<input type="text" name="{{ $unique_prefix }}[sn_details][0][selling_price]" value="{{ @num_format($selling_price) }}" class="form-control input-sm input_number os_sn_sp_input" placeholder="@lang('lang_v1.selling_price')">
 								</td>
 								<td class="text-center">
 									<button type="button" class="btn btn-xs btn-danger remove_os_sn_row"><i class="fa fa-trash"></i></button>
@@ -139,7 +139,7 @@
 					</tbody>
 				</table>
 				<button type="button" class="btn btn-xs btn-primary tw-mt-1.5 add_os_sn_row">
-					<i class="fa fa-plus"></i> Tambah Serial Number / IMEI
+					<i class="fa fa-plus"></i> @lang('lang_v1.add_sn_or_imei')
 				</button>
 			</div>
 		@endif
@@ -187,58 +187,7 @@
 	<td>
 		{!! Form::textarea('stocks[' . $key . '][' . $variation->id . '][' . $sub_key . '][purchase_line_note]', $purchase_line_note , ['class' => 'form-control input-sm', 'rows' => 3 ]); !!}
 	</td>
-	<td>
-		@if($loop->index == 0)
-			<button type="button" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline  tw-dw-btn-primary add_stock_row" data-sub-key="{{ count($purchases[$key][$variation->id])}}" 
-				data-row-html='<tr>
-					<td>
-						{{ $product->name }} @if( $product->type == "variable" ) (<b>{{ $variation->product_variation->name }}</b> : {{ $variation->name }}) @endif
-					</td>
-					<td>
-					<div class="input-group">
-	              		<input class="form-control input-sm input_number purchase_quantity" required="" name="stocks[{{$key}}][{{$variation->id}}][__subkey__][quantity]" type="text" value="0">
-			              <span class="input-group-addon">
-			                {{ $product->unit->short_name }}
-			              </span>
-	        			</div>
-					</td>
-	<td>
-		<input class="form-control input-sm input_number unit_price" required="" name="stocks[{{$key}}][{{$variation->id}}][__subkey__][purchase_price]" type="text" value="{{@num_format($purcahse_price)}}">
-	</td>
-	<td>
-		<input class="form-control input-sm input_number selling_price" name="stocks[{{$key}}][{{$variation->id}}][__subkey__][selling_price]" type="text" value="{{@num_format($selling_price)}}">
-	</td>
-
-	@if($enable_expiry == 1 && $product->enable_stock == 1)
-	<td>
-		<input class="form-control input-sm os_exp_date" required="" name="stocks[{{$key}}][{{$variation->id}}][__subkey__][exp_date]" type="text" readonly>
-	</td>
-	@endif
-
-	@if($enable_lot == 1)
-	<td>
-		<input class="form-control input-sm" name="stocks[{{$key}}][{{$variation->id}}][__subkey__][lot_number]" type="text">
-	</td>
-	@endif
-	<td>
-		<span class="row_subtotal_before_tax">
-			0.00
-		</span>
-	</td>
-	<td>
-		<div class="input-group date">
-			<input class="form-control input-sm os_date" name="stocks[{{$key}}][{{$variation->id}}][__subkey__][transaction_date]" type="text" readonly>
-		</div>
-	</td>
-	<td>
-		<textarea rows="3" class="form-control input-sm" name="stocks[{{$key}}][{{$variation->id}}][__subkey__][purchase_line_note]"></textarea>
-	</td>
-	<td>&nbsp;</td></tr>'
-	><i class="fa fa-plus"></i></button>
-	@else
-		&nbsp;
-	@endif
-			</td>
+	<td>&nbsp;</td>
 			</tr>
 		@endforeach
 	@endforeach
