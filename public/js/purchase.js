@@ -970,10 +970,6 @@ function get_purchase_entry_row(product_id, variation_id) {
                 row_count = idx + 1;
             }
         });
-        var hidden_count = parseInt($('#row_count').val()) || 0;
-        if (hidden_count > row_count) {
-            row_count = hidden_count;
-        }
 
         var location_id = $('#location_id').val();
         var supplier_id = $('#supplier_id').val();
