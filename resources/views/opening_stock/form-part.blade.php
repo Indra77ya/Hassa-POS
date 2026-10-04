@@ -87,59 +87,60 @@
 						}
 					})
 					->get();
-				$unique_row_id = $key . '_' . $variation->id . '_' . $sub_key;
+				$unique_prefix = "stocks[{$key}][{$variation->id}][{$sub_key}]";
 			@endphp
-			<br>
-			<small class="text-primary"><strong>@lang('lang_v1.sn_input_help')</strong></small>
-			<select name="stocks[{{$key}}][{{$variation->id}}][{{$sub_key}}][serial_numbers][]" class="form-control input-sm os_sn_select" multiple="multiple" style="width: 100%;" data-row_index="{{$unique_row_id}}">
-				@foreach($existing_sn_records as $sn_rec)
-					@php
-						$is_this_line = !empty($purchase_line_id) && $sn_rec->purchase_line_id == $purchase_line_id;
-						$is_unlinked = empty($sn_rec->purchase_line_id);
-						$is_selected = $is_this_line || $is_unlinked;
-					@endphp
-					<option value="{{$sn_rec->serial_number}}"
-							data-status="{{$sn_rec->status}}"
-							data-purchase_price="{{@num_format($sn_rec->purchase_price)}}"
-							data-purchase-price="{{@num_format($sn_rec->purchase_price)}}"
-							data-selling_price="{{@num_format($sn_rec->selling_price)}}"
-							data-selling-price="{{@num_format($sn_rec->selling_price)}}"
-							@if($is_selected) selected="selected" @endif>
-						{{$sn_rec->serial_number}}
-					</option>
-				@endforeach
-			</select>
-			<button type="button" class="btn btn-xs btn-default tw-mt-1.5 btn_sn_price_details" data-toggle="modal" data-target="#sn_price_modal_{{$unique_row_id}}">
-				<i class="fa fa-cog text-info"></i> @lang('lang_v1.sn_price_details')
-			</button>
-
-			<!-- Modal for SN Price Details -->
-			<div class="modal fade sn_price_modal" id="sn_price_modal_{{$unique_row_id}}" data-row_index="{{$unique_row_id}}" tabindex="-1" role="dialog">
-				<div class="modal-dialog modal-lg" role="document">
-					<div class="modal-content">
-						<div class="modal-header">
-							<button type="button" class="close" data-dismiss="modal">&times;</button>
-							<h4 class="modal-title">@lang('lang_v1.sn_price_modal_title') &ndash; <span class="text-primary">{{ $product->name }}@if($product->type == 'variable') - {{ $variation->product_variation->name }} : {{ $variation->name }}@endif</span></h4>
-						</div>
-						<div class="modal-body">
-							<p class="help-block"><small>@lang('lang_v1.sn_price_modal_help')</small></p>
-							<table class="table table-bordered table-condensed sn_price_table">
-								<thead>
-									<tr>
-										<th>Serial Number / IMEI</th>
-										<th>@lang('lang_v1.sn_purchase_price')</th>
-										<th>@lang('lang_v1.sn_selling_price')</th>
-									</tr>
-								</thead>
-								<tbody>
-								</tbody>
-							</table>
-						</div>
-						<div class="modal-footer">
-							<button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">@lang('messages.save') & @lang('messages.close')</button>
-						</div>
-					</div>
-				</div>
+			<div class="tw-mt-2 text-left" style="background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+				<label style="font-size: 11px; margin-bottom: 4px;" class="text-primary">
+					<i class="fa fa-barcode"></i> <strong>Rincian Serial Number / IMEI Per Unit:</strong>
+				</label>
+				<table class="table table-bordered table-condensed os_sn_table mb-0" style="background: #ffffff; font-size: 12px;" data-prefix="{{ $unique_prefix }}">
+					<thead>
+						<tr class="bg-gray">
+							<th style="width: 40%;">Serial Number / IMEI <span class="text-danger">*</span></th>
+							<th style="width: 27%;">Harga Beli <span class="text-danger">*</span></th>
+							<th style="width: 27%;">Harga Jual <span class="text-danger">*</span></th>
+							<th style="width: 6%;" class="text-center"><i class="fa fa-trash"></i></th>
+						</tr>
+					</thead>
+					<tbody class="os_sn_tbody">
+						@if($existing_sn_records->count() > 0)
+							@foreach($existing_sn_records as $sn_idx => $sn_rec)
+								<tr class="os_sn_row">
+									<td>
+										<input type="text" name="{{ $unique_prefix }}[sn_details][{{ $sn_idx }}][serial_number]" value="{{ $sn_rec->serial_number }}" class="form-control input-sm os_sn_input" placeholder="Enter Serial / IMEI" required>
+									</td>
+									<td>
+										<input type="text" name="{{ $unique_prefix }}[sn_details][{{ $sn_idx }}][purchase_price]" value="{{ @num_format($sn_rec->purchase_price) }}" class="form-control input-sm input_number os_sn_pp_input" placeholder="Harga Beli" required>
+									</td>
+									<td>
+										<input type="text" name="{{ $unique_prefix }}[sn_details][{{ $sn_idx }}][selling_price]" value="{{ @num_format($sn_rec->selling_price) }}" class="form-control input-sm input_number os_sn_sp_input" placeholder="Harga Jual" required>
+									</td>
+									<td class="text-center">
+										<button type="button" class="btn btn-xs btn-danger remove_os_sn_row"><i class="fa fa-trash"></i></button>
+									</td>
+								</tr>
+							@endforeach
+						@else
+							<tr class="os_sn_row">
+								<td>
+									<input type="text" name="{{ $unique_prefix }}[sn_details][0][serial_number]" class="form-control input-sm os_sn_input" placeholder="Enter Serial / IMEI">
+								</td>
+								<td>
+									<input type="text" name="{{ $unique_prefix }}[sn_details][0][purchase_price]" value="{{ @num_format($purcahse_price) }}" class="form-control input-sm input_number os_sn_pp_input" placeholder="Harga Beli">
+								</td>
+								<td>
+									<input type="text" name="{{ $unique_prefix }}[sn_details][0][selling_price]" value="{{ @num_format($selling_price) }}" class="form-control input-sm input_number os_sn_sp_input" placeholder="Harga Jual">
+								</td>
+								<td class="text-center">
+									<button type="button" class="btn btn-xs btn-danger remove_os_sn_row"><i class="fa fa-trash"></i></button>
+								</td>
+							</tr>
+						@endif
+					</tbody>
+				</table>
+				<button type="button" class="btn btn-xs btn-primary tw-mt-1.5 add_os_sn_row">
+					<i class="fa fa-plus"></i> Tambah Serial Number / IMEI
+				</button>
 			</div>
 		@endif
 	</td>

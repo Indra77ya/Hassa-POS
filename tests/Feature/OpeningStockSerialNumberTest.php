@@ -227,14 +227,13 @@ class OpeningStockSerialNumberTest extends TestCase
                             'quantity' => '2',
                             'purchase_price' => '5.000.000',
                             'selling_price' => '6.250.000',
-                            'serial_numbers' => ['OS-SN-101', 'OS-SN-102'],
                             'sn_details' => [
-                                'OS-SN-101' => [
+                                0 => [
                                     'serial_number' => 'OS-SN-101',
                                     'purchase_price' => '5.000.000',
                                     'selling_price' => '6.000.000',
                                 ],
-                                'OS-SN-102' => [
+                                1 => [
                                     'serial_number' => 'OS-SN-102',
                                     'purchase_price' => '5.000.000',
                                     'selling_price' => '6.500.000',

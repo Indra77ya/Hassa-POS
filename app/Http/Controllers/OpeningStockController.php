@@ -248,10 +248,25 @@ class OpeningStockController extends Controller
                                     $purchase_line->secondary_unit_quantity = $secondary_unit_quantity;
                                 }
 
-                                $raw_sns = isset($pl['serial_numbers']) ? $pl['serial_numbers'] : [];
-                                $serials = is_array($raw_sns) ? $raw_sns : preg_split('/[\r\n,]+/', $raw_sns);
-                                $serials = array_values(array_filter(array_map('trim', $serials)));
-                                $sn_details = isset($pl['sn_details']) ? $pl['sn_details'] : [];
+                                $serials = [];
+                                $sn_details = [];
+                                if (isset($pl['sn_details']) && is_array($pl['sn_details'])) {
+                                    foreach ($pl['sn_details'] as $sn_item) {
+                                        $sn_str = trim($sn_item['serial_number'] ?? '');
+                                        if (!empty($sn_str)) {
+                                            $serials[] = $sn_str;
+                                            $sn_details[$sn_str] = [
+                                                'serial_number' => $sn_str,
+                                                'purchase_price' => isset($sn_item['purchase_price']) ? $this->productUtil->num_uf($sn_item['purchase_price']) : $purchase_price,
+                                                'selling_price' => isset($sn_item['selling_price']) ? $this->productUtil->num_uf($sn_item['selling_price']) : 0,
+                                            ];
+                                        }
+                                    }
+                                } elseif (isset($pl['serial_numbers'])) {
+                                    $raw_sns = $pl['serial_numbers'];
+                                    $serials = is_array($raw_sns) ? $raw_sns : preg_split('/[\r\n,]+/', $raw_sns);
+                                    $serials = array_values(array_filter(array_map('trim', $serials)));
+                                }
 
                                 if (! empty($purchase_line->transaction_id)) {
                                     $edit_purchase_lines[$purchase_line->transaction_id][] = [
