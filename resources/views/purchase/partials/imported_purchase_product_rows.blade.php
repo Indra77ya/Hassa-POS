@@ -10,7 +10,4 @@
 		'sub_units' => $data['sub_units'],
 		'imported_data' =>  $data
 	])
-	@php
-		$row_count++;
-	@endphp
 @endforeach

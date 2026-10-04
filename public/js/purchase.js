@@ -1556,7 +1556,11 @@ if ($("div#import_product_dz").length) {
         },
         success: function(file, response) {
             if (response.success) {
-                toastr.success(response.msg);
+                if (response.skipped_skus_count && response.skipped_skus_count > 0) {
+                    toastr.warning(response.msg);
+                } else {
+                    toastr.success(response.msg);
+                }
                 var row_count = $('#row_count').val();
                 append_purchase_lines(response.html, row_count, true);
 

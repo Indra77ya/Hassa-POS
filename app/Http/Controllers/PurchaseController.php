@@ -1187,14 +1187,16 @@ class PurchaseController extends Controller
 
             $grouped_rows = [];
             $row_index = 0;
-            $missing_skus = [];
+            $skipped_skus = [];
 
             foreach ($imported_data as $key => $value) {
                 $row_index = $key + 1;
-                $sku = ! empty($value[0]) ? trim((string) $value[0]) : '';
+                $raw_sku = ! empty($value[0]) ? (string) $value[0] : '';
+                $sku = preg_replace('/[\x00-\x1F\x7F\xA0]/u', '', trim($raw_sku));
+                $sku = trim($sku);
 
                 if (empty($sku)) {
-                    $missing_skus[] = "Baris {$row_index}: [SKU Kosong]";
+                    $skipped_skus[] = "Baris {$row_index}: [SKU Kosong]";
                     continue;
                 }
 
@@ -1203,8 +1205,8 @@ class PurchaseController extends Controller
                                     ->where(function ($q) use ($sku) {
                                         $q->where('variations.sub_sku', $sku)
                                           ->orWhere('products.sku', $sku)
-                                          ->orWhereRaw('LOWER(variations.sub_sku) = ?', [strtolower($sku)])
-                                          ->orWhereRaw('LOWER(products.sku) = ?', [strtolower($sku)]);
+                                          ->orWhereRaw('LOWER(TRIM(variations.sub_sku)) = ?', [strtolower($sku)])
+                                          ->orWhereRaw('LOWER(TRIM(products.sku)) = ?', [strtolower($sku)]);
                                     })
                                     ->with([
                                         'product_variation',
@@ -1216,7 +1218,7 @@ class PurchaseController extends Controller
                                     ->first();
 
                 if (empty($variation)) {
-                    $missing_skus[] = "Baris {$row_index}: SKU '{$sku}'";
+                    $skipped_skus[] = "Baris {$row_index}: SKU '{$sku}'";
                     continue;
                 }
 
@@ -1226,7 +1228,7 @@ class PurchaseController extends Controller
                                 ->first();
 
                 if (empty($product)) {
-                    $missing_skus[] = "Baris {$row_index}: SKU '{$sku}'";
+                    $skipped_skus[] = "Baris {$row_index}: SKU '{$sku}'";
                     continue;
                 }
 
@@ -1282,11 +1284,11 @@ class PurchaseController extends Controller
                 }
             }
 
-            if (! empty($missing_skus)) {
-                $missing_list = implode(', ', $missing_skus);
+            if (empty($grouped_rows)) {
+                $missing_list = implode(', ', $skipped_skus);
                 return [
                     'success' => false,
-                    'msg' => "Produk tidak ditemukan di Master Produk untuk data berikut: {$missing_list}. Silakan daftarkan produk terlebih dahulu di Master Data Produk.",
+                    'msg' => "Tidak ada produk yang berhasil diimpor. Produk tidak ditemukan di Master Produk untuk SKU berikut: {$missing_list}. Silakan daftarkan produk terlebih dahulu di Master Data Produk.",
                 ];
             }
 
@@ -1343,9 +1345,17 @@ class PurchaseController extends Controller
             $html = view('purchase.partials.imported_purchase_product_rows')
                         ->with(compact('formatted_data', 'taxes', 'currency_details', 'hide_tax', 'row_count'))->render();
 
+            $msg = __('lang_v.imported');
+            $skipped_skus_count = count($skipped_skus);
+            if (! empty($skipped_skus)) {
+                $missing_list = implode(', ', $skipped_skus);
+                $msg = count($formatted_data) . " produk berhasil dimasukkan. SKU berikut dilewati karena belum terdaftar di Master Produk: {$missing_list}.";
+            }
+
             return [
                 'success' => true,
-                'msg' => __('lang_v.imported'),
+                'msg' => $msg,
+                'skipped_skus_count' => $skipped_skus_count,
                 'html' => $html,
             ];
         } catch (\Exception $e) {

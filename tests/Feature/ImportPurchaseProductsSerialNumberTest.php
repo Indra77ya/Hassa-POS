@@ -284,4 +284,30 @@ class ImportPurchaseProductsSerialNumberTest extends TestCase
         $this->assertStringContainsString('Baris 1', $json['msg']);
         $this->assertStringContainsString('Baris 2', $json['msg']);
     }
+
+    public function test_import_purchase_products_imports_matched_skus_and_notifies_skipped_skus()
+    {
+        $sku = $this->product->sku;
+        $csvHeader = "SKU,QUANTITY,UNIT COST (BEFORE DISCOUNT),DISCOUNT PERCENT,PRODUCT TAX,LOT NUMBER,MFG DATE,EXP DATE,SERIAL NUMBER,SERIAL PURCHASE PRICE,SERIAL SELLING PRICE\n";
+        $csvContent = $csvHeader .
+            "{$sku},,5000000,0,,LOT-A1,,,SN-PARTIAL-101,5000000,6000000\n" .
+            "NON-EXISTENT-SKU-99,1,3000000,0,,,,,,,,,\n";
+
+        $file = UploadedFile::fake()->createWithContent('import_purchase.csv', $csvContent);
+
+        $response = $this->post('/import-purchase-products', [
+            'file' => $file,
+            'location_id' => $this->location->id,
+            'row_count' => 0,
+        ]);
+
+        $response->assertStatus(200);
+        $json = $response->json();
+
+        $this->assertTrue($json['success']);
+        $this->assertEquals(1, $json['skipped_skus_count']);
+        $this->assertStringContainsString('SN-PARTIAL-101', $json['html']);
+        $this->assertStringContainsString('NON-EXISTENT-SKU-99', $json['msg']);
+        $this->assertStringContainsString('dilewati', $json['msg']);
+    }
 }
