@@ -40,7 +40,7 @@
 
                             $sn_pp = $is_in_imported && isset($imp_sn_map[$sn_rec->serial_number]['purchase_price']) ? $imp_sn_map[$sn_rec->serial_number]['purchase_price'] : $sn_rec->purchase_price;
                             $sn_sp = $is_in_imported && isset($imp_sn_map[$sn_rec->serial_number]['selling_price']) ? $imp_sn_map[$sn_rec->serial_number]['selling_price'] : $sn_rec->selling_price;
-                            $is_selected = $is_unlinked || $is_in_imported;
+                            $is_selected = $is_in_imported;
                         @endphp
                         <option value="{{$sn_rec->serial_number}}"
                                 data-status="{{$sn_rec->status}}"
