@@ -44,6 +44,18 @@ $(document).ready(function() {
         });
     });
 
+    // Calculate initial summary for existing OS SN tables
+    $('.os_sn_table').each(function() {
+        var main_tr = $(this).closest('td').closest('tr');
+        calculate_os_sn_table_summary(main_tr);
+    });
+});
+
+$('#opening_stock_modal').on('shown.bs.modal', function(e) {
+    $('#opening_stock_modal .os_sn_table').each(function() {
+        var main_tr = $(this).closest('td').closest('tr');
+        calculate_os_sn_table_summary(main_tr);
+    });
 });
 
 // Add new OS Serial Number row
@@ -51,8 +63,9 @@ $(document).on('click', '.add_os_sn_row', function() {
     var table = $(this).closest('div').find('.os_sn_table');
     var prefix = table.data('prefix');
     var index = table.find('tbody tr.os_sn_row').length;
-    var default_pp = $(this).closest('tr').find('.unit_price').val() || '';
-    var default_sp = $(this).closest('tr').find('.selling_price').val() || '';
+    var main_tr = table.closest('td').closest('tr');
+    var default_pp = main_tr.find('.unit_price').val() || '';
+    var default_sp = main_tr.find('.selling_price').val() || '';
 
     var new_row = '<tr class="os_sn_row">' +
         '<td><input type="text" name="' + prefix + '[sn_details][' + index + '][serial_number]" class="form-control input-sm os_sn_input" placeholder="Enter Serial / IMEI" required></td>' +
@@ -62,14 +75,12 @@ $(document).on('click', '.add_os_sn_row', function() {
         '</tr>';
     table.find('tbody.os_sn_tbody').append(new_row);
 
-    var main_tr = $(this).closest('tr');
     calculate_os_sn_table_summary(main_tr);
 });
 
 // Remove OS Serial Number row
 $(document).on('click', '.remove_os_sn_row', function() {
-    var main_tr = $(this).closest('tr.os_sn_row').closest('tr');
-    var tbody = $(this).closest('tbody');
+    var main_tr = $(this).closest('table.os_sn_table').closest('td').closest('tr');
     $(this).closest('tr.os_sn_row').remove();
     calculate_os_sn_table_summary(main_tr);
 });
@@ -98,7 +109,7 @@ $(document).on('change blur', '.os_sn_input', function() {
 
 // Recalculate main row quantity, average unit cost & selling price when SN row prices or count change
 $(document).on('change keyup', '.os_sn_input, .os_sn_pp_input, .os_sn_sp_input', function() {
-    var main_tr = $(this).closest('tr.os_sn_row').closest('tr');
+    var main_tr = $(this).closest('table.os_sn_table').closest('td').closest('tr');
     calculate_os_sn_table_summary(main_tr);
 });
 
