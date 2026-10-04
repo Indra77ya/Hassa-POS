@@ -59,7 +59,7 @@ class AddProductSerialNumberTest extends TestCase
         ]);
     }
 
-    public function test_add_product_fails_when_enable_sr_no_is_checked_without_serials()
+    public function test_add_product_succeeds_with_enable_sr_no_checked()
     {
         $data = [
             'name' => 'Samsung Galaxy S24',
@@ -74,71 +74,21 @@ class AddProductSerialNumberTest extends TestCase
             'profit_percent' => 20,
             'single_dsp' => 12000000,
             'single_dsp_inc_tax' => 12000000,
-            'product_serials' => []
         ];
 
         $response = $this->post('/products', $data);
 
-        $this->assertDatabaseMissing('products', [
-            'name' => 'Samsung Galaxy S24'
-        ]);
-    }
-
-    public function test_add_product_succeeds_and_creates_serial_numbers_when_valid()
-    {
-        $data = [
-            'name' => 'iPhone 15 Pro Max',
-            'unit_id' => $this->unit->id,
-            'category_id' => $this->category->id,
-            'barcode_type' => 'C128',
-            'tax_type' => 'exclusive',
-            'type' => 'single',
-            'enable_sr_no' => 1,
-            'single_dpp' => 15000000,
-            'single_dpp_inc_tax' => 15000000,
-            'profit_percent' => 20,
-            'single_dsp' => 18000000,
-            'single_dsp_inc_tax' => 18000000,
-            'product_serials' => [
-                [
-                    'serial_number' => 'IMEI-TEST-001',
-                    'purchase_price' => 14000000,
-                    'selling_price' => 17500000
-                ],
-                [
-                    'serial_number' => 'IMEI-TEST-002',
-                    'purchase_price' => 16000000,
-                    'selling_price' => 18500000
-                ]
-            ]
-        ];
-
-        $response = $this->post('/products', $data);
-
-        $product = Product::where('name', 'iPhone 15 Pro Max')->first();
+        $product = Product::where('name', 'Samsung Galaxy S24')->first();
         $this->assertNotNull($product);
         $this->assertEquals(1, $product->enable_sr_no);
 
-        $this->assertDatabaseHas('product_serial_numbers', [
-            'business_id' => $this->business->id,
+        // Verify no in_stock serial numbers are created automatically upon product creation
+        $this->assertDatabaseMissing('product_serial_numbers', [
             'product_id' => $product->id,
-            'serial_number' => 'IMEI-TEST-001',
-            'purchase_price' => 14000000,
-            'selling_price' => 17500000,
-            'status' => 'in_stock'
-        ]);
-
-        $this->assertDatabaseHas('product_serial_numbers', [
-            'business_id' => $this->business->id,
-            'product_id' => $product->id,
-            'serial_number' => 'IMEI-TEST-002',
-            'purchase_price' => 16000000,
-            'selling_price' => 18500000,
-            'status' => 'in_stock'
         ]);
     }
 
-    public function test_quick_add_product_with_serial_numbers()
+    public function test_quick_add_product_with_enable_sr_no()
     {
         $data = [
             'name' => 'Xiaomi 14 Ultra',
@@ -153,13 +103,6 @@ class AddProductSerialNumberTest extends TestCase
             'profit_percent' => 20,
             'single_dsp' => 14400000,
             'single_dsp_inc_tax' => 14400000,
-            'product_serials' => [
-                [
-                    'serial_number' => 'XIAOMI-SN-001',
-                    'purchase_price' => 12000000,
-                    'selling_price' => 14400000
-                ]
-            ]
         ];
 
         $response = $this->post('/products/save-quick-product', $data);
@@ -167,54 +110,11 @@ class AddProductSerialNumberTest extends TestCase
 
         $product = Product::where('name', 'Xiaomi 14 Ultra')->first();
         $this->assertNotNull($product);
+        $this->assertEquals(1, $product->enable_sr_no);
 
-        $this->assertDatabaseHas('product_serial_numbers', [
-            'business_id' => $this->business->id,
+        // Verify no in_stock serial numbers are created
+        $this->assertDatabaseMissing('product_serial_numbers', [
             'product_id' => $product->id,
-            'serial_number' => 'XIAOMI-SN-001',
-            'purchase_price' => 12000000,
-            'selling_price' => 14400000,
-            'status' => 'in_stock'
-        ]);
-    }
-
-    public function test_add_product_fails_when_duplicate_in_stock_serial_number_provided()
-    {
-        // Existing serial in stock
-        ProductSerialNumber::create([
-            'business_id' => $this->business->id,
-            'serial_number' => 'DUPLICATE-SN-999',
-            'purchase_price' => 1000,
-            'selling_price' => 1200,
-            'status' => 'in_stock'
-        ]);
-
-        $data = [
-            'name' => 'Duplicate Test Phone',
-            'unit_id' => $this->unit->id,
-            'category_id' => $this->category->id,
-            'barcode_type' => 'C128',
-            'tax_type' => 'exclusive',
-            'type' => 'single',
-            'enable_sr_no' => 1,
-            'single_dpp' => 10000000,
-            'single_dpp_inc_tax' => 10000000,
-            'profit_percent' => 20,
-            'single_dsp' => 12000000,
-            'single_dsp_inc_tax' => 12000000,
-            'product_serials' => [
-                [
-                    'serial_number' => 'DUPLICATE-SN-999',
-                    'purchase_price' => 10000000,
-                    'selling_price' => 12000000
-                ]
-            ]
-        ];
-
-        $response = $this->post('/products', $data);
-
-        $this->assertDatabaseMissing('products', [
-            'name' => 'Duplicate Test Phone'
         ]);
     }
 }

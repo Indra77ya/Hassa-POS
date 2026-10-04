@@ -232,57 +232,33 @@
           <div class="col-sm-12 product_sr_no_container @if(empty($product->enable_sr_no)) hide @endif">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <strong><i class="fa fa-barcode"></i> Serial Number / IMEI Details</strong>
-                    <small class="text-muted">(Edit in-stock serial numbers or add new ones with purchase & selling prices)</small>
+                    <strong><i class="fa fa-barcode"></i> Serial Number / IMEI Registered</strong>
                 </div>
                 <div class="panel-body">
-                    <table class="table table-bordered table-striped" id="product_sr_no_table">
-                        <thead>
-                            <tr>
-                                <th>Serial Number / IMEI <span class="text-danger">*</span></th>
-                                <th>Purchase Price (Cost) <span class="text-danger">*</span></th>
-                                <th>Selling Price <span class="text-danger">*</span></th>
-                                <th class="text-center" style="width: 50px;">
-                                    <button type="button" class="btn btn-xs btn-primary add_product_sr_no_row"><i class="fa fa-plus"></i></button>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if(!empty($in_stock_serials) && count($in_stock_serials) > 0)
-                                @foreach($in_stock_serials as $index => $sn)
-                                    <tr class="product_sr_no_row">
-                                        <td>
-                                            <input type="text" name="product_serials[{{ $index }}][serial_number]" value="{{ $sn->serial_number }}" class="form-control input-sm product_sn_input" placeholder="Enter Serial / IMEI">
-                                        </td>
-                                        <td>
-                                            <input type="text" name="product_serials[{{ $index }}][purchase_price]" value="{{ @num_format($sn->purchase_price) }}" class="form-control input-sm input_number product_sn_purchase_price" placeholder="Purchase Price (Cost)">
-                                        </td>
-                                        <td>
-                                            <input type="text" name="product_serials[{{ $index }}][selling_price]" value="{{ @num_format($sn->selling_price) }}" class="form-control input-sm input_number product_sn_selling_price" placeholder="Selling Price">
-                                        </td>
-                                        <td class="text-center">
-                                            <button type="button" class="btn btn-xs btn-danger remove_product_sr_no_row"><i class="fa fa-trash"></i></button>
-                                        </td>
+                    @if(!empty($in_stock_serials) && count($in_stock_serials) > 0)
+                        <table class="table table-bordered table-striped" id="product_sr_no_table">
+                            <thead>
+                                <tr>
+                                    <th>Serial Number / IMEI</th>
+                                    <th>Status</th>
+                                    <th>Purchase Price (Cost)</th>
+                                    <th>Selling Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($in_stock_serials as $sn)
+                                    <tr>
+                                        <td><strong>{{ $sn->serial_number }}</strong></td>
+                                        <td><span class="label bg-green">@lang('lang_v1.in_stock')</span></td>
+                                        <td>@format_currency($sn->purchase_price)</td>
+                                        <td>@format_currency($sn->selling_price)</td>
                                     </tr>
                                 @endforeach
-                            @else
-                                <tr class="product_sr_no_row">
-                                    <td>
-                                        <input type="text" name="product_serials[0][serial_number]" class="form-control input-sm product_sn_input" placeholder="Enter Serial / IMEI">
-                                    </td>
-                                    <td>
-                                        <input type="text" name="product_serials[0][purchase_price]" class="form-control input-sm input_number product_sn_purchase_price" placeholder="Purchase Price (Cost)">
-                                    </td>
-                                    <td>
-                                        <input type="text" name="product_serials[0][selling_price]" class="form-control input-sm input_number product_sn_selling_price" placeholder="Selling Price">
-                                    </td>
-                                    <td class="text-center">
-                                        <button type="button" class="btn btn-xs btn-danger remove_product_sr_no_row"><i class="fa fa-trash"></i></button>
-                                    </td>
-                                </tr>
-                            @endif
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    @else
+                        <p class="text-muted"><i class="fa fa-info-circle"></i> Belum ada Serial Number / IMEI berstatus In Stock. Serial Number / IMEI baru dimasukkan saat melakukan transaksi Pembelian (Add Purchase) atau Stok Awal (Opening Stock).</p>
+                    @endif
                 </div>
             </div>
           </div>

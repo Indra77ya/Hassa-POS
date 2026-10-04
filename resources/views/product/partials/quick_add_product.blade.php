@@ -163,45 +163,6 @@
             </label>@show_tooltip(__('lang_v1.tooltip_sr_no'))
           </div>
         </div>
-
-        <div class="col-sm-12 product_sr_no_container hide">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <strong><i class="fa fa-barcode"></i> Serial Number / IMEI Details</strong>
-                    <small class="text-muted">(Enter at least 1 serial number with purchase price & selling price)</small>
-                </div>
-                <div class="panel-body">
-                    <table class="table table-bordered table-striped" id="quick_product_sr_no_table">
-                        <thead>
-                            <tr>
-                                <th>Serial Number / IMEI <span class="text-danger">*</span></th>
-                                <th>Purchase Price (Cost) <span class="text-danger">*</span></th>
-                                <th>Selling Price <span class="text-danger">*</span></th>
-                                <th class="text-center" style="width: 50px;">
-                                    <button type="button" class="btn btn-xs btn-primary add_product_sr_no_row"><i class="fa fa-plus"></i></button>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="product_sr_no_row">
-                                <td>
-                                    <input type="text" name="product_serials[0][serial_number]" class="form-control input-sm product_sn_input" placeholder="Enter Serial / IMEI">
-                                </td>
-                                <td>
-                                    <input type="text" name="product_serials[0][purchase_price]" class="form-control input-sm input_number product_sn_purchase_price" placeholder="Purchase Price (Cost)">
-                                </td>
-                                <td>
-                                    <input type="text" name="product_serials[0][selling_price]" class="form-control input-sm input_number product_sn_selling_price" placeholder="Selling Price">
-                                </td>
-                                <td class="text-center">
-                                    <button type="button" class="btn btn-xs btn-danger remove_product_sr_no_row"><i class="fa fa-trash"></i></button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
         <div class="clearfix"></div>
         @php
         $custom_labels = json_decode(session('business.custom_labels'), true);
@@ -315,30 +276,6 @@
       submitHandler: function (form) {
         
         var form = $("form#quick_add_product_form");
-        if (form.find('input[name="enable_sr_no"]').is(':checked')) {
-            var sn_valid = true;
-            var sn_count = 0;
-            form.find('tr.product_sr_no_row').each(function() {
-                var sn = $(this).find('.product_sn_input').val().trim();
-                var pp = $(this).find('.product_sn_purchase_price').val().trim();
-                var sp = $(this).find('.product_sn_selling_price').val().trim();
-                if (sn !== '') {
-                    sn_count++;
-                    if (pp === '' || sp === '') {
-                        sn_valid = false;
-                    }
-                }
-            });
-
-            if (sn_count === 0) {
-                toastr.error('At least 1 serial number is required when Enable Serial Number is checked.');
-                return false;
-            }
-            if (!sn_valid) {
-                toastr.error('Please fill in Serial Number, Purchase Price, and Selling Price for every row.');
-                return false;
-            }
-        }
         var url = form.attr('action');
         form.find('button[type="submit"]').attr('disabled', true);
         $.ajax({
