@@ -404,14 +404,16 @@ class ImportProductsController extends Controller
                         }
                     }
 
-                    // Extract serial numbers and custom prices across all grouped rows
+                    // Extract serial numbers and custom prices across all grouped rows only if opening stock > 0
                     $serials_list = [];
                     $sn_details = [];
                     if ($product_array['enable_sr_no'] == 1) {
                         foreach ($rows as $r) {
                             $r_val = $r['data'];
                             $sn = isset($r_val[38]) ? trim($r_val[38]) : '';
-                            if (! empty($sn)) {
+                            $r_os = isset($r_val[21]) && trim($r_val[21]) !== '' ? $this->productUtil->num_uf(trim($r_val[21])) : 0;
+
+                            if (! empty($sn) && $r_os > 0) {
                                 $serials_list[] = $sn;
                                 $sn_pp = isset($r_val[39]) && trim($r_val[39]) !== '' ? $this->productUtil->num_uf(trim($r_val[39])) : null;
                                 $sn_sp = isset($r_val[40]) && trim($r_val[40]) !== '' ? $this->productUtil->num_uf(trim($r_val[40])) : null;
@@ -495,8 +497,12 @@ class ImportProductsController extends Controller
                         if ($enable_stock == 1) {
                             $opening_stock_qty = 0;
 
-                            if ($product_array['enable_sr_no'] == 1 && ! empty($serials_list)) {
-                                $opening_stock_qty = count($serials_list);
+                            if ($product_array['enable_sr_no'] == 1) {
+                                foreach ($rows as $r) {
+                                    $r_val = $r['data'];
+                                    $r_os = isset($r_val[21]) && trim($r_val[21]) !== '' ? $this->productUtil->num_uf(trim($r_val[21])) : 0;
+                                    $opening_stock_qty += $r_os;
+                                }
                             } elseif (! empty($value[21])) {
                                 $opening_stock_qty = $this->productUtil->num_uf(trim($value[21]));
                             }
