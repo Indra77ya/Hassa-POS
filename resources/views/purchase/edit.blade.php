@@ -223,10 +223,7 @@
 
     @component('components.widget', ['class' => 'box-primary'])
         <div class="row">
-            <div class="col-sm-2 text-center">
-              <button type="button" class="tw-dw-btn tw-dw-btn-primary tw-text-white tw-dw-btn-sm" data-toggle="modal" data-target="#import_purchase_products_modal">@lang('product.import_products')</button>
-            </div>
-            <div class="col-sm-8">
+            <div class="col-sm-10">
               <div class="form-group">
                 <div class="input-group">
                   <span class="input-group-addon">
@@ -532,7 +529,6 @@
 <div class="modal fade contact_modal" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel">
   @include('contact.create', ['quick_add' => true])
 </div>
-@include('purchase.partials.import_purchase_products_modal')
 @endsection
 
 @section('javascript')

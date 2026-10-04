@@ -94,7 +94,6 @@ return [
     'enable_imei_or_sr_no' => 'Aktifkan deskripsi Produk, IMEI atau Nomor Seri',
     'serial_numbers' => 'Serial Number / IMEI',
     'serial_number_ins' => 'Nomor Seri / IMEI individual per produk (jika Aktifkan deskripsi Produk, IMEI atau Nomor Seri = 1). Buat baris CSV baru untuk setiap Serial Number.',
-    'import_purchase_products_sn_ins' => 'Serial Number / IMEI produk. Jika terdapat beberapa unit untuk SKU yang sama, dapat dipisahkan dengan koma (,) atau ditulis pada baris terpisah. Untuk produk ber-serial number, jumlah pembelian otomatis dihitung dari banyaknya Serial Number.',
     'serial_purchase_price' => 'Harga Beli Serial Number (HPP)',
     'serial_purchase_price_ins' => 'Harga beli / HPP per-unit khusus untuk Serial Number / IMEI tersebut. Jika dikosongkan, menggunakan Unit Cost Before Discount.',
     'serial_selling_price' => 'Harga Jual Serial Number',

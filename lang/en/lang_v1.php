@@ -94,7 +94,6 @@ return [
     'enable_imei_or_sr_no' => 'Enable Product description, IMEI or Serial Number',
     'serial_numbers' => 'Serial Number / IMEI',
     'serial_number_ins' => 'Individual Serial Number / IMEI per product (if ENABLE IMEI OR SERIAL NUMBER = 1). Create a new CSV row for each Serial Number.',
-    'import_purchase_products_sn_ins' => 'Product Serial Number / IMEI. If there are multiple units for the same SKU, they can be separated by commas (,) or written on separate rows. For serial-numbered products, the purchase quantity is automatically calculated from the number of Serial Numbers.',
     'serial_purchase_price' => 'Serial Purchase Price / HPP Unit',
     'serial_purchase_price_ins' => 'Cost price / HPP per-unit specific to that Serial Number / IMEI. If left blank, Unit Cost Before Discount will be used.',
     'serial_selling_price' => 'Serial Selling Price / Unit Selling Price',
