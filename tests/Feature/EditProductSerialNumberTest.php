@@ -194,7 +194,7 @@ class EditProductSerialNumberTest extends TestCase
     }
 
     /** @test */
-    public function it_updates_serial_numbers_and_recalculates_average_prices_on_product_update()
+    public function it_updates_product_details_without_modifying_serials_on_product_update()
     {
         $business = Business::create(['name' => 'Test Business']);
         $user = User::create([
@@ -239,7 +239,7 @@ class EditProductSerialNumberTest extends TestCase
         ]);
 
         $payload = [
-            'name' => $product->name,
+            'name' => 'Test Phone SN Sync Updated Name',
             'sku' => $product->sku,
             'barcode_type' => 'C128',
             'unit_id' => $product->unit_id,
@@ -248,18 +248,11 @@ class EditProductSerialNumberTest extends TestCase
             'enable_sr_no' => 1,
             'type' => 'single',
             'single_variation_id' => $variation->id,
-            'product_serials' => [
-                [
-                    'serial_number' => 'SN-OLD-1',
-                    'purchase_price' => '6.000.000',
-                    'selling_price' => '7.000.000',
-                ],
-                [
-                    'serial_number' => 'SN-NEW-2',
-                    'purchase_price' => '8.000.000',
-                    'selling_price' => '9.000.000',
-                ],
-            ],
+            'single_dpp' => 4000000,
+            'single_dpp_inc_tax' => 4000000,
+            'profit_percent' => 0,
+            'single_dsp' => 5000000,
+            'single_dsp_inc_tax' => 5000000,
             'submit_type' => 'submit',
         ];
 
@@ -267,24 +260,17 @@ class EditProductSerialNumberTest extends TestCase
 
         $response->assertRedirect('products');
 
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'name' => 'Test Phone SN Sync Updated Name',
+            'enable_sr_no' => 1,
+        ]);
+
+        // Existing serial number remains unchanged
         $this->assertDatabaseHas('product_serial_numbers', [
             'product_id' => $product->id,
             'serial_number' => 'SN-OLD-1',
-            'purchase_price' => 6000000,
-            'selling_price' => 7000000,
+            'status' => 'in_stock',
         ]);
-
-        $this->assertDatabaseHas('product_serial_numbers', [
-            'product_id' => $product->id,
-            'serial_number' => 'SN-NEW-2',
-            'purchase_price' => 8000000,
-            'selling_price' => 9000000,
-        ]);
-
-        // Average purchase price = (6M + 8M) / 2 = 7M
-        // Average selling price = (7M + 9M) / 2 = 8M
-        $variation->refresh();
-        $this->assertEquals(7000000, $variation->default_purchase_price);
-        $this->assertEquals(8000000, $variation->default_sell_price);
     }
 }
