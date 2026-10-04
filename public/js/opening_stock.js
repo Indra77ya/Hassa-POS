@@ -67,10 +67,13 @@ $(document).on('click', '.add_os_sn_row', function() {
     var default_pp = main_tr.find('.unit_price').val() || '';
     var default_sp = main_tr.find('.selling_price').val() || '';
 
+    var pp_placeholder = (typeof LANG !== 'undefined' && LANG.purchase_price) ? LANG.purchase_price : 'Purchase Price';
+    var sp_placeholder = (typeof LANG !== 'undefined' && LANG.selling_price) ? LANG.selling_price : 'Selling Price';
+
     var new_row = '<tr class="os_sn_row">' +
         '<td><input type="text" name="' + prefix + '[sn_details][' + index + '][serial_number]" class="form-control input-sm os_sn_input" placeholder="Enter Serial / IMEI" required></td>' +
-        '<td><input type="text" name="' + prefix + '[sn_details][' + index + '][purchase_price]" value="' + default_pp + '" class="form-control input-sm input_number os_sn_pp_input" placeholder="Harga Beli" required></td>' +
-        '<td><input type="text" name="' + prefix + '[sn_details][' + index + '][selling_price]" value="' + default_sp + '" class="form-control input-sm input_number os_sn_sp_input" placeholder="Harga Jual" required></td>' +
+        '<td><input type="text" name="' + prefix + '[sn_details][' + index + '][purchase_price]" value="' + default_pp + '" class="form-control input-sm input_number os_sn_pp_input" placeholder="' + pp_placeholder + '" required></td>' +
+        '<td><input type="text" name="' + prefix + '[sn_details][' + index + '][selling_price]" value="' + default_sp + '" class="form-control input-sm input_number os_sn_sp_input" placeholder="' + sp_placeholder + '" required></td>' +
         '<td class="text-center"><button type="button" class="btn btn-xs btn-danger remove_os_sn_row"><i class="fa fa-trash"></i></button></td>' +
         '</tr>';
     table.find('tbody.os_sn_tbody').append(new_row);
@@ -102,7 +105,10 @@ $(document).on('change blur', '.os_sn_input', function() {
     });
 
     if (is_dup) {
-        toastr.error('Serial Number / IMEI "' + current_val + '" duplikat di dalam form.');
+        var err_msg = (typeof LANG !== 'undefined' && LANG.sn_duplicate_in_form_error)
+            ? LANG.sn_duplicate_in_form_error.replace(':sn', current_val)
+            : 'Serial Number / IMEI "' + current_val + '" is duplicated in the form.';
+        toastr.error(err_msg);
         current_input.val('').focus();
     }
 });
