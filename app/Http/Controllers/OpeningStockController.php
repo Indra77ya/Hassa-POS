@@ -234,8 +234,17 @@ class OpeningStockController extends Controller
                                     $purchase_line->secondary_unit_quantity = $secondary_unit_quantity;
                                 }
 
+                                $raw_sns = isset($pl['serial_numbers']) ? $pl['serial_numbers'] : [];
+                                $serials = is_array($raw_sns) ? $raw_sns : preg_split('/[\r\n,]+/', $raw_sns);
+                                $serials = array_values(array_filter(array_map('trim', $serials)));
+                                $sn_details = isset($pl['sn_details']) ? $pl['sn_details'] : [];
+
                                 if (! empty($purchase_line->transaction_id)) {
-                                    $edit_purchase_lines[$purchase_line->transaction_id][] = $purchase_line;
+                                    $edit_purchase_lines[$purchase_line->transaction_id][] = [
+                                        'line' => $purchase_line,
+                                        'serials' => $serials,
+                                        'sn_details' => $sn_details,
+                                    ];
 
                                     $purchase_line->save();
 
@@ -244,7 +253,11 @@ class OpeningStockController extends Controller
                                         'additional_notes' => $purchase_line_note,
                                     ];
                                 } else {
-                                    $new_purchase_lines[] = $purchase_line;
+                                    $new_purchase_lines[] = [
+                                        'line' => $purchase_line,
+                                        'serials' => $serials,
+                                        'sn_details' => $sn_details,
+                                    ];
                                     $new_transaction_data[] = [
                                         'transaction_date' => $transaction_date,
                                         'additional_notes' => $purchase_line_note,
@@ -253,15 +266,30 @@ class OpeningStockController extends Controller
                             }
                         }
 
+                        $snUtil = new \App\Utils\ProductSerialNumberUtil();
+
                         //edit existing transactions & purchase lines
                         $updated_transaction_ids = [];
                         if (! empty($edit_purchase_lines)) {
-                            foreach ($edit_purchase_lines as $t_id => $purchase_lines) {
+                            foreach ($edit_purchase_lines as $t_id => $item_rows) {
                                 $purchase_total = 0;
                                 $updated_purchase_line_ids = [];
-                                foreach ($purchase_lines as $purchase_line) {
-                                    $purchase_total = $purchase_line->purchase_price_inc_tax * $purchase_line->quantity;
+                                foreach ($item_rows as $row) {
+                                    $purchase_line = $row['line'];
+                                    $purchase_total += $purchase_line->purchase_price_inc_tax * $purchase_line->quantity;
                                     $updated_purchase_line_ids[] = $purchase_line->id;
+
+                                    if (! empty($product->enable_sr_no) && $product->enable_sr_no == 1) {
+                                        $snUtil->syncPurchaseSerialNumbers(
+                                            $business_id,
+                                            $product->id,
+                                            $purchase_line->variation_id,
+                                            $purchase_line->id,
+                                            $row['serials'],
+                                            $purchase_line->purchase_price,
+                                            $row['sn_details']
+                                        );
+                                    }
                                 }
 
                                 $transaction = Transaction::where('type', 'opening_stock')
@@ -336,7 +364,8 @@ class OpeningStockController extends Controller
 
                         //create transaction & purchase lines
                         if (! empty($new_purchase_lines)) {
-                            foreach ($new_purchase_lines as $key => $new_purchase_line) {
+                            foreach ($new_purchase_lines as $key => $row) {
+                                $new_purchase_line = $row['line'];
                                 if (empty($new_purchase_line)) {
                                     continue;
                                 }
@@ -357,6 +386,18 @@ class OpeningStockController extends Controller
                                 );
 
                                 $transaction->purchase_lines()->saveMany([$new_purchase_line]);
+
+                                if (! empty($product->enable_sr_no) && $product->enable_sr_no == 1) {
+                                    $snUtil->syncPurchaseSerialNumbers(
+                                        $business_id,
+                                        $product->id,
+                                        $new_purchase_line->variation_id,
+                                        $new_purchase_line->id,
+                                        $row['serials'],
+                                        $new_purchase_line->purchase_price,
+                                        $row['sn_details']
+                                    );
+                                }
 
                                 //Adjust stock over selling if found
                                 $this->productUtil->adjustStockOverSelling($transaction);

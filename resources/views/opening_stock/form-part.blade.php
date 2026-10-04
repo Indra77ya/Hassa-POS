@@ -68,10 +68,81 @@
 		@if(!empty($purchase_line_id))
 			{!! Form::hidden('stocks[' . $key . '][' . $variation->id . '][' . $sub_key . '][purchase_line_id]', $purchase_line_id); !!}
 		@endif
+
+		@php
+			$has_sr_no = (!empty($product->enable_sr_no) && $product->enable_sr_no == 1);
+		@endphp
+		@if($has_sr_no)
+			@php
+				$p_id = $product->id;
+				$existing_sn_records = \App\ProductSerialNumber::where('business_id', session('user.business_id'))
+					->where('product_id', $p_id)
+					->where(function($q) use ($purchase_line_id) {
+						$q->where('status', 'in_stock');
+						if (!empty($purchase_line_id)) {
+							$q->orWhere('purchase_line_id', $purchase_line_id);
+						}
+					})
+					->get();
+				$unique_row_id = $key . '_' . $variation->id . '_' . $sub_key;
+			@endphp
+			<br>
+			<small class="text-primary"><strong>@lang('lang_v1.sn_input_help')</strong></small>
+			<select name="stocks[{{$key}}][{{$variation->id}}][{{$sub_key}}][serial_numbers][]" class="form-control input-sm os_sn_select" multiple="multiple" style="width: 100%;" data-row_index="{{$unique_row_id}}">
+				@foreach($existing_sn_records as $sn_rec)
+					@php
+						$is_this_line = !empty($purchase_line_id) && $sn_rec->purchase_line_id == $purchase_line_id;
+						$is_unlinked = empty($sn_rec->purchase_line_id);
+						$is_selected = $is_this_line || $is_unlinked;
+					@endphp
+					<option value="{{$sn_rec->serial_number}}"
+							data-status="{{$sn_rec->status}}"
+							data-purchase_price="{{@num_format($sn_rec->purchase_price)}}"
+							data-purchase-price="{{@num_format($sn_rec->purchase_price)}}"
+							data-selling_price="{{@num_format($sn_rec->selling_price)}}"
+							data-selling-price="{{@num_format($sn_rec->selling_price)}}"
+							@if($is_selected) selected="selected" @endif>
+						{{$sn_rec->serial_number}}
+					</option>
+				@endforeach
+			</select>
+			<button type="button" class="btn btn-xs btn-default tw-mt-1.5 btn_sn_price_details" data-toggle="modal" data-target="#sn_price_modal_{{$unique_row_id}}">
+				<i class="fa fa-cog text-info"></i> @lang('lang_v1.sn_price_details')
+			</button>
+
+			<!-- Modal for SN Price Details -->
+			<div class="modal fade sn_price_modal" id="sn_price_modal_{{$unique_row_id}}" data-row_index="{{$unique_row_id}}" tabindex="-1" role="dialog">
+				<div class="modal-dialog modal-lg" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h4 class="modal-title">@lang('lang_v1.sn_price_modal_title') &ndash; <span class="text-primary">{{ $product->name }}@if($product->type == 'variable') - {{ $variation->product_variation->name }} : {{ $variation->name }}@endif</span></h4>
+						</div>
+						<div class="modal-body">
+							<p class="help-block"><small>@lang('lang_v1.sn_price_modal_help')</small></p>
+							<table class="table table-bordered table-condensed sn_price_table">
+								<thead>
+									<tr>
+										<th>Serial Number / IMEI</th>
+										<th>@lang('lang_v1.sn_purchase_price')</th>
+										<th>@lang('lang_v1.sn_selling_price')</th>
+									</tr>
+								</thead>
+								<tbody>
+								</tbody>
+							</table>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-primary btn-sm" data-dismiss="modal">@lang('messages.save') & @lang('messages.close')</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		@endif
 	</td>
 	<td>
 		<div class="input-group">
-		  {!! Form::text('stocks[' . $key . '][' . $variation->id . '][' . $sub_key . '][quantity]', @format_quantity($qty) , ['class' => 'form-control input-sm input_number purchase_quantity input_quantity', 'required']); !!}
+		  {!! Form::text('stocks[' . $key . '][' . $variation->id . '][' . $sub_key . '][quantity]', @format_quantity($qty) , array_merge(['class' => 'form-control input-sm input_number purchase_quantity input_quantity', 'required'], $has_sr_no ? ['readonly' => 'readonly'] : [])); !!}
 		  <span class="input-group-addon">
 		    {{ $product->unit->short_name }}
 		  </span>
