@@ -28,21 +28,54 @@ class ImportProductsSerialNumberTest extends TestCase
     {
         parent::setUp();
 
-        $this->business = Business::factory()->create();
-        $this->user = User::factory()->create([
-            'business_id' => $this->business->id,
-        ]);
-        $this->location = BusinessLocation::factory()->create([
-            'business_id' => $this->business->id,
-            'name' => 'Gudang Utama',
-        ]);
-        $this->unit = Unit::create([
-            'business_id' => $this->business->id,
-            'actual_name' => 'Pcs',
-            'short_name' => 'Pcs',
-            'allow_decimal' => 0,
-            'created_by' => $this->user->id,
-        ]);
+        $this->user = User::first();
+        if (! $this->user) {
+            $this->business = Business::create([
+                'name' => 'Test Business SN Import',
+                'currency_id' => 1,
+                'start_date' => '2023-01-01',
+                'tax_number_1' => '12345',
+            ]);
+            $this->user = User::create([
+                'surname' => 'Mr',
+                'first_name' => 'Admin',
+                'email' => 'admin_sn_import@test.com',
+                'username' => 'admin_sn_import',
+                'password' => bcrypt('123456'),
+                'business_id' => $this->business->id,
+            ]);
+        } else {
+            $this->business = Business::find($this->user->business_id);
+            if (! $this->business) {
+                $this->business = Business::create([
+                    'name' => 'Test Business SN Import',
+                    'currency_id' => 1,
+                    'start_date' => '2023-01-01',
+                    'tax_number_1' => '12345',
+                ]);
+                $this->user->business_id = $this->business->id;
+                $this->user->save();
+            }
+        }
+
+        $this->location = BusinessLocation::where('business_id', $this->business->id)->first();
+        if (! $this->location) {
+            $this->location = BusinessLocation::create([
+                'business_id' => $this->business->id,
+                'name' => 'Gudang Utama',
+            ]);
+        }
+
+        $this->unit = Unit::where('business_id', $this->business->id)->first();
+        if (! $this->unit) {
+            $this->unit = Unit::create([
+                'business_id' => $this->business->id,
+                'actual_name' => 'Pcs',
+                'short_name' => 'Pcs',
+                'allow_decimal' => 0,
+                'created_by' => $this->user->id,
+            ]);
+        }
 
         $this->actingAs($this->user);
         session([
@@ -92,6 +125,25 @@ class ImportProductsSerialNumberTest extends TestCase
         $variation = $product->variations()->first();
         $this->assertEquals(15500000, (float)$variation->default_purchase_price);
         $this->assertEquals(18500000, (float)$variation->default_sell_price);
+    }
+
+    public function test_import_products_rejects_opening_stock_greater_than_one_for_serial_numbers()
+    {
+        $csvHeader = "NAME,BRAND,UNIT,CATEGORY,SUB-CATEGORY,SKU,BARCODE TYPE,MANAGE STOCK,ALERT QUANTITY,EXPIRES IN,EXPIRY PERIOD UNIT,APPLICABLE TAX,Selling Price Tax Type,PRODUCT TYPE,VARIATION NAME,VARIATION VALUES,VARIATION SKU,PURCHASE PRICE (Including tax),PURCHASE PRICE (Excluding tax),PROFIT MARGIN,SELLING PRICE,OPENING STOCK,LOCATION,EXPIRY DATE,ENABLE IMEI OR SERIAL NUMBER,WEIGHT,RACK,ROW,POSITION,IMAGE,PRODUCT DESCRIPTION,CUSTOM FIELD 1,CUSTOM FIELD 2,CUSTOM FIELD 3,CUSTOM FIELD 4,NOT FOR SELLING,PRODUCT LOCATIONS,PROFIT MARGIN TYPE,SERIAL NUMBER,SERIAL PURCHASE PRICE,SERIAL SELLING PRICE\n";
+        $csvContent = $csvHeader .
+            "iPhone 15 Pro Invalid,,Pcs,,,IP15P-INV,C128,1,5,,,exclusive,single,,,15000000,15000000,20,18000000,5,Gudang Utama,,1,0.2,,,,Test,,,,,0,Gudang Utama,percentage,SN-IMP-INV01,15000000,18000000\n";
+
+        $file = UploadedFile::fake()->createWithContent('import_products_invalid.csv', $csvContent);
+
+        $response = $this->post('/import-products/store', [
+            'products_csv' => $file,
+        ]);
+
+        $response->assertRedirect('import-products');
+        $response->assertSessionHas('notification');
+        $notification = session('notification');
+        $this->assertEquals(0, $notification['success']);
+        $this->assertStringContainsString('Serial number hanya boleh stoknya 1 aja', $notification['msg']);
     }
 
     public function test_import_products_rejects_duplicate_serial_number()

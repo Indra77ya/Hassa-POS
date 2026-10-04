@@ -390,6 +390,20 @@ class ImportProductsController extends Controller
                         break;
                     }
 
+                    // Check opening stock limit for Serial Number rows (max 1 stock per serial number)
+                    foreach ($rows as $r) {
+                        $r_val = $r['data'];
+                        $r_enable_sn = trim($r_val[24] ?? 0);
+                        $r_sn = trim($r_val[38] ?? '');
+                        $r_os = isset($r_val[21]) && trim($r_val[21]) !== '' ? $this->productUtil->num_uf(trim($r_val[21])) : 0;
+
+                        if (($r_enable_sn == 1 || ! empty($r_sn)) && $r_os > 1) {
+                            $is_valid = false;
+                            $error_msg = "Serial number hanya boleh stoknya 1 aja";
+                            break 2;
+                        }
+                    }
+
                     // Extract serial numbers and custom prices across all grouped rows
                     $serials_list = [];
                     $sn_details = [];
