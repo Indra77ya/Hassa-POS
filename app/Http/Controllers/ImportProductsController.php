@@ -399,7 +399,7 @@ class ImportProductsController extends Controller
 
                         if (($r_enable_sn == 1 || ! empty($r_sn)) && $r_os > 1) {
                             $is_valid = false;
-                            $error_msg = "Serial number hanya boleh stoknya 1 aja";
+                            $error_msg = __('lang_v1.serial_number_max_stock_one');
                             break 2;
                         }
                     }

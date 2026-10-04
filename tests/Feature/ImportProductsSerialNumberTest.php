@@ -463,7 +463,7 @@ class ImportProductsSerialNumberTest extends TestCase
         $response->assertSessionHas('notification');
         $notification = session('notification');
         $this->assertEquals(0, $notification['success']);
-        $this->assertStringContainsString('Serial number hanya boleh stoknya 1 aja', $notification['msg']);
+        $this->assertStringContainsString(__('lang_v1.serial_number_max_stock_one'), $notification['msg']);
     }
 
     public function test_import_products_rejects_duplicate_serial_number()
