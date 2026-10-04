@@ -217,6 +217,8 @@ class PurchaseReturnController extends Controller
             $purchase->purchase_lines[$key]->formatted_qty_available = $this->transactionUtil->num_f($qty_available);
         }
 
+        $purchase->load(['purchase_lines.serial_numbers']);
+
         return view('purchase_return.add')
                     ->with(compact('purchase'));
     }
@@ -246,20 +248,54 @@ class PurchaseReturnController extends Controller
 
             DB::beginTransaction();
 
+            $return_sn_input = $request->input('return_serial_numbers', []);
+
             foreach ($purchase->purchase_lines as $purchase_line) {
                 $old_return_qty = $purchase_line->quantity_returned;
 
-                $return_quantity = ! empty($return_quantities[$purchase_line->id]) ? $this->productUtil->num_uf($return_quantities[$purchase_line->id]) : 0;
+                $has_sr_no = !empty($purchase_line->product->enable_sr_no) && $purchase_line->product->enable_sr_no == 1;
 
-                $multiplier = 1;
-                if (! empty($purchase_line->sub_unit->base_unit_multiplier)) {
-                    $multiplier = $purchase_line->sub_unit->base_unit_multiplier;
-                    $return_quantity = $return_quantity * $multiplier;
+                if ($has_sr_no && isset($return_sn_input[$purchase_line->id])) {
+                    $selected_sns = (array) $return_sn_input[$purchase_line->id];
+                    $return_quantity = count($selected_sns);
+
+                    // Reset existing returned serial numbers for this purchase line back to in_stock if re-editing
+                    \App\ProductSerialNumber::where('business_id', $business_id)
+                        ->where('purchase_line_id', $purchase_line->id)
+                        ->where('status', 'returned')
+                        ->update(['status' => 'in_stock']);
+
+                    // Update newly selected serial numbers to returned
+                    $line_return_subtotal = 0;
+                    if (!empty($selected_sns)) {
+                        $sn_records = \App\ProductSerialNumber::where('business_id', $business_id)
+                            ->where('purchase_line_id', $purchase_line->id)
+                            ->whereIn('serial_number', $selected_sns)
+                            ->get();
+
+                        foreach ($sn_records as $sn_rec) {
+                            $sn_rec->status = 'returned';
+                            $sn_rec->save();
+                            $line_return_subtotal += ($sn_rec->purchase_price > 0 ? $sn_rec->purchase_price : $purchase_line->purchase_price_inc_tax);
+                        }
+                    }
+
+                    $purchase_line->quantity_returned = $return_quantity;
+                    $purchase_line->save();
+                    $return_total += $line_return_subtotal;
+                } else {
+                    $return_quantity = ! empty($return_quantities[$purchase_line->id]) ? $this->productUtil->num_uf($return_quantities[$purchase_line->id]) : 0;
+
+                    $multiplier = 1;
+                    if (! empty($purchase_line->sub_unit->base_unit_multiplier)) {
+                        $multiplier = $purchase_line->sub_unit->base_unit_multiplier;
+                        $return_quantity = $return_quantity * $multiplier;
+                    }
+
+                    $purchase_line->quantity_returned = $return_quantity;
+                    $purchase_line->save();
+                    $return_total += $purchase_line->purchase_price_inc_tax * $purchase_line->quantity_returned;
                 }
-
-                $purchase_line->quantity_returned = $return_quantity;
-                $purchase_line->save();
-                $return_total += $purchase_line->purchase_price_inc_tax * $purchase_line->quantity_returned;
 
                 //Decrease quantity in variation location details
                 if ($old_return_qty != $purchase_line->quantity_returned) {

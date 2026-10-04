@@ -87,8 +87,10 @@
 							}
 							}
 
+							$has_sr_no = (!empty($sell_line->product->enable_sr_no) && $sell_line->product->enable_sr_no == 1);
+							$line_serials = $has_sr_no ? $sell_line->serial_numbers : collect([]);
 							@endphp
-							<tr>
+							<tr @if($has_sr_no) class="sn_return_row" @endif>
 								<td>{{ $loop->iteration }}</td>
 								<td>
 									{{ $sell_line->product->name }}
@@ -98,12 +100,34 @@
 									@endif
 									<br>
 									{{ $sell_line->variations->sub_sku }}
+
+									@if($has_sr_no)
+										<br>
+										<small class="text-primary"><strong>@lang('lang_v1.select_returned_sn_customer'):</strong></small>
+										<select name="products[{{$loop->index}}][return_serial_numbers][]" class="form-control input-sm return_sn_select select2" multiple="multiple" style="width: 100%;">
+											@foreach($line_serials as $sn_rec)
+												@php
+													$price = $sn_rec->selling_price > 0 ? $sn_rec->selling_price : $sell_line->unit_price_inc_tax;
+													$is_ret_selected = ($sn_rec->status == 'in_stock');
+												@endphp
+												<option value="{{$sn_rec->serial_number}}"
+														data-selling_price="{{$price}}"
+														@if($is_ret_selected) selected="selected" @endif>
+													{{$sn_rec->serial_number}} (@format_currency($price))
+												</option>
+											@endforeach
+										</select>
+									@endif
 								</td>
 								<td><span class="display_currency" data-currency_symbol="true">{{ $sell_line->unit_price_inc_tax }}</span></td>
 								<td>{{ $sell_line->formatted_qty }} {{$unit_name}}</td>
 
 								<td>
-									<input type="text" name="products[{{$loop->index}}][quantity]" value="{{@format_quantity($sell_line->quantity_returned)}}" class="form-control input-sm input_number return_qty input_quantity" data-rule-abs_digit="{{$check_decimal}}" data-msg-abs_digit="@lang('lang_v1.decimal_value_not_allowed')" data-rule-max-value="{{$sell_line->quantity}}" data-msg-max-value="@lang('validation.custom-messages.quantity_not_available', ['qty' => $sell_line->formatted_qty, 'unit' => $unit_name ])">
+									@if($has_sr_no)
+										<input type="text" name="products[{{$loop->index}}][quantity]" value="{{@format_quantity($sell_line->quantity_returned)}}" class="form-control input-sm input_number return_qty input_quantity sn_return_qty" readonly>
+									@else
+										<input type="text" name="products[{{$loop->index}}][quantity]" value="{{@format_quantity($sell_line->quantity_returned)}}" class="form-control input-sm input_number return_qty input_quantity" data-rule-abs_digit="{{$check_decimal}}" data-msg-abs_digit="@lang('lang_v1.decimal_value_not_allowed')" data-rule-max-value="{{$sell_line->quantity}}" data-msg-max-value="@lang('validation.custom-messages.quantity_not_available', ['qty' => $sell_line->formatted_qty, 'unit' => $unit_name ])">
+									@endif
 									<input name="products[{{$loop->index}}][unit_price_inc_tax]" type="hidden" class="unit_price" value="{{@num_format($sell_line->unit_price_inc_tax)}}">
 									<input name="products[{{$loop->index}}][sell_line_id]" type="hidden" value="{{$sell_line->id}}">
 								</td>
@@ -175,24 +199,49 @@
 <script type="text/javascript">
 	$(document).ready(function() {
 		$('form#sell_return_form').validate();
+
+		$('.return_sn_select').each(function() {
+			if (!$(this).hasClass('select2-hidden-accessible')) {
+				$(this).select2({
+					placeholder: "Pilih Serial Number...",
+					width: '100%'
+				});
+			}
+		});
+
 		update_sell_return_total();
-		//Date picker
-		// $('#transaction_date').datepicker({
-		//     autoclose: true,
-		//     format: datepicker_date_format
-		// });
 	});
-	$(document).on('change', 'input.return_qty, #discount_amount, #discount_type', function() {
-		update_sell_return_total()
+
+	$(document).on('change', 'input.return_qty, #discount_amount, #discount_type, .return_sn_select', function() {
+		var row = $(this).closest('tr');
+		if (row.hasClass('sn_return_row')) {
+			var select = row.find('.return_sn_select');
+			var selected_opts = select.find('option:selected');
+			var qty = selected_opts.length;
+			row.find('input.sn_return_qty').val(qty);
+		}
+		update_sell_return_total();
 	});
 
 	function update_sell_return_total() {
 		var net_return = 0;
 		$('table#sell_return_table tbody tr').each(function() {
-			var quantity = __read_number($(this).find('input.return_qty'));
-			var unit_price = __read_number($(this).find('input.unit_price'));
-			var subtotal = quantity * unit_price;
-			$(this).find('.return_subtotal').text(__currency_trans_from_en(subtotal, true));
+			var row = $(this);
+			var subtotal = 0;
+			if (row.hasClass('sn_return_row')) {
+				var select = row.find('.return_sn_select');
+				var selected_opts = select.find('option:selected');
+				selected_opts.each(function() {
+					var p = parseFloat($(this).data('selling_price')) || 0;
+					subtotal += p;
+				});
+				row.find('input.sn_return_qty').val(selected_opts.length);
+			} else {
+				var quantity = __read_number(row.find('input.return_qty'));
+				var unit_price = __read_number(row.find('input.unit_price'));
+				subtotal = quantity * unit_price;
+			}
+			row.find('.return_subtotal').text(__currency_trans_from_en(subtotal, true));
 			net_return += subtotal;
 		});
 		var discount = 0;

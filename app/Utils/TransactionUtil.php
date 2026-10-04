@@ -6393,17 +6393,41 @@ class TransactionUtil extends Util
         //Update quantity returned in sell line
         $returns = [];
         $product_lines = $input['products'];
+        $product_lines_by_sl_id = [];
         foreach ($product_lines as $product_line) {
             $returns[$product_line['sell_line_id']] = $uf_number ? $this->num_uf($product_line['quantity']) : $product_line['quantity'];
+            $product_lines_by_sl_id[$product_line['sell_line_id']] = $product_line;
         }
+
         foreach ($sell->sell_lines as $sell_line) {
             if (array_key_exists($sell_line->id, $returns)) {
-                $multiplier = 1;
-                if (! empty($sell_line->sub_unit)) {
-                    $multiplier = $sell_line->sub_unit->base_unit_multiplier;
-                }
+                $has_sr_no = !empty($sell_line->product->enable_sr_no) && $sell_line->product->enable_sr_no == 1;
+                $line_input = $product_lines_by_sl_id[$sell_line->id] ?? [];
 
-                $quantity = $returns[$sell_line->id] * $multiplier;
+                if ($has_sr_no && isset($line_input['return_serial_numbers'])) {
+                    $selected_sns = (array) $line_input['return_serial_numbers'];
+                    $quantity = count($selected_sns);
+
+                    // Reset serial numbers for this sell line that were returned back to sold if re-editing
+                    \App\ProductSerialNumber::where('business_id', $business_id)
+                        ->where('transaction_sell_line_id', $sell_line->id)
+                        ->where('status', 'in_stock')
+                        ->update(['status' => 'sold']);
+
+                    // Update newly selected returned serial numbers to in_stock
+                    if (!empty($selected_sns)) {
+                        \App\ProductSerialNumber::where('business_id', $business_id)
+                            ->where('transaction_sell_line_id', $sell_line->id)
+                            ->whereIn('serial_number', $selected_sns)
+                            ->update(['status' => 'in_stock']);
+                    }
+                } else {
+                    $multiplier = 1;
+                    if (! empty($sell_line->sub_unit)) {
+                        $multiplier = $sell_line->sub_unit->base_unit_multiplier;
+                    }
+                    $quantity = $returns[$sell_line->id] * $multiplier;
+                }
 
                 $quantity_before = $sell_line->quantity_returned;
 

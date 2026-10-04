@@ -95,6 +95,8 @@ return [
     'serial_numbers' => 'Serial Number / IMEI',
     'serial_number_ins' => 'Nomor Seri / IMEI individual per produk (jika Aktifkan deskripsi Produk, IMEI atau Nomor Seri = 1). Buat baris CSV baru untuk setiap Serial Number. Setiap baris serial number stoknya maksimal 1 (isi 1 jika ada stok serial number, isi 0 jika tidak ada).',
     'serial_number_max_stock_one' => 'Serial number hanya boleh stoknya 1 aja',
+    'select_returned_sn' => 'Pilih Serial Number yang Diretur',
+    'select_returned_sn_customer' => 'Pilih Serial Number yang Diretur Customer',
     'serial_purchase_price' => 'Harga Beli Serial Number (HPP)',
     'serial_purchase_price_ins' => 'Harga beli / HPP per-unit khusus untuk Serial Number / IMEI tersebut. Jika dikosongkan, menggunakan Unit Cost Before Discount.',
     'serial_selling_price' => 'Harga Jual Serial Number',
