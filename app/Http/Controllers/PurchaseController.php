@@ -1187,20 +1187,25 @@ class PurchaseController extends Controller
 
             $grouped_rows = [];
             $row_index = 0;
-            $error_msg = '';
+            $missing_skus = [];
 
             foreach ($imported_data as $key => $value) {
                 $row_index = $key + 1;
-                $sku = ! empty($value[0]) ? trim($value[0]) : '';
+                $sku = ! empty($value[0]) ? trim((string) $value[0]) : '';
 
                 if (empty($sku)) {
-                    $error_msg = __('lang_v1.product_not_found_exception', ['row' => $row_index, 'sku' => '']);
-                    break;
+                    $missing_skus[] = "Baris {$row_index}: [SKU Kosong]";
+                    continue;
                 }
 
-                $variation = Variation::where('sub_sku', $sku)
-                                    ->join('products', 'products.id', '=', 'variations.product_id')
+                $variation = Variation::join('products', 'products.id', '=', 'variations.product_id')
                                     ->where('products.business_id', $business_id)
+                                    ->where(function ($q) use ($sku) {
+                                        $q->where('variations.sub_sku', $sku)
+                                          ->orWhere('products.sku', $sku)
+                                          ->orWhereRaw('LOWER(variations.sub_sku) = ?', [strtolower($sku)])
+                                          ->orWhereRaw('LOWER(products.sku) = ?', [strtolower($sku)]);
+                                    })
                                     ->with([
                                         'product_variation',
                                         'variation_location_details' => function ($q) use ($location_id) {
@@ -1211,8 +1216,8 @@ class PurchaseController extends Controller
                                     ->first();
 
                 if (empty($variation)) {
-                    $error_msg = __('lang_v1.product_not_found_exception', ['row' => $row_index, 'sku' => $sku]);
-                    break;
+                    $missing_skus[] = "Baris {$row_index}: SKU '{$sku}'";
+                    continue;
                 }
 
                 $product = Product::where('id', $variation->product_id)
@@ -1221,8 +1226,8 @@ class PurchaseController extends Controller
                                 ->first();
 
                 if (empty($product)) {
-                    $error_msg = __('lang_v1.product_not_found_exception', ['row' => $row_index, 'sku' => $sku]);
-                    break;
+                    $missing_skus[] = "Baris {$row_index}: SKU '{$sku}'";
+                    continue;
                 }
 
                 $v_id = $variation->id;
@@ -1277,10 +1282,11 @@ class PurchaseController extends Controller
                 }
             }
 
-            if (! empty($error_msg)) {
+            if (! empty($missing_skus)) {
+                $missing_list = implode(', ', $missing_skus);
                 return [
                     'success' => false,
-                    'msg' => $error_msg,
+                    'msg' => "Produk tidak ditemukan di Master Produk untuk data berikut: {$missing_list}. Silakan daftarkan produk terlebih dahulu di Master Data Produk.",
                 ];
             }
 

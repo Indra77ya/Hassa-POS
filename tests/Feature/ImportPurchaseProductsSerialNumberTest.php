@@ -237,4 +237,51 @@ class ImportPurchaseProductsSerialNumberTest extends TestCase
         $this->assertFalse($json['success']);
         $this->assertStringContainsString('SN-EXISTS-100', $json['msg']);
     }
+
+    public function test_import_purchase_products_supports_case_insensitive_sku_matching()
+    {
+        $lowerSku = strtolower($this->product->sku);
+        $csvHeader = "SKU,QUANTITY,UNIT COST (BEFORE DISCOUNT),DISCOUNT PERCENT,PRODUCT TAX,LOT NUMBER,MFG DATE,EXP DATE,SERIAL NUMBER,SERIAL PURCHASE PRICE,SERIAL SELLING PRICE\n";
+        $csvContent = $csvHeader .
+            " {$lowerSku} ,,5000000,0,,LOT-A1,,,SN-CASE-101,5000000,6000000\n";
+
+        $file = UploadedFile::fake()->createWithContent('import_purchase.csv', $csvContent);
+
+        $response = $this->post('/import-purchase-products', [
+            'file' => $file,
+            'location_id' => $this->location->id,
+            'row_count' => 0,
+        ]);
+
+        $response->assertStatus(200);
+        $json = $response->json();
+
+        $this->assertTrue($json['success']);
+        $this->assertStringContainsString('SN-CASE-101', $json['html']);
+    }
+
+    public function test_import_purchase_products_reports_all_missing_skus()
+    {
+        $csvHeader = "SKU,QUANTITY,UNIT COST (BEFORE DISCOUNT),DISCOUNT PERCENT,PRODUCT TAX,LOT NUMBER,MFG DATE,EXP DATE,SERIAL NUMBER,SERIAL PURCHASE PRICE,SERIAL SELLING PRICE\n";
+        $csvContent = $csvHeader .
+            "NON-EXISTENT-SKU-1,1,5000000,0,,,,,,,,,\n" .
+            "NON-EXISTENT-SKU-2,1,5000000,0,,,,,,,,,\n";
+
+        $file = UploadedFile::fake()->createWithContent('import_purchase.csv', $csvContent);
+
+        $response = $this->post('/import-purchase-products', [
+            'file' => $file,
+            'location_id' => $this->location->id,
+            'row_count' => 0,
+        ]);
+
+        $response->assertStatus(200);
+        $json = $response->json();
+
+        $this->assertFalse($json['success']);
+        $this->assertStringContainsString('NON-EXISTENT-SKU-1', $json['msg']);
+        $this->assertStringContainsString('NON-EXISTENT-SKU-2', $json['msg']);
+        $this->assertStringContainsString('Baris 1', $json['msg']);
+        $this->assertStringContainsString('Baris 2', $json['msg']);
+    }
 }
