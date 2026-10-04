@@ -194,20 +194,30 @@ function update_os_sn_row_prices(tr, selected_sns) {
 
     var select = tr.find('.os_sn_select');
     var total_pp = 0;
+    var total_sp = 0;
     var count = 0;
 
     select.find('option:selected').each(function() {
         var pp_str = $(this).attr('data-purchase_price') || $(this).attr('data-purchase-price');
+        var sp_str = $(this).attr('data-selling_price') || $(this).attr('data-selling-price');
         var pp = __number_uf(pp_str);
+        var sp = __number_uf(sp_str);
         if (pp >= 0) {
             total_pp += pp;
-            count++;
         }
+        if (sp >= 0) {
+            total_sp += sp;
+        }
+        count++;
     });
 
     if (count > 0) {
         var avg_pp = total_pp / count;
+        var avg_sp = total_sp / count;
         tr.find('.unit_price').val(__number_f(avg_pp));
+        if (tr.find('.selling_price').length) {
+            tr.find('.selling_price').val(__number_f(avg_sp));
+        }
     }
 }
 

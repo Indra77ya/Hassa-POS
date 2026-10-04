@@ -226,6 +226,7 @@ class OpeningStockSerialNumberTest extends TestCase
                         0 => [
                             'quantity' => '2',
                             'purchase_price' => '5.000.000',
+                            'selling_price' => '6.250.000',
                             'serial_numbers' => ['OS-SN-101', 'OS-SN-102'],
                             'sn_details' => [
                                 'OS-SN-101' => [
@@ -267,5 +268,8 @@ class OpeningStockSerialNumberTest extends TestCase
             'selling_price' => 6500000,
             'status' => 'in_stock',
         ]);
+
+        $variation->refresh();
+        $this->assertEquals(6250000, $variation->default_sell_price);
     }
 }

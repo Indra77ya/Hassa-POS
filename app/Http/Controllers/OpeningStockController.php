@@ -182,8 +182,22 @@ class OpeningStockController extends Controller
                                 $purchase_price = $this->productUtil->num_uf(trim($pl['purchase_price']));
                                 $item_tax = $this->productUtil->calc_percentage($purchase_price, $tax_percent);
                                 $purchase_price_inc_tax = $purchase_price + $item_tax;
+                                $selling_price = isset($pl['selling_price']) ? $this->productUtil->num_uf(trim($pl['selling_price'])) : null;
                                 $qty_remaining = $this->productUtil->num_uf(trim($pl['quantity']));
                                 $secondary_unit_quantity = isset($pl['secondary_unit_quantity']) ? $this->productUtil->num_uf(trim($pl['secondary_unit_quantity'])) : 0;
+
+                                // Update variation purchase price and selling price if provided
+                                $variation = \App\Variation::find($vid);
+                                if ($variation) {
+                                    $variation->default_purchase_price = $purchase_price;
+                                    $variation->dpp_inc_tax = $purchase_price_inc_tax;
+                                    if (!is_null($selling_price) && $selling_price > 0) {
+                                        $sp_inc_tax = $this->productUtil->calc_percentage($selling_price, $tax_percent, $selling_price);
+                                        $variation->default_sell_price = $selling_price;
+                                        $variation->sell_price_inc_tax = $sp_inc_tax;
+                                    }
+                                    $variation->save();
+                                }
 
                                 $exp_date = null;
                                 if (! empty($pl['exp_date'])) {
