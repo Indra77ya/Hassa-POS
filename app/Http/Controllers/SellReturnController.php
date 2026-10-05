@@ -545,6 +545,13 @@ class SellReturnController extends Controller
                     }
 
                     $sell_return->delete();
+
+                    // Sync accounting double-entry journal if Accounting module is installed
+                    if (class_exists('\Modules\Accounting\Listeners\MapSellReturnTransaction')) {
+                        $mapSellReturn = new \Modules\Accounting\Listeners\MapSellReturnTransaction();
+                        $mapSellReturn->handle($sell_return, true);
+                    }
+
                     foreach ($transaction_payments as $payment) {
                         event(new TransactionPaymentDeleted($payment));
                     }

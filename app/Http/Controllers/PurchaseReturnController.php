@@ -352,6 +352,12 @@ class PurchaseReturnController extends Controller
             //update payment status
             $this->transactionUtil->updatePaymentStatus($return_transaction->id, $return_transaction->final_total);
 
+            // Sync accounting double-entry journal if Accounting module is installed
+            if (class_exists('\Modules\Accounting\Listeners\MapPurchaseReturnTransaction')) {
+                $mapPurchaseReturn = new \Modules\Accounting\Listeners\MapPurchaseReturnTransaction();
+                $mapPurchaseReturn->handle($return_transaction);
+            }
+
             $output = ['success' => 1,
                 'msg' => __('lang_v1.purchase_return_added_success'),
             ];
@@ -472,6 +478,12 @@ class PurchaseReturnController extends Controller
 
                 //Delete Transaction
                 $purchase_return->delete();
+
+                // Sync accounting double-entry journal if Accounting module is installed
+                if (class_exists('\Modules\Accounting\Listeners\MapPurchaseReturnTransaction')) {
+                    $mapPurchaseReturn = new \Modules\Accounting\Listeners\MapPurchaseReturnTransaction();
+                    $mapPurchaseReturn->handle($purchase_return, true);
+                }
 
                 //Delete account transactions
                 AccountTransaction::where('transaction_id', $id)->delete();

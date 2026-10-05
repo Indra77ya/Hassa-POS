@@ -334,6 +334,16 @@ class MapSellTransaction
                 }
             }
 
+            // Also sync/update any linked sell_return transactions (if any)
+            $return_transaction = \App\Transaction::where('business_id', $business_id)
+                ->where('type', 'sell_return')
+                ->where('return_parent_id', $id)
+                ->first();
+            if ($return_transaction) {
+                $mapSellReturn = new \Modules\Accounting\Listeners\MapSellReturnTransaction();
+                $mapSellReturn->handle($return_transaction);
+            }
+
             // Validate balance
             AccountingAccountsTransaction::validateTransactionBalance($id);
         });
