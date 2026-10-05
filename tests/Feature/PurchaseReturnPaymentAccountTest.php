@@ -9,12 +9,12 @@ use App\Contact;
 use App\Transaction;
 use App\TransactionPayment;
 use App\User;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class PurchaseReturnPaymentAccountTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     protected $user;
     protected $business;
@@ -27,7 +27,7 @@ class PurchaseReturnPaymentAccountTest extends TestCase
 
         $this->business = Business::firstOrCreate(
             ['name' => 'Test Business Return'],
-            ['currency_id' => 1, 'start_date' => '2020-01-01', 'time_zone' => 'Asia/Jakarta']
+            ['currency_id' => 1, 'start_date' => '2020-01-01', 'time_zone' => 'Asia/Jakarta', 'tax_number_1' => '123', 'owner_id' => 1]
         );
 
         $this->user = User::factory()->create([
