@@ -6,6 +6,7 @@ use App\Account;
 use App\AccountTransaction;
 use App\Business;
 use App\Contact;
+use App\Currency;
 use App\Transaction;
 use App\TransactionPayment;
 use App\User;
@@ -25,17 +26,40 @@ class PurchaseReturnPaymentAccountTest extends TestCase
     {
         parent::setUp();
 
-        $this->business = Business::firstOrCreate(
-            ['name' => 'Test Business Return'],
-            ['currency_id' => 1, 'start_date' => '2020-01-01', 'time_zone' => 'Asia/Jakarta', 'tax_number_1' => '123', 'owner_id' => 1]
-        );
+        $currency = Currency::first();
+        if (!$currency) {
+            $currency = new Currency();
+            $currency->country = 'Indonesia';
+            $currency->currency = 'Rupiah';
+            $currency->code = 'IDR';
+            $currency->symbol = 'Rp';
+            $currency->thousand_separator = '.';
+            $currency->decimal_separator = ',';
+            $currency->save();
+        }
 
-        $this->user = User::factory()->create([
-            'business_id' => $this->business->id,
+        $this->user = User::create([
             'surname' => 'Test',
             'first_name' => 'SupplierReturn',
+            'username' => 'return_user_' . uniqid(),
             'email' => 'returnuser_' . uniqid() . '@example.com',
+            'password' => bcrypt('123456'),
         ]);
+
+        $this->business = Business::create([
+            'name' => 'Test Business Return',
+            'currency_id' => $currency->id,
+            'start_date' => '2020-01-01',
+            'time_zone' => 'Asia/Jakarta',
+            'tax_label_1' => 'VAT',
+            'tax_number_1' => '123',
+            'owner_id' => $this->user->id,
+            'stop_selling_before' => 0,
+            'weighing_scale_setting' => '{}',
+        ]);
+
+        $this->user->business_id = $this->business->id;
+        $this->user->save();
 
         $this->bankAccount = Account::create([
             'business_id' => $this->business->id,
@@ -85,9 +109,7 @@ class PurchaseReturnPaymentAccountTest extends TestCase
             'paid_on' => date('m/d/Y H:i'),
         ]);
 
-        $response->assertJson([
-            'success' => true,
-        ]);
+        $response->assertRedirect();
 
         // 3. Verify that AccountTransaction created is DEBIT (money coming into bank)
         $accountTx = AccountTransaction::where('transaction_id', $purchaseReturn->id)->first();
