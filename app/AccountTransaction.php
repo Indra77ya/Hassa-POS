@@ -230,7 +230,7 @@ class AccountTransaction extends Model
             'gym_subscription' => 'debit',
         ];
 
-        return $account_transaction_types[$tansaction_type];
+        return $account_transaction_types[$tansaction_type] ?? 'debit';
     }
 
     /**
@@ -282,10 +282,15 @@ class AccountTransaction extends Model
 
                 return $account_transaction;
             } else {
+                $type = ! empty($transaction_payment->payment_type) ? $transaction_payment->payment_type : (! empty($transaction_type) ? self::getAccountTransactionType($transaction_type) : null);
+                if (empty($type) && ! empty($transaction_payment->transaction)) {
+                    $type = self::getAccountTransactionType($transaction_payment->transaction->type);
+                }
+
                 $accnt_trans_data = [
                     'amount' => $transaction_payment->amount,
                     'account_id' => $transaction_payment->account_id,
-                    'type' => empty($transaction_type) ? $transaction_payment->payment_type : self::getAccountTransactionType($transaction_type),
+                    'type' => $type ?? 'debit',
                     'operation_date' => $transaction_payment->paid_on,
                     'created_by' => $transaction_payment->created_by,
                     'transaction_id' => $transaction_payment->transaction_id,
