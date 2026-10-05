@@ -345,7 +345,7 @@ class SellReturnController extends Controller
         }
 
         $sell = Transaction::where('business_id', $business_id)
-            ->with(['sell_lines', 'location', 'return_parent', 'contact', 'tax', 'sell_lines.sub_unit', 'sell_lines.product', 'sell_lines.product.unit'])
+            ->with(['sell_lines', 'location', 'return_parent', 'contact', 'tax', 'sell_lines.sub_unit', 'sell_lines.product', 'sell_lines.product.unit', 'sell_lines.serial_numbers'])
             ->find($id);
 
         foreach ($sell->sell_lines as $key => $value) {

@@ -390,14 +390,30 @@ class ImportProductsController extends Controller
                         break;
                     }
 
-                    // Extract serial numbers and custom prices across all grouped rows
+                    // Check opening stock limit for Serial Number rows (max 1 stock per serial number)
+                    foreach ($rows as $r) {
+                        $r_val = $r['data'];
+                        $r_enable_sn = trim($r_val[24] ?? 0);
+                        $r_sn = trim($r_val[38] ?? '');
+                        $r_os = isset($r_val[21]) && trim($r_val[21]) !== '' ? $this->productUtil->num_uf(trim($r_val[21])) : 0;
+
+                        if (($r_enable_sn == 1 || ! empty($r_sn)) && $r_os > 1) {
+                            $is_valid = false;
+                            $error_msg = __('lang_v1.serial_number_max_stock_one');
+                            break 2;
+                        }
+                    }
+
+                    // Extract serial numbers and custom prices across all grouped rows only if opening stock > 0
                     $serials_list = [];
                     $sn_details = [];
                     if ($product_array['enable_sr_no'] == 1) {
                         foreach ($rows as $r) {
                             $r_val = $r['data'];
                             $sn = isset($r_val[38]) ? trim($r_val[38]) : '';
-                            if (! empty($sn)) {
+                            $r_os = isset($r_val[21]) && trim($r_val[21]) !== '' ? $this->productUtil->num_uf(trim($r_val[21])) : 0;
+
+                            if (! empty($sn) && $r_os > 0) {
                                 $serials_list[] = $sn;
                                 $sn_pp = isset($r_val[39]) && trim($r_val[39]) !== '' ? $this->productUtil->num_uf(trim($r_val[39])) : null;
                                 $sn_sp = isset($r_val[40]) && trim($r_val[40]) !== '' ? $this->productUtil->num_uf(trim($r_val[40])) : null;
@@ -481,8 +497,12 @@ class ImportProductsController extends Controller
                         if ($enable_stock == 1) {
                             $opening_stock_qty = 0;
 
-                            if ($product_array['enable_sr_no'] == 1 && ! empty($serials_list)) {
-                                $opening_stock_qty = count($serials_list);
+                            if ($product_array['enable_sr_no'] == 1) {
+                                foreach ($rows as $r) {
+                                    $r_val = $r['data'];
+                                    $r_os = isset($r_val[21]) && trim($r_val[21]) !== '' ? $this->productUtil->num_uf(trim($r_val[21])) : 0;
+                                    $opening_stock_qty += $r_os;
+                                }
                             } elseif (! empty($value[21])) {
                                 $opening_stock_qty = $this->productUtil->num_uf(trim($value[21]));
                             }

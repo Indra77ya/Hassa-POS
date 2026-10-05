@@ -939,7 +939,7 @@ function init_purchase_sn_select(element) {
     element.each(function() {
         var $el = $(this);
         if ($el.hasClass('select2-hidden-accessible')) {
-            $el.select2('destroy');
+            return;
         }
         $el.select2({
             tags: true,
@@ -957,17 +957,23 @@ function get_purchase_entry_row(product_id, variation_id) {
     if (product_id) {
         var row_count = 0;
         $('#purchase_entry_table tbody tr').each(function() {
-            var select = $(this).find('.purchase_sn_select');
-            var idx = select.length ? parseInt(select.data('row_index')) : NaN;
-            if (isNaN(idx)) {
-                var input = $(this).find('input[name*="purchases["]');
-                if (input.length) {
-                    var match = input.attr('name').match(/purchases\[(\d+)\]/);
-                    if (match) idx = parseInt(match[1]);
+            var input = $(this).find('input[name*="purchases["]');
+            if (input.length) {
+                var match = input.attr('name').match(/purchases\[(\d+)\]/);
+                if (match) {
+                    var idx = parseInt(match[1]);
+                    if (!isNaN(idx) && idx >= row_count) {
+                        row_count = idx + 1;
+                    }
                 }
-            }
-            if (!isNaN(idx) && idx >= row_count) {
-                row_count = idx + 1;
+            } else {
+                var select = $(this).find('.purchase_sn_select');
+                if (select.length && select.data('row_index') !== undefined) {
+                    var idx = parseInt(select.data('row_index'));
+                    if (!isNaN(idx) && idx >= row_count) {
+                        row_count = idx + 1;
+                    }
+                }
             }
         });
         var hidden_count = parseInt($('#row_count').val()) || 0;
