@@ -48,8 +48,10 @@ class CombinedPurchaseReturnController extends Controller
 
         $business_locations = BusinessLocation::forDropdown($business_id);
 
+        $taxes = $this->transactionUtil->getTaxDetails($business_id);
+
         return view('purchase_return.create')
-            ->with(compact('business_locations'));
+            ->with(compact('business_locations', 'taxes'));
     }
 
     /**
@@ -79,11 +81,11 @@ class CombinedPurchaseReturnController extends Controller
                 $return_ref_no = $this->transactionUtil->generateReferenceNumber('purchase_return', $ref_count);
 
                 $discount = [
-                    'discount_type' => $input['discount_type'],
-                    'discount_amount' => $this->transactionUtil->num_uf($input['discount_amount']),
+                    'discount_type' => $input['discount_type'] ?? 'fixed',
+                    'discount_amount' => $this->transactionUtil->num_uf($input['discount_amount'] ?? 0),
                 ];
 
-                $invoice_total = $this->productUtil->calculateInvoiceTotal($products, $input['tax_id'], $discount);
+                $invoice_total = $this->productUtil->calculateInvoiceTotal($products, $input['tax_id'] ?? null, $discount);
 
                 $input_data = [
                     'business_id' => $business_id,
@@ -94,10 +96,10 @@ class CombinedPurchaseReturnController extends Controller
                     'ref_no' => empty($input['ref_no']) ? $return_ref_no : $input['ref_no'],
                     'transaction_date' => $this->transactionUtil->uf_date($input['transaction_date'], true),
                     'total_before_tax' => $invoice_total['total_before_tax'],
-                    'tax_id' => $input['tax_id'],
+                    'tax_id' => $input['tax_id'] ?? null,
                     'tax_amount' => $invoice_total['tax'],
-                    'discount_type' => $input['discount_type'],
-                    'discount_amount' => $this->transactionUtil->num_uf($input['discount_amount']),
+                    'discount_type' => $input['discount_type'] ?? 'fixed',
+                    'discount_amount' => $this->transactionUtil->num_uf($input['discount_amount'] ?? 0),
                     'final_total' => $invoice_total['final_total'],
                     'created_by' => $user_id,
                 ];
@@ -105,13 +107,19 @@ class CombinedPurchaseReturnController extends Controller
                 $product_data = [];
 
                 foreach ($products as $product) {
+                    $unit_price = isset($product['unit_price']) ? $this->productUtil->num_uf($product['unit_price']) : 0;
+                    $unit_price_inc_tax = isset($product['unit_price_inc_tax']) ? $this->productUtil->num_uf($product['unit_price_inc_tax']) : $unit_price;
+
                     $product_data[] = [
                         'product_id' => $product['product_id'],
                         'variation_id' => $product['variation_id'],
                         'quantity' => 0,
-                        'purchase_price' => $this->productUtil->num_uf($product['unit_price']),
-                        'purchase_price_inc_tax' => $this->productUtil->num_uf($product['unit_price_inc_tax']),
+                        'purchase_price' => $unit_price,
+                        'purchase_price_inc_tax' => $unit_price_inc_tax,
+                        'pp_without_discount' => $unit_price,
                         'quantity_returned' => $this->productUtil->num_uf($product['quantity']),
+                        'lot_number' => $product['lot_number'] ?? null,
+                        'exp_date' => !empty($product['exp_date']) ? $this->productUtil->uf_date($product['exp_date']) : null,
                     ];
 
                     //decrease product quantity
@@ -189,18 +197,26 @@ class CombinedPurchaseReturnController extends Controller
                             'p.name as product_name',
                             'p.type as product_type',
                             'p.id as product_id',
+                            'p.enable_stock',
                             'v.id as variation_id',
                             'v.name as variation_name',
                             'v.sub_sku',
                             'vld.qty_available',
                             'u.short_name as unit',
+                            'u.allow_decimal as unit_allow_decimal',
                             'pl.id as purchase_line_id',
+                            'pl.purchase_price',
                             'pl.purchase_price as unit_price',
                             'pl.purchase_price_inc_tax as unit_price_inc_tax',
-                            'pl.quantity_returned as quantity_returned'
+                            'pl.quantity_returned as quantity_returned',
+                            'pl.lot_number',
+                            'pl.exp_date'
                         )->get();
 
         foreach ($purchase_lines as $key => $value) {
+            if ($value->product_type == 'variable') {
+                $purchase_lines[$key]->product_name .= ' - ' . $value->variation_name . ' (' . $value->sub_sku . ')';
+            }
             $purchase_lines[$key]->qty_available += $value->quantity_returned;
             $purchase_lines[$key]->formatted_qty_available = $this->productUtil->num_f($purchase_lines[$key]->qty_available);
         }
@@ -244,21 +260,21 @@ class CombinedPurchaseReturnController extends Controller
 
             if (! empty($products)) {
                 $discount = [
-                    'discount_type' => $input['discount_type'],
-                    'discount_amount' => $this->transactionUtil->num_uf($input['discount_amount']),
+                    'discount_type' => $input['discount_type'] ?? 'fixed',
+                    'discount_amount' => $this->transactionUtil->num_uf($input['discount_amount'] ?? 0),
                 ];
 
-                $invoice_total = $this->productUtil->calculateInvoiceTotal($products, $input['tax_id'], $discount);
+                $invoice_total = $this->productUtil->calculateInvoiceTotal($products, $input['tax_id'] ?? null, $discount);
 
                 $input_data = [
                     'contact_id' => $input['contact_id'],
                     'ref_no' => $input['ref_no'],
                     'transaction_date' => $this->transactionUtil->uf_date($input['transaction_date'], true),
                     'total_before_tax' => $invoice_total['total_before_tax'],
-                    'tax_id' => $input['tax_id'],
+                    'tax_id' => $input['tax_id'] ?? null,
                     'tax_amount' => $invoice_total['tax'],
-                    'discount_type' => $input['discount_type'],
-                    'discount_amount' => $this->transactionUtil->num_uf($input['discount_amount']),
+                    'discount_type' => $input['discount_type'] ?? 'fixed',
+                    'discount_amount' => $this->transactionUtil->num_uf($input['discount_amount'] ?? 0),
                     'final_total' => $invoice_total['final_total'],
                 ];
 
@@ -267,6 +283,9 @@ class CombinedPurchaseReturnController extends Controller
                 $updated_purchase_lines = [];
 
                 foreach ($products as $product) {
+                    $unit_price = isset($product['unit_price']) ? $this->productUtil->num_uf($product['unit_price']) : 0;
+                    $unit_price_inc_tax = isset($product['unit_price_inc_tax']) ? $this->productUtil->num_uf($product['unit_price_inc_tax']) : $unit_price;
+
                     if (! empty($product['purchase_line_id'])) {
                         $return_line = PurchaseLine::find($product['purchase_line_id']);
 
@@ -280,18 +299,28 @@ class CombinedPurchaseReturnController extends Controller
                             $return_line->quantity_returned
                         );
 
-                        $return_line->purchase_price = $this->productUtil->num_uf($product['unit_price']);
-                        $return_line->purchase_price_inc_tax = $this->productUtil->num_uf($product['unit_price_inc_tax']);
+                        $return_line->purchase_price = $unit_price;
+                        $return_line->purchase_price_inc_tax = $unit_price_inc_tax;
+                        $return_line->pp_without_discount = $unit_price;
                         $return_line->quantity_returned = $this->productUtil->num_uf($product['quantity']);
+                        if (isset($product['lot_number'])) {
+                            $return_line->lot_number = $product['lot_number'];
+                        }
+                        if (!empty($product['exp_date'])) {
+                            $return_line->exp_date = $this->productUtil->uf_date($product['exp_date']);
+                        }
                         $return_line->save();
                     } else {
                         $product_data[] = [
                             'product_id' => $product['product_id'],
                             'variation_id' => $product['variation_id'],
                             'quantity' => 0,
-                            'purchase_price' => $this->productUtil->num_uf($product['unit_price']),
-                            'purchase_price_inc_tax' => $this->productUtil->num_uf($product['unit_price_inc_tax']),
+                            'purchase_price' => $unit_price,
+                            'purchase_price_inc_tax' => $unit_price_inc_tax,
+                            'pp_without_discount' => $unit_price,
                             'quantity_returned' => $this->productUtil->num_uf($product['quantity']),
+                            'lot_number' => $product['lot_number'] ?? null,
+                            'exp_date' => !empty($product['exp_date']) ? $this->productUtil->uf_date($product['exp_date']) : null,
                         ];
 
                         //decrease product quantity
