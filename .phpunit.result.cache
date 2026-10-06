@@ -1,1 +1,0 @@
-{"version":1,"defects":{"Tests\\Feature\\ImportPurchasesTest::test_import_purchases_index_page_is_accessible":3},"times":{"Tests\\Feature\\ImportPurchasesTest::test_import_purchases_index_page_is_accessible":1.247,"Tests\\Feature\\ImportPurchasesTest::test_import_purchases_preview_and_import_process":1.042}}
