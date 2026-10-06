@@ -1724,7 +1724,7 @@ class CoaController extends Controller
                         }
 
                         if ($row->sub_type == 'purchase') {
-                            $description = '<b>'.__('purchase.purchase').'</b>';
+                            $description = '<b>'.__('lang_v1.purchase').'</b>';
                             $ref = !empty($row->ref_no) ? $row->ref_no : $row->a_ref;
                             if (!empty($ref)) {
                                 $description .= '<br>'.__('purchase.ref_no').': '.$ref;
