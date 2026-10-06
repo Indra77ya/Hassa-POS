@@ -288,6 +288,11 @@ class AdminSidebarMenu
                                 __('purchase.add_purchase'),
                                 ['icon' => '', 'active' => request()->segment(1) == 'purchases' && request()->segment(2) == 'create']
                             );
+                            $sub->url(
+                                action([\App\Http\Controllers\ImportPurchasesController::class, 'index']),
+                                __('lang_v1.import_purchases'),
+                                ['icon' => '', 'active' => request()->segment(1) == 'import-purchases']
+                            );
                         }
                         if (auth()->user()->can('purchase.update')) {
                             $sub->url(

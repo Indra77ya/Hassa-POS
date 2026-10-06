@@ -23,6 +23,7 @@ use App\Http\Controllers\GroupTaxController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ImportOpeningStockController;
 use App\Http\Controllers\ImportProductsController;
+use App\Http\Controllers\ImportPurchasesController;
 use App\Http\Controllers\ImportSalesController;
 use App\Http\Controllers\ImportUnitsController;
 use App\Http\Controllers\Install;
@@ -222,6 +223,11 @@ Route::middleware(['setData', 'auth', 'SetSessionData', 'language', 'timezone', 
     Route::post('/purchases/get_purchase_entry_row', [PurchaseController::class, 'getPurchaseEntryRow']);
     Route::post('/purchases/check_ref_number', [PurchaseController::class, 'checkRefNumber']);
     Route::resource('purchases', PurchaseController::class)->except(['show']);
+
+    Route::get('/import-purchases', [ImportPurchasesController::class, 'index']);
+    Route::post('/import-purchases/preview', [ImportPurchasesController::class, 'preview']);
+    Route::post('/import-purchases', [ImportPurchasesController::class, 'import']);
+    Route::get('/revert-purchase-import/{batch}', [ImportPurchasesController::class, 'revertPurchaseImport']);
 
     Route::get('/toggle-subscription/{id}', [SellPosController::class, 'toggleRecurringInvoices']);
     Route::post('/sells/pos/get-types-of-service-details', [SellPosController::class, 'getTypesOfServiceDetails']);
