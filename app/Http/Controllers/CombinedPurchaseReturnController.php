@@ -2,38 +2,35 @@
 
 namespace App\Http\Controllers;
 
+use App\AccountTransaction;
 use App\BusinessLocation;
 use App\PurchaseLine;
-use App\TaxRate;
 use App\Transaction;
-use App\Utils\ModuleUtil;
 use App\Utils\ProductUtil;
 use App\Utils\TransactionUtil;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 
 class CombinedPurchaseReturnController extends Controller
 {
     /**
      * All Utils instance.
      */
-    protected $productUtil;
-
-    protected $moduleUtil;
-
     protected $transactionUtil;
+
+    protected $productUtil;
 
     /**
      * Constructor
      *
-     * @param  ProductUtils  $product
+     * @param  TransactionUtil  $transactionUtil
      * @return void
      */
-    public function __construct(ProductUtil $productUtil, ModuleUtil $moduleUtil, TransactionUtil $transactionUtil)
+    public function __construct(TransactionUtil $transactionUtil, ProductUtil $productUtil)
     {
-        $this->productUtil = $productUtil;
-        $this->moduleUtil = $moduleUtil;
         $this->transactionUtil = $transactionUtil;
+        $this->productUtil = $productUtil;
     }
 
     /**
@@ -49,16 +46,9 @@ class CombinedPurchaseReturnController extends Controller
 
         $business_id = request()->session()->get('user.business_id');
 
-        //Check if subscribed or not
-        if (! $this->moduleUtil->isSubscribed($business_id)) {
-            return $this->moduleUtil->expiredResponse();
-        }
-
         $business_locations = BusinessLocation::forDropdown($business_id);
 
-        $taxes = TaxRate::where('business_id', $business_id)
-                        ->ExcludeForTaxGroup()
-                        ->get();
+        $taxes = $this->transactionUtil->getTaxDetails($business_id);
 
         return view('purchase_return.create')
             ->with(compact('business_locations', 'taxes'));
@@ -79,59 +69,64 @@ class CombinedPurchaseReturnController extends Controller
         try {
             DB::beginTransaction();
 
-            $input_data = $request->only(['location_id', 'transaction_date', 'final_total', 'ref_no',
-                'tax_id', 'tax_amount', 'contact_id', ]);
-            $business_id = $request->session()->get('user.business_id');
+            $input = $request->except('_token');
 
-            //Check if subscribed or not
-            if (! $this->moduleUtil->isSubscribed($business_id)) {
-                return $this->moduleUtil->expiredResponse();
-            }
-
+            $business_id = request()->session()->get('user.business_id');
             $user_id = $request->session()->get('user.id');
 
-            $input_data['type'] = 'purchase_return';
-            $input_data['business_id'] = $business_id;
-            $input_data['created_by'] = $user_id;
-            $input_data['transaction_date'] = $this->productUtil->uf_date($input_data['transaction_date'], true);
-            $input_data['total_before_tax'] = $input_data['final_total'] - $input_data['tax_amount'];
-
-            //Update reference count
-            $ref_count = $this->productUtil->setAndGetReferenceCount('purchase_return');
-            //Generate reference number
-            if (empty($input_data['ref_no'])) {
-                $input_data['ref_no'] = $this->productUtil->generateReferenceNumber('purchase_return', $ref_count);
-            }
-
-            //upload document
-            $input_data['document'] = $this->productUtil->uploadFile($request, 'document', 'documents');
-
-            $products = $request->input('products');
+            $products = $input['products'];
 
             if (! empty($products)) {
+                $ref_count = $this->transactionUtil->setAndGetReferenceCount('purchase_return');
+                $return_ref_no = $this->transactionUtil->generateReferenceNumber('purchase_return', $ref_count);
+
+                $discount = [
+                    'discount_type' => $input['discount_type'] ?? 'fixed',
+                    'discount_amount' => $this->transactionUtil->num_uf($input['discount_amount'] ?? 0),
+                ];
+
+                $invoice_total = $this->productUtil->calculateInvoiceTotal($products, $input['tax_id'] ?? null, $discount);
+
+                $input_data = [
+                    'business_id' => $business_id,
+                    'location_id' => $input['location_id'],
+                    'type' => 'purchase_return',
+                    'status' => 'final',
+                    'contact_id' => $input['contact_id'],
+                    'ref_no' => empty($input['ref_no']) ? $return_ref_no : $input['ref_no'],
+                    'transaction_date' => $this->transactionUtil->uf_date($input['transaction_date'], true),
+                    'total_before_tax' => $invoice_total['total_before_tax'],
+                    'tax_id' => $input['tax_id'] ?? null,
+                    'tax_amount' => $invoice_total['tax'],
+                    'discount_type' => $input['discount_type'] ?? 'fixed',
+                    'discount_amount' => $this->transactionUtil->num_uf($input['discount_amount'] ?? 0),
+                    'final_total' => $invoice_total['final_total'],
+                    'created_by' => $user_id,
+                ];
+
                 $product_data = [];
 
                 foreach ($products as $product) {
-                    $unit_price = $this->productUtil->num_uf($product['unit_price']);
-                    $return_line = [
+                    $unit_price = isset($product['unit_price']) ? $this->productUtil->num_uf($product['unit_price']) : 0;
+                    $unit_price_inc_tax = isset($product['unit_price_inc_tax']) ? $this->productUtil->num_uf($product['unit_price_inc_tax']) : $unit_price;
+
+                    $product_data[] = [
                         'product_id' => $product['product_id'],
                         'variation_id' => $product['variation_id'],
                         'quantity' => 0,
                         'purchase_price' => $unit_price,
+                        'purchase_price_inc_tax' => $unit_price_inc_tax,
                         'pp_without_discount' => $unit_price,
-                        'purchase_price_inc_tax' => $unit_price,
                         'quantity_returned' => $this->productUtil->num_uf($product['quantity']),
-                        'lot_number' => ! empty($product['lot_number']) ? $product['lot_number'] : null,
-                        'exp_date' => ! empty($product['exp_date']) ? $this->productUtil->uf_date($product['exp_date']) : null,
+                        'lot_number' => $product['lot_number'] ?? null,
+                        'exp_date' => !empty($product['exp_date']) ? $this->productUtil->uf_date($product['exp_date']) : null,
                     ];
 
-                    $product_data[] = $return_line;
-
-                    //Decrease available quantity
+                    //decrease product quantity
                     $this->productUtil->decreaseProductQuantity(
                         $product['product_id'],
                         $product['variation_id'],
-                        $input_data['location_id'],
+                        $input['location_id'],
                         $this->productUtil->num_uf($product['quantity'])
                     );
                 }
@@ -141,6 +136,12 @@ class CombinedPurchaseReturnController extends Controller
 
                 //update payment status
                 $this->transactionUtil->updatePaymentStatus($purchase_return->id, $purchase_return->final_total);
+
+                // Sync accounting double-entry journal if Accounting module is installed
+                if (class_exists('\Modules\Accounting\Listeners\MapPurchaseReturnTransaction')) {
+                    $mapPurchaseReturn = new \Modules\Accounting\Listeners\MapPurchaseReturnTransaction();
+                    $mapPurchaseReturn->handle($purchase_return);
+                }
             }
 
             $output = ['success' => 1,
@@ -176,65 +177,56 @@ class CombinedPurchaseReturnController extends Controller
         $business_id = request()->session()->get('user.business_id');
 
         $purchase_return = Transaction::where('business_id', $business_id)
-                                    ->with(['contact'])
+                                    ->where('type', 'purchase_return')
                                     ->find($id);
+
         $location_id = $purchase_return->location_id;
-        $purchase_lines = PurchaseLine::join(
-                            'products AS p',
-                            'purchase_lines.product_id',
-                            '=',
-                            'p.id'
-                        )
-                        ->join(
-                            'variations AS variations',
-                            'purchase_lines.variation_id',
-                            '=',
-                            'variations.id'
-                        )
-                        ->join(
-                            'product_variations AS pv',
-                            'variations.product_variation_id',
-                            '=',
-                            'pv.id'
-                        )
-                        ->leftjoin('variation_location_details AS vld', function ($join) use ($location_id) {
-                            $join->on('variations.id', '=', 'vld.variation_id')
+
+        $purchase_lines = Transaction::leftJoin('purchase_lines as pl', 'transactions.id', '=', 'pl.transaction_id')
+                        ->leftJoin('products as p', 'pl.product_id', '=', 'p.id')
+                        ->leftJoin('variations as v', 'pl.variation_id', '=', 'v.id')
+                        ->leftJoin('variation_location_details as vld', function ($join) use ($location_id) {
+                            $join->on('v.id', '=', 'vld.variation_id')
                                 ->where('vld.location_id', '=', $location_id);
                         })
-                        ->leftjoin('units', 'units.id', '=', 'p.unit_id')
-                        ->where('purchase_lines.transaction_id', $id)
+                        ->leftJoin('units as u', 'p.unit_id', '=', 'u.id')
+                        ->where('transactions.business_id', $business_id)
+                        ->where('transactions.type', 'purchase_return')
+                        ->where('transactions.id', $id)
                         ->select(
-                            DB::raw("IF(pv.is_dummy = 0, CONCAT(p.name, 
-                                    ' (', pv.name, ':',variations.name, ')'), p.name) AS product_name"),
+                            'p.name as product_name',
+                            'p.type as product_type',
                             'p.id as product_id',
                             'p.enable_stock',
-                            'pv.is_dummy as is_dummy',
-                            'variations.sub_sku',
+                            'v.id as variation_id',
+                            'v.name as variation_name',
+                            'v.sub_sku',
                             'vld.qty_available',
-                            'variations.id as variation_id',
-                            'units.short_name as unit',
-                            'units.allow_decimal as unit_allow_decimal',
-                            'purchase_lines.purchase_price',
-                            'purchase_lines.id as purchase_line_id',
-                            'purchase_lines.quantity_returned as quantity_returned',
-                            'purchase_lines.lot_number',
-                            'purchase_lines.exp_date'
-                        )
-                        ->get();
+                            'u.short_name as unit',
+                            'u.allow_decimal as unit_allow_decimal',
+                            'pl.id as purchase_line_id',
+                            'pl.purchase_price',
+                            'pl.purchase_price as unit_price',
+                            'pl.purchase_price_inc_tax as unit_price_inc_tax',
+                            'pl.quantity_returned as quantity_returned',
+                            'pl.lot_number',
+                            'pl.exp_date'
+                        )->get();
 
         foreach ($purchase_lines as $key => $value) {
+            if ($value->product_type == 'variable') {
+                $purchase_lines[$key]->product_name .= ' - ' . $value->variation_name . ' (' . $value->sub_sku . ')';
+            }
             $purchase_lines[$key]->qty_available += $value->quantity_returned;
             $purchase_lines[$key]->formatted_qty_available = $this->productUtil->num_f($purchase_lines[$key]->qty_available);
         }
 
         $business_locations = BusinessLocation::forDropdown($business_id);
 
-        $taxes = TaxRate::where('business_id', $business_id)
-                        ->ExcludeForTaxGroup()
-                        ->get();
+        $taxes = $this->transactionUtil->getTaxDetails($business_id);
 
         return view('purchase_return.edit')
-            ->with(compact('business_locations', 'taxes', 'purchase_return', 'purchase_lines'));
+            ->with(compact('business_locations', 'purchase_return', 'purchase_lines', 'taxes'));
     }
 
     /**
@@ -253,43 +245,50 @@ class CombinedPurchaseReturnController extends Controller
         try {
             DB::beginTransaction();
 
-            $input_data = $request->only(['transaction_date', 'final_total',
-                'tax_id', 'tax_amount', 'contact_id', ]);
-            $business_id = $request->session()->get('user.business_id');
+            $input = $request->except('_token');
 
-            if (! empty($request->input('ref_no'))) {
-                $input_data['ref_no'] = $request->input('ref_no');
-            }
+            $business_id = request()->session()->get('user.business_id');
+            $user_id = $request->session()->get('user.id');
 
-            //Check if subscribed or not
-            if (! $this->moduleUtil->isSubscribed($business_id)) {
-                return $this->moduleUtil->expiredResponse();
-            }
+            $purchase_return_id = $input['purchase_return_id'];
 
-            $input_data['transaction_date'] = $this->productUtil->uf_date($input_data['transaction_date'], true);
-            $input_data['total_before_tax'] = $input_data['final_total'] - $input_data['tax_amount'];
-
-            //upload document
-            $doc_name = $this->productUtil->uploadFile($request, 'document', 'documents');
-
-            if (! empty($doc_name)) {
-                $input_data['document'] = $doc_name;
-            }
-
-            $products = $request->input('products');
-            $purchase_return_id = $request->input('purchase_return_id');
             $purchase_return = Transaction::where('business_id', $business_id)
                                 ->where('type', 'purchase_return')
                                 ->find($purchase_return_id);
 
+            $products = $input['products'];
+
             if (! empty($products)) {
+                $discount = [
+                    'discount_type' => $input['discount_type'] ?? 'fixed',
+                    'discount_amount' => $this->transactionUtil->num_uf($input['discount_amount'] ?? 0),
+                ];
+
+                $invoice_total = $this->productUtil->calculateInvoiceTotal($products, $input['tax_id'] ?? null, $discount);
+
+                $input_data = [
+                    'contact_id' => $input['contact_id'],
+                    'ref_no' => $input['ref_no'],
+                    'transaction_date' => $this->transactionUtil->uf_date($input['transaction_date'], true),
+                    'total_before_tax' => $invoice_total['total_before_tax'],
+                    'tax_id' => $input['tax_id'] ?? null,
+                    'tax_amount' => $invoice_total['tax'],
+                    'discount_type' => $input['discount_type'] ?? 'fixed',
+                    'discount_amount' => $this->transactionUtil->num_uf($input['discount_amount'] ?? 0),
+                    'final_total' => $invoice_total['final_total'],
+                ];
+
                 $product_data = [];
+
                 $updated_purchase_lines = [];
 
                 foreach ($products as $product) {
-                    $unit_price = $this->productUtil->num_uf($product['unit_price']);
+                    $unit_price = isset($product['unit_price']) ? $this->productUtil->num_uf($product['unit_price']) : 0;
+                    $unit_price_inc_tax = isset($product['unit_price_inc_tax']) ? $this->productUtil->num_uf($product['unit_price_inc_tax']) : $unit_price;
+
                     if (! empty($product['purchase_line_id'])) {
                         $return_line = PurchaseLine::find($product['purchase_line_id']);
+
                         $updated_purchase_lines[] = $return_line->id;
 
                         $this->productUtil->decreaseProductQuantity(
@@ -299,14 +298,32 @@ class CombinedPurchaseReturnController extends Controller
                             $this->productUtil->num_uf($product['quantity']),
                             $return_line->quantity_returned
                         );
+
+                        $return_line->purchase_price = $unit_price;
+                        $return_line->purchase_price_inc_tax = $unit_price_inc_tax;
+                        $return_line->pp_without_discount = $unit_price;
+                        $return_line->quantity_returned = $this->productUtil->num_uf($product['quantity']);
+                        if (isset($product['lot_number'])) {
+                            $return_line->lot_number = $product['lot_number'];
+                        }
+                        if (!empty($product['exp_date'])) {
+                            $return_line->exp_date = $this->productUtil->uf_date($product['exp_date']);
+                        }
+                        $return_line->save();
                     } else {
-                        $return_line = new PurchaseLine([
+                        $product_data[] = [
                             'product_id' => $product['product_id'],
                             'variation_id' => $product['variation_id'],
                             'quantity' => 0,
-                        ]);
+                            'purchase_price' => $unit_price,
+                            'purchase_price_inc_tax' => $unit_price_inc_tax,
+                            'pp_without_discount' => $unit_price,
+                            'quantity_returned' => $this->productUtil->num_uf($product['quantity']),
+                            'lot_number' => $product['lot_number'] ?? null,
+                            'exp_date' => !empty($product['exp_date']) ? $this->productUtil->uf_date($product['exp_date']) : null,
+                        ];
 
-                        //Decrease available quantity
+                        //decrease product quantity
                         $this->productUtil->decreaseProductQuantity(
                             $product['product_id'],
                             $product['variation_id'],
@@ -314,13 +331,6 @@ class CombinedPurchaseReturnController extends Controller
                             $this->productUtil->num_uf($product['quantity'])
                         );
                     }
-                    $return_line->purchase_price = $unit_price;
-                    $return_line->pp_without_discount = $unit_price;
-                    $return_line->purchase_price_inc_tax = $unit_price;
-                    $return_line->quantity_returned = $this->productUtil->num_uf($product['quantity']);
-                    $return_line->lot_number = ! empty($product['lot_number']) ? $product['lot_number'] : null;
-                    $return_line->exp_date = ! empty($product['exp_date']) ? $this->productUtil->uf_date($product['exp_date']) : null;
-                    $product_data[] = $return_line;
                 }
 
                 $purchase_return->update($input_data);
@@ -342,6 +352,12 @@ class CombinedPurchaseReturnController extends Controller
 
                 //update payment status
                 $this->transactionUtil->updatePaymentStatus($purchase_return->id, $purchase_return->final_total);
+
+                // Sync accounting double-entry journal if Accounting module is installed
+                if (class_exists('\Modules\Accounting\Listeners\MapPurchaseReturnTransaction')) {
+                    $mapPurchaseReturn = new \Modules\Accounting\Listeners\MapPurchaseReturnTransaction();
+                    $mapPurchaseReturn->handle($purchase_return);
+                }
             }
 
             $output = ['success' => 1,
@@ -363,19 +379,20 @@ class CombinedPurchaseReturnController extends Controller
     }
 
     /**
-     * Return product rows
+     * Return products row for combined purchase return.
      *
-     * @param  Request  $request
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function getProductRow(Request $request)
     {
-        if (request()->ajax()) {
+        if ($request->ajax()) {
             $row_index = $request->input('row_index');
             $variation_id = $request->input('variation_id');
             $location_id = $request->input('location_id');
 
             $business_id = $request->session()->get('user.business_id');
+
             $product = $this->productUtil->getDetailsFromVariation($variation_id, $business_id, $location_id);
             $product->formatted_qty_available = $this->productUtil->num_f($product->qty_available);
 

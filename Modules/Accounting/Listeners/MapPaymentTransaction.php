@@ -77,6 +77,18 @@ class MapPaymentTransaction
             return;
         }
 
+        if ($transaction->type == 'purchase_return') {
+            $mapPurchaseReturn = new \Modules\Accounting\Listeners\MapPurchaseReturnTransaction();
+            $mapPurchaseReturn->handle($transaction, isset($event->isDeleted) && $event->isDeleted);
+            return;
+        }
+
+        if ($transaction->type == 'sell_return') {
+            $mapSellReturn = new \Modules\Accounting\Listeners\MapSellReturnTransaction();
+            $mapSellReturn->handle($transaction, isset($event->isDeleted) && $event->isDeleted);
+            return;
+        }
+
         // if payment is deleted then delete the mapping
         if (isset($event->isDeleted) && $event->isDeleted) {
             $accountingUtil = new \Modules\Accounting\Utils\AccountingUtil();

@@ -1723,6 +1723,44 @@ class CoaController extends Controller
                             $description .= '<br>'.__('lang_v1.description').': '.$row->aat_note;
                         }
 
+                        if ($row->sub_type == 'purchase') {
+                            $description = '<b>'.__('lang_v1.purchase').'</b>';
+                            $ref = !empty($row->ref_no) ? $row->ref_no : $row->a_ref;
+                            if (!empty($ref)) {
+                                $description .= '<br>'.__('purchase.ref_no').': '.$ref;
+                            }
+                            if (!empty($row->aat_note)) {
+                                $description .= '<br>'.__('lang_v1.description').': '.$row->aat_note;
+                            }
+                        }
+
+                        if ($row->sub_type == 'purchase_return') {
+                            $description = '<b>'.__('lang_v1.purchase_return').'</b>';
+                            $ref = !empty($row->ref_no) ? $row->ref_no : $row->a_ref;
+                            if (!empty($ref)) {
+                                $description .= '<br>'.__('purchase.ref_no').': '.$ref;
+                            }
+                            if (!empty($row->aat_note)) {
+                                $description .= '<br>'.__('lang_v1.description').': '.$row->aat_note;
+                            }
+                        }
+
+                        if ($row->sub_type == 'sell_return') {
+                            $description = '<b>'.__('lang_v1.sell_return').'</b>';
+                            $inv = !empty($row->invoice_no) ? $row->invoice_no : $row->ref_no;
+                            if (!empty($inv)) {
+                                $description .= '<br>'.__('sale.invoice_no').': '.$inv;
+                            }
+                            if (!empty($row->aat_note)) {
+                                $description .= '<br>'.__('lang_v1.description').': '.$row->aat_note;
+                            }
+                        }
+
+                        if (empty($description) && !empty($row->aat_note)) {
+                            $description = '<b>'.ucfirst(str_replace('_', ' ', $row->sub_type)).'</b>';
+                            $description .= '<br>'.__('lang_v1.description').': '.$row->aat_note;
+                        }
+
                         return $description;
                     })
                     ->addColumn('debit', function ($row) {

@@ -2,42 +2,31 @@
 
 namespace Modules\Accounting\Listeners;
 
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use App\Events\PurchaseCreatedOrModified;
 use App\BusinessLocation;
+use App\Transaction;
+use Modules\Accounting\Entities\AccountingAccount;
 use Modules\Accounting\Entities\AccountingAccountsTransaction;
 
-class MapPurchaseTransaction
+class MapPurchaseReturnTransaction
 {
     /**
-     * Create the event listener.
+     * Handle mapping for purchase_return transaction
      *
+     * @param Transaction $transaction
+     * @param bool $isDeleted
      * @return void
      */
-    public function __construct()
+    public function handle(Transaction $transaction, $isDeleted = false)
     {
-        //
-    }
-
-    /**
-     * Handle the event.
-     *
-     * @param  object  $event
-     * @return void
-     */
-    public function handle(PurchaseCreatedOrModified $event)
-    {
-        \DB::transaction(function () use ($event) {
-            $transaction = $event->transaction;
+        \DB::transaction(function () use ($transaction, $isDeleted) {
             $id = $transaction->id;
             $business_id = $transaction->business_id;
             $user_id = auth()->id() ?? (request()->hasSession() ? request()->session()->get('user.id') : null) ?? $transaction->created_by ?? 1;
 
             $accountingUtil = new \Modules\Accounting\Utils\AccountingUtil();
 
-            // 1. If deleted, delete all mappings and return
-            if (isset($event->isDeleted) && $event->isDeleted) {
+            // 1. If deleted or final_total <= 0, delete mapping and return
+            if ($isDeleted || $transaction->final_total <= 0) {
                 $accountingUtil->deleteMap($id, null);
                 return;
             }
@@ -49,11 +38,11 @@ class MapPurchaseTransaction
             }
             $accounting_default_map = json_decode($business_location->accounting_default_map, true);
 
-            // Resolve accounts
-            // Debit: Persediaan Barang
+            // Resolve accounts:
+            // Inventory Account (Persediaan Barang) - Credit
             $inventory_account_id = isset($accounting_default_map['purchases']['deposit_to']) ? $accounting_default_map['purchases']['deposit_to'] : null;
             if (is_null($inventory_account_id)) {
-                $inventory_account_id = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                $inventory_account_id = AccountingAccount::where('business_id', $business_id)
                     ->where('status', 'active')
                     ->where('account_primary_type', 'asset')
                     ->where(function($q) {
@@ -64,10 +53,10 @@ class MapPurchaseTransaction
                     ->value('id');
             }
 
-            // Credit (Tempo/Credit): Hutang Usaha
+            // Payable Account (Hutang Usaha) - Debit
             $payable_account_id = isset($accounting_default_map['purchases']['payment_account']) ? $accounting_default_map['purchases']['payment_account'] : null;
             if (is_null($payable_account_id)) {
-                $payable_account_id = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                $payable_account_id = AccountingAccount::where('business_id', $business_id)
                     ->where('status', 'active')
                     ->where('account_primary_type', 'liability')
                     ->where(function($q) {
@@ -82,68 +71,50 @@ class MapPurchaseTransaction
                 return;
             }
 
-            // 2. Delete existing mappings for this transaction
+            // 2. Delete existing mappings for this return transaction
             AccountingAccountsTransaction::where('transaction_id', $id)
                 ->whereIn('map_type', ['payment_account', 'deposit_to', 'cogs_debit', 'cogs_credit', 'recovered_deposit_to', 'loss_deposit_to'])
                 ->delete();
 
-            // 3. Calculate net paid amount (payments)
+            // 3. Calculate payments received for this return (Refunds from supplier)
             $payments_sum = \DB::table('transaction_payments')
                 ->where('transaction_id', $id)
-                ->where('is_return', 0)
                 ->sum('amount');
-            $returns_sum = \DB::table('transaction_payments')
-                ->where('transaction_id', $id)
-                ->where('is_return', 1)
-                ->sum('amount');
-            $net_paid = $payments_sum - $returns_sum;
-            if ($net_paid < 0) {
-                $net_paid = 0;
-            }
 
             $final_total = $transaction->final_total;
+            $received_paid = min($payments_sum, $final_total);
+            $unreceived_payable_offset = $final_total - $received_paid;
 
-            if ($net_paid > $final_total) {
-                $net_paid = $final_total;
-            }
-
-            $unpaid = $final_total - $net_paid;
-
-            // Debit Inventory Leg (Persediaan Barang)
+            // Credit Inventory Leg (Persediaan Barang) - full return value
             $inventory_data = [
                 'accounting_account_id' => $inventory_account_id,
                 'transaction_id' => $id,
                 'transaction_payment_id' => null,
                 'amount' => $final_total,
-                'type' => 'debit',
-                'sub_type' => 'purchase',
-                'note' => 'Pembelian - ' . $transaction->ref_no,
+                'type' => 'credit',
+                'sub_type' => 'purchase_return',
+                'note' => 'Retur Pembelian - ' . ($transaction->ref_no ?? $transaction->id),
                 'map_type' => 'deposit_to',
                 'created_by' => $user_id,
                 'operation_date' => $transaction->transaction_date ?? \Carbon::now(),
             ];
             AccountingAccountsTransaction::updateOrCreateMapTransaction($inventory_data);
 
-            // Credit Cash Leg (Kas/Bank)
-            if ($net_paid > 0) {
+            // Debit Cash Leg (Kas/Bank) for refund received from supplier
+            if ($received_paid > 0) {
                 $payments = \DB::table('transaction_payments')
                     ->where('transaction_id', $id)
-                    ->where('is_return', 0)
                     ->get();
 
-                $scale_factor = 1.0;
-                if ($payments_sum > 0) {
-                    $scale_factor = $net_paid / $payments_sum;
-                }
-
+                $scale_factor = ($payments_sum > 0) ? ($received_paid / $payments_sum) : 1.0;
                 $total_mapped_cash = 0;
+
                 foreach ($payments as $payment) {
                     $p_amount = (float)$payment->amount * $scale_factor;
                     if ($p_amount <= 0) {
                         continue;
                     }
 
-                    // Resolve cash account for this specific payment
                     $p_cash_account_id = null;
                     if (!empty($payment->account_id)) {
                         $p_cash_account_id = \DB::table('accounts')
@@ -156,7 +127,7 @@ class MapPurchaseTransaction
                             : null;
                     }
                     if (is_null($p_cash_account_id)) {
-                        $p_cash_account_id = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                        $p_cash_account_id = AccountingAccount::where('business_id', $business_id)
                             ->where('status', 'active')
                             ->where('account_primary_type', 'asset')
                             ->where(function($q) {
@@ -173,9 +144,9 @@ class MapPurchaseTransaction
                             'transaction_id' => $id,
                             'transaction_payment_id' => $payment->id,
                             'amount' => $p_amount,
-                            'type' => 'credit',
-                            'sub_type' => 'purchase',
-                            'note' => 'Bayar Pembelian - ' . $transaction->ref_no,
+                            'type' => 'debit',
+                            'sub_type' => 'purchase_return',
+                            'note' => 'Pengembalian Dana Retur Pembelian - ' . ($transaction->ref_no ?? $transaction->id),
                             'map_type' => 'payment_account',
                             'created_by' => $user_id,
                             'operation_date' => $payment->paid_on ?? $transaction->transaction_date ?? \Carbon::now(),
@@ -185,14 +156,13 @@ class MapPurchaseTransaction
                     }
                 }
 
-                // If some cash wasn't mapped through payment records or sum of payments < net_paid
-                $remaining_cash = $net_paid - $total_mapped_cash;
+                $remaining_cash = $received_paid - $total_mapped_cash;
                 if ($remaining_cash > 0.01) {
                     $fallback_cash_account_id = isset($accounting_default_map['purchase_payment']['payment_account'])
                         ? $accounting_default_map['purchase_payment']['payment_account']
                         : null;
                     if (is_null($fallback_cash_account_id)) {
-                        $fallback_cash_account_id = \Modules\Accounting\Entities\AccountingAccount::where('business_id', $business_id)
+                        $fallback_cash_account_id = AccountingAccount::where('business_id', $business_id)
                             ->where('status', 'active')
                             ->where('account_primary_type', 'asset')
                             ->where(function($q) {
@@ -209,9 +179,9 @@ class MapPurchaseTransaction
                             'transaction_id' => $id,
                             'transaction_payment_id' => null,
                             'amount' => $remaining_cash,
-                            'type' => 'credit',
-                            'sub_type' => 'purchase',
-                            'note' => 'Bayar Pembelian - ' . $transaction->ref_no,
+                            'type' => 'debit',
+                            'sub_type' => 'purchase_return',
+                            'note' => 'Pengembalian Dana Retur Pembelian - ' . ($transaction->ref_no ?? $transaction->id),
                             'map_type' => 'payment_account',
                             'created_by' => $user_id,
                             'operation_date' => $transaction->transaction_date ?? \Carbon::now(),
@@ -221,31 +191,21 @@ class MapPurchaseTransaction
                 }
             }
 
-            // Credit Payable Leg (Hutang Usaha)
-            if ($unpaid > 0 && !is_null($payable_account_id)) {
+            // Debit Payable Leg (Hutang Usaha) for the remaining unreceived return amount (offsets/reduces outstanding purchase debt)
+            if ($unreceived_payable_offset > 0 && !is_null($payable_account_id)) {
                 $payable_data = [
                     'accounting_account_id' => $payable_account_id,
                     'transaction_id' => $id,
                     'transaction_payment_id' => null,
-                    'amount' => $unpaid,
-                    'type' => 'credit',
-                    'sub_type' => 'purchase',
-                    'note' => 'Hutang Pembelian - ' . $transaction->ref_no,
+                    'amount' => $unreceived_payable_offset,
+                    'type' => 'debit',
+                    'sub_type' => 'purchase_return',
+                    'note' => 'Pemotongan Hutang Retur Pembelian - ' . ($transaction->ref_no ?? $transaction->id),
                     'map_type' => 'payment_account',
                     'created_by' => $user_id,
                     'operation_date' => $transaction->transaction_date ?? \Carbon::now(),
                 ];
                 AccountingAccountsTransaction::updateOrCreateMapTransaction($payable_data);
-            }
-
-            // Also sync/update any linked purchase_return transactions (if any)
-            $return_transaction = \App\Transaction::where('business_id', $business_id)
-                ->where('type', 'purchase_return')
-                ->where('return_parent_id', $id)
-                ->first();
-            if ($return_transaction) {
-                $mapPurchaseReturn = new \Modules\Accounting\Listeners\MapPurchaseReturnTransaction();
-                $mapPurchaseReturn->handle($return_transaction);
             }
 
             // Validate balance

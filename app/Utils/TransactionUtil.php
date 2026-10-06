@@ -6442,6 +6442,12 @@ class TransactionUtil extends Util
             }
         }
 
+        // Sync accounting double-entry journal if Accounting module is installed
+        if (class_exists('\Modules\Accounting\Listeners\MapSellReturnTransaction')) {
+            $mapSellReturn = new \Modules\Accounting\Listeners\MapSellReturnTransaction();
+            $mapSellReturn->handle($sell_return);
+        }
+
         return $sell_return;
     }
 
