@@ -125,7 +125,7 @@
                                 <td>{{count($value['ref_nos'])}}</td>
                                 <td>{{$value['created_by']}}</td>
                                 <td>
-                                    <a href="{{action([\App\Http\Controllers\ImportPurchasesController::class, 'revertPurchaseImport'], [$key])}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-error" onclick="return confirm('Apakah Anda yakin ingin membatalkan/menghapus impor batch ini?');"><i class="fa fa-undo"></i> @lang('lang_v1.revert_batch_import')</a>
+                                    <a href="{{action([\App\Http\Controllers\ImportPurchasesController::class, 'revertPurchaseImport'], [$key])}}" class="tw-dw-btn tw-dw-btn-xs tw-dw-btn-outline tw-dw-btn-error" onclick="return confirm('{{__('messages.are_you_sure')}}');"><i class="fa fa-undo"></i> @lang('lang_v1.revert_batch_import')</a>
                                 </td>
                             </tr>
                         @endforeach

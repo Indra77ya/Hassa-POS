@@ -482,9 +482,9 @@ class ImportPurchasesController extends Controller
     {
         $fields = [
             'ref_no' => ['label' => __('purchase.ref_no')],
-            'supplier_id' => ['label' => __('supplier.supplier_id')],
+            'supplier_id' => ['label' => __('lang_v1.supplier_id')],
             'supplier_name' => ['label' => __('purchase.supplier')],
-            'supplier_phone' => ['label' => __('contact.mobile')],
+            'supplier_phone' => ['label' => __('lang_v1.supplier_phone_number')],
             'date' => ['label' => __('purchase.purchase_date'), 'instruction' => __('lang_v1.date_format_instruction')],
             'status' => ['label' => __('purchase.purchase_status'), 'instruction' => 'received, pending, ordered'],
             'product' => ['label' => __('product.product_name'), 'instruction' => __('lang_v1.either_product_name_or_sku_required')],
