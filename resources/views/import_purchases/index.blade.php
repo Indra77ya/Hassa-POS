@@ -111,6 +111,22 @@
                                 <td>200.000</td>
                                 <td><span class="text-muted">(kosong)</span></td>
                             </tr>
+                            <tr>
+                                <td>PUR-2026-002</td>
+                                <td><span class="text-muted">(kosong)</span></td>
+                                <td>CV Jaya Elektronik</td>
+                                <td>08567890123</td>
+                                <td>2026-10-06 11:30:00</td>
+                                <td><span class="label label-success">received</span></td>
+                                <td>Monitor LED 24 Inch</td>
+                                <td>SKU-MON24</td>
+                                <td>3</td>
+                                <td>1.800.000</td>
+                                <td>5</td>
+                                <td><span class="text-muted">(kosong)</span></td>
+                                <td>2.200.000</td>
+                                <td><span class="text-muted">(kosong)</span></td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
