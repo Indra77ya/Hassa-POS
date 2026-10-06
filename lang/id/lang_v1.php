@@ -942,6 +942,8 @@ return [
     'pls_upload_valid_zip_file' => 'Silakan unggah file zip yang valid.',
     'import_sales' => 'Impor Penjualan',
     'import_purchases' => 'Impor Pembelian',
+    'template_example' => 'Contoh Isi Template',
+    'template_example_instruction' => 'Berikut adalah contoh format dan isi baris data dalam file template CSV / Excel:',
     'preview_imported_purchases' => 'Pratinjau Impor Pembelian',
     'group_purchase_line_by' => 'Kelompokkan Baris Pembelian Berdasarkan',
     'purchases_imported_successfully' => 'Pembelian berhasil diimpor',

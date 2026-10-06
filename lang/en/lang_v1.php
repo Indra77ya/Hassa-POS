@@ -997,6 +997,8 @@ return [
     'pls_upload_valid_zip_file' => 'Please upload a valid zip file.',
     'import_sales' => 'Import Sales',
     'import_purchases' => 'Import Purchases',
+    'template_example' => 'Template Data Example',
+    'template_example_instruction' => 'Below is an example format and sample rows in the CSV / Excel template file:',
     'preview_imported_purchases' => 'Preview Imported Purchases',
     'group_purchase_line_by' => 'Group Purchase Line By',
     'purchases_imported_successfully' => 'Purchases imported successfully',
