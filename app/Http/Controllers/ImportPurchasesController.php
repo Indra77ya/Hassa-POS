@@ -481,20 +481,20 @@ class ImportPurchasesController extends Controller
     private function __importFields()
     {
         $fields = [
-            'ref_no' => ['label' => __('purchase.ref_no'), 'instruction' => __('lang_v1.optional')],
-            'supplier_id' => ['label' => __('lang_v1.supplier_id'), 'instruction' => __('lang_v1.optional')],
-            'supplier_name' => ['label' => __('purchase.supplier'), 'instruction' => __('lang_v1.optional')],
-            'supplier_phone' => ['label' => __('lang_v1.supplier_phone_number'), 'instruction' => __('lang_v1.optional')],
-            'date' => ['label' => __('purchase.purchase_date'), 'instruction' => __('lang_v1.optional') . ' (Format: Y-m-d H:i:s)'],
-            'status' => ['label' => __('purchase.purchase_status'), 'instruction' => __('lang_v1.optional') . ' (received, pending, ordered)'],
-            'product' => ['label' => __('product.product_name'), 'instruction' => __('lang_v1.either_product_name_or_sku_required')],
-            'sku' => ['label' => __('lang_v1.product_sku'), 'instruction' => __('lang_v1.either_product_name_or_sku_required')],
-            'quantity' => ['label' => __('lang_v1.quantity'), 'instruction' => __('lang_v1.required')],
-            'unit_cost_before_discount' => ['label' => __('lang_v1.unit_cost_before_discount'), 'instruction' => __('lang_v1.optional')],
-            'discount_percent' => ['label' => __('lang_v1.discount_percent'), 'instruction' => __('lang_v1.optional')],
-            'item_tax' => ['label' => __('lang_v1.item_tax'), 'instruction' => __('lang_v1.optional')],
-            'selling_price' => ['label' => __('purchase.unit_selling_price'), 'instruction' => __('lang_v1.optional')],
-            'serial_numbers' => ['label' => __('lang_v1.serial_number'), 'instruction' => __('lang_v1.optional') . ' (' . __('lang_v1.comma_separated') . ')'],
+            'ref_no' => ['label' => __('purchase.ref_no'), 'is_optional' => true, 'instruction' => __('lang_v1.optional')],
+            'supplier_id' => ['label' => __('lang_v1.supplier_id'), 'is_optional' => true, 'instruction' => __('lang_v1.optional')],
+            'supplier_name' => ['label' => __('purchase.supplier'), 'is_optional' => true, 'instruction' => __('lang_v1.optional')],
+            'supplier_phone' => ['label' => __('lang_v1.supplier_phone_number'), 'is_optional' => true, 'instruction' => __('lang_v1.optional')],
+            'date' => ['label' => __('purchase.purchase_date'), 'is_optional' => true, 'instruction' => __('lang_v1.optional') . ' (Format: Y-m-d H:i:s)'],
+            'status' => ['label' => __('purchase.purchase_status'), 'is_optional' => true, 'instruction' => __('lang_v1.optional') . ' (received, pending, ordered)'],
+            'product' => ['label' => __('product.product_name'), 'is_optional' => false, 'instruction' => __('lang_v1.either_product_name_or_sku_required')],
+            'sku' => ['label' => __('lang_v1.product_sku'), 'is_optional' => false, 'instruction' => __('lang_v1.either_product_name_or_sku_required')],
+            'quantity' => ['label' => __('lang_v1.quantity'), 'is_optional' => false, 'instruction' => __('lang_v1.required')],
+            'unit_cost_before_discount' => ['label' => __('lang_v1.unit_cost_before_discount'), 'is_optional' => true, 'instruction' => __('lang_v1.optional')],
+            'discount_percent' => ['label' => __('lang_v1.discount_percent'), 'is_optional' => true, 'instruction' => __('lang_v1.optional')],
+            'item_tax' => ['label' => __('lang_v1.item_tax'), 'is_optional' => true, 'instruction' => __('lang_v1.optional')],
+            'selling_price' => ['label' => __('purchase.unit_selling_price'), 'is_optional' => true, 'instruction' => __('lang_v1.optional')],
+            'serial_numbers' => ['label' => __('lang_v1.serial_number'), 'is_optional' => true, 'instruction' => __('lang_v1.optional') . ' (' . __('lang_v1.comma_separated') . ')'],
         ];
 
         return $fields;

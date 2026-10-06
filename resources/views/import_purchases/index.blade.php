@@ -89,6 +89,13 @@
                             <tr>
                                 <td>
                                     {{$value['label']}}
+                                    <small class="text-muted">
+                                        @if(!empty($value['is_optional']))
+                                            (@lang('lang_v1.optional'))
+                                        @else
+                                            (@lang('lang_v1.required'))
+                                        @endif
+                                    </small>
                                 </td>
                                 <td>
                                     <small class="text-muted">
