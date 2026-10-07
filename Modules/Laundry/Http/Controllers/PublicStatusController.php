@@ -29,7 +29,7 @@ class PublicStatusController extends Controller
     {
         $order_sheet = null;
         if (!empty($order_no)) {
-            $order_sheet = LaundryOrderSheet::with(['customer', 'status', 'serviceType', 'itemType', 'processLogs.process', 'processLogs.staff'])
+            $order_sheet = LaundryOrderSheet::with(['customer', 'status', 'serviceType', 'itemType', 'items.itemType', 'items.status', 'processLogs.process', 'processLogs.staff'])
                 ->where('order_no', $order_no)
                 ->first();
         }
@@ -43,7 +43,7 @@ class PublicStatusController extends Controller
     {
         $search = trim($request->input('search_key'));
 
-        $order_sheet = LaundryOrderSheet::with(['customer', 'status', 'serviceType', 'itemType', 'processLogs.process', 'processLogs.staff'])
+        $order_sheet = LaundryOrderSheet::with(['customer', 'status', 'serviceType', 'itemType', 'items.itemType', 'items.status', 'processLogs.process', 'processLogs.staff'])
             ->where(function ($q) use ($search) {
                 $q->where('order_no', $search)
                   ->orWhereHas('customer', function ($cq) use ($search) {

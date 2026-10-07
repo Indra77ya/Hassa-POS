@@ -58,13 +58,14 @@ class LaundryOrderSheet extends Model
 
     public function getTotalAmountAttribute()
     {
-        if ($this->relationLoaded('items') && $this->items->count() > 0) {
-            return (float) $this->items->sum('subtotal');
-        }
-
-        $items_sum = $this->items()->sum('subtotal');
-        if ($items_sum > 0) {
-            return (float) $items_sum;
+        if ($this->relationLoaded('items')) {
+            if ($this->items->count() > 0) {
+                return (float) $this->items->sum('subtotal');
+            }
+        } else {
+            if ($this->items()->exists()) {
+                return (float) $this->items()->sum('subtotal');
+            }
         }
 
         $price = optional($this->itemType)->default_price ?? 0;

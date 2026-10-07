@@ -39,7 +39,6 @@
                         <h3>@lang('laundry::lang.order_no'): <strong>{{ $order_sheet->order_no }}</strong></h3>
                         <p><strong>@lang('contact.customer'):</strong> {{ optional($order_sheet->customer)->name }}</p>
                         <p><strong>@lang('laundry::lang.service_type'):</strong> {{ optional($order_sheet->serviceType)->name }}</p>
-                        <p><strong>@lang('laundry::lang.item_type'):</strong> {{ optional($order_sheet->itemType)->name }} ({{ @format_quantity($order_sheet->quantity) }} {{ optional($order_sheet->itemType)->unit_name }})</p>
                         <p><strong>@lang('laundry::lang.received_at'):</strong> {{ $order_sheet->received_at ? \Carbon\Carbon::parse($order_sheet->received_at)->format('d/m/Y H:i') : '-' }}</p>
                         <p><strong>@lang('laundry::lang.estimated_completion_at'):</strong> {{ $order_sheet->estimated_completion_at ? \Carbon\Carbon::parse($order_sheet->estimated_completion_at)->format('d/m/Y H:i') : '-' }}</p>
                     </div>
@@ -53,6 +52,57 @@
                             <span class="status-badge bg-gray">-</span>
                         @endif
                     </div>
+                </div>
+
+                <hr>
+                <h4>Item Cucian Laundry</h4>
+                <div class="table-responsive" style="margin-bottom: 20px;">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr class="bg-primary" style="color: #fff;">
+                                <th>Jenis Barang</th>
+                                <th class="text-center">Jumlah / Qty</th>
+                                <th class="text-center">Status Barang</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if(!empty($order_sheet->items) && count($order_sheet->items) > 0)
+                                @foreach($order_sheet->items as $item)
+                                    <tr>
+                                        <td><strong>{{ optional($item->itemType)->name }}</strong></td>
+                                        <td class="text-center">{{ @format_quantity($item->quantity) }} {{ $item->unit_name }}</td>
+                                        <td class="text-center">
+                                            @if($item->status)
+                                                <span class="label" style="background-color: {{ $item->status->color }}; font-size: 11px; padding: 4px 8px;">
+                                                    {{ $item->status->name }}
+                                                </span>
+                                            @elseif($order_sheet->status)
+                                                <span class="label" style="background-color: {{ $order_sheet->status->color }}; font-size: 11px; padding: 4px 8px;">
+                                                    {{ $order_sheet->status->name }}
+                                                </span>
+                                            @else
+                                                <span class="label bg-gray">-</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @else
+                                <tr>
+                                    <td><strong>{{ optional($order_sheet->itemType)->name }}</strong></td>
+                                    <td class="text-center">{{ @format_quantity($order_sheet->quantity) }} {{ optional($order_sheet->itemType)->unit_name }}</td>
+                                    <td class="text-center">
+                                        @if($order_sheet->status)
+                                            <span class="label" style="background-color: {{ $order_sheet->status->color }}; font-size: 11px; padding: 4px 8px;">
+                                                {{ $order_sheet->status->name }}
+                                            </span>
+                                        @else
+                                            <span class="label bg-gray">-</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endif
+                        </tbody>
+                    </table>
                 </div>
 
                 <hr>
