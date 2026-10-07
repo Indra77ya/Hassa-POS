@@ -62,26 +62,26 @@
                     <table class="table table-bordered table-striped">
                         <thead>
                             <tr class="bg-gray">
-                                <th>Reference No</th>
-                                <th>Supplier ID</th>
-                                <th>Supplier Name</th>
-                                <th>Supplier Phone</th>
-                                <th>Purchase Date</th>
-                                <th>Purchase Status</th>
-                                <th>Product Name</th>
-                                <th>SKU</th>
-                                <th>Quantity</th>
-                                <th>Unit Cost Before Discount</th>
-                                <th>Discount Percent</th>
-                                <th>Item Tax</th>
-                                <th>Selling Price</th>
-                                <th>Serial Numbers</th>
+                                <th>@lang('purchase.ref_no')</th>
+                                <th>@lang('lang_v1.supplier_id')</th>
+                                <th>@lang('purchase.supplier')</th>
+                                <th>@lang('lang_v1.supplier_phone_number')</th>
+                                <th>@lang('purchase.purchase_date')</th>
+                                <th>@lang('purchase.purchase_status')</th>
+                                <th>@lang('product.product_name')</th>
+                                <th>@lang('lang_v1.product_sku')</th>
+                                <th>@lang('lang_v1.quantity')</th>
+                                <th>@lang('lang_v1.unit_cost_before_discount')</th>
+                                <th>@lang('lang_v1.discount_percent')</th>
+                                <th>@lang('lang_v1.item_tax')</th>
+                                <th>@lang('purchase.unit_selling_price')</th>
+                                <th>@lang('lang_v1.serial_number')</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
                                 <td>PUR-2026-001</td>
-                                <td><span class="text-muted">(kosong)</span></td>
+                                <td>-</td>
                                 <td>Toko Komputer Perkasa</td>
                                 <td>08123456789</td>
                                 <td>2026-10-06 10:00:00</td>
@@ -91,13 +91,13 @@
                                 <td>2</td>
                                 <td>12.000.000</td>
                                 <td>0</td>
-                                <td><span class="text-muted">(kosong)</span></td>
+                                <td>-</td>
                                 <td>14.000.000</td>
                                 <td>SN1001, SN1002</td>
                             </tr>
                             <tr>
                                 <td>PUR-2026-001</td>
-                                <td><span class="text-muted">(kosong)</span></td>
+                                <td>-</td>
                                 <td>Toko Komputer Perkasa</td>
                                 <td>08123456789</td>
                                 <td>2026-10-06 10:00:00</td>
@@ -107,13 +107,13 @@
                                 <td>5</td>
                                 <td>150.000</td>
                                 <td>0</td>
-                                <td><span class="text-muted">(kosong)</span></td>
+                                <td>-</td>
                                 <td>200.000</td>
-                                <td><span class="text-muted">(kosong)</span></td>
+                                <td>-</td>
                             </tr>
                             <tr>
                                 <td>PUR-2026-002</td>
-                                <td><span class="text-muted">(kosong)</span></td>
+                                <td>-</td>
                                 <td>CV Jaya Elektronik</td>
                                 <td>08567890123</td>
                                 <td>2026-10-06 11:30:00</td>
@@ -123,9 +123,9 @@
                                 <td>3</td>
                                 <td>1.800.000</td>
                                 <td>5</td>
-                                <td><span class="text-muted">(kosong)</span></td>
+                                <td>-</td>
                                 <td>2.200.000</td>
-                                <td><span class="text-muted">(kosong)</span></td>
+                                <td>-</td>
                             </tr>
                         </tbody>
                     </table>
