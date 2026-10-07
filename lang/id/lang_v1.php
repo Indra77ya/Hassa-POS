@@ -968,7 +968,7 @@ return [
     'discount_percent_ins' => 'Persentase diskon item pembelian (contoh: 5 untuk 5%).',
     'item_tax_ins' => 'Nama tarif pajak yang berlaku di sistem.',
     'selling_price_ins' => 'Harga jual satuan baru (Inc. Pajak). Biarkan kosong untuk menggunakan harga jual produk saat ini.',
-    'serial_numbers_ins' => 'Nomor Seri / IMEI produk, dipisahkan dengan koma jika lebih dari satu (contoh: SN101, SN102).',
+    'serial_numbers_ins' => 'Nomor Seri / IMEI produk, dipisahkan dengan koma jika lebih dari satu. Jika setiap unit SN memiliki harga beli (HPP) berbeda, pisahkan menjadi baris tersendiri dengan Quantity = 1 dan Reference No yang sama.',
     'preview_imported_sales' => 'Pratinjau Penjualan Impor',
     'customer_phone_number' => 'Nomor Telepon Pelanggan',
     'customer_email' => 'Surel pelanggan',

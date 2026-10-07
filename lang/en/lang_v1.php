@@ -1023,7 +1023,7 @@ return [
     'discount_percent_ins' => 'Item discount percentage (e.g. 5 for 5%).',
     'item_tax_ins' => 'Name of the tax rate configured in the system.',
     'selling_price_ins' => 'Unit selling price (Inc. Tax). Leave empty to use current product selling price.',
-    'serial_numbers_ins' => 'Product Serial Numbers / IMEIs, comma separated (e.g. SN101, SN102).',
+    'serial_numbers_ins' => 'Product Serial Numbers / IMEIs, comma separated. If serial numbers have different purchase costs, place each on a separate row with Quantity = 1 and the same Reference No.',
     'preview_imported_sales' => 'Preview Imported Sales',
     'customer_phone_number' => 'Customer Phone number',
     'customer_email' => 'Customer Email',
