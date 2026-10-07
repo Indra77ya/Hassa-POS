@@ -238,6 +238,17 @@ class ImportPurchasesController extends Controller
         foreach ($formatted_data as $data) {
             $first_line = $data[0];
 
+            // Validate required fields
+            if (empty($first_line['supplier_name']) && empty($first_line['supplier_id'])) {
+                throw new \Exception(__('lang_v1.supplier_required_at', ['row' => $row_index]));
+            }
+            if (empty($first_line['date'])) {
+                throw new \Exception(__('lang_v1.purchase_date_required_at', ['row' => $row_index]));
+            }
+            if (empty($first_line['status'])) {
+                throw new \Exception(__('lang_v1.purchase_status_required_at', ['row' => $row_index]));
+            }
+
             // Resolve supplier contact
             $supplier_id = null;
             if (! empty($first_line['supplier_id'])) {
@@ -483,10 +494,10 @@ class ImportPurchasesController extends Controller
         $fields = [
             'ref_no' => ['label' => __('purchase.ref_no'), 'is_optional' => true, 'instruction' => __('lang_v1.purchase_ref_no_ins')],
             'supplier_id' => ['label' => __('lang_v1.supplier_id'), 'is_optional' => true, 'instruction' => __('lang_v1.supplier_id_ins')],
-            'supplier_name' => ['label' => __('purchase.supplier'), 'is_optional' => true, 'instruction' => __('lang_v1.supplier_name_ins')],
+            'supplier_name' => ['label' => __('purchase.supplier'), 'is_optional' => false, 'instruction' => __('lang_v1.supplier_name_ins')],
             'supplier_phone' => ['label' => __('lang_v1.supplier_phone_number'), 'is_optional' => true, 'instruction' => __('lang_v1.supplier_phone_ins')],
-            'date' => ['label' => __('purchase.purchase_date'), 'is_optional' => true, 'instruction' => __('lang_v1.purchase_date_ins')],
-            'status' => ['label' => __('purchase.purchase_status'), 'is_optional' => true, 'instruction' => __('lang_v1.purchase_status_ins')],
+            'date' => ['label' => __('purchase.purchase_date'), 'is_optional' => false, 'instruction' => __('lang_v1.purchase_date_ins')],
+            'status' => ['label' => __('purchase.purchase_status'), 'is_optional' => false, 'instruction' => __('lang_v1.purchase_status_ins')],
             'product' => ['label' => __('product.product_name'), 'is_optional' => false, 'instruction' => __('lang_v1.either_product_name_or_sku_required')],
             'sku' => ['label' => __('lang_v1.product_sku'), 'is_optional' => false, 'instruction' => __('lang_v1.either_product_name_or_sku_required')],
             'quantity' => ['label' => __('lang_v1.quantity'), 'is_optional' => false, 'instruction' => __('lang_v1.quantity_ins')],
