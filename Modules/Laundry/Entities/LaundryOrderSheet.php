@@ -41,6 +41,11 @@ class LaundryOrderSheet extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function items()
+    {
+        return $this->hasMany(LaundryOrderSheetItem::class, 'laundry_order_sheet_id');
+    }
+
     public function processLogs()
     {
         return $this->hasMany(LaundryOrderProcessLog::class, 'order_sheet_id');
@@ -53,6 +58,15 @@ class LaundryOrderSheet extends Model
 
     public function getTotalAmountAttribute()
     {
+        if ($this->relationLoaded('items') && $this->items->count() > 0) {
+            return (float) $this->items->sum('subtotal');
+        }
+
+        $items_sum = $this->items()->sum('subtotal');
+        if ($items_sum > 0) {
+            return (float) $items_sum;
+        }
+
         $price = optional($this->itemType)->default_price ?? 0;
         return (float) ($this->quantity * $price);
     }

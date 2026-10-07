@@ -5,6 +5,7 @@ namespace Modules\Laundry\Http\Controllers;
 use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 use Modules\Laundry\Entities\LaundryOrderSheet;
+use Modules\Laundry\Entities\LaundryOrderSheetItem;
 use Modules\Laundry\Entities\LaundryStatus;
 use Modules\Laundry\Entities\LaundryProcess;
 use Modules\Laundry\Entities\LaundryServiceType;
@@ -38,7 +39,7 @@ class OrderSheetController extends Controller
         if ($request->ajax()) {
             $orders = LaundryOrderSheet::where('laundry_order_sheets.business_id', $business_id)
                 ->select('laundry_order_sheets.*')
-                ->with(['customer', 'location', 'status', 'serviceType', 'itemType', 'transactions']);
+                ->with(['customer', 'location', 'status', 'serviceType', 'itemType', 'items.itemType', 'items.serviceType', 'items.status', 'transactions']);
 
             if (!empty($request->location_id)) {
                 $orders->where('laundry_order_sheets.location_id', $request->location_id);
@@ -48,23 +49,6 @@ class OrderSheetController extends Controller
             }
             if (!empty($request->laundry_service_type_id)) {
                 $orders->where('laundry_order_sheets.laundry_service_type_id', $request->laundry_service_type_id);
-            }
-            if (!empty($request->payment_status)) {
-                if ($request->payment_status == 'paid') {
-                    $orders->where(function($q) {
-                        $q->whereRaw("(SELECT COALESCE(SUM(tp.amount), 0) FROM transaction_payments tp JOIN transactions t ON t.id = tp.transaction_id WHERE t.laundry_order_sheet_id = laundry_order_sheets.id AND tp.is_return = 0) >= (laundry_order_sheets.quantity * COALESCE((SELECT it.default_price FROM laundry_item_types it WHERE it.id = laundry_order_sheets.laundry_item_type_id), 0))");
-                    });
-                } elseif ($request->payment_status == 'due') {
-                    $orders->where(function($q) {
-                        $q->whereRaw("(SELECT COALESCE(SUM(tp.amount), 0) FROM transaction_payments tp JOIN transactions t ON t.id = tp.transaction_id WHERE t.laundry_order_sheet_id = laundry_order_sheets.id AND tp.is_return = 0) = 0")
-                          ->whereRaw("(laundry_order_sheets.quantity * COALESCE((SELECT it.default_price FROM laundry_item_types it WHERE it.id = laundry_order_sheets.laundry_item_type_id), 0)) > 0");
-                    });
-                } elseif ($request->payment_status == 'partial') {
-                    $orders->where(function($q) {
-                        $q->whereRaw("(SELECT COALESCE(SUM(tp.amount), 0) FROM transaction_payments tp JOIN transactions t ON t.id = tp.transaction_id WHERE t.laundry_order_sheet_id = laundry_order_sheets.id AND tp.is_return = 0) > 0")
-                          ->whereRaw("(SELECT COALESCE(SUM(tp.amount), 0) FROM transaction_payments tp JOIN transactions t ON t.id = tp.transaction_id WHERE t.laundry_order_sheet_id = laundry_order_sheets.id AND tp.is_return = 0) < (laundry_order_sheets.quantity * COALESCE((SELECT it.default_price FROM laundry_item_types it WHERE it.id = laundry_order_sheets.laundry_item_type_id), 0))");
-                    });
-                }
             }
 
             return DataTables::of($orders)
@@ -137,6 +121,14 @@ class OrderSheetController extends Controller
                     return $html;
                 })
                 ->editColumn('quantity', function ($row) {
+                    if ($row->items->count() > 0) {
+                        $item_strings = [];
+                        foreach ($row->items as $item) {
+                            $item_type_name = optional($item->itemType)->name ?: 'Item';
+                            $item_strings[] = e($item_type_name) . ' (' . $this->commonUtil->num_f($item->quantity, false, null, true) . ' ' . e($item->unit_name) . ')';
+                        }
+                        return implode('<br/>', $item_strings);
+                    }
                     return $this->commonUtil->num_f($row->quantity, false, null, true) . ' ' . e($row->unit_name);
                 })
                 ->editColumn('received_at', function ($row) {
@@ -145,7 +137,7 @@ class OrderSheetController extends Controller
                 ->editColumn('estimated_completion_at', function ($row) {
                     return $row->estimated_completion_at ? Carbon::parse($row->estimated_completion_at)->format('d/m/Y H:i') : '-';
                 })
-                ->rawColumns(['action', 'order_no', 'status', 'payment_status', 'wa_status'])
+                ->rawColumns(['action', 'order_no', 'status', 'payment_status', 'wa_status', 'quantity'])
                 ->make(true);
         }
 
@@ -164,7 +156,7 @@ class OrderSheetController extends Controller
     public function getOrderSheets(Request $request)
     {
         try {
-            $business_id = session()->get('user.business_id') ?? request()->session()->get('user.business_id');
+            $business_id = session()->get('user.business_id') ?? (request()->hasSession() ? request()->session()->get('user.business_id') : session('user.business_id'));
             $query = LaundryOrderSheet::where('business_id', $business_id);
 
             $contact_id = $request->get('contact_id');
@@ -179,20 +171,22 @@ class OrderSheetController extends Controller
                 }
             }
 
-            $order_sheets_list = $query->with(['itemType', 'transactions'])->get();
+            $order_sheets_raw = $query->orderBy('id', 'desc')->get();
+
             $order_sheets = [];
-            foreach ($order_sheets_list as $os) {
+            foreach ($order_sheets_raw as $os) {
                 $status_label = '';
                 if ($os->payment_status == 'partial') {
-                    $due = $os->total_amount - $os->total_paid;
-                    if ($due < 0) $due = 0;
-                    $status_label = ' (' . __('lang_v1.partial') . ' - ' . __('purchase.payment_due') . ': ' . $this->commonUtil->num_f($due) . ')';
+                    $due = max(0, $os->total_amount - $os->total_paid);
+                    $status_label = ' (' . __('lang_v1.partial') . ' - Sisa: ' . $this->commonUtil->num_f($due) . ')';
                 } elseif ($os->payment_status == 'due') {
-                    $status_label = ' (' . __('lang_v1.due') . ')';
+                    $status_label = ' (' . __('lang_v1.due') . ' - Rp ' . $this->commonUtil->num_f($os->total_amount) . ')';
                 } elseif ($os->payment_status == 'paid') {
                     $status_label = ' (' . __('lang_v1.paid') . ')';
                 }
-                $order_sheets[$os->id] = $os->order_no . $status_label;
+
+                $customer_name = optional($os->customer)->name ?? '-';
+                $order_sheets[$os->id] = $os->order_no . ' - ' . $customer_name . $status_label;
             }
 
             return response()->json([
@@ -278,6 +272,7 @@ class OrderSheetController extends Controller
         $statuses = LaundryStatus::forDropdown($business_id);
         $service_types = LaundryServiceType::forDropdown($business_id);
         $item_types = LaundryItemType::forDropdown($business_id);
+        $item_types_all = LaundryItemType::where('business_id', $business_id)->get();
         $processes = LaundryProcess::where('business_id', $business_id)->where('is_active', true)->orderBy('sort_order', 'asc')->get();
         $staffs = User::forDropdown($business_id, false);
 
@@ -285,10 +280,10 @@ class OrderSheetController extends Controller
         $contact_id = request()->get('contact_id', null);
 
         if ($quick_add || request()->ajax()) {
-            return view('laundry::order_sheet.quick_add_modal', compact('business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'processes', 'staffs', 'quick_add', 'contact_id'));
+            return view('laundry::order_sheet.quick_add_modal', compact('business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'item_types_all', 'processes', 'staffs', 'quick_add', 'contact_id'));
         }
 
-        return view('laundry::order_sheet.create', compact('business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'processes', 'staffs', 'contact_id'));
+        return view('laundry::order_sheet.create', compact('business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'item_types_all', 'processes', 'staffs', 'contact_id'));
     }
 
     public function store(Request $request)
@@ -311,6 +306,17 @@ class OrderSheetController extends Controller
             $completion_hours = $service_type ? $service_type->completion_hours : 24;
             $estimated_completion_at = (clone $received_at)->addHours($completion_hours);
 
+            $first_item_type_id = $request->laundry_item_type_id;
+            $first_qty = $request->quantity ?? 1;
+            $first_unit = $request->unit_name ?? 'kg';
+
+            if (!empty($request->items) && is_array($request->items) && count($request->items) > 0) {
+                $first_item = reset($request->items);
+                $first_item_type_id = $first_item['laundry_item_type_id'] ?? $first_item_type_id;
+                $first_qty = $first_item['quantity'] ?? $first_qty;
+                $first_unit = $first_item['unit_name'] ?? $first_unit;
+            }
+
             $order_sheet = LaundryOrderSheet::create([
                 'business_id' => $business_id,
                 'location_id' => $request->location_id,
@@ -318,9 +324,9 @@ class OrderSheetController extends Controller
                 'contact_id' => $request->contact_id,
                 'laundry_status_id' => $request->laundry_status_id,
                 'laundry_service_type_id' => $request->laundry_service_type_id,
-                'laundry_item_type_id' => $request->laundry_item_type_id,
-                'quantity' => $request->quantity ?? 1,
-                'unit_name' => $request->unit_name ?? 'kg',
+                'laundry_item_type_id' => $first_item_type_id,
+                'quantity' => $first_qty,
+                'unit_name' => $first_unit,
                 'delivery_type' => $request->delivery_type ?? 'self_service',
                 'received_at' => $received_at,
                 'estimated_completion_at' => $estimated_completion_at,
@@ -329,6 +335,7 @@ class OrderSheetController extends Controller
                 'created_by' => $user_id,
             ]);
 
+            $this->_syncOrderSheetItems($order_sheet, $request, $business_id);
             $this->_syncProcessLogs($order_sheet, $request, $user_id);
 
             DB::commit();
@@ -372,7 +379,7 @@ class OrderSheetController extends Controller
     {
         $business_id = request()->session()->get('user.business_id');
         $order_sheet = LaundryOrderSheet::where('business_id', $business_id)
-            ->with(['customer', 'location', 'status', 'serviceType', 'itemType', 'createdBy', 'processLogs.process', 'processLogs.staff'])
+            ->with(['customer', 'location', 'status', 'serviceType', 'itemType', 'items.itemType', 'items.serviceType', 'items.status', 'createdBy', 'processLogs.process', 'processLogs.staff'])
             ->findOrFail($id);
 
         if (request()->ajax()) {
@@ -389,21 +396,24 @@ class OrderSheetController extends Controller
         }
 
         $business_id = request()->session()->get('user.business_id');
-        $order_sheet = LaundryOrderSheet::where('business_id', $business_id)->with('processLogs')->findOrFail($id);
+        $order_sheet = LaundryOrderSheet::where('business_id', $business_id)
+            ->with(['items', 'processLogs'])
+            ->findOrFail($id);
 
         $business_locations = BusinessLocation::forDropdown($business_id);
         $customers = Contact::where('business_id', $business_id)->whereIn('type', ['customer', 'both'])->pluck('name', 'id');
         $statuses = LaundryStatus::forDropdown($business_id);
         $service_types = LaundryServiceType::forDropdown($business_id);
         $item_types = LaundryItemType::forDropdown($business_id);
+        $item_types_all = LaundryItemType::where('business_id', $business_id)->get();
         $processes = LaundryProcess::where('business_id', $business_id)->where('is_active', true)->orderBy('sort_order', 'asc')->get();
         $staffs = User::forDropdown($business_id, false);
 
         if (request()->ajax()) {
-            return view('laundry::order_sheet.edit_modal', compact('order_sheet', 'business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'processes', 'staffs'));
+            return view('laundry::order_sheet.edit_modal', compact('order_sheet', 'business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'item_types_all', 'processes', 'staffs'));
         }
 
-        return view('laundry::order_sheet.edit', compact('order_sheet', 'business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'processes', 'staffs'));
+        return view('laundry::order_sheet.edit', compact('order_sheet', 'business_locations', 'customers', 'statuses', 'service_types', 'item_types', 'item_types_all', 'processes', 'staffs'));
     }
 
     public function update(Request $request, $id)
@@ -425,14 +435,25 @@ class OrderSheetController extends Controller
             $completion_hours = $service_type ? $service_type->completion_hours : 24;
             $estimated_completion_at = (clone Carbon::parse($received_at))->addHours($completion_hours);
 
+            $first_item_type_id = $request->laundry_item_type_id;
+            $first_qty = $request->quantity ?? 1;
+            $first_unit = $request->unit_name ?? 'kg';
+
+            if (!empty($request->items) && is_array($request->items) && count($request->items) > 0) {
+                $first_item = reset($request->items);
+                $first_item_type_id = $first_item['laundry_item_type_id'] ?? $first_item_type_id;
+                $first_qty = $first_item['quantity'] ?? $first_qty;
+                $first_unit = $first_item['unit_name'] ?? $first_unit;
+            }
+
             $order_sheet->update([
                 'location_id' => $request->location_id,
                 'contact_id' => $request->contact_id,
                 'laundry_status_id' => $request->laundry_status_id,
                 'laundry_service_type_id' => $request->laundry_service_type_id,
-                'laundry_item_type_id' => $request->laundry_item_type_id,
-                'quantity' => $request->quantity ?? 1,
-                'unit_name' => $request->unit_name ?? 'kg',
+                'laundry_item_type_id' => $first_item_type_id,
+                'quantity' => $first_qty,
+                'unit_name' => $first_unit,
                 'delivery_type' => $request->delivery_type ?? 'self_service',
                 'received_at' => $received_at,
                 'estimated_completion_at' => $estimated_completion_at,
@@ -440,6 +461,7 @@ class OrderSheetController extends Controller
                 'notes' => $request->notes,
             ]);
 
+            $this->_syncOrderSheetItems($order_sheet, $request, $business_id);
             $this->_syncProcessLogs($order_sheet, $request, $user_id);
 
             DB::commit();
@@ -493,7 +515,9 @@ class OrderSheetController extends Controller
         }
 
         $business_id = request()->session()->get('user.business_id');
-        $order_sheet = LaundryOrderSheet::where('business_id', $business_id)->with(['status', 'processLogs'])->findOrFail($id);
+        $order_sheet = LaundryOrderSheet::where('business_id', $business_id)
+            ->with(['status', 'items.itemType', 'items.status', 'processLogs.process', 'processLogs.staff'])
+            ->findOrFail($id);
 
         $statuses = LaundryStatus::forDropdown($business_id);
         $processes = LaundryProcess::where('business_id', $business_id)->where('is_active', true)->orderBy('sort_order', 'asc')->get();
@@ -515,14 +539,25 @@ class OrderSheetController extends Controller
             DB::beginTransaction();
 
             $order_sheet = LaundryOrderSheet::where('business_id', $business_id)->findOrFail($id);
-            $order_sheet->laundry_status_id = $request->laundry_status_id;
+            if (!empty($request->laundry_status_id)) {
+                $order_sheet->laundry_status_id = $request->laundry_status_id;
 
-            $status = LaundryStatus::find($request->laundry_status_id);
-            if ($status && $status->is_completed_status) {
-                $order_sheet->completed_at = Carbon::now();
+                $status = LaundryStatus::find($request->laundry_status_id);
+                if ($status && $status->is_completed_status) {
+                    $order_sheet->completed_at = Carbon::now();
+                }
+                $order_sheet->save();
             }
 
-            $order_sheet->save();
+            if (!empty($request->item_statuses) && is_array($request->item_statuses)) {
+                foreach ($request->item_statuses as $item_id => $item_status_id) {
+                    if (!empty($item_status_id)) {
+                        LaundryOrderSheetItem::where('laundry_order_sheet_id', $order_sheet->id)
+                            ->where('id', $item_id)
+                            ->update(['laundry_status_id' => $item_status_id]);
+                    }
+                }
+            }
 
             $this->_syncProcessLogs($order_sheet, $request, $user_id);
 
@@ -537,6 +572,72 @@ class OrderSheetController extends Controller
         return $output;
     }
 
+    private function _syncOrderSheetItems($order_sheet, Request $request, $business_id)
+    {
+        $kept_item_ids = [];
+
+        if (!empty($request->items) && is_array($request->items)) {
+            foreach ($request->items as $item_data) {
+                if (empty($item_data['laundry_item_type_id'])) continue;
+
+                $item_type = LaundryItemType::find($item_data['laundry_item_type_id']);
+                $unit_price = isset($item_data['unit_price']) ? (float) $item_data['unit_price'] : (optional($item_type)->default_price ?? 0);
+                $qty = isset($item_data['quantity']) ? (float) $item_data['quantity'] : 1;
+                $subtotal = $qty * $unit_price;
+
+                $item_record = LaundryOrderSheetItem::updateOrCreate(
+                    [
+                        'id' => $item_data['id'] ?? null,
+                        'laundry_order_sheet_id' => $order_sheet->id,
+                    ],
+                    [
+                        'laundry_item_type_id' => $item_data['laundry_item_type_id'],
+                        'laundry_service_type_id' => $item_data['laundry_service_type_id'] ?? $order_sheet->laundry_service_type_id,
+                        'laundry_status_id' => $item_data['laundry_status_id'] ?? $order_sheet->laundry_status_id,
+                        'quantity' => $qty,
+                        'unit_name' => $item_data['unit_name'] ?? (optional($item_type)->unit_name ?? 'kg'),
+                        'unit_price' => $unit_price,
+                        'subtotal' => $subtotal,
+                        'items_detail' => $item_data['items_detail'] ?? null,
+                        'notes' => $item_data['notes'] ?? null,
+                    ]
+                );
+
+                $kept_item_ids[] = $item_record->id;
+            }
+        } else {
+            // Single item fallback
+            $item_type = LaundryItemType::find($request->laundry_item_type_id);
+            $price = optional($item_type)->default_price ?? 0;
+            $qty = $request->quantity ?? 1;
+
+            $item_record = LaundryOrderSheetItem::updateOrCreate(
+                [
+                    'laundry_order_sheet_id' => $order_sheet->id,
+                    'laundry_item_type_id' => $request->laundry_item_type_id,
+                ],
+                [
+                    'laundry_service_type_id' => $request->laundry_service_type_id,
+                    'laundry_status_id' => $request->laundry_status_id,
+                    'quantity' => $qty,
+                    'unit_name' => $request->unit_name ?? 'kg',
+                    'unit_price' => $price,
+                    'subtotal' => $qty * $price,
+                    'items_detail' => $request->items_detail,
+                    'notes' => $request->notes,
+                ]
+            );
+
+            $kept_item_ids[] = $item_record->id;
+        }
+
+        if (!empty($kept_item_ids)) {
+            LaundryOrderSheetItem::where('laundry_order_sheet_id', $order_sheet->id)
+                ->whereNotIn('id', $kept_item_ids)
+                ->delete();
+        }
+    }
+
     private function _syncProcessLogs($order_sheet, Request $request, $user_id)
     {
         $process_rows = $request->process_rows;
@@ -547,24 +648,35 @@ class OrderSheetController extends Controller
                 if (empty($row['process_id'])) continue;
 
                 $process_id = $row['process_id'];
+                $item_id = !empty($row['laundry_order_sheet_item_id']) ? $row['laundry_order_sheet_item_id'] : null;
                 $raw_staff_id = !empty($row['staff_id']) ? $row['staff_id'] : null;
                 $staff_id = !empty($raw_staff_id) ? $raw_staff_id : null;
                 $process = LaundryProcess::find($process_id);
 
                 $status = !empty($row['status']) ? $row['status'] : ($staff_id ? 'completed' : 'pending');
                 $is_completed = ($status === 'completed');
-                $points_earned = ($is_completed && $process) ? ($process->points * $order_sheet->quantity) : 0;
+
+                $log_qty = $order_sheet->quantity;
+                if ($item_id) {
+                    $item_obj = LaundryOrderSheetItem::find($item_id);
+                    if ($item_obj) $log_qty = $item_obj->quantity;
+                }
+                $points_earned = ($is_completed && $process) ? ($process->points * $log_qty) : 0;
 
                 $existing_log = LaundryOrderProcessLog::where('order_sheet_id', $order_sheet->id)
                     ->where('laundry_process_id', $process_id)
+                    ->when($item_id, function($q) use ($item_id) {
+                        $q->where('laundry_order_sheet_item_id', $item_id);
+                    })
                     ->first();
 
                 $completed_at = $is_completed ? ($existing_log && $existing_log->completed_at ? $existing_log->completed_at : Carbon::now()) : null;
 
-                LaundryOrderProcessLog::updateOrCreate(
+                $log = LaundryOrderProcessLog::updateOrCreate(
                     [
                         'order_sheet_id' => $order_sheet->id,
                         'laundry_process_id' => $process_id,
+                        'laundry_order_sheet_item_id' => $item_id,
                     ],
                     [
                         'staff_id' => $staff_id,
@@ -575,44 +687,13 @@ class OrderSheetController extends Controller
                     ]
                 );
 
-                $kept_process_ids[] = $process_id;
-            }
-        } elseif (!empty($request->process_staffs) && is_array($request->process_staffs)) {
-            // Fallback for legacy process_staffs
-            foreach ($request->process_staffs as $process_id => $raw_staff_id) {
-                $staff_id = !empty($raw_staff_id) ? $raw_staff_id : null;
-                $process = LaundryProcess::find($process_id);
-                $status = $staff_id ? 'completed' : 'pending';
-                $points_earned = ($staff_id && $process) ? ($process->points * $order_sheet->quantity) : 0;
-
-                $existing_log = LaundryOrderProcessLog::where('order_sheet_id', $order_sheet->id)
-                    ->where('laundry_process_id', $process_id)
-                    ->first();
-
-                $completed_at = $staff_id ? ($existing_log && $existing_log->completed_at ? $existing_log->completed_at : Carbon::now()) : null;
-
-                LaundryOrderProcessLog::updateOrCreate(
-                    [
-                        'order_sheet_id' => $order_sheet->id,
-                        'laundry_process_id' => $process_id,
-                    ],
-                    [
-                        'staff_id' => $staff_id,
-                        'status' => $status,
-                        'points_earned' => $points_earned,
-                        'completed_at' => $completed_at,
-                        'created_by' => $user_id,
-                    ]
-                );
-
-                $kept_process_ids[] = $process_id;
+                $kept_process_ids[] = $log->id;
             }
         }
 
-        // Delete logs for processes removed from the dynamic rows
         if (!empty($kept_process_ids)) {
             LaundryOrderProcessLog::where('order_sheet_id', $order_sheet->id)
-                ->whereNotIn('laundry_process_id', $kept_process_ids)
+                ->whereNotIn('id', $kept_process_ids)
                 ->delete();
         }
     }
@@ -621,7 +702,7 @@ class OrderSheetController extends Controller
     {
         $business_id = request()->session()->get('user.business_id');
         $order_sheet = LaundryOrderSheet::where('business_id', $business_id)
-            ->with(['customer', 'location', 'status', 'serviceType', 'itemType', 'createdBy', 'processLogs.process', 'processLogs.staff'])
+            ->with(['customer', 'location', 'status', 'serviceType', 'itemType', 'items.itemType', 'items.serviceType', 'items.status', 'createdBy', 'processLogs.process', 'processLogs.staff'])
             ->findOrFail($id);
 
         $business = \App\Business::find($business_id);
@@ -639,38 +720,78 @@ class OrderSheetController extends Controller
     public function getPosDetails($id)
     {
         try {
-            $business_id = request()->session()->get('user.business_id');
+            $business_id = session()->get('user.business_id') ?? (request()->hasSession() ? request()->session()->get('user.business_id') : session('user.business_id'));
             $order_sheet = LaundryOrderSheet::where('business_id', $business_id)
-                ->with(['customer', 'itemType'])
+                ->with(['customer', 'itemType', 'items.itemType'])
                 ->findOrFail($id);
 
-            $variation_id = null;
-            $item_type = $order_sheet->itemType;
-            $item_type_name = optional($item_type)->name;
+            $items_payload = [];
 
-            if ($item_type && \Illuminate\Support\Facades\Schema::hasColumn('laundry_item_types', 'variation_id') && !empty($item_type->variation_id)) {
-                $variation_id = $item_type->variation_id;
-            }
+            if ($order_sheet->items->count() > 0) {
+                foreach ($order_sheet->items as $item) {
+                    $item_type = $item->itemType;
+                    $item_type_name = optional($item_type)->name ?: 'Laundry Item';
+                    $variation_id = optional($item_type)->variation_id;
 
-            if (!$variation_id && !empty($item_type_name)) {
-                // 1. Check exact match by product name
-                $variation = \App\Variation::join('products as p', 'p.id', '=', 'variations.product_id')
-                    ->where('p.business_id', $business_id)
-                    ->where('p.name', $item_type_name)
-                    ->select('variations.id')
-                    ->first();
+                    if (!$variation_id && $item_type) {
+                        $variation = \App\Variation::join('products as p', 'p.id', '=', 'variations.product_id')
+                            ->where('p.business_id', $business_id)
+                            ->where('p.name', $item_type_name)
+                            ->select('variations.id')
+                            ->first();
 
-                if ($variation) {
-                    $variation_id = $variation->id;
-                } else {
-                    // 2. Auto-create exact service product for this Laundry Item Type
-                    $variation_id = $this->_createProductForItemType($business_id, $item_type);
+                        if ($variation) {
+                            $variation_id = $variation->id;
+                        } else {
+                            $variation_id = $this->_createProductForItemType($business_id, $item_type);
+                        }
+
+                        if ($variation_id && \Illuminate\Support\Facades\Schema::hasColumn('laundry_item_types', 'variation_id')) {
+                            $item_type->variation_id = $variation_id;
+                            $item_type->save();
+                        }
+                    }
+
+                    $items_payload[] = [
+                        'variation_id' => $variation_id,
+                        'item_type_name' => $item_type_name,
+                        'quantity' => (float) $item->quantity,
+                        'unit_price' => (float) $item->unit_price,
+                        'subtotal' => (float) $item->subtotal,
+                    ];
+                }
+            } else {
+                $item_type = $order_sheet->itemType;
+                $item_type_name = optional($item_type)->name ?: 'Laundry Service';
+                $variation_id = optional($item_type)->variation_id;
+
+                if (!$variation_id && $item_type) {
+                    $variation = \App\Variation::join('products as p', 'p.id', '=', 'variations.product_id')
+                        ->where('p.business_id', $business_id)
+                        ->where('p.name', $item_type_name)
+                        ->select('variations.id')
+                        ->first();
+
+                    if ($variation) {
+                        $variation_id = $variation->id;
+                    } else {
+                        $variation_id = $this->_createProductForItemType($business_id, $item_type);
+                    }
+
+                    if ($variation_id && \Illuminate\Support\Facades\Schema::hasColumn('laundry_item_types', 'variation_id')) {
+                        $item_type->variation_id = $variation_id;
+                        $item_type->save();
+                    }
                 }
 
-                if ($variation_id && $item_type && \Illuminate\Support\Facades\Schema::hasColumn('laundry_item_types', 'variation_id')) {
-                    $item_type->variation_id = $variation_id;
-                    $item_type->save();
-                }
+                $price = optional($item_type)->default_price ?? 0;
+                $items_payload[] = [
+                    'variation_id' => $variation_id,
+                    'item_type_name' => $item_type_name,
+                    'quantity' => (float) $order_sheet->quantity,
+                    'unit_price' => (float) $price,
+                    'subtotal' => (float) ($order_sheet->quantity * $price),
+                ];
             }
 
             $total_amount = $order_sheet->total_amount;
@@ -684,8 +805,9 @@ class OrderSheetController extends Controller
                 'contact_id' => $order_sheet->contact_id,
                 'customer_name' => optional($order_sheet->customer)->name,
                 'quantity' => $order_sheet->quantity,
-                'variation_id' => $variation_id,
-                'item_type_name' => $item_type_name,
+                'variation_id' => $items_payload[0]['variation_id'] ?? null,
+                'item_type_name' => $items_payload[0]['item_type_name'] ?? '',
+                'items' => $items_payload,
                 'payment_status' => $payment_status,
                 'total_amount' => $total_amount,
                 'total_paid' => $total_paid,
@@ -708,7 +830,7 @@ class OrderSheetController extends Controller
 
         $business_id = request()->session()->get('user.business_id');
         $order_sheet = LaundryOrderSheet::where('business_id', $business_id)
-            ->with(['customer', 'location', 'status', 'serviceType', 'itemType'])
+            ->with(['customer', 'location', 'status', 'serviceType', 'itemType', 'items.itemType', 'items.serviceType', 'items.status'])
             ->findOrFail($id);
 
         $customer = $order_sheet->customer;
@@ -756,7 +878,7 @@ class OrderSheetController extends Controller
 
         $business_id = request()->session()->get('user.business_id');
         $order_sheet = LaundryOrderSheet::where('business_id', $business_id)
-            ->with(['customer', 'location', 'status', 'serviceType', 'itemType'])
+            ->with(['customer', 'location', 'status', 'serviceType', 'itemType', 'items.itemType', 'items.serviceType', 'items.status'])
             ->findOrFail($id);
 
         $mobile = trim($request->mobile);
@@ -792,10 +914,7 @@ class OrderSheetController extends Controller
 
         $customer_name = optional($order_sheet->customer)->name ?? '-';
         $service_name = optional($order_sheet->serviceType)->name ?? '-';
-        $item_name = optional($order_sheet->itemType)->name ?? '-';
         $status_name = optional($order_sheet->status)->name ?? '-';
-
-        $quantity = $this->commonUtil->num_f($order_sheet->quantity, false, null, true) . ' ' . $order_sheet->unit_name;
 
         $total = $order_sheet->total_amount;
         $paid = $order_sheet->total_paid;
@@ -817,14 +936,32 @@ class OrderSheetController extends Controller
         $text .= "Pelanggan : {$customer_name}\n";
         $text .= "Tanggal   : " . ($order_sheet->received_at ? Carbon::parse($order_sheet->received_at)->format('d/m/Y H:i') : '-') . "\n";
         $text .= "Estimasi  : " . ($order_sheet->estimated_completion_at ? Carbon::parse($order_sheet->estimated_completion_at)->format('d/m/Y H:i') : '-') . "\n";
+        $text .= "Layanan   : {$service_name}\n";
+        $text .= "Status    : {$status_name}\n";
         $text .= "----------------------------------------\n";
-        $text .= "Layanan  : {$service_name}\n";
-        $text .= "Jenis    : {$item_name}\n";
-        $text .= "Jumlah   : {$quantity}\n";
-        if (!empty($order_sheet->items_detail)) {
-            $text .= "Rincian  : {$order_sheet->items_detail}\n";
+        $text .= "RINCIAN ITEM CUCIAN:\n";
+
+        if ($order_sheet->items->count() > 0) {
+            foreach ($order_sheet->items as $idx => $item) {
+                $num = $idx + 1;
+                $item_name = optional($item->itemType)->name ?: 'Item';
+                $qty_str = $this->commonUtil->num_f($item->quantity, false, null, true) . ' ' . $item->unit_name;
+                $item_status = optional($item->status)->name;
+                $status_str = $item_status ? " [{$item_status}]" : '';
+                $text .= "{$num}. {$item_name} ({$qty_str}) - Rp " . $this->commonUtil->num_f($item->subtotal) . "{$status_str}\n";
+                if (!empty($item->items_detail)) {
+                    $text .= "   Catatan: {$item->items_detail}\n";
+                }
+            }
+        } else {
+            $item_name = optional($order_sheet->itemType)->name ?? '-';
+            $quantity = $this->commonUtil->num_f($order_sheet->quantity, false, null, true) . ' ' . $order_sheet->unit_name;
+            $text .= "1. {$item_name} ({$quantity}) - Rp " . $this->commonUtil->num_f($total) . "\n";
+            if (!empty($order_sheet->items_detail)) {
+                $text .= "   Catatan: {$order_sheet->items_detail}\n";
+            }
         }
-        $text .= "Status   : {$status_name}\n";
+
         $text .= "----------------------------------------\n";
         $text .= "Total Tagihan : Rp " . $this->commonUtil->num_f($total) . "\n";
         $text .= "Sudah Dibayar : Rp " . $this->commonUtil->num_f($paid) . "\n";
@@ -843,7 +980,7 @@ class OrderSheetController extends Controller
         if (empty($item_type)) return null;
 
         try {
-            $user_id = request()->session()->get('user.id') ?? 1;
+            $user_id = session()->get('user.id') ?? (request()->hasSession() ? request()->session()->get('user.id') : 1);
             $unit_name = $item_type->unit_name ?? 'kg';
             $unit = \App\Unit::where('business_id', $business_id)->where('actual_name', 'LIKE', '%' . $unit_name . '%')->first();
             if (!$unit) {
@@ -863,13 +1000,11 @@ class OrderSheetController extends Controller
 
             $product = \App\Product::create($product_data);
 
-            // Sync product locations
             $locations = \App\BusinessLocation::forDropdown($business_id);
             if (!empty($locations)) {
                 $product->product_locations()->sync(array_keys($locations->toArray()));
             }
 
-            // Create single product variation using ProductUtil
             $productUtil = new \App\Utils\ProductUtil();
             $price = $item_type->default_price ?? 0;
             $variation = $productUtil->createSingleProductVariation(
