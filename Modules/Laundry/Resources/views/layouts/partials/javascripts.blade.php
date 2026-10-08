@@ -147,13 +147,12 @@
             success: function(result) {
                 if (result.success) {
                     var select = $('#laundry_order_sheet_id');
-                    var placeholder = '{{ __("laundry::lang.select_order_sheet") }}';
-                    select.empty().append(new Option(placeholder, '', true, false));
+                    select.empty();
 
                     $.each(result.order_sheets, function(id, order_no) {
                         select.append(new Option(order_no, id, false, false));
                     });
-                    select.val('');
+                    select.val(null).trigger('change');
                 }
                 is_syncing_laundry_customer = false;
             },
@@ -166,7 +165,9 @@
     function filterOrderSheetsByCustomer(contact_id) {
         if (!($('#laundry_order_sheet_id').length) || is_syncing_laundry_customer) return;
         is_syncing_laundry_customer = true;
-        var current_order_sheet_id = $('#laundry_order_sheet_id').val();
+        var raw_vals = $('#laundry_order_sheet_id').val() || [];
+        if (!Array.isArray(raw_vals)) raw_vals = [raw_vals];
+
         var default_customer_id = $('#default_customer_id').length ? $('#default_customer_id').val() : '';
 
         if (contact_id && contact_id == default_customer_id) {
@@ -180,21 +181,16 @@
             success: function(result) {
                 if (result.success) {
                     var select = $('#laundry_order_sheet_id');
-                    var placeholder = '{{ __("laundry::lang.select_order_sheet") }}';
-                    select.empty().append(new Option(placeholder, '', true, false));
+                    select.empty();
 
-                    var found_current = false;
+                    var selected_ids = [];
                     $.each(result.order_sheets, function(id, order_no) {
-                        var is_selected = (id == current_order_sheet_id);
-                        if (is_selected) found_current = true;
+                        var is_selected = (raw_vals.indexOf(id.toString()) !== -1 || raw_vals.indexOf(parseInt(id)) !== -1);
+                        if (is_selected) selected_ids.push(id.toString());
                         select.append(new Option(order_no, id, is_selected, is_selected));
                     });
 
-                    if (!found_current) {
-                        select.val('').trigger('change');
-                    } else {
-                        select.trigger('change');
-                    }
+                    select.val(selected_ids).trigger('change');
                 }
                 is_syncing_laundry_customer = false;
             },
@@ -283,8 +279,7 @@
                                 success: function(res) {
                                     if (res.success) {
                                         var select = $('#laundry_order_sheet_id');
-                                        var placeholder = '{{ __("laundry::lang.select_order_sheet") }}';
-                                        select.empty().append(new Option(placeholder, '', false, false));
+                                        select.empty();
 
                                         var found_new = false;
                                         $.each(res.order_sheets, function(id, order_no) {
@@ -297,7 +292,7 @@
                                             select.append(new Option(display_order_no, new_order_sheet_id, true, true));
                                         }
 
-                                        select.val(new_order_sheet_id).trigger('change');
+                                        select.val([new_order_sheet_id.toString()]).trigger('change');
                                     }
                                     is_syncing_laundry_customer = false;
                                 },
