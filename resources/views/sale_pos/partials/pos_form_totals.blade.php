@@ -33,7 +33,8 @@
 			<input type="hidden" name="discount_amount" id="discount_amount" value="@if(empty($edit)) {{@num_format($business_details->default_sales_discount)}} @else {{@num_format($transaction->discount_amount)}} @endif" data-default="{{$business_details->default_sales_discount}}">
 		</div>
 
-		{{-- Trade In (Tukar Tambah) --}}
+		{{-- Trade In (Tukar Tambah) - Only show on POS Repair --}}
+		@if(!empty($sub_type) && $sub_type == 'repair')
 		<div class="pos_totals_cell">
 			<span class="pos_totals_label">
 				<span class="mobile-only">TRD(-)</span>
@@ -49,6 +50,15 @@
 			<input type="hidden" name="trade_in_item_details[category_id]" id="trade_in_category_hidden" value="@if(!empty($trade_in_details['category_id'])){{$trade_in_details['category_id']}}@endif">
 			<input type="hidden" name="trade_in_item_details[resale_price]" id="trade_in_resale_price_hidden" value="@if(!empty($trade_in_details['resale_price'])){{$trade_in_details['resale_price']}}@endif">
 		</div>
+		@else
+			<input type="hidden" name="trade_in_amount" id="trade_in_amount" value="0" data-default="0">
+			<input type="hidden" name="trade_in_item_details[model_name]" id="trade_in_model_hidden" value="">
+			<input type="hidden" name="trade_in_item_details[serial_no]" id="trade_in_serial_hidden" value="">
+			<input type="hidden" name="trade_in_item_details[condition]" id="trade_in_condition_hidden" value="">
+			<input type="hidden" name="trade_in_item_details[unit_id]" id="trade_in_unit_hidden" value="">
+			<input type="hidden" name="trade_in_item_details[category_id]" id="trade_in_category_hidden" value="">
+			<input type="hidden" name="trade_in_item_details[resale_price]" id="trade_in_resale_price_hidden" value="">
+		@endif
 
 		{{-- Loyalty --}}
 		<div class="pos_totals_cell @if(!$is_rp_enabled) hide @endif">

@@ -76,7 +76,7 @@
         <div class="col-md-4">
           <div class="form-group">
             {!! Form::label('received_at', __('laundry::lang.received_at') . ':') !!}
-            {!! Form::text('received_at', $order_sheet->received_at ? \Carbon\Carbon::parse($order_sheet->received_at)->format('Y-m-d H:i') : null, ['class' => 'form-control date-time-picker']) !!}
+            {!! Form::text('received_at', $order_sheet->received_at ? @format_datetime($order_sheet->received_at) : @format_datetime('now'), ['class' => 'form-control date-time-picker', 'readonly']) !!}
           </div>
         </div>
         <div class="col-md-4">
