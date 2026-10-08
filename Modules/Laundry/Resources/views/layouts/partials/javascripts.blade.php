@@ -1,9 +1,5 @@
 <script type="text/javascript">
-    function addOrderSheetToCart(order_sheet_id) {
-        if (!order_sheet_id) {
-            toastr.warning('{{ __("laundry::lang.select_order_sheet") }}');
-            return;
-        }
+    function addSingleOrderSheetToCart(order_sheet_id, callback) {
         $.ajax({
             url: '/laundry/order-sheet/' + order_sheet_id + '/get-pos-details',
             dataType: 'json',
@@ -20,14 +16,42 @@
                     if (typeof pos_product_row === 'function') {
                         pos_product_row(result.variation_id, null, null, result.quantity);
 
-                        if (result.due_amount !== undefined && result.due_amount >= 0) {
-                            setTimeout(function() {
-                                var last_row = $('#pos_table tbody tr').last();
-                                if (last_row.length) {
-                                    var qty = parseFloat(result.quantity) || 1;
-                                    var due = parseFloat(result.due_amount);
-                                    var new_unit_price = due / qty;
+                        setTimeout(function() {
+                            var last_row = $('#pos_table tbody tr').last();
+                            if (last_row.length) {
+                                var qty = parseFloat(result.quantity) || 1;
+                                var due = parseFloat(result.due_amount);
+                                var new_unit_price = due / qty;
 
+                                // Append hidden field to link this row with order_sheet_id
+                                if (last_row.find('.laundry_order_sheet_id_input').length === 0) {
+                                    var row_index = last_row.data('row_index');
+                                    last_row.find('td').first().append('<input type="hidden" name="products[' + row_index + '][laundry_order_sheet_id]" class="laundry_order_sheet_id_input" value="' + result.order_sheet_id + '">');
+                                }
+
+                                // Append sell_line_note hidden input and prefix product name / item display with [Order No]
+                                if (result.order_no) {
+                                    var row_index = last_row.data('row_index');
+                                    var note_val = '[' + result.order_no + ']';
+                                    var existing_note = last_row.find('textarea[name="products[' + row_index + '][sell_line_note]"]');
+                                    if (existing_note.length) {
+                                        if (existing_note.val().indexOf(note_val) === -1) {
+                                            existing_note.val(note_val + ' ' + existing_note.val());
+                                        }
+                                    } else {
+                                        last_row.find('td').first().append('<input type="hidden" name="products[' + row_index + '][sell_line_note]" value="' + note_val + '">');
+                                    }
+
+                                    var name_span = last_row.find('span.text-link, span.tw-font-bold').first();
+                                    if (name_span.length) {
+                                        var current_html = name_span.html();
+                                        if (current_html.indexOf('[' + result.order_no + ']') === -1) {
+                                            name_span.html('<strong class="text-primary">[' + result.order_no + ']</strong> ' + current_html);
+                                        }
+                                    }
+                                }
+
+                                if (result.due_amount !== undefined && result.due_amount >= 0) {
                                     if (typeof __write_number === 'function') {
                                         __write_number(last_row.find('input.pos_unit_price'), new_unit_price);
                                         __write_number(last_row.find('input.pos_unit_price_inc_tax'), new_unit_price);
@@ -48,29 +72,61 @@
                                         pos_total_row();
                                     }
                                 }
-                            }, 350);
-                        }
-
-                        toastr.success('Pesanan laundry berhasil dimasukkan ke keranjang');
-                        $('.view_modal').modal('hide');
+                            }
+                            if (typeof callback === 'function') callback(true);
+                        }, 350);
+                    } else {
+                        if (typeof callback === 'function') callback(false);
                     }
                 } else {
-                    toastr.error('Produk/jasa untuk jenis barang laundry ini tidak ditemukan');
+                    toastr.error('{{ __("laundry::lang.item_type_not_found") }}');
+                    if (typeof callback === 'function') callback(false);
                 }
             },
             error: function() {
-                toastr.error('Gagal mengambil detail pesanan laundry');
+                toastr.error('{{ __("laundry::lang.failed_to_get_order_details") }}');
+                if (typeof callback === 'function') callback(false);
             }
         });
+    }
+
+    function addOrderSheetToCart(order_sheet_id) {
+        var ids = [];
+        if (Array.isArray(order_sheet_id)) {
+            ids = order_sheet_id.filter(function(v) { return v !== null && v !== ''; });
+        } else if (order_sheet_id) {
+            ids = [order_sheet_id];
+        }
+
+        if (ids.length === 0) {
+            toastr.warning('{{ __("laundry::lang.select_order_sheet") }}');
+            return;
+        }
+
+        function processNext(index) {
+            if (index >= ids.length) {
+                toastr.success('{{ __("laundry::lang.order_added_to_cart") }}');
+                $('.view_modal').modal('hide');
+                if ($('#laundry_order_sheet_id').length) {
+                    $('#laundry_order_sheet_id').val(null).trigger('change');
+                }
+                return;
+            }
+            addSingleOrderSheetToCart(ids[index], function() {
+                processNext(index + 1);
+            });
+        }
+        processNext(0);
     }
 
     var is_syncing_laundry_customer = false;
 
     function syncCustomerFromOrderSheet(order_sheet_id) {
-        if (!order_sheet_id || is_syncing_laundry_customer) return;
+        var id = Array.isArray(order_sheet_id) ? order_sheet_id[0] : order_sheet_id;
+        if (!id || is_syncing_laundry_customer) return;
         is_syncing_laundry_customer = true;
         $.ajax({
-            url: '/laundry/order-sheet/' + order_sheet_id + '/get-pos-details',
+            url: '/laundry/order-sheet/' + id + '/get-pos-details',
             dataType: 'json',
             success: function(result) {
                 if (result.success && result.contact_id && $('select#customer_id').length) {
@@ -107,13 +163,12 @@
             success: function(result) {
                 if (result.success) {
                     var select = $('#laundry_order_sheet_id');
-                    var placeholder = '{{ __("laundry::lang.select_order_sheet") }}';
-                    select.empty().append(new Option(placeholder, '', true, false));
+                    select.empty();
 
                     $.each(result.order_sheets, function(id, order_no) {
                         select.append(new Option(order_no, id, false, false));
                     });
-                    select.val('');
+                    select.val(null).trigger('change');
                 }
                 is_syncing_laundry_customer = false;
             },
@@ -126,7 +181,9 @@
     function filterOrderSheetsByCustomer(contact_id) {
         if (!($('#laundry_order_sheet_id').length) || is_syncing_laundry_customer) return;
         is_syncing_laundry_customer = true;
-        var current_order_sheet_id = $('#laundry_order_sheet_id').val();
+        var raw_vals = $('#laundry_order_sheet_id').val() || [];
+        if (!Array.isArray(raw_vals)) raw_vals = [raw_vals];
+
         var default_customer_id = $('#default_customer_id').length ? $('#default_customer_id').val() : '';
 
         if (contact_id && contact_id == default_customer_id) {
@@ -140,21 +197,16 @@
             success: function(result) {
                 if (result.success) {
                     var select = $('#laundry_order_sheet_id');
-                    var placeholder = '{{ __("laundry::lang.select_order_sheet") }}';
-                    select.empty().append(new Option(placeholder, '', true, false));
+                    select.empty();
 
-                    var found_current = false;
+                    var selected_ids = [];
                     $.each(result.order_sheets, function(id, order_no) {
-                        var is_selected = (id == current_order_sheet_id);
-                        if (is_selected) found_current = true;
+                        var is_selected = (raw_vals.indexOf(id.toString()) !== -1 || raw_vals.indexOf(parseInt(id)) !== -1);
+                        if (is_selected) selected_ids.push(id.toString());
                         select.append(new Option(order_no, id, is_selected, is_selected));
                     });
 
-                    if (!found_current) {
-                        select.val('').trigger('change');
-                    } else {
-                        select.trigger('change');
-                    }
+                    select.val(selected_ids).trigger('change');
                 }
                 is_syncing_laundry_customer = false;
             },
@@ -243,8 +295,7 @@
                                 success: function(res) {
                                     if (res.success) {
                                         var select = $('#laundry_order_sheet_id');
-                                        var placeholder = '{{ __("laundry::lang.select_order_sheet") }}';
-                                        select.empty().append(new Option(placeholder, '', false, false));
+                                        select.empty();
 
                                         var found_new = false;
                                         $.each(res.order_sheets, function(id, order_no) {
@@ -257,7 +308,7 @@
                                             select.append(new Option(display_order_no, new_order_sheet_id, true, true));
                                         }
 
-                                        select.val(new_order_sheet_id).trigger('change');
+                                        select.val([new_order_sheet_id.toString()]).trigger('change');
                                     }
                                     is_syncing_laundry_customer = false;
                                 },
@@ -297,7 +348,8 @@
 
         $(document).off('click', '#edit_laundry_order_sheet_btn').on('click', '#edit_laundry_order_sheet_btn', function(e) {
             e.preventDefault();
-            var id = $('#laundry_order_sheet_id').val();
+            var val = $('#laundry_order_sheet_id').val();
+            var id = Array.isArray(val) ? val[0] : val;
             if (!id) {
                 toastr.warning('{{ __("laundry::lang.select_order_sheet") }}');
                 return;
@@ -313,7 +365,8 @@
 
         $(document).off('click', '#show_laundry_order_sheet_btn').on('click', '#show_laundry_order_sheet_btn', function(e) {
             e.preventDefault();
-            var id = $('#laundry_order_sheet_id').val();
+            var val = $('#laundry_order_sheet_id').val();
+            var id = Array.isArray(val) ? val[0] : val;
             if (!id) {
                 toastr.warning('{{ __("laundry::lang.select_order_sheet") }}');
                 return;

@@ -498,20 +498,38 @@ class SellPosController extends Controller
                 //upload document
                 $input['document'] = $this->transactionUtil->uploadFile($request, 'sell_document', 'documents');
 
-                $laundry_order_sheet_id = $input['laundry_order_sheet_id'] ?? null;
+                // Extract all laundry order sheet IDs from top dropdown or individual product cart rows
+                $laundry_order_sheet_ids = [];
+                if (!empty($input['laundry_order_sheet_id'])) {
+                    if (is_array($input['laundry_order_sheet_id'])) {
+                        $laundry_order_sheet_ids = array_merge($laundry_order_sheet_ids, $input['laundry_order_sheet_id']);
+                    } else {
+                        $laundry_order_sheet_ids[] = $input['laundry_order_sheet_id'];
+                    }
+                }
+                if (!empty($input['products']) && is_array($input['products'])) {
+                    foreach ($input['products'] as $p_line) {
+                        if (!empty($p_line['laundry_order_sheet_id'])) {
+                            $laundry_order_sheet_ids[] = $p_line['laundry_order_sheet_id'];
+                        }
+                    }
+                }
+                $laundry_order_sheet_ids = array_values(array_unique(array_filter($laundry_order_sheet_ids)));
+                $primary_laundry_order_sheet_id = !empty($laundry_order_sheet_ids) ? $laundry_order_sheet_ids[0] : null;
+
                 $transaction = null;
                 $existing_transaction = null;
 
-                if (!empty($laundry_order_sheet_id)) {
+                if (count($laundry_order_sheet_ids) == 1) {
                     $existing_transaction = Transaction::where('business_id', $business_id)
-                        ->where('laundry_order_sheet_id', $laundry_order_sheet_id)
+                        ->where('laundry_order_sheet_id', $primary_laundry_order_sheet_id)
                         ->where('type', 'sell')
                         ->first();
                 }
 
                 if (!empty($existing_transaction)) {
                     $transaction = $existing_transaction;
-                    $order_sheet = \Modules\Laundry\Entities\LaundryOrderSheet::find($laundry_order_sheet_id);
+                    $order_sheet = \Modules\Laundry\Entities\LaundryOrderSheet::find($primary_laundry_order_sheet_id);
                     if ($order_sheet) {
                         $os_total = $order_sheet->total_amount;
                         if ($os_total > 0 && $transaction->final_total < $os_total) {
@@ -522,8 +540,8 @@ class SellPosController extends Controller
                     }
                 } else {
                     $transaction = $this->transactionUtil->createSellTransaction($business_id, $input, $invoice_total, $user_id);
-                    if (!empty($laundry_order_sheet_id)) {
-                        $transaction->laundry_order_sheet_id = $laundry_order_sheet_id;
+                    if (count($laundry_order_sheet_ids) == 1 && !empty($primary_laundry_order_sheet_id)) {
+                        $transaction->laundry_order_sheet_id = $primary_laundry_order_sheet_id;
                         $transaction->save();
                     }
                 }
@@ -608,6 +626,62 @@ class SellPosController extends Controller
                     $payment_status = $this->transactionUtil->updatePaymentStatus($transaction->id, $transaction->final_total);
 
                     $transaction->payment_status = $payment_status;
+
+                    // Sync payment status for all linked laundry order sheets
+                    if (!empty($laundry_order_sheet_ids)) {
+                        foreach ($laundry_order_sheet_ids as $os_id) {
+                            $order_sheet = \Modules\Laundry\Entities\LaundryOrderSheet::find($os_id);
+                            if ($order_sheet) {
+                                $os_tx = Transaction::where('business_id', $business_id)
+                                    ->where('laundry_order_sheet_id', $os_id)
+                                    ->where('type', 'sell')
+                                    ->first();
+
+                                if (!$os_tx) {
+                                    $ref_count = Transaction::where('business_id', $business_id)->where('type', 'sell')->count() + 1;
+                                    $invoice_no = 'LND-INV-' . str_pad($ref_count, 4, '0', STR_PAD_LEFT);
+
+                                    $os_tx = Transaction::create([
+                                        'business_id' => $business_id,
+                                        'location_id' => $input['location_id'] ?? $order_sheet->location_id,
+                                        'type' => 'sell',
+                                        'status' => 'final',
+                                        'payment_status' => 'due',
+                                        'contact_id' => $order_sheet->contact_id,
+                                        'laundry_order_sheet_id' => $os_id,
+                                        'invoice_no' => $invoice_no,
+                                        'transaction_date' => \Carbon\Carbon::now(),
+                                        'total_before_tax' => $order_sheet->total_amount,
+                                        'final_total' => $order_sheet->total_amount,
+                                        'created_by' => $user_id,
+                                        'sub_type' => 'laundry',
+                                    ]);
+                                }
+
+                                if ($os_tx->id != $transaction->id) {
+                                    $os_due = max(0, $order_sheet->total_amount - $order_sheet->total_paid);
+                                    if ($os_due > 0 && ($transaction->payment_status == 'paid' || !empty($input['payment']))) {
+                                        $first_payment = $input['payment'][0] ?? [];
+                                        $payment_method = $first_payment['method'] ?? 'cash';
+                                        $payment_account_id = !empty($first_payment['account_id']) ? $first_payment['account_id'] : null;
+
+                                        $payment_data = [
+                                            [
+                                                'amount' => $os_due,
+                                                'method' => $payment_method,
+                                                'account_id' => $payment_account_id,
+                                                'paid_on' => $this->transactionUtil->format_date(\Carbon\Carbon::now(), true),
+                                                'created_by' => $user_id,
+                                                'note' => 'Bayar via POS (Multi Order Sheet - Nota #' . $transaction->invoice_no . ')',
+                                            ]
+                                        ];
+                                        $this->transactionUtil->createOrUpdatePaymentLines($os_tx, $payment_data);
+                                        $this->transactionUtil->updatePaymentStatus($os_tx->id, $os_tx->final_total);
+                                    }
+                                }
+                            }
+                        }
+                    }
 
                     if ($request->session()->get('business.enable_rp') == 1) {
                         $redeemed = !empty($input['rp_redeemed']) ? $input['rp_redeemed'] : 0;
@@ -703,7 +777,7 @@ class SellPosController extends Controller
                     $receipt = $this->receiptContent($business_id, $input['location_id'], $transaction->id, null, false, true, $invoice_layout_id);
                 }
 
-                $trade_in = \Modules\Repair\Entities\RepairTradeIn::where('transaction_id', $transaction->id)->first();
+                $trade_in = \Illuminate\Support\Facades\Schema::hasTable('repair_trade_ins') ? \Modules\Repair\Entities\RepairTradeIn::where('transaction_id', $transaction->id)->first() : null;
                 $output = ['success' => 1, 'msg' => $msg, 'receipt' => $receipt, 'transaction_id' => $transaction->id];
                 if (!empty($trade_in)) {
                     $output['trade_in_url'] = action([\Modules\Repair\Http\Controllers\JobSheetController::class, 'printTradeInReceipt'], [$transaction->id]);

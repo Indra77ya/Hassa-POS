@@ -119,4 +119,8 @@ return [
     'laundry_logo_help' => 'Upload custom laundry logo. Allowed image formats: jpeg, png, gif.',
     'remove_laundry_logo' => 'Remove Laundry Logo',
     'current_image' => 'Current Image',
+    'add_to_cart' => 'Add to Cart',
+    'order_added_to_cart' => 'Laundry order sheet successfully added to cart',
+    'item_type_not_found' => 'Product or service for this laundry item type not found',
+    'failed_to_get_order_details' => 'Failed to retrieve laundry order sheet details',
 ];

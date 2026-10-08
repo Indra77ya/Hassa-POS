@@ -119,4 +119,8 @@ return [
     'laundry_logo_help' => 'Upload logo khusus laundry. Format gambar yang diperbolehkan: jpeg, png, gif.',
     'remove_laundry_logo' => 'Hapus Logo Laundry',
     'current_image' => 'Gambar Saat Ini',
+    'add_to_cart' => 'Masukkan ke Keranjang',
+    'order_added_to_cart' => 'Pesanan laundry berhasil dimasukkan ke keranjang',
+    'item_type_not_found' => 'Produk/jasa untuk jenis barang laundry ini tidak ditemukan',
+    'failed_to_get_order_details' => 'Gagal mengambil detail pesanan laundry',
 ];

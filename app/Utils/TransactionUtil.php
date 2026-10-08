@@ -2070,10 +2070,32 @@ class TransactionUtil extends Util
             }
             $base_unit_price = $line->unit_price_inc_tax / $base_unit_multiplier;
 
+            $line_product_name = $product->name;
+            if (empty($line->transaction->laundry_order_sheet_id) && !empty($line->transaction_id)) {
+                $line_tx = \App\Transaction::select('laundry_order_sheet_id')->find($line->transaction_id);
+                if (!empty($line_tx->laundry_order_sheet_id)) {
+                    $line->transaction = $line_tx;
+                }
+            }
+            if (!empty($line->transaction->laundry_order_sheet_id)) {
+                $os = \Modules\Laundry\Entities\LaundryOrderSheet::find($line->transaction->laundry_order_sheet_id);
+                if ($os && !empty($os->order_no) && strpos($line_product_name, '[' . $os->order_no . ']') === false) {
+                    $line_product_name = '[' . $os->order_no . '] ' . $line_product_name;
+                }
+            }
+            if (!empty($line->sell_line_note) && strpos($line->sell_line_note, '[') !== false && strpos($line->sell_line_note, ']') !== false) {
+                if (preg_match('/\[([^\]]+)\]/', $line->sell_line_note, $matches)) {
+                    $extracted_os_no = $matches[0];
+                    if (strpos($line_product_name, $extracted_os_no) === false) {
+                        $line_product_name = $extracted_os_no . ' ' . $line_product_name;
+                    }
+                }
+            }
+
             $show_product_description = $il->common_settings['show_product_description'] ?? null;
             $line_array = [
                 //Field for 1st column
-                'name' => $product->name,
+                'name' => $line_product_name,
                 'product_description' => ! empty($show_product_description) ? $product->product_description : null,
                 'variation' => (empty($variation->name) || $variation->name == 'DUMMY') ? '' : $variation->name,
                 'product_variation' => (empty($product_variation->name) || $product_variation->name == 'DUMMY') ? '' : $product_variation->name,
