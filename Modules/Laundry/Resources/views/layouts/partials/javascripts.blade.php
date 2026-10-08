@@ -107,6 +107,9 @@
             if (index >= ids.length) {
                 toastr.success('{{ __("laundry::lang.order_added_to_cart") }}');
                 $('.view_modal').modal('hide');
+                if ($('#laundry_order_sheet_id').length) {
+                    $('#laundry_order_sheet_id').val(null).trigger('change');
+                }
                 return;
             }
             addSingleOrderSheetToCart(ids[index], function() {
