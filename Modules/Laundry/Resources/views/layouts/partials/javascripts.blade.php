@@ -29,12 +29,25 @@
                                     last_row.find('td').first().append('<input type="hidden" name="products[' + row_index + '][laundry_order_sheet_id]" class="laundry_order_sheet_id_input" value="' + result.order_sheet_id + '">');
                                 }
 
-                                // Prefix product name / item display with [Order No]
-                                var name_span = last_row.find('span.text-link, span.tw-font-bold').first();
-                                if (name_span.length && result.order_no) {
-                                    var current_html = name_span.html();
-                                    if (current_html.indexOf('[' + result.order_no + ']') === -1) {
-                                        name_span.html('<strong class="text-primary">[' + result.order_no + ']</strong> ' + current_html);
+                                // Append sell_line_note hidden input and prefix product name / item display with [Order No]
+                                if (result.order_no) {
+                                    var row_index = last_row.data('row_index');
+                                    var note_val = '[' + result.order_no + ']';
+                                    var existing_note = last_row.find('textarea[name="products[' + row_index + '][sell_line_note]"]');
+                                    if (existing_note.length) {
+                                        if (existing_note.val().indexOf(note_val) === -1) {
+                                            existing_note.val(note_val + ' ' + existing_note.val());
+                                        }
+                                    } else {
+                                        last_row.find('td').first().append('<input type="hidden" name="products[' + row_index + '][sell_line_note]" value="' + note_val + '">');
+                                    }
+
+                                    var name_span = last_row.find('span.text-link, span.tw-font-bold').first();
+                                    if (name_span.length) {
+                                        var current_html = name_span.html();
+                                        if (current_html.indexOf('[' + result.order_no + ']') === -1) {
+                                            name_span.html('<strong class="text-primary">[' + result.order_no + ']</strong> ' + current_html);
+                                        }
                                     }
                                 }
 
