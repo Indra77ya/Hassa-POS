@@ -1,9 +1,5 @@
 <script type="text/javascript">
-    function addOrderSheetToCart(order_sheet_id) {
-        if (!order_sheet_id) {
-            toastr.warning('{{ __("laundry::lang.select_order_sheet") }}');
-            return;
-        }
+    function addSingleOrderSheetToCart(order_sheet_id, callback) {
         $.ajax({
             url: '/laundry/order-sheet/' + order_sheet_id + '/get-pos-details',
             dataType: 'json',
@@ -20,14 +16,29 @@
                     if (typeof pos_product_row === 'function') {
                         pos_product_row(result.variation_id, null, null, result.quantity);
 
-                        if (result.due_amount !== undefined && result.due_amount >= 0) {
-                            setTimeout(function() {
-                                var last_row = $('#pos_table tbody tr').last();
-                                if (last_row.length) {
-                                    var qty = parseFloat(result.quantity) || 1;
-                                    var due = parseFloat(result.due_amount);
-                                    var new_unit_price = due / qty;
+                        setTimeout(function() {
+                            var last_row = $('#pos_table tbody tr').last();
+                            if (last_row.length) {
+                                var qty = parseFloat(result.quantity) || 1;
+                                var due = parseFloat(result.due_amount);
+                                var new_unit_price = due / qty;
 
+                                // Append hidden field to link this row with order_sheet_id
+                                if (last_row.find('.laundry_order_sheet_id_input').length === 0) {
+                                    var row_index = last_row.data('row_index');
+                                    last_row.find('td').first().append('<input type="hidden" name="products[' + row_index + '][laundry_order_sheet_id]" class="laundry_order_sheet_id_input" value="' + result.order_sheet_id + '">');
+                                }
+
+                                // Prefix product name / item display with [Order No]
+                                var name_span = last_row.find('span.text-link, span.tw-font-bold').first();
+                                if (name_span.length && result.order_no) {
+                                    var current_html = name_span.html();
+                                    if (current_html.indexOf('[' + result.order_no + ']') === -1) {
+                                        name_span.html('<strong class="text-primary">[' + result.order_no + ']</strong> ' + current_html);
+                                    }
+                                }
+
+                                if (result.due_amount !== undefined && result.due_amount >= 0) {
                                     if (typeof __write_number === 'function') {
                                         __write_number(last_row.find('input.pos_unit_price'), new_unit_price);
                                         __write_number(last_row.find('input.pos_unit_price_inc_tax'), new_unit_price);
@@ -48,29 +59,58 @@
                                         pos_total_row();
                                     }
                                 }
-                            }, 350);
-                        }
-
-                        toastr.success('Pesanan laundry berhasil dimasukkan ke keranjang');
-                        $('.view_modal').modal('hide');
+                            }
+                            if (typeof callback === 'function') callback(true);
+                        }, 350);
+                    } else {
+                        if (typeof callback === 'function') callback(false);
                     }
                 } else {
                     toastr.error('Produk/jasa untuk jenis barang laundry ini tidak ditemukan');
+                    if (typeof callback === 'function') callback(false);
                 }
             },
             error: function() {
                 toastr.error('Gagal mengambil detail pesanan laundry');
+                if (typeof callback === 'function') callback(false);
             }
         });
+    }
+
+    function addOrderSheetToCart(order_sheet_id) {
+        var ids = [];
+        if (Array.isArray(order_sheet_id)) {
+            ids = order_sheet_id.filter(function(v) { return v !== null && v !== ''; });
+        } else if (order_sheet_id) {
+            ids = [order_sheet_id];
+        }
+
+        if (ids.length === 0) {
+            toastr.warning('{{ __("laundry::lang.select_order_sheet") }}');
+            return;
+        }
+
+        function processNext(index) {
+            if (index >= ids.length) {
+                toastr.success('Pesanan laundry berhasil dimasukkan ke keranjang');
+                $('.view_modal').modal('hide');
+                return;
+            }
+            addSingleOrderSheetToCart(ids[index], function() {
+                processNext(index + 1);
+            });
+        }
+        processNext(0);
     }
 
     var is_syncing_laundry_customer = false;
 
     function syncCustomerFromOrderSheet(order_sheet_id) {
-        if (!order_sheet_id || is_syncing_laundry_customer) return;
+        var id = Array.isArray(order_sheet_id) ? order_sheet_id[0] : order_sheet_id;
+        if (!id || is_syncing_laundry_customer) return;
         is_syncing_laundry_customer = true;
         $.ajax({
-            url: '/laundry/order-sheet/' + order_sheet_id + '/get-pos-details',
+            url: '/laundry/order-sheet/' + id + '/get-pos-details',
             dataType: 'json',
             success: function(result) {
                 if (result.success && result.contact_id && $('select#customer_id').length) {
@@ -297,7 +337,8 @@
 
         $(document).off('click', '#edit_laundry_order_sheet_btn').on('click', '#edit_laundry_order_sheet_btn', function(e) {
             e.preventDefault();
-            var id = $('#laundry_order_sheet_id').val();
+            var val = $('#laundry_order_sheet_id').val();
+            var id = Array.isArray(val) ? val[0] : val;
             if (!id) {
                 toastr.warning('{{ __("laundry::lang.select_order_sheet") }}');
                 return;
@@ -313,7 +354,8 @@
 
         $(document).off('click', '#show_laundry_order_sheet_btn').on('click', '#show_laundry_order_sheet_btn', function(e) {
             e.preventDefault();
-            var id = $('#laundry_order_sheet_id').val();
+            var val = $('#laundry_order_sheet_id').val();
+            var id = Array.isArray(val) ? val[0] : val;
             if (!id) {
                 toastr.warning('{{ __("laundry::lang.select_order_sheet") }}');
                 return;

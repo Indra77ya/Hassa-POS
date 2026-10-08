@@ -683,6 +683,7 @@ class OrderSheetController extends Controller
             return response()->json([
                 'success' => true,
                 'order_sheet_id' => $order_sheet->id,
+                'order_no' => $order_sheet->order_no,
                 'contact_id' => $order_sheet->contact_id,
                 'customer_name' => optional($order_sheet->customer)->name,
                 'quantity' => $order_sheet->quantity,
