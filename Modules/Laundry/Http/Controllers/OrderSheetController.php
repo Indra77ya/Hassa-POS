@@ -306,7 +306,8 @@ class OrderSheetController extends Controller
             $ref_count = LaundryOrderSheet::where('business_id', $business_id)->count() + 1;
             $order_no = 'LND-' . date('Y') . '-' . str_pad($ref_count, 4, '0', STR_PAD_LEFT);
 
-            $received_at = $request->received_at ? $this->commonUtil->uf_date($request->received_at, true) : Carbon::now();
+            $raw_received_at = $request->received_at ? $this->commonUtil->uf_date($request->received_at, true) : null;
+            $received_at = $raw_received_at ? Carbon::parse($raw_received_at) : Carbon::now();
             $service_type = LaundryServiceType::find($request->laundry_service_type_id);
             $completion_hours = $service_type ? $service_type->completion_hours : 24;
             $estimated_completion_at = (clone $received_at)->addHours($completion_hours);
@@ -420,10 +421,11 @@ class OrderSheetController extends Controller
 
             $order_sheet = LaundryOrderSheet::where('business_id', $business_id)->findOrFail($id);
 
-            $received_at = $request->received_at ? $this->commonUtil->uf_date($request->received_at, true) : $order_sheet->received_at;
+            $raw_received_at = $request->received_at ? $this->commonUtil->uf_date($request->received_at, true) : null;
+            $received_at = $raw_received_at ? Carbon::parse($raw_received_at) : ($order_sheet->received_at ? Carbon::parse($order_sheet->received_at) : Carbon::now());
             $service_type = LaundryServiceType::find($request->laundry_service_type_id);
             $completion_hours = $service_type ? $service_type->completion_hours : 24;
-            $estimated_completion_at = (clone Carbon::parse($received_at))->addHours($completion_hours);
+            $estimated_completion_at = (clone $received_at)->addHours($completion_hours);
 
             $order_sheet->update([
                 'location_id' => $request->location_id,
