@@ -806,7 +806,7 @@ tr.details td.details-control {
 }
 
 .modal-xl{
-    width: 95% !important; /* respsonsive width */
+    width: 90% !important; /* respsonsive width */
     margin-left: auto !important;
     margin-right: auto !important;
 }

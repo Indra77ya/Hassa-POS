@@ -925,7 +925,7 @@
 
     /* Widen Extra Large Modals */
     .modal-xl {
-      width: 95% !important;
+      width: 90% !important;
       margin-left: auto !important;
       margin-right: auto !important;
     }
