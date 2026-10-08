@@ -923,6 +923,13 @@
       display: inline-block;
     }
 
+    /* Widen Extra Large Modals */
+    .modal-xl {
+      width: 90% !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+    }
+
     /* Widen Quick Add Product Modal */
     .quick_add_product_modal .modal-dialog {
       width: 96% !important;

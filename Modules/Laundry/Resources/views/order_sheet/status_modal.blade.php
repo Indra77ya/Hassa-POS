@@ -1,4 +1,4 @@
-<div class="modal-dialog modal-lg" role="document">
+<div class="modal-dialog modal-xl" role="document">
   <div class="modal-content">
     {!! Form::open(['url' => action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'updateStatus'], [$order_sheet->id]), 'method' => 'post', 'id' => 'update_laundry_status_form']) !!}
     <div class="modal-header">

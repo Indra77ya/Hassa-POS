@@ -1,4 +1,4 @@
-<div class="modal-dialog modal-lg" role="document">
+<div class="modal-dialog modal-xl" role="document">
   <div class="modal-content">
 
     {!! Form::open(['url' => action([\Modules\Laundry\Http\Controllers\OrderSheetController::class, 'store']), 'method' => 'post', 'id' => 'quick_add_order_sheet_form']) !!}
