@@ -66,12 +66,12 @@
                         if (typeof callback === 'function') callback(false);
                     }
                 } else {
-                    toastr.error('Produk/jasa untuk jenis barang laundry ini tidak ditemukan');
+                    toastr.error('{{ __("laundry::lang.item_type_not_found") }}');
                     if (typeof callback === 'function') callback(false);
                 }
             },
             error: function() {
-                toastr.error('Gagal mengambil detail pesanan laundry');
+                toastr.error('{{ __("laundry::lang.failed_to_get_order_details") }}');
                 if (typeof callback === 'function') callback(false);
             }
         });
@@ -92,7 +92,7 @@
 
         function processNext(index) {
             if (index >= ids.length) {
-                toastr.success('Pesanan laundry berhasil dimasukkan ke keranjang');
+                toastr.success('{{ __("laundry::lang.order_added_to_cart") }}');
                 $('.view_modal').modal('hide');
                 return;
             }
