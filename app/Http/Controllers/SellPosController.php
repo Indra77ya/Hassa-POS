@@ -661,11 +661,15 @@ class SellPosController extends Controller
                                 if ($os_tx->id != $transaction->id) {
                                     $os_due = max(0, $order_sheet->total_amount - $order_sheet->total_paid);
                                     if ($os_due > 0 && ($transaction->payment_status == 'paid' || !empty($input['payment']))) {
-                                        $payment_method = $input['payment'][0]['method'] ?? 'cash';
+                                        $first_payment = $input['payment'][0] ?? [];
+                                        $payment_method = $first_payment['method'] ?? 'cash';
+                                        $payment_account_id = !empty($first_payment['account_id']) ? $first_payment['account_id'] : null;
+
                                         $payment_data = [
                                             [
                                                 'amount' => $os_due,
                                                 'method' => $payment_method,
+                                                'account_id' => $payment_account_id,
                                                 'paid_on' => $this->transactionUtil->format_date(\Carbon\Carbon::now(), true),
                                                 'created_by' => $user_id,
                                                 'note' => 'Bayar via POS (Multi Order Sheet - Nota #' . $transaction->invoice_no . ')',
