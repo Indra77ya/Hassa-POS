@@ -670,12 +670,12 @@ class SellPosController extends Controller
                                                 'amount' => $os_due,
                                                 'method' => $payment_method,
                                                 'account_id' => $payment_account_id,
-                                                'paid_on' => $this->transactionUtil->format_date(\Carbon\Carbon::now(), true),
+                                                'paid_on' => \Carbon\Carbon::now()->toDateTimeString(),
                                                 'created_by' => $user_id,
                                                 'note' => 'Bayar via POS (Multi Order Sheet - Nota #' . $transaction->invoice_no . ')',
                                             ]
                                         ];
-                                        $this->transactionUtil->createOrUpdatePaymentLines($os_tx, $payment_data);
+                                        $this->transactionUtil->createOrUpdatePaymentLines($os_tx, $payment_data, null, null, false);
                                         $this->transactionUtil->updatePaymentStatus($os_tx->id, $os_tx->final_total);
                                     }
                                 }
