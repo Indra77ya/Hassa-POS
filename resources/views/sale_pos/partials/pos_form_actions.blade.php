@@ -162,4 +162,6 @@
 @endif
 
 @include('sale_pos.partials.edit_shipping_modal')
-@include('repair::repair.partials.trade_in_modal')
+@if(!empty($sub_type) && $sub_type == 'repair')
+	@include('repair::repair.partials.trade_in_modal')
+@endif
