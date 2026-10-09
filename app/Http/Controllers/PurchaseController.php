@@ -1184,7 +1184,7 @@ class PurchaseController extends Controller
                 if (empty($parsed_array) || empty($parsed_array[0])) {
                     return response()->json([
                         'success' => false,
-                        'msg' => 'File impor kosong atau format tidak valid.',
+                        'msg' => __('lang_v1.import_empty_file'),
                     ]);
                 }
 
@@ -1192,7 +1192,7 @@ class PurchaseController extends Controller
                 if (empty($imported_rows)) {
                     return response()->json([
                         'success' => false,
-                        'msg' => 'Tidak ada data produk dalam file yang diunggah.',
+                        'msg' => __('lang_v1.import_no_products'),
                     ]);
                 }
 
@@ -1247,14 +1247,23 @@ class PurchaseController extends Controller
                         if ($qty > 1) {
                             return response()->json([
                                 'success' => false,
-                                'msg' => "Baris ke-$row_no (SKU: $sku, Serial Number: $serial_no): " . __('lang_v1.serial_number_max_stock_one') . " (Quantity diisi $qty, seharusnya 1).",
+                                'msg' => __('lang_v1.import_sn_qty_error', [
+                                    'row' => $row_no,
+                                    'sku' => $sku,
+                                    'serial_no' => $serial_no,
+                                    'max_stock_msg' => __('lang_v1.serial_number_max_stock_one'),
+                                    'qty' => $qty,
+                                ]),
                             ]);
                         }
 
                         if (in_array(strtolower($serial_no), $all_imported_serials)) {
                             return response()->json([
                                 'success' => false,
-                                'msg' => "Serial Number '$serial_no' pada baris ke-$row_no duplikat dalam file impor.",
+                                'msg' => __('lang_v1.import_duplicate_sn_file', [
+                                    'serial_no' => $serial_no,
+                                    'row' => $row_no,
+                                ]),
                             ]);
                         }
                         $all_imported_serials[] = strtolower($serial_no);
@@ -1299,7 +1308,9 @@ class PurchaseController extends Controller
                     if (! empty($duplicate_serials)) {
                         return response()->json([
                             'success' => false,
-                            'msg' => 'Serial Number berikut sudah ada dalam stok sistem: ' . implode(', ', $duplicate_serials),
+                            'msg' => __('lang_v1.import_duplicate_sn_db', [
+                                'serials' => implode(', ', $duplicate_serials),
+                            ]),
                         ]);
                     }
                 }
@@ -1307,14 +1318,16 @@ class PurchaseController extends Controller
                 if (! empty($unfound_skus)) {
                     return response()->json([
                         'success' => false,
-                        'msg' => 'SKU berikut tidak ditemukan di sistem: ' . implode(', ', $unfound_skus),
+                        'msg' => __('lang_v1.import_unfound_skus', [
+                            'skus' => implode(', ', $unfound_skus),
+                        ]),
                     ]);
                 }
 
                 if (empty($items)) {
                     return response()->json([
                         'success' => false,
-                        'msg' => 'Tidak ada produk valid yang berhasil diimpor.',
+                        'msg' => __('lang_v1.import_no_products'),
                     ]);
                 }
 
@@ -1372,7 +1385,7 @@ class PurchaseController extends Controller
                     'success' => true,
                     'html' => $html,
                     'row_count' => $row_count,
-                    'msg' => 'Produk berhasil diimpor ke dalam tabel.',
+                    'msg' => __('lang_v1.import_purchase_lines_success'),
                 ]);
             }
         } catch (\Exception $e) {

@@ -371,7 +371,7 @@ class ImportPurchaseLinesTest extends TestCase
         $response->assertStatus(200);
         $response->assertJson([
             'success' => false,
-            'msg' => 'SKU berikut tidak ditemukan di sistem: UNKNOWN-SKU-999',
+            'msg' => __('lang_v1.import_unfound_skus', ['skus' => 'UNKNOWN-SKU-999']),
         ]);
     }
 
@@ -434,10 +434,13 @@ class ImportPurchaseLinesTest extends TestCase
         $response->assertStatus(200);
         $response->assertJson([
             'success' => false,
+            'msg' => __('lang_v1.import_sn_qty_error', [
+                'row' => 2,
+                'sku' => 'SK-001',
+                'serial_no' => '24546FG',
+                'max_stock_msg' => __('lang_v1.serial_number_max_stock_one'),
+                'qty' => 5,
+            ]),
         ]);
-
-        $json = $response->json();
-        $this->assertStringContainsString(__('lang_v1.serial_number_max_stock_one'), $json['msg']);
-        $this->assertStringContainsString('Quantity diisi 5, seharusnya 1', $json['msg']);
     }
 }
