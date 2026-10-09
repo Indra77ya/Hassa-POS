@@ -79,7 +79,7 @@ class SettingsController extends Controller
 
             if ($accounts->isEmpty()) {
                 $output = ['success' => false,
-                    'msg' => 'Chart of Accounts (CoA) tidak ditemukan. Silakan buat CoA terlebih dahulu.',
+                    'msg' => __('accounting::lang.coa_not_found_create_first'),
                 ];
                 return redirect()->back()->with(['status' => $output]);
             }
@@ -139,7 +139,7 @@ class SettingsController extends Controller
             }
 
             $output = ['success' => true,
-                'msg' => 'Berhasil memetakan akun default secara otomatis!',
+                'msg' => __('accounting::lang.auto_map_success'),
             ];
         } catch (\Exception $e) {
             \Log::emergency('File:'.$e->getFile().'Line:'.$e->getLine().'Message:'.$e->getMessage());
