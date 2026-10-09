@@ -11,16 +11,19 @@
                 <div class="col-md-12">
                     <div class="well">
                         <div class="row">
-                            <div class="col-sm-8">
+                            <div class="col-sm-6">
                                 <h4><strong>Unduh Template File Impor:</strong></h4>
-                                <p class="text-muted">Gunakan template di bawah ini untuk mengunggah daftar produk pembelian Anda.</p>
+                                <p class="text-muted">Gunakan template spreadsheet di bawah ini agar kolom terpisah dengan rapi di Excel.</p>
                             </div>
-                            <div class="col-sm-4 text-right">
+                            <div class="col-sm-6 text-right">
+                                <a href="{{ asset('files/import_purchase_lines_template.xlsx') }}" class="btn btn-primary btn-sm tw-mb-1" download>
+                                    <i class="fa fa-download"></i> Template Excel (.xlsx)
+                                </a>
+                                <a href="{{ asset('files/import_purchase_lines_template.xls') }}" class="btn btn-info btn-sm tw-mb-1" download>
+                                    <i class="fa fa-download"></i> Template Excel (.xls)
+                                </a>
                                 <a href="{{ asset('files/import_purchase_lines_template.csv') }}" class="btn btn-success btn-sm tw-mb-1" download>
                                     <i class="fa fa-download"></i> Template CSV
-                                </a>
-                                <a href="{{ asset('files/import_purchase_lines_template.xls') }}" class="btn btn-primary btn-sm tw-mb-1" download>
-                                    <i class="fa fa-download"></i> Template Excel (.xls)
                                 </a>
                             </div>
                         </div>
@@ -31,7 +34,7 @@
                     <div class="form-group">
                         {!! Form::label('purchase_lines_csv', 'Pilih File CSV / Excel:*') !!}
                         {!! Form::file('purchase_lines_csv', ['accept' => '.csv, .xls, .xlsx', 'required', 'id' => 'purchase_lines_csv']); !!}
-                        <p class="help-block">Format file yang didukung: .csv, .xls, .xlsx</p>
+                        <p class="help-block">Format file yang didukung: .xlsx, .xls, .csv</p>
                     </div>
                 </div>
 
