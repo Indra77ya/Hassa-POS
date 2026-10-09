@@ -224,7 +224,7 @@
 
 	@component('components.widget', ['class' => 'box-primary'])
 		<div class="row">
-			<div class="col-sm-10">
+			<div class="col-sm-7">
 				<div class="form-group">
 					<div class="input-group">
 						<span class="input-group-addon">
@@ -234,9 +234,10 @@
 					</div>
 				</div>
 			</div>
-			<div class="col-sm-2">
+			<div class="col-sm-5 text-right">
 				<div class="form-group">
-					<button tabindex="-1" type="button" class="btn btn-link btn-modal"data-href="{{action([\App\Http\Controllers\ProductController::class, 'quickAdd'])}}" 
+					<button tabindex="-1" type="button" class="btn btn-link btn-modal btn_import_purchase_lines" data-href="{{action([\App\Http\Controllers\PurchaseController::class, 'getImportPurchaseLinesModal'])}}" data-container=".import_purchase_lines_modal"><i class="fa fa-file-excel-o text-success"></i> Impor Produk (CSV/Excel)</button>
+					<button tabindex="-1" type="button" class="btn btn-link btn-modal" data-href="{{action([\App\Http\Controllers\ProductController::class, 'quickAdd'])}}"
             	data-container=".quick_add_product_modal"><i class="fa fa-plus"></i> @lang( 'product.add_new_product' ) </button>
 				</div>
 			</div>
@@ -574,6 +575,7 @@
 </section>
 <!-- quick product modal -->
 <div class="modal fade quick_add_product_modal" tabindex="-1" role="dialog" aria-labelledby="modalTitle"></div>
+<div class="modal fade import_purchase_lines_modal" tabindex="-1" role="dialog" aria-labelledby="importPurchaseLinesModalLabel"></div>
 <div class="modal fade contact_modal" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel">
 	@include('contact.create', ['quick_add' => true])
 </div>

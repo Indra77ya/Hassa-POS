@@ -1502,6 +1502,79 @@ $("#purchase_order_ids").on("select2:unselect", function (e) {
     });
 });
 
+$(document).on('submit', '#import_purchase_lines_form', function(e) {
+    e.preventDefault();
+    var form = $(this);
+    var existing_rows = $('#purchase_entry_table tbody tr').length;
+
+    var process_import = function() {
+        var formData = new FormData(form[0]);
+        formData.append('location_id', $('#location_id').val() || '');
+        formData.append('supplier_id', $('#supplier_id').val() || '');
+
+        var btn = $('#btn_submit_import_purchase_lines');
+        btn.attr('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Mengimpor...');
+
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            dataType: 'json',
+            success: function(result) {
+                btn.attr('disabled', false).html('<i class="fa fa-upload"></i> Unggah & Proses Impor');
+                if (result.success) {
+                    $('#purchase_entry_table tbody').html(result.html);
+                    $('#row_count').val(result.row_count);
+
+                    $('.import_purchase_lines_modal').modal('hide');
+
+                    if (typeof init_purchase_sn_select === 'function') {
+                        $('.purchase_sn_select').each(function() {
+                            init_purchase_sn_select($(this));
+                        });
+                    }
+
+                    $('.expiry_datepicker').datepicker({
+                        autoclose: true,
+                        format: datepicker_date_format
+                    });
+
+                    update_table_total();
+                    update_grand_total();
+                    update_table_sr_number();
+
+                    toastr.success(result.msg);
+                } else {
+                    toastr.error(result.msg);
+                }
+            },
+            error: function(xhr) {
+                btn.attr('disabled', false).html('<i class="fa fa-upload"></i> Unggah & Proses Impor');
+                var msg = xhr.responseJSON && xhr.responseJSON.msg ? xhr.responseJSON.msg : 'Terjadi kesalahan saat mengunggah file.';
+                toastr.error(msg);
+            }
+        });
+    };
+
+    if (existing_rows > 0) {
+        swal({
+            title: 'Apakah Anda Yakin?',
+            text: 'Tabel pembelian sudah memiliki item. Mengimpor file akan menggantikan (overwrite) seluruh item di tabel pembelian saat ini.',
+            icon: 'warning',
+            buttons: ['Batal', 'Ya, Timpa Data'],
+            dangerMode: true,
+        }).then(function(willOverwrite) {
+            if (willOverwrite) {
+                process_import();
+            }
+        });
+    } else {
+        process_import();
+    }
+});
+
 function set_po_values(po) {
     $('#shipping_details').val(po.shipping_details);
     $('#shipping_charges').val( __number_f(po.shipping_charges));
