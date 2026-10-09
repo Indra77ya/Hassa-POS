@@ -1151,6 +1151,254 @@ class PurchaseController extends Controller
     }
 
     /**
+     * Renders modal for importing purchase lines via CSV/Excel
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function getImportPurchaseLinesModal()
+    {
+        if (! auth()->user()->can('purchase.create')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        return view('purchase.partials.import_purchase_lines_modal');
+    }
+
+    /**
+     * Parses uploaded CSV/Excel file and returns rendered purchase entry rows
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function parseImportPurchaseLines(Request $request)
+    {
+        if (! auth()->user()->can('purchase.create')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+            if ($request->hasFile('purchase_lines_csv')) {
+                $file = $request->file('purchase_lines_csv');
+                $parsed_array = Excel::toArray([], $file);
+
+                if (empty($parsed_array) || empty($parsed_array[0])) {
+                    return response()->json([
+                        'success' => false,
+                        'msg' => __('lang_v1.import_empty_file'),
+                    ]);
+                }
+
+                $imported_rows = array_splice($parsed_array[0], 1);
+                if (empty($imported_rows)) {
+                    return response()->json([
+                        'success' => false,
+                        'msg' => __('lang_v1.import_no_products'),
+                    ]);
+                }
+
+                $business_id = $request->session()->get('user.business_id');
+                $location_id = $request->input('location_id');
+                $supplier_id = $request->input('supplier_id');
+
+                $items = [];
+                $unfound_skus = [];
+                $all_imported_serials = [];
+
+                foreach ($imported_rows as $key => $row) {
+                    $row_no = $key + 2;
+                    $sku = trim($row[0] ?? '');
+                    if (empty($sku)) {
+                        continue;
+                    }
+
+                    $variation = Variation::where('sub_sku', $sku)
+                        ->join('products AS P', 'variations.product_id', '=', 'P.id')
+                        ->leftjoin('tax_rates AS TR', 'P.tax', 'TR.id')
+                        ->where('P.business_id', $business_id)
+                        ->select([
+                            'P.id as product_id',
+                            'variations.id as variation_id',
+                            'P.name as product_name',
+                            'P.enable_stock',
+                            'P.enable_sr_no',
+                            'P.type as product_type',
+                            'TR.amount as tax_percent',
+                            'TR.id as tax_id',
+                            'variations.default_purchase_price',
+                            'variations.sell_price_inc_tax',
+                            'variations.sub_sku',
+                        ])
+                        ->first();
+
+                    if (empty($variation)) {
+                        if (! in_array($sku, $unfound_skus)) {
+                            $unfound_skus[] = $sku;
+                        }
+                        continue;
+                    }
+
+                    $qty = isset($row[1]) && is_numeric(trim($row[1])) ? (float) trim($row[1]) : 1;
+                    $unit_cost = isset($row[2]) && trim($row[2]) !== '' && is_numeric(trim($row[2])) ? (float) trim($row[2]) : null;
+                    $discount_percent = isset($row[3]) && trim($row[3]) !== '' && is_numeric(trim($row[3])) ? (float) trim($row[3]) : 0;
+                    $selling_price = isset($row[4]) && trim($row[4]) !== '' && is_numeric(trim($row[4])) ? (float) trim($row[4]) : null;
+                    $serial_no = trim($row[5] ?? '');
+
+                    if (! empty($serial_no)) {
+                        if ($qty > 1) {
+                            return response()->json([
+                                'success' => false,
+                                'msg' => __('lang_v1.import_sn_qty_error', [
+                                    'row' => $row_no,
+                                    'sku' => $sku,
+                                    'serial_no' => $serial_no,
+                                    'max_stock_msg' => __('lang_v1.serial_number_max_stock_one'),
+                                    'qty' => $qty,
+                                ]),
+                            ]);
+                        }
+
+                        if (in_array(strtolower($serial_no), $all_imported_serials)) {
+                            return response()->json([
+                                'success' => false,
+                                'msg' => __('lang_v1.import_duplicate_sn_file', [
+                                    'serial_no' => $serial_no,
+                                    'row' => $row_no,
+                                ]),
+                            ]);
+                        }
+                        $all_imported_serials[] = strtolower($serial_no);
+                    }
+
+                    if (! isset($items[$sku])) {
+                        $items[$sku] = [
+                            'product_id' => $variation->product_id,
+                            'variation_id' => $variation->variation_id,
+                            'sku' => $sku,
+                            'quantity' => 0,
+                            'unit_cost_before_discount' => $unit_cost,
+                            'discount_percent' => $discount_percent,
+                            'selling_price' => $selling_price,
+                            'serials' => [],
+                            'enable_sr_no' => $variation->enable_sr_no,
+                        ];
+                    }
+
+                    if ($unit_cost !== null && $items[$sku]['unit_cost_before_discount'] === null) {
+                        $items[$sku]['unit_cost_before_discount'] = $unit_cost;
+                    }
+                    if ($selling_price !== null && $items[$sku]['selling_price'] === null) {
+                        $items[$sku]['selling_price'] = $selling_price;
+                    }
+
+                    if (! empty($serial_no)) {
+                        $items[$sku]['serials'][] = [
+                            'serial_number' => $serial_no,
+                            'purchase_price' => $unit_cost ?? $variation->default_purchase_price,
+                            'selling_price' => $selling_price ?? $variation->sell_price_inc_tax,
+                        ];
+                        $items[$sku]['quantity'] += 1;
+                    } else {
+                        $items[$sku]['quantity'] += $qty;
+                    }
+                }
+
+                if (! empty($all_imported_serials)) {
+                    $snUtil = app(\App\Utils\ProductSerialNumberUtil::class);
+                    $duplicate_serials = $snUtil->checkDuplicateInStockSerials($business_id, $all_imported_serials);
+                    if (! empty($duplicate_serials)) {
+                        return response()->json([
+                            'success' => false,
+                            'msg' => __('lang_v1.import_duplicate_sn_db', [
+                                'serials' => implode(', ', $duplicate_serials),
+                            ]),
+                        ]);
+                    }
+                }
+
+                if (! empty($unfound_skus)) {
+                    return response()->json([
+                        'success' => false,
+                        'msg' => __('lang_v1.import_unfound_skus', [
+                            'skus' => implode(', ', $unfound_skus),
+                        ]),
+                    ]);
+                }
+
+                if (empty($items)) {
+                    return response()->json([
+                        'success' => false,
+                        'msg' => __('lang_v1.import_no_products'),
+                    ]);
+                }
+
+                $html = '';
+                $row_count = 0;
+                $currency_details = $this->transactionUtil->purchaseCurrencyDetails($business_id);
+                $hide_tax = session('business.enable_inline_tax') == 1 ? '' : 'hide';
+                $taxes = TaxRate::where('business_id', $business_id)->ExcludeForTaxGroup()->get();
+
+                foreach ($items as $sku => $item_data) {
+                    $product = Product::where('id', $item_data['product_id'])
+                        ->with(['unit', 'second_unit'])
+                        ->first();
+
+                    $sub_units = $this->productUtil->getSubUnits($business_id, $product->unit->id, false, $item_data['product_id']);
+
+                    $variations = Variation::where('product_id', $item_data['product_id'])
+                        ->where('id', $item_data['variation_id'])
+                        ->with([
+                            'product_variation',
+                            'variation_location_details' => function ($q) use ($location_id) {
+                                $q->where('location_id', $location_id);
+                            },
+                        ])->get();
+
+                    $last_purchase_line = $this->getLastPurchaseLine($item_data['variation_id'], $location_id, $supplier_id);
+
+                    $imported_data = [
+                        'quantity' => $item_data['quantity'],
+                        'unit_cost_before_discount' => $item_data['unit_cost_before_discount'] ?? $variations->first()->default_purchase_price,
+                        'discount_percent' => $item_data['discount_percent'] ?? 0,
+                        'serials' => $item_data['serials'],
+                    ];
+
+                    $variation_id = $item_data['variation_id'];
+
+                    $html .= view('purchase.partials.purchase_entry_row')
+                        ->with(compact(
+                            'product',
+                            'variations',
+                            'row_count',
+                            'variation_id',
+                            'taxes',
+                            'currency_details',
+                            'hide_tax',
+                            'sub_units',
+                            'last_purchase_line',
+                            'imported_data'
+                        ))->render();
+
+                    $row_count++;
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'html' => $html,
+                    'row_count' => $row_count,
+                    'msg' => __('lang_v1.import_purchase_lines_success'),
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::emergency('File:' . $e->getFile() . 'Line:' . $e->getLine() . 'Message:' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'msg' => 'Terjadi kesalahan saat mengimpor file: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
      * Finds last purchase line of a variation for the supplier for a location
      */
     private function getLastPurchaseLine($variation_id, $location_id, $supplier_id = null)
