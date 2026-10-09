@@ -1202,6 +1202,7 @@ class PurchaseController extends Controller
 
                 $items = [];
                 $unfound_skus = [];
+                $all_imported_serials = [];
 
                 foreach ($imported_rows as $key => $row) {
                     $row_no = $key + 2;
@@ -1242,6 +1243,23 @@ class PurchaseController extends Controller
                     $selling_price = isset($row[4]) && trim($row[4]) !== '' && is_numeric(trim($row[4])) ? (float) trim($row[4]) : null;
                     $serial_no = trim($row[5] ?? '');
 
+                    if (! empty($serial_no)) {
+                        if ($qty > 1) {
+                            return response()->json([
+                                'success' => false,
+                                'msg' => "Baris ke-$row_no (SKU: $sku, Serial Number: $serial_no): " . __('lang_v1.serial_number_max_stock_one') . " (Quantity diisi $qty, seharusnya 1).",
+                            ]);
+                        }
+
+                        if (in_array(strtolower($serial_no), $all_imported_serials)) {
+                            return response()->json([
+                                'success' => false,
+                                'msg' => "Serial Number '$serial_no' pada baris ke-$row_no duplikat dalam file impor.",
+                            ]);
+                        }
+                        $all_imported_serials[] = strtolower($serial_no);
+                    }
+
                     if (! isset($items[$sku])) {
                         $items[$sku] = [
                             'product_id' => $variation->product_id,
@@ -1272,6 +1290,17 @@ class PurchaseController extends Controller
                         $items[$sku]['quantity'] += 1;
                     } else {
                         $items[$sku]['quantity'] += $qty;
+                    }
+                }
+
+                if (! empty($all_imported_serials)) {
+                    $snUtil = app(\App\Utils\ProductSerialNumberUtil::class);
+                    $duplicate_serials = $snUtil->checkDuplicateInStockSerials($business_id, $all_imported_serials);
+                    if (! empty($duplicate_serials)) {
+                        return response()->json([
+                            'success' => false,
+                            'msg' => 'Serial Number berikut sudah ada dalam stok sistem: ' . implode(', ', $duplicate_serials),
+                        ]);
                     }
                 }
 

@@ -374,4 +374,70 @@ class ImportPurchaseLinesTest extends TestCase
             'msg' => 'SKU berikut tidak ditemukan di sistem: UNKNOWN-SKU-999',
         ]);
     }
+
+    /** @test */
+    public function it_returns_error_when_serial_number_row_has_quantity_greater_than_one()
+    {
+        $unit = Unit::create([
+            'business_id' => 1,
+            'actual_name' => 'Piece',
+            'short_name' => 'Pc',
+            'allow_decimal' => 0,
+            'created_by' => 1,
+        ]);
+
+        $p1 = Product::create([
+            'name' => 'Kabel USB',
+            'business_id' => 1,
+            'unit_id' => $unit->id,
+            'sku' => 'SK-001',
+            'type' => 'single',
+            'enable_stock' => 1,
+            'enable_sr_no' => 1,
+            'created_by' => 1,
+        ]);
+
+        $v1 = Variation::create([
+            'name' => 'DUMMY',
+            'product_id' => $p1->id,
+            'product_variation_id' => 1,
+            'sub_sku' => 'SK-001',
+            'default_purchase_price' => 150000,
+            'dpp_inc_tax' => 150000,
+            'profit_percent' => 33.33,
+            'default_sell_price' => 200000,
+            'sell_price_inc_tax' => 200000,
+        ]);
+
+        $csvContent = "SKU,QUANTITY,UNIT COST (BEFORE DISCOUNT),DISCOUNT PERCENT,SELLING PRICE,SERIAL NUMBER\n";
+        $csvContent .= "SK-001,5,1200000,0,5000000,24546FG\n";
+
+        $tempFile = tempnam(sys_get_temp_dir(), 'csv');
+        file_put_contents($tempFile, $csvContent);
+
+        $uploadedFile = new UploadedFile(
+            $tempFile,
+            'purchase_lines.csv',
+            'text/csv',
+            null,
+            true
+        );
+
+        $response = $this->withSession([
+            'user' => ['id' => 1, 'business_id' => 1],
+            'business' => ['id' => 1, 'currency_id' => 1, 'time_zone' => 'Asia/Jakarta'],
+        ])->postJson('/purchases/parse_import_purchase_lines', [
+            'purchase_lines_csv' => $uploadedFile,
+            'location_id' => 1,
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => false,
+        ]);
+
+        $json = $response->json();
+        $this->assertStringContainsString(__('lang_v1.serial_number_max_stock_one'), $json['msg']);
+        $this->assertStringContainsString('Quantity diisi 5, seharusnya 1', $json['msg']);
+    }
 }
