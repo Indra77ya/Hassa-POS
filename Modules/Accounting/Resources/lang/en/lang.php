@@ -434,4 +434,6 @@ return [
     'auto_map_default_accounts_confirmation_text' => 'This action will automatically map sales, purchases, payments, and expenses to default accounts based on the active chart of accounts (CoA).',
     'coa_not_available_title' => 'Chart of Accounts (CoA) Not Available',
     'coa_not_available_text' => 'You do not have a Chart of Accounts (CoA) for this business yet. Please create default accounts first before mapping transactions.',
+    'auto_map_success' => 'Default accounts mapped automatically successfully!',
+    'coa_not_found_create_first' => 'Chart of Accounts (CoA) not found. Please create CoA first.',
 ];

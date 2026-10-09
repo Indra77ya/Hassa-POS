@@ -304,6 +304,11 @@ return [
     'reset_laundry' => 'Laundry',
     'reset_selected' => 'Reset Selected Data',
     'reset_success' => 'Data successfully reset!',
+    'reset_confirmation_text' => 'Selected data will be permanently deleted from the system!',
+    'yes_reset' => 'Yes, Reset',
+    'select_at_least_one_category' => 'Please select at least one data category to reset.',
+    'processing' => 'Processing...',
+    'error_processing_request' => 'An error occurred while processing the request.',
 
     'coupon_not_matched_with_packeg' => 'Coupon not matched with package',
     'enable_recaptcha' => 'Enable Google reCAPTCHA',

@@ -259,15 +259,15 @@
             });
 
             if (!hasChecked) {
-                toastr.error('Silakan pilih setidaknya satu kategori data untuk disetel ulang.');
+                toastr.error("{{ __('superadmin::lang.select_at_least_one_category') }}");
                 return false;
             }
 
             swal({
                 title: LANG.sure,
-                text: "Data yang terpilih akan dihapus secara permanen dari sistem!",
+                text: "{{ __('superadmin::lang.reset_confirmation_text') }}",
                 icon: "warning",
-                buttons: ["Batal", "Ya, Setel Ulang"],
+                buttons: [(LANG.cancel ? LANG.cancel : "{{ __('messages.cancel') }}"), "{{ __('superadmin::lang.yes_reset') }}"],
                 dangerMode: true,
             }).then((confirmed) => {
                 if (confirmed) {
@@ -283,7 +283,7 @@
                     // Add submit button spinner or disable to prevent double submit
                     var submitBtn = form.find('#btn-submit-reset');
                     var originalText = submitBtn.html();
-                    submitBtn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Memproses...');
+                    submitBtn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> {{ __("superadmin::lang.processing") }}');
 
                     $.ajax({
                         method: 'POST',
@@ -307,7 +307,7 @@
                             }
                         },
                         error: function() {
-                            toastr.error("Terjadi kesalahan saat memproses permintaan.");
+                            toastr.error("{{ __('superadmin::lang.error_processing_request') }}");
                             submitBtn.prop('disabled', false).html(originalText);
                         }
                     });

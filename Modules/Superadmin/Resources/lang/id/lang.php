@@ -297,6 +297,11 @@ return [
     'reset_laundry' => 'Laundry',
     'reset_selected' => 'Setel Ulang Data Terpilih',
     'reset_success' => 'Data berhasil disetel ulang!',
+    'reset_confirmation_text' => 'Data yang terpilih akan dihapus secara permanen dari sistem!',
+    'yes_reset' => 'Ya, Setel Ulang',
+    'select_at_least_one_category' => 'Silakan pilih setidaknya satu kategori data untuk disetel ulang.',
+    'processing' => 'Memproses...',
+    'error_processing_request' => 'Terjadi kesalahan saat memproses permintaan.',
 
     'api_key_document' => 'Dokumen Kunci API',
     'enable_google_recaptcha' => 'Aktifkan Google reCAPTCHA',
